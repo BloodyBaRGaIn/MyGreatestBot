@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DicordNET": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SLAVA_UKRAINI": "1"
+      }
+    }
+  }
+}
