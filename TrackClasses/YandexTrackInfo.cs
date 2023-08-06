@@ -1,6 +1,7 @@
 ﻿using DicordNET.ApiClasses;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
+using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
 namespace DicordNET.TrackClasses
@@ -12,14 +13,15 @@ namespace DicordNET.TrackClasses
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
+        public HyperLink? PlaylistName { get; }
         public string Id { get; }
         public TimeSpan Duration { get; }
         public TimeSpan Seek { get; set; }
         public string AudioURL { get; set; }
-        public string CoverURL { get; }
+        public string? CoverURL { get; }
         public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
 
-        internal YandexTrackInfo(YTrack track)
+        internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null)
         {
             Id = track.Id;
 
@@ -56,6 +58,11 @@ namespace DicordNET.TrackClasses
             else
             {
                 AlbumName = null;
+            }
+
+            if (playlist != null)
+            {
+                PlaylistName = new(playlist.Title, $"{DomainURL}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
             }
         }
 

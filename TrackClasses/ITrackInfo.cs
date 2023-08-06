@@ -5,10 +5,11 @@
         internal HyperLink TrackName { get; }
         internal HyperLink[] ArtistArr { get; }
         internal HyperLink? AlbumName { get; }
+        internal HyperLink? PlaylistName { get; }
         internal string Id { get; }
         internal TimeSpan Duration { get; }
         internal TimeSpan Seek { get; set; }
-        internal string CoverURL { get; }
+        internal string? CoverURL { get; }
         protected internal string AudioURL { get; protected set; }
         protected internal bool IsLiveStream { get; protected set; }
 
@@ -30,6 +31,11 @@
             if (AlbumName != null)
             {
                 result += $"Album: {AlbumName}\n";
+            }
+
+            if (PlaylistName != null)
+            {
+                result += $"Playlist: {PlaylistName}";
             }
 
             return result.Trim('\n');

@@ -7,6 +7,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
+using System.Data;
 
 namespace DicordNET
 {
@@ -91,7 +92,7 @@ namespace DicordNET
         {
             if (VoiceNext != null)
             {
-                VoiceNext.ConnectAsync(VoiceChannel).Wait();
+                VoiceNext.ConnectAsync(VoiceChannel).Wait(1000);
             }
         }
 
@@ -166,18 +167,17 @@ namespace DicordNET
             }
         }
 
-        private Task Client_VoiceStateUpdated(DiscordClient sender, VoiceStateUpdateEventArgs args)
+        private Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
-            if (args.User.IsBot)
+            if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
             {
-                if (args.After.Channel == null)
+                if (e.After?.Channel == null)
                 {
-                    PlayerManager.Stop(ActionSource.External);
+                    PlayerManager.Pause(ActionSource.Mute | ActionSource.External);
                 }
-                else if (args.Before.Channel != null)
+                else
                 {
-                    // Voice channel changed
-                    ;
+                    PlayerManager.Resume(ActionSource.Mute | ActionSource.External);
                 }
             }
             return Task.CompletedTask;

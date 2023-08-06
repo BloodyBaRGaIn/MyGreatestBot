@@ -451,7 +451,15 @@ namespace DicordNET
 
                 while (retries < 2)
                 {
-                    bytesCount = ffmpeg.StandardOutput.BaseStream.Read(buff, 0, buff.Length);
+                    var read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length);
+                    if (!read_task.Wait(1000))
+                    {
+                        bytesCount = 0;
+                    }
+                    else
+                    {
+                        bytesCount = read_task.Result;
+                    }
 
                     if (bytesCount != 0)
                     {

@@ -1,8 +1,10 @@
-﻿using DicordNET.TrackClasses;
+﻿using DicordNET.ApiClasses;
+using DicordNET.TrackClasses;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
+using VkNet;
 
 namespace DicordNET.Commands
 {
@@ -169,6 +171,7 @@ namespace DicordNET.Commands
         }
 
         [Command("stop")]
+        [Aliases("st")]
         [Category("player")]
         [Description("Stop")]
         public async Task Stop(CommandContext ctx)
@@ -199,7 +202,7 @@ namespace DicordNET.Commands
 
         [Command("logout")]
         [Category("connection")]
-        [Description("Logout")]
+        [Description("Logout and exit")]
         public async Task LogoutCommand(CommandContext ctx)
         {
             _ = await ctx.Channel.SendMessageAsync(":wave:");
@@ -210,6 +213,7 @@ namespace DicordNET.Commands
                 await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
 
                 PlayerManager.Terminate();
+                VkApiWrapper.Logout();
 
                 await bot_client.DisconnectAsync();
                 bot_client.Dispose();

@@ -11,9 +11,10 @@ namespace DicordNET.TrackClasses
         public string Id { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
+        public HyperLink? PlaylistName { get; }
         public TimeSpan Duration { get; }
         public TimeSpan Seek { get; set; }
-        public string CoverURL { get; }
+        public string? CoverURL { get; }
         public string AudioURL { get; set; }
         public bool IsLiveStream { get; set; }
 
@@ -71,7 +72,7 @@ namespace DicordNET.TrackClasses
             AudioURL = string.Empty;
             CoverURL = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
 
-            AlbumName = playlist == null ? null : new(playlist.Title, playlist.Url);
+            PlaylistName = playlist == null ? null : new(playlist.Title, playlist.Url);
         }
 
         void ITrackInfo.Reload()

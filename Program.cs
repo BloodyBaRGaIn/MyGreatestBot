@@ -12,6 +12,7 @@ namespace DicordNET
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             YoutubeApiWrapper.Init();
             YandexApiWrapper.Init();
+            VkApiWrapper.Init();
             StaticBotInstanceContainer.Run();
         }
     }

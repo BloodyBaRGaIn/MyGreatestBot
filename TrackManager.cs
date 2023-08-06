@@ -20,6 +20,10 @@ namespace DicordNET
             {
                 tracks.AddRange(YandexApiWrapper.GetTracks(query));
             }
+            else if (query.Contains("https://vk.com/"))
+            {
+                tracks.AddRange(VkApiWrapper.GetTracks(query));
+            }
             else
             {
                 // Unknown query type
@@ -31,15 +35,13 @@ namespace DicordNET
 
         internal static Process StartFFMPEG(ITrackInfo track)
         {
-            ProcessStartInfo psi = new()
+            return Process.Start(new ProcessStartInfo()
             {
                 FileName = FFMPEG_PATH,
                 Arguments = track.Arguments,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
-            };
-
-            return Process.Start(psi) ?? throw new InvalidOperationException("ffmpeg not started");
+            }) ?? throw new InvalidOperationException("ffmpeg not started");
         }
 
         internal static void DisposeFFMPEG(Process ffmpeg)

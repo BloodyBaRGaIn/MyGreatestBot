@@ -5,14 +5,19 @@
         internal readonly string Title;
         internal readonly string Url;
 
-        internal HyperLink(string title, string url)
+        internal HyperLink(string title, string? url = null)
         {
             Title = title;
-            Url = url;
+            Url = url ?? string.Empty;
         }
 
         public override string ToString()
         {
+            if (string.IsNullOrWhiteSpace(Url))
+            {
+                return Title;
+            }
+
             return $"[{Title}]({Url})";
         }
     }

@@ -1,7 +1,5 @@
 ﻿using DicordNET.Config;
 using DicordNET.TrackClasses;
-using Newtonsoft.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
@@ -287,7 +285,7 @@ namespace DicordNET.ApiClasses
             {
                 if (track != null)
                 {
-                    tracks_collection.Add(new(track));
+                    tracks_collection.Add(new(track, playlist));
                 }
             }
 
