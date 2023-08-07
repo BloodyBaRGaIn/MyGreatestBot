@@ -63,7 +63,7 @@ namespace DicordNET.Commands
         [Aliases("p")]
         [Category("player")]
         [Description("Add tracks")]
-        public async Task Play(CommandContext ctx, [RemainingText] string query)
+        public async Task Play(CommandContext ctx, [RemainingText] string? query)
         {
             StaticBotInstanceContainer.TextChannel = ctx.Channel;
             StaticBotInstanceContainer.VoiceNext = ctx.Client.GetVoiceNext();
@@ -88,6 +88,55 @@ namespace DicordNET.Commands
             }
 
             PlayerManager.EnqueueTracks(tracks);
+        }
+
+        [Command("tms")]
+        [Category("player")]
+        [Description("Place query result to queue head")]
+        public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
+        {
+            StaticBotInstanceContainer.TextChannel = ctx.Channel;
+            StaticBotInstanceContainer.VoiceNext = ctx.Client.GetVoiceNext();
+            StaticBotInstanceContainer.VoiceConnection = StaticBotInstanceContainer.GetVoiceConnection(ctx.Guild);
+
+            if (StaticBotInstanceContainer.VoiceConnection == null)
+            {
+                await Join(ctx);
+                StaticBotInstanceContainer.VoiceConnection = StaticBotInstanceContainer.GetVoiceConnection(ctx.Guild);
+
+                if (StaticBotInstanceContainer.VoiceConnection == null)
+                {
+                    return;
+                }
+            }
+
+            List<ITrackInfo> tracks = TrackManager.GetAll(query);
+
+            if (!tracks.Any())
+            {
+                throw new InvalidOperationException("No results");
+            }
+
+            PlayerManager.EnqueueTracks(tracks, ActionSource.External);
+        }
+
+        [Command("seek")]
+        [Category("player")]
+        [Description("Seek current track")]
+        public async Task SeekCommand(CommandContext ctx, string span_str)
+        {
+            StaticBotInstanceContainer.TextChannel = ctx.Channel;
+            StaticBotInstanceContainer.VoiceNext = ctx.Client.GetVoiceNext();
+            StaticBotInstanceContainer.VoiceConnection = StaticBotInstanceContainer.GetVoiceConnection(ctx.Guild);
+
+            if (!TimeSpan.TryParse(span_str, out TimeSpan result))
+            {
+                throw new InvalidCastException();
+            }
+
+            PlayerManager.RequestSeek(result);
+
+            await Task.Delay(1);
         }
 
         [Command("return")]

@@ -7,7 +7,6 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
-using System.Data;
 
 namespace DicordNET
 {
@@ -82,10 +81,7 @@ namespace DicordNET
             {
                 _ = VoiceConnection?.SendSpeakingAsync(speaking).Wait(100);
             }
-            catch
-            {
-
-            }
+            catch { }
         }
 
         internal static void Connect()
@@ -102,10 +98,7 @@ namespace DicordNET
             {
                 VoiceConnection?.Disconnect();
             }
-            catch
-            {
-
-            }
+            catch { }
         }
     }
 
@@ -136,7 +129,8 @@ namespace DicordNET
 
             Client.Ready += Client_Ready;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-
+            Client.ClientErrored += Client_ClientErrored;
+            Client.SocketErrored += Client_SocketErrored;
 
             Client.UseInteractivity(new()
             {
@@ -165,6 +159,18 @@ namespace DicordNET
             {
                 await Task.Delay(Timeout.Infinite);
             }
+        }
+
+        private Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
+        {
+            Console.WriteLine($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            return Task.CompletedTask;
+        }
+
+        private Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+        {
+            Console.WriteLine($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            return Task.CompletedTask;
         }
 
         private Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)

@@ -5,11 +5,14 @@ namespace DicordNET.Config
     internal static class ConfigManager
     {
         private const string CONFIG_DIR = "Config/Json";
+
         private const string DISCORD_JSON_PATH = $"{CONFIG_DIR}/config.json";
-        private const string GOOGLE_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/client_secret.json";
+        
         private const string GOOGLE_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/google_cred.json";
         private const string YANDEX_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/yandex_cred.json";
         private const string VK_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/vk_cred.json";
+
+        private const string GOOGLE_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/google_secret.json";
 
         private static T ReadConfig<T>(string filepath) where T : struct
         {

@@ -28,6 +28,11 @@
 
             result += '\n';
 
+            if (Duration != TimeSpan.Zero)
+            {
+                result += $"Duration: {Duration:hh\\:mm\\:ss}\n";
+            }
+
             if (AlbumName != null)
             {
                 result += $"Album: {AlbumName}\n";
@@ -35,7 +40,12 @@
 
             if (PlaylistName != null)
             {
-                result += $"Playlist: {PlaylistName}";
+                result += $"Playlist: {PlaylistName}\n";
+            }
+
+            if (Seek != TimeSpan.Zero)
+            {
+                result += $"Position: {Seek:hh\\:mm\\:ss}\n";
             }
 
             return result.Trim('\n');

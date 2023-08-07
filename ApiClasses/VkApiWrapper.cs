@@ -13,8 +13,7 @@ namespace DicordNET.ApiClasses
     {
         private static class VkQueryDecomposer
         {
-            private static readonly Regex PLAYLIST_RE = new("playlist/([a-zA-Z0-9]+)_([a-zA-Z0-9]+)");
-            //https://vk.com/music/album/-2000294413_7294413?act=album
+            private static readonly Regex PLAYLIST_RE = new("playlist/([-]?[\\d]+)_([-]?[\\d]+)");
             private static readonly Regex ALBUM_RE = new("album/([-]?[\\d]+)_([-]?[\\d]+)");
 
             internal static (string? album, string? id) TryGetAlbumId(string query)

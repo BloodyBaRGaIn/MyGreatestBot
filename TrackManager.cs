@@ -8,9 +8,14 @@ namespace DicordNET
     {
         internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
 
-        internal static List<ITrackInfo> GetAll(string query)
+        internal static List<ITrackInfo> GetAll(string? query)
         {
             List<ITrackInfo> tracks = new();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return tracks;
+            }
 
             if (query.Contains("https://www.youtube.com/"))
             {
@@ -35,13 +40,17 @@ namespace DicordNET
 
         internal static Process StartFFMPEG(ITrackInfo track)
         {
-            return Process.Start(new ProcessStartInfo()
+            Process process = Process.Start(new ProcessStartInfo()
             {
                 FileName = FFMPEG_PATH,
                 Arguments = track.Arguments,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             }) ?? throw new InvalidOperationException("ffmpeg not started");
+
+            process.PriorityClass = ProcessPriorityClass.RealTime;
+
+            return process;
         }
 
         internal static void DisposeFFMPEG(Process ffmpeg)

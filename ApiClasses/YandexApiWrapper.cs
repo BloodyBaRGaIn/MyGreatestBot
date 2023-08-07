@@ -232,7 +232,7 @@ namespace DicordNET.ApiClasses
             }
 
             YArtistBriefInfo info = api.Artist.GetAsync(storage, artist_id_str).GetAwaiter().GetResult().Result;
-            foreach (YAlbum? album in info.Albums.OrderByDescending(a => a.ReleaseDate))
+            foreach (YAlbum? album in info.Albums.Concat(info.AlsoAlbums).DistinctBy(t => t.Id).OrderByDescending(a => a.ReleaseDate))
             {
                 if (album != null)
                 {

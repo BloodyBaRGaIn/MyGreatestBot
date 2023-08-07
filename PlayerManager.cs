@@ -1,8 +1,6 @@
 ﻿using DicordNET.TrackClasses;
 using DSharpPlus.Entities;
-using DSharpPlus.VoiceNext;
 using System.Diagnostics;
-using System.Threading;
 
 namespace DicordNET
 {
@@ -14,8 +12,10 @@ namespace DicordNET
 
         private static volatile bool IsPlaying;
         private static volatile bool IsPaused;
+        private static volatile bool SeekRequested;
+        private static TimeSpan Seek;
 
-        private const int TRANSMIT_SINK_MS = 5;
+        private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
@@ -35,9 +35,26 @@ namespace DicordNET
 
             lock (tracks_queue)
             {
-                foreach (var track in tracks)
+                if ((source & ActionSource.External) == 0)
                 {
-                    tracks_queue.Enqueue(track);
+                    foreach (var track in tracks)
+                    {
+                        tracks_queue.Enqueue(track);
+                    }
+                }
+                else
+                {
+                    List<ITrackInfo> collection = new();
+                    collection.AddRange(tracks);
+                    while (tracks_queue.Any())
+                    {
+                        collection.Add(tracks_queue.Dequeue());
+                    }
+                    while (collection.Any())
+                    {
+                        tracks_queue.Enqueue(collection[0]);
+                        collection.RemoveAt(0);
+                    }
                 }
 
                 count = tracks_queue.Count;
@@ -211,22 +228,40 @@ namespace DicordNET
             if (tracks_queue.Any())
             {
                 int count;
+                int live_streams_count;
+                TimeSpan total_duration = TimeSpan.Zero;
 
                 lock (tracks_queue)
                 {
                     count = tracks_queue.Count;
+                    live_streams_count = tracks_queue.Count(t => t.IsLiveStream || t.Duration == TimeSpan.Zero);
+                    total_duration = tracks_queue.Aggregate(TimeSpan.Zero, (sum, next) => sum + next.Duration);
                 }
+
+                string description = $"Enqueued tracks count: {count}\n";
+
+                if (live_streams_count != 0)
+                {
+                    description += $"Enqueued live streams: {live_streams_count}\n";
+                }
+
+                description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
                 StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Purple,
                     Title = "Count",
-                    Description = $"Enqueued tracks count: {count}"
+                    Description = description
                 });
             }
             else
             {
-                StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder() { Color = DiscordColor.Purple, Title = "Count", Description = "Tracks queue is empty" });
+                StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Purple,
+                    Title = "Count",
+                    Description = "Tracks queue is empty"
+                });
             }
         }
 
@@ -249,6 +284,7 @@ namespace DicordNET
                         collection.RemoveAt(0);
                     }
                 }
+
                 StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Orange,
@@ -299,10 +335,60 @@ namespace DicordNET
             IsPlaying = false;
         }
 
+        internal static void RequestSeek(TimeSpan span)
+        {
+            if (!IsPlaying || currentTrack == null)
+            {
+                StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Yellow,
+                    Title = "Seek",
+                    Description = "Nothing to seek"
+                });
+            }
+            else
+            {
+                if (currentTrack != null
+                    && !currentTrack.IsLiveStream
+                    && currentTrack.Duration != TimeSpan.Zero
+                    && currentTrack.Duration > span)
+                {
+                    lock (currentTrack)
+                    {
+                        Seek = span;
+                        currentTrack.Seek = Seek;
+
+                        StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+                        {
+                            Color = DiscordColor.Purple,
+                            Title = "Seek",
+                            Description = currentTrack.GetMessage(),
+                            Thumbnail = currentTrack.GetThumbnail()
+                        });
+                    }
+
+                    IsPaused = true;
+
+                    Task.Yield().GetAwaiter().GetResult();
+
+                    SeekRequested = true;
+                }
+                else
+                {
+                    StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Red,
+                        Title = "Seek",
+                        Description = "Cannot seek"
+                    });
+                }
+            }
+        }
+
         private static void PlayerTaskFunction()
         {
             Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
-            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
             while (true)
             {
                 if (MainPlayerCancellationToken.IsCancellationRequested)
@@ -379,20 +465,9 @@ namespace DicordNET
                 return;
             }
 
+            bool play_message = true;
+
             byte[] buff = new byte[BUFFER_SIZE];
-
-        restart:
-
-            TimeSpan span = TimeSpan.Zero;
-
-            track.ObtainAudioURL();
-
-        seek:
-
-            if (!track.IsLiveStream)
-            {
-                track.Seek = span;
-            }
 
             try
             {
@@ -403,25 +478,42 @@ namespace DicordNET
                 ;
             }
 
+        restart:
+
+            Seek = TimeSpan.Zero;
+
+            track.ObtainAudioURL();
+
+        seek:
+
+            if (!track.IsLiveStream)
+            {
+                track.Seek = Seek;
+            }
+
             IsPlaying = true;
 
-            StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+            if (play_message)
             {
-                Color = DiscordColor.Purple,
-                Title = "Play",
-                Description = track.GetMessage(),
-                Thumbnail = track.GetThumbnail()
-            });
+                play_message = false;
+                StaticBotInstanceContainer.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Purple,
+                    Title = "Play",
+                    Description = track.GetMessage(),
+                    Thumbnail = track.GetThumbnail()
+                });
+            }
 
             Process ffmpeg = TrackManager.StartFFMPEG(track);
 
             if (track.IsLiveStream)
             {
-                _ = ffmpeg.WaitForExit(5000);
+                _ = ffmpeg.WaitForExit(2000);
             }
             else
             {
-                _ = ffmpeg.WaitForExit(2000);
+                _ = ffmpeg.WaitForExit(500);
             }
 
             if (ffmpeg.HasExited)
@@ -435,7 +527,7 @@ namespace DicordNET
 
             while (true)
             {
-                while (IsPaused && IsPlaying)
+                while (IsPaused && IsPlaying && !SeekRequested)
                 {
                     Task.Delay(1).Wait();
                 }
@@ -445,15 +537,25 @@ namespace DicordNET
                     goto finish;
                 }
 
+                if (SeekRequested)
+                {
+                    SeekRequested = false;
+                    IsPaused = false;
+                    TrackManager.DisposeFFMPEG(ffmpeg);
+                    goto seek;
+                }
+
                 int retries = 0;
 
                 int bytesCount;
 
                 while (retries < 2)
                 {
-                    var read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length);
-                    if (!read_task.Wait(1000))
+                    CancellationTokenSource cts = new();
+                    Task<int> read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length, cts.Token);
+                    if (!read_task.Wait(100))
                     {
+                        cts.Cancel();
                         bytesCount = 0;
                     }
                     else
@@ -465,7 +567,7 @@ namespace DicordNET
                     {
                         if (bytesCount < buff.Length)
                         {
-                            Task.Delay(10).Wait();
+                            Task.Delay(100).Wait();
                             while (bytesCount < buff.Length)
                             {
                                 buff[bytesCount++] = 0;
@@ -483,26 +585,35 @@ namespace DicordNET
                 {
                     if (track.IsLiveStream)
                     {
-                        StaticBotInstanceContainer.SendMessage("Restarting");
+                        //StaticBotInstanceContainer.SendMessage("Restarting");
+                        Console.WriteLine("Restart ffmpeg");
                     }
                     else
                     {
-                        if (track.Duration - span >= TimeSpan.FromSeconds(5))
+                        if (track.Duration - Seek >= TimeSpan.FromSeconds(5))
                         {
-                            StaticBotInstanceContainer.SendMessage($"Restarting at {span}");
+                            //StaticBotInstanceContainer.SendMessage($"Restarting at {span}");
+                            Console.WriteLine("Restart ffmpeg");
                         }
                         else
                         {
                             // track almost ended
+                            Console.WriteLine("Stop ffmpeg");
                             break;
                         }
                     }
 
                     // restart ffmpeg
+                    TrackManager.DisposeFFMPEG(ffmpeg);
                     goto seek;
                 }
 
-                span += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
+                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
+
+                if (!track.IsLiveStream)
+                {
+                    track.Seek = Seek;
+                }
 
                 if (StaticBotInstanceContainer.TransmitSink == null)
                 {
