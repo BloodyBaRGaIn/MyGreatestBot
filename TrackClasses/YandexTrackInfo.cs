@@ -82,8 +82,7 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            YandexApiWrapper.Logout();
-            YandexApiWrapper.PerformAuth();
+            ApiConfig.DeinitApis(ApiIntents.Yandex);
         }
     }
 }

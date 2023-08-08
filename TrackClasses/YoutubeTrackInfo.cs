@@ -80,8 +80,7 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            YoutubeApiWrapper.Logout();
-            YoutubeApiWrapper.PerformAuth();
+            ApiConfig.ReloadApis(ApiIntents.Youtube);
         }
     }
 }

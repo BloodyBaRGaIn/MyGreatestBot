@@ -92,7 +92,7 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            VkApiWrapper.PerformAuth();
+            ApiConfig.ReloadApis(ApiIntents.Vk);
         }
     }
 }

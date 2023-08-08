@@ -31,6 +31,37 @@ namespace DicordNET.ApiClasses
             }
         }
 
+        internal static void ReloadApis(ApiIntents intents = ApiIntents.All)
+        {
+            if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube
+                && (intents & ApiIntents.Youtube) == ApiIntents.Youtube)
+            {
+                YoutubeApiWrapper.Logout();
+                YoutubeApiWrapper.PerformAuth();
+            }
+
+            if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex
+                && (intents & ApiIntents.Yandex) == ApiIntents.Yandex)
+            {
+                YandexApiWrapper.Logout();
+                YandexApiWrapper.PerformAuth();
+            }
+
+            if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk
+                && (intents & ApiIntents.Vk) == ApiIntents.Vk)
+            {
+                VkApiWrapper.Logout();
+                VkApiWrapper.PerformAuth();
+            }
+
+            if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify
+                && (intents & ApiIntents.Spotify) == ApiIntents.Spotify)
+            {
+                SpotifyApiWrapper.Logout();
+                SpotifyApiWrapper.PerformAuth();
+            }
+        }
+
         internal static void DeinitApis(ApiIntents intents = ApiIntents.All)
         {
             if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube

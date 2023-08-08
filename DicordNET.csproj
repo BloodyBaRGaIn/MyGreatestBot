@@ -21,6 +21,7 @@
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3113" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.4.1" />
+    <PackageReference Include="libspotifydotnet" Version="4.1.0" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.9" />
@@ -43,6 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Config\Json\spotify_secret.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Config\Json\vk_cred.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
