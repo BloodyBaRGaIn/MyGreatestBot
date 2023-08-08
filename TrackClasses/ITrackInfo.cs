@@ -1,7 +1,11 @@
-﻿namespace DicordNET.TrackClasses
+﻿using DicordNET.Utils;
+
+namespace DicordNET.TrackClasses
 {
     internal interface ITrackInfo
     {
+        ITrackInfo Base { get; }
+
         internal HyperLink TrackName { get; }
         internal HyperLink[] ArtistArr { get; }
         internal HyperLink? AlbumName { get; }
@@ -70,6 +74,5 @@
 
         internal string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero ? "" : $"-ss {Seek} ")}" +
                                      $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
-
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DicordNET.ApiClasses
+namespace DicordNET.ApiClasses.Extensions
 {
-    internal static class UrlParser
+    internal static class RegexExtensions
     {
         internal static string? GetMatchValue(this Regex regex, string query)
         {
-            return GetMatchValue(regex, query, 1)[0];
+            return regex.GetMatchValue(query, 1)[0];
         }
 
         internal static string?[] GetMatchValue(this Regex regex, string query, params int[] groups)

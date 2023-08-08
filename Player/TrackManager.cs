@@ -2,7 +2,7 @@
 using DicordNET.TrackClasses;
 using System.Diagnostics;
 
-namespace DicordNET
+namespace DicordNET.Player
 {
     internal static class TrackManager
     {

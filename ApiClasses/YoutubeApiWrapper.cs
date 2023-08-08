@@ -1,4 +1,5 @@
-﻿using DicordNET.Config;
+﻿using DicordNET.ApiClasses.Extensions;
+using DicordNET.Config;
 using DicordNET.TrackClasses;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -38,7 +39,7 @@ namespace DicordNET.ApiClasses
             }
         }
 
-        internal static void Init()
+        internal static void PerformAuth()
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
@@ -110,6 +111,11 @@ namespace DicordNET.ApiClasses
             }
 
             return tracks;
+        }
+
+        internal static void Logout()
+        {
+
         }
     }
 }

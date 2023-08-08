@@ -1,4 +1,5 @@
 ﻿using DicordNET.ApiClasses;
+using DicordNET.Utils;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -17,6 +18,8 @@ namespace DicordNET.TrackClasses
         public string? CoverURL { get; }
         public string AudioURL { get; set; }
         public bool IsLiveStream { get; set; }
+
+        public ITrackInfo Base => this;
 
         void ITrackInfo.ObtainAudioURL()
         {
@@ -77,7 +80,8 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            YoutubeApiWrapper.Init();
+            YoutubeApiWrapper.Logout();
+            YoutubeApiWrapper.PerformAuth();
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace DicordNET
+﻿namespace DicordNET.Utils
 {
     internal sealed class HyperLink
     {
-        internal readonly string Title;
-        internal readonly string Url;
+        private string Title { get; init; }
+        private string Url { get; init; }
 
         internal HyperLink(string title, string? url = null)
         {

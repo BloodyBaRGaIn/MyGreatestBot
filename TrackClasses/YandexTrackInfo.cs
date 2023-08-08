@@ -1,4 +1,5 @@
 ﻿using DicordNET.ApiClasses;
+using DicordNET.Utils;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
@@ -20,6 +21,8 @@ namespace DicordNET.TrackClasses
         public string AudioURL { get; set; }
         public string? CoverURL { get; }
         public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
+
+        public ITrackInfo Base => this;
 
         internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null)
         {
@@ -72,14 +75,15 @@ namespace DicordNET.TrackClasses
             AudioURL = YandexApiWrapper.GetAudioURL(Id);
             if (string.IsNullOrEmpty(AudioURL))
             {
-                (this as ITrackInfo).Reload();
+                Base.Reload();
                 goto start;
             }
         }
 
         void ITrackInfo.Reload()
         {
-            YandexApiWrapper.Init();
+            YandexApiWrapper.Logout();
+            YandexApiWrapper.PerformAuth();
         }
     }
 }

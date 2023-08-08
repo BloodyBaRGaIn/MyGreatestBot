@@ -1,4 +1,5 @@
-﻿using DicordNET.Config;
+﻿using DicordNET.ApiClasses.Extensions;
+using DicordNET.Config;
 using DicordNET.TrackClasses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.RegularExpressions;
@@ -13,8 +14,10 @@ namespace DicordNET.ApiClasses
     {
         private static class VkQueryDecomposer
         {
-            private static readonly Regex PLAYLIST_RE = new("playlist/([-]?[\\d]+)_([-]?[\\d]+)");
-            private static readonly Regex ALBUM_RE = new("album/([-]?[\\d]+)_([-]?[\\d]+)");
+            private static readonly Regex PLAYLIST_RE = new("/music/playlist/([-]?[\\d]+)_([-]?[\\d]+)");
+            private static readonly Regex ALBUM_RE = new("/music/album/([-]?[\\d]+)_([-]?[\\d]+)");
+            private static readonly Regex ARTIST_RE = new("/artist/([\\w\\d\\-._]+)");
+            private static readonly Regex TRACK_RE = new("/audio([-]?[\\d]+)_([-]?[\\d]+)");
 
             internal static (string? album, string? id) TryGetAlbumId(string query)
             {
@@ -31,7 +34,7 @@ namespace DicordNET.ApiClasses
 
         private static IVkApi? api;
 
-        internal static void Init()
+        internal static void PerformAuth()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
@@ -84,6 +87,11 @@ namespace DicordNET.ApiClasses
             if (TryAddAsCollection(query, tracks, is_playlist: false)) return tracks;
 
             return tracks;
+        }
+
+        internal static GetMusiciansResult? GetArtist(string artist_name)
+        {
+            return api?.Ads.GetMusicians(artist_name).FirstOrDefault();
         }
 
         private static bool TryAddAsCollection(string query, List<VkTrackInfo> tracks, bool is_playlist)

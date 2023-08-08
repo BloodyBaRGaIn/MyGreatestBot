@@ -13,6 +13,7 @@ namespace DicordNET.Config
         private const string VK_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/vk_cred.json";
 
         private const string GOOGLE_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/google_secret.json";
+        private const string SPOTIFY_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/spotify_secret.json";
 
         private static T ReadConfig<T>(string filepath) where T : struct
         {
@@ -76,6 +77,11 @@ namespace DicordNET.Config
         internal static FileStream GetGoogleClientSecretsFileStream()
         {
             return GetFileStream(GOOGLE_CLIENT_SECRETS_JSON_PATH);
+        }
+
+        internal static SpotifyClientSecretsJSON GetSpotifyClientSecretsJSON()
+        {
+            return ReadConfig<SpotifyClientSecretsJSON>(SPOTIFY_CLIENT_SECRETS_JSON_PATH);
         }
     }
 }

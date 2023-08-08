@@ -8,15 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="CookieManager.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Content Remove="C:\Users\kydravcev_ra\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
     <Content Remove="C:\Users\User\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="CookieManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

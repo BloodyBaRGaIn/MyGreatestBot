@@ -1,4 +1,5 @@
-﻿using DicordNET.Config;
+﻿using DicordNET.ApiClasses.Extensions;
+using DicordNET.Config;
 using DicordNET.TrackClasses;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
@@ -14,10 +15,10 @@ namespace DicordNET.ApiClasses
     {
         private static class YandexQueryDecomposer
         {
-            private static readonly Regex TRACK_RE = new("track/(\\d+)$");
-            private static readonly Regex ALBUM_RE = new("album/(\\d+)$");
-            private static readonly Regex ARTIST_RE = new("artist/(\\d+)$");
-            private static readonly Regex PLAYLIST_RE = new("([\\w\\-._]+)/playlists/(\\d+)$");
+            private static readonly Regex TRACK_RE = new("/track/(\\d+)$");
+            private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
+            private static readonly Regex ARTIST_RE = new("/artist/(\\d+)$");
+            private static readonly Regex PLAYLIST_RE = new("/users/([\\w\\-._]+)/playlists/(\\d+)$");
 
             internal static string? TryGetTrackId(string query)
             {
@@ -44,7 +45,7 @@ namespace DicordNET.ApiClasses
         private static YandexMusicApi? api;
         private static AuthStorage? storage;
 
-        internal static void Init()
+        internal static void PerformAuth()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
@@ -81,6 +82,11 @@ namespace DicordNET.ApiClasses
             {
                 throw new InvalidOperationException("Cannot get valid token");
             }
+        }
+
+        internal static void Logout()
+        {
+
         }
 
         internal static List<YandexTrackInfo> GetTracks(string? query)

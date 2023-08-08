@@ -1,4 +1,5 @@
 ﻿using DicordNET.ApiClasses;
+using DicordNET.Utils;
 using VkNet.Model;
 
 namespace DicordNET.TrackClasses
@@ -17,6 +18,8 @@ namespace DicordNET.TrackClasses
         public string? CoverURL { get; }
         public string AudioURL { get; set; }
         public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
+
+        public ITrackInfo Base => this;
 
         internal VkTrackInfo(Audio audio, AudioPlaylist? playlist = null)
         {
@@ -52,7 +55,9 @@ namespace DicordNET.TrackClasses
 
             AudioAlbum album = audio.Album;
 
-            TrackName = new(audio.Title);
+            TrackName = audio.OwnerId == null || audio.Id == null
+                ? new(audio.Title)
+                : new(audio.Title, $"{DomainUrl}audio{audio.OwnerId}_{audio.Id}");
 
             if (playlist != null)
             {
@@ -87,7 +92,7 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            VkApiWrapper.Init();
+            VkApiWrapper.PerformAuth();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DicordNET.ApiClasses;
+using DicordNET.Bot;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
@@ -14,11 +15,9 @@ namespace DicordNET
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            YoutubeApiWrapper.Init();
-            YandexApiWrapper.Init();
-            VkApiWrapper.Init();
+            ApiConfig.InitApis();
 
-            StaticBotInstanceContainer.Run();
+            BotWrapper.Run();
         }
     }
 }
