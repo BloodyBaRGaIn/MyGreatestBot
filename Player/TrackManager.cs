@@ -1,5 +1,4 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.TrackClasses;
+﻿using DicordNET.TrackClasses;
 using System.Diagnostics;
 
 namespace DicordNET.Player
@@ -7,36 +6,6 @@ namespace DicordNET.Player
     internal static class TrackManager
     {
         internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
-
-        internal static List<ITrackInfo> GetAll(string? query)
-        {
-            List<ITrackInfo> tracks = new();
-
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return tracks;
-            }
-
-            if (query.Contains("https://www.youtube.com/"))
-            {
-                tracks.AddRange(YoutubeApiWrapper.GetTracks(query));
-            }
-            else if (query.Contains("https://music.yandex.by/") || query.Contains("https://music.yandex.ru/"))
-            {
-                tracks.AddRange(YandexApiWrapper.GetTracks(query));
-            }
-            else if (query.Contains("https://vk.com/"))
-            {
-                tracks.AddRange(VkApiWrapper.GetTracks(query));
-            }
-            else
-            {
-                // Unknown query type
-                ;
-            }
-
-            return tracks;
-        }
 
         internal static Process StartFFMPEG(ITrackInfo track)
         {

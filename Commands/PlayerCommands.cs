@@ -1,4 +1,5 @@
-﻿using DicordNET.Bot;
+﻿using DicordNET.ApiClasses;
+using DicordNET.Bot;
 using DicordNET.Player;
 using DicordNET.TrackClasses;
 using DSharpPlus.CommandsNext;
@@ -10,10 +11,7 @@ namespace DicordNET.Commands
     [Category(CommandStrings.PlayerCategoryName)]
     internal class PlayerCommands : BaseCommandModule
     {
-        [Command("play")]
-        [Aliases("p")]
-        [Description("Add tracks")]
-        public async Task Play(CommandContext ctx, [RemainingText] string? query)
+        private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, string? query)
         {
             BotWrapper.TextChannel = ctx.Channel;
             BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
@@ -26,16 +24,26 @@ namespace DicordNET.Commands
 
                 if (BotWrapper.VoiceConnection == null)
                 {
-                    return;
+                    return Enumerable.Empty<ITrackInfo>();
                 }
             }
 
-            List<ITrackInfo> tracks = TrackManager.GetAll(query);
+            List<ITrackInfo> tracks = ApiConfig.GetAll(query);
 
             if (!tracks.Any())
             {
                 throw new InvalidOperationException("No results");
             }
+
+            return tracks;
+        }
+
+        [Command("play")]
+        [Aliases("p")]
+        [Description("Add tracks")]
+        public async Task Play(CommandContext ctx, [RemainingText] string? query)
+        {
+            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
             PlayerManager.Enqueue(tracks);
         }
@@ -44,27 +52,7 @@ namespace DicordNET.Commands
         [Description("Place query result to queue head")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
         {
-            BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
-            BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
-
-            if (BotWrapper.VoiceConnection == null)
-            {
-                await BotWrapper.Join(ctx);
-                BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
-
-                if (BotWrapper.VoiceConnection == null)
-                {
-                    return;
-                }
-            }
-
-            List<ITrackInfo> tracks = TrackManager.GetAll(query);
-
-            if (!tracks.Any())
-            {
-                throw new InvalidOperationException("No results");
-            }
+            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
             PlayerManager.Enqueue(tracks, CommandActionSource.External);
         }

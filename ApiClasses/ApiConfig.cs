@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DicordNET.TrackClasses;
 
 namespace DicordNET.ApiClasses
 {
@@ -60,6 +56,44 @@ namespace DicordNET.ApiClasses
             {
                 SpotifyApiWrapper.Logout();
             }
+        }
+
+        internal static List<ITrackInfo> GetAll(string? query)
+        {
+            List<ITrackInfo> tracks = new();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return tracks;
+            }
+
+            if (query.Contains("https://www.youtube.com/"))
+            {
+                if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube)
+                    tracks.AddRange(YoutubeApiWrapper.GetTracks(query));
+            }
+            else if (query.Contains("https://music.yandex.by/") || query.Contains("https://music.yandex.ru/"))
+            {
+                if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
+                    tracks.AddRange(YandexApiWrapper.GetTracks(query));
+            }
+            else if (query.Contains("https://vk.com/"))
+            {
+                if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk)
+                    tracks.AddRange(VkApiWrapper.GetTracks(query));
+            }
+            else if (query.Contains("https://open.spotify.com/"))
+            {
+                if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify)
+                    tracks.AddRange(SpotifyApiWrapper.GetTracks(query));
+            }
+            else
+            {
+                // Unknown query type
+                ;
+            }
+
+            return tracks;
         }
     }
 }
