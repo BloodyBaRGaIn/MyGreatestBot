@@ -14,10 +14,17 @@ namespace DicordNET.ApiClasses
     {
         private static class VkQueryDecomposer
         {
+
+#pragma warning disable SYSLIB1045
             private static readonly Regex PLAYLIST_RE = new("/music/playlist/([-]?[\\d]+)_([-]?[\\d]+)");
             private static readonly Regex ALBUM_RE = new("/music/album/([-]?[\\d]+)_([-]?[\\d]+)");
+
+#pragma warning disable IDE0052
             private static readonly Regex ARTIST_RE = new("/artist/([\\w\\d\\-._]+)");
             private static readonly Regex TRACK_RE = new("/audio([-]?[\\d]+)_([-]?[\\d]+)");
+#pragma warning restore IDE0052
+
+#pragma warning restore SYSLIB1045
 
             internal static (string? album, string? id) TryGetAlbumId(string query)
             {

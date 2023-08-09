@@ -13,8 +13,6 @@ namespace DicordNET.Bot
 {
     internal sealed class DiscordBot
     {
-        internal const string HelpCommandName = "help";
-
         internal DiscordClient? Client { get; private set; }
         internal InteractivityExtension? Interactivity { get; private set; }
         internal CommandsNextExtension? Commands { get; private set; }
@@ -58,10 +56,10 @@ namespace DicordNET.Bot
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
-            Commands.RegisterCommands<CommonCommands>();
             Commands.RegisterCommands<ConnectionCommands>();
             Commands.RegisterCommands<PlayerCommands>();
             Commands.RegisterCommands<DebugCommands>();
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
 
             Commands.CommandErrored += Commands_CommandErrored;
 
@@ -107,7 +105,7 @@ namespace DicordNET.Bot
             await sender.UpdateStatusAsync(new()
             {
                 ActivityType = ActivityType.ListeningTo,
-                Name = $"{prefix}{HelpCommandName}"
+                Name = $"{prefix}help"
             }, UserStatus.Online);
 
             Console.WriteLine("### READY ###");

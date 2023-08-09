@@ -20,14 +20,12 @@ namespace DicordNET.ApiClasses
 
         private static class SpotifyQueryDecomposer
         {
-            //https://open.spotify.com/playlist/6NWEsOPK2E63K8C882OdGW
+#pragma warning disable SYSLIB1045
             private static readonly Regex PLAYLIST_RE = new("/playlist/([a-zA-Z0-9]+)$");
-            //https://open.spotify.com/album/05b3WF6jDA6kf7JtIvKw2c
             private static readonly Regex ALBUM_RE = new("/album/([a-zA-Z0-9]+)$");
-            //https://open.spotify.com/artist/7iWiAD5LLKyiox2grgfmUT
             private static readonly Regex ARTIST_RE = new("/artist/([a-zA-Z0-9]+)$");
-            //https://open.spotify.com/track/1EJzHoU6rg1afMozs9t6aM
             private static readonly Regex TRACK_RE = new("/track/([a-zA-Z0-9]+)$");
+#pragma warning restore SYSLIB1045
 
             internal static string? TryGetPlaylistId(string query)
             {

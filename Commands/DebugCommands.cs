@@ -10,6 +10,7 @@ namespace DicordNET.Commands
     {
         [Command("test")]
         [Description("Get test message")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TestCommand(CommandContext ctx)
         {
             _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
@@ -22,6 +23,7 @@ namespace DicordNET.Commands
 
         [Command("name")]
         [Description("Get origin bot name")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
             var bot_client = BotWrapper.Client;
@@ -29,7 +31,7 @@ namespace DicordNET.Commands
             {
                 _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
                 {
-                    Color = DiscordColor.White,
+                    Color = DiscordColor.Red,
                     Title = "Name",
                     Description = "Cannot get my username"
                 });

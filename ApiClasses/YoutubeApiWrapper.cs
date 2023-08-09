@@ -25,8 +25,10 @@ namespace DicordNET.ApiClasses
 
         private static class YoutubeQueryDecomposer
         {
+#pragma warning disable SYSLIB1045
             private static readonly Regex VIDEO_RE = new("/watch\\?v=([^&]+)");
             private static readonly Regex PLAYLIST_RE = new("[&?]list=([^&]+)");
+#pragma warning restore SYSLIB1045
 
             internal static string? TryGetPlaylistId(string query)
             {
@@ -63,7 +65,7 @@ namespace DicordNET.ApiClasses
         {
             if (YoutubeClientInstance == null)
             {
-                throw new ArgumentNullException(nameof(YoutubeClientInstance));
+                throw new ArgumentNullException(nameof(YoutubeClientInstance), "Auth failed");
             }
 
             List<YoutubeTrackInfo> tracks = new();
@@ -78,6 +80,7 @@ namespace DicordNET.ApiClasses
             if (!string.IsNullOrWhiteSpace(playlist_id))
             {
                 Playlist pl_instance = Playlists.GetAsync(playlist_id)
+                                                .AsTask()
                                                 .GetAwaiter()
                                                 .GetResult();
 
@@ -101,6 +104,7 @@ namespace DicordNET.ApiClasses
             if (!string.IsNullOrWhiteSpace(video_id))
             {
                 var video = Videos.GetAsync(video_id)
+                                  .AsTask()
                                   .GetAwaiter()
                                   .GetResult();
 

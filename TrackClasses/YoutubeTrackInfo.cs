@@ -63,6 +63,7 @@ namespace DicordNET.TrackClasses
             if (IsLiveStream)
             {
                 var stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
+                    .AsTask()
                     .GetAwaiter()
                     .GetResult() ?? throw new InvalidOperationException("Stream URL was null");
 
@@ -71,6 +72,7 @@ namespace DicordNET.TrackClasses
             else
             {
                 StreamManifest manifest = YoutubeApiWrapper.Streams.GetManifestAsync(Id)
+                    .AsTask()
                     .GetAwaiter()
                     .GetResult() ?? throw new InvalidOperationException("Manifest was null");
 

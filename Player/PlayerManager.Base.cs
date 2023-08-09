@@ -257,7 +257,7 @@ namespace DicordNET.Player
 
                 if (BotWrapper.TransmitSink == null)
                 {
-                    throw new ArgumentNullException(nameof(BotWrapper.TransmitSink));
+                    throw new ArgumentNullException(nameof(BotWrapper.TransmitSink), "Transmit sink not configured");
                 }
 
                 if (!BotWrapper.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))

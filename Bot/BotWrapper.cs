@@ -73,10 +73,7 @@ namespace DicordNET.Bot
 
         internal static void Connect()
         {
-            if (VoiceNext != null)
-            {
-                VoiceNext.ConnectAsync(VoiceChannel).Wait(1000);
-            }
+            VoiceNext?.ConnectAsync(VoiceChannel).Wait(1000);
         }
 
         internal static void Disconnect()

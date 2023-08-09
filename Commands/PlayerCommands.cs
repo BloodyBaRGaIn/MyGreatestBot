@@ -41,7 +41,8 @@ namespace DicordNET.Commands
         [Command("play")]
         [Aliases("p")]
         [Description("Add tracks")]
-        public async Task Play(CommandContext ctx, [RemainingText] string? query)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string? query)
         {
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
@@ -50,6 +51,7 @@ namespace DicordNET.Commands
 
         [Command("tms")]
         [Description("Place query result to queue head")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
         {
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
@@ -59,6 +61,7 @@ namespace DicordNET.Commands
 
         [Command("seek")]
         [Description("Seek current track")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(CommandContext ctx, string span_str)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -78,6 +81,7 @@ namespace DicordNET.Commands
         [Command("return")]
         [Aliases("rt")]
         [Description("Return track to queue")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task ReturnCommand(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -92,6 +96,7 @@ namespace DicordNET.Commands
         [Command("shuffle")]
         [Aliases("sh")]
         [Description("Shuffle queue")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Shuffle(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -104,6 +109,7 @@ namespace DicordNET.Commands
         [Command("count")]
         [Aliases("cn")]
         [Description("Get queue length")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task GetCount(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -116,6 +122,7 @@ namespace DicordNET.Commands
         [Command("track")]
         [Aliases("tr")]
         [Description("Get current track")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task GetTrackInfo(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -128,6 +135,7 @@ namespace DicordNET.Commands
         [Command("pause")]
         [Aliases("ps")]
         [Description("Pause")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Pause(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -140,6 +148,7 @@ namespace DicordNET.Commands
         [Command("resume")]
         [Aliases("rs")]
         [Description("Resume")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Resume(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -152,6 +161,7 @@ namespace DicordNET.Commands
         [Command("stop")]
         [Aliases("st")]
         [Description("Stop")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Stop(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
@@ -168,6 +178,7 @@ namespace DicordNET.Commands
         [Command("skip")]
         [Aliases("s")]
         [Description("Skip")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Skip(CommandContext ctx)
         {
             BotWrapper.TextChannel = ctx.Channel;
