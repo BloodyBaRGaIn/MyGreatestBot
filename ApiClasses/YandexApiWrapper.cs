@@ -1,9 +1,7 @@
 ﻿using DicordNET.ApiClasses.Extensions;
 using DicordNET.Config;
 using DicordNET.TrackClasses;
-using System.Linq;
 using System.Text.RegularExpressions;
-using VkNet.Utils;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Album;
@@ -93,7 +91,7 @@ namespace DicordNET.ApiClasses
 
         }
 
-        internal static ITrackInfo? Search(SpotifyTrackInfo spotifyTrack)
+        internal static ITrackInfo? Search(ITrackInfo spotifyTrack)
         {
             if (api == null)
             {
@@ -122,10 +120,14 @@ namespace DicordNET.ApiClasses
                 return null;
             }
 
-            foreach (var track in tracks)
+            foreach (Yandex.Music.Api.Models.Search.Track.YSearchTrackModel? track in tracks)
             {
-                ITrackInfo trackInfo = new YandexTrackInfo(track);
-                if (trackInfo.AlbumName == spotifyTrack.AlbumName || trackInfo.ArtistArr.Union(spotifyTrack.ArtistArr).Any())
+                YTrack y_track = track;
+                y_track.Albums = track.Albums.Select(a => a as YAlbum).ToList();
+                ITrackInfo trackInfo = new YandexTrackInfo(y_track);
+                if (trackInfo.AlbumName == spotifyTrack.AlbumName
+                    || trackInfo.ArtistArr.Select(a => a.Title)
+                        .Intersect(spotifyTrack.ArtistArr.Select(a => a.Title)).Any())
                 {
                     trackInfo.ObtainAudioURL();
                     return trackInfo;

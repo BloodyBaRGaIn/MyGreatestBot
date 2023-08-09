@@ -11,13 +11,14 @@ namespace DicordNET.TrackClasses
         public string Domain => "https://open.spotify.com/";
 
         public string Id { get; }
-        public string Title => Base.Title;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
-        
+
+        public string Title => TrackName.Title;
+
         public TimeSpan Duration { get; private set; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
@@ -46,7 +47,7 @@ namespace DicordNET.TrackClasses
             AudioURL = track.PreviewUrl;
         }
 
-        void ITrackInfo.ObtainAudioURL()
+        public void ObtainAudioURL()
         {
             var result = YandexApiWrapper.Search(this);
             if (result != null)

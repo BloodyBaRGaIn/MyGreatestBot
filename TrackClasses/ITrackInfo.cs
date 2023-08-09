@@ -9,12 +9,13 @@ namespace DicordNET.TrackClasses
         protected string Domain { get; }
 
         internal string Id { get; }
-        internal string Title => TrackName.Title;
 
         internal HyperLink TrackName { get; }
         internal HyperLink[] ArtistArr { get; }
         internal HyperLink? AlbumName { get; }
         internal HyperLink? PlaylistName { get; }
+
+        internal string Title { get; }
         
         internal TimeSpan Duration { get; }
         internal protected TimeSpan Seek { get; protected set; }
@@ -60,12 +61,14 @@ namespace DicordNET.TrackClasses
 
             if (AlbumName != null)
             {
-                result += $"Album: {AlbumName}\n";
+                if (!string.IsNullOrWhiteSpace(AlbumName.Title))
+                    result += $"Album: {AlbumName}\n";
             }
 
             if (PlaylistName != null)
             {
-                result += $"Playlist: {PlaylistName}\n";
+                if (!string.IsNullOrWhiteSpace(PlaylistName.Title))
+                    result += $"Playlist: {PlaylistName}\n";
             }
 
             if (Seek != TimeSpan.Zero)

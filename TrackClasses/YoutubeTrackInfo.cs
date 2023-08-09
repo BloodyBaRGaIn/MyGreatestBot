@@ -13,12 +13,13 @@ namespace DicordNET.TrackClasses
         public string Domain => "https://www.youtube.com/";
 
         public string Id { get; }
-        public string Title => Base.Title;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
+
+        public string Title => TrackName.Title;
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }

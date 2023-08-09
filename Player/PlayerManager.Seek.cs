@@ -24,6 +24,7 @@ namespace DicordNET.Player
                     IsPaused = true;
 
                     Task.Yield().GetAwaiter().GetResult();
+                    Task.Delay(100).Wait();
 
                     SeekRequested = true;
                 }
