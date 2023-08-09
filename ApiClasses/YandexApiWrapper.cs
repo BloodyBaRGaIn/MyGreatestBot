@@ -100,7 +100,15 @@ namespace DicordNET.ApiClasses
                 return null;
             }
 
-            var response = api?.Search.Track(storage, spotifyTrack.Title).Result;
+            string artists = string.Empty;
+            foreach (var artist in spotifyTrack.ArtistArr)
+            {
+                artists += $"{artist.Title}, ";
+            }
+
+            artists = artists[..^2];
+
+            var response = api?.Search.Track(storage, $"{spotifyTrack.Title} - {artists}").Result;
 
             if (response == null)
             {
