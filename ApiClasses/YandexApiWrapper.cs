@@ -93,7 +93,7 @@ namespace DicordNET.ApiClasses
 
         }
 
-        internal static string? Search(SpotifyTrackInfo spotifyTrack)
+        internal static ITrackInfo? Search(SpotifyTrackInfo spotifyTrack)
         {
             if (api == null)
             {
@@ -120,7 +120,7 @@ namespace DicordNET.ApiClasses
                 if (trackInfo.AlbumName == spotifyTrack.AlbumName || trackInfo.ArtistArr.Union(spotifyTrack.ArtistArr).Any())
                 {
                     trackInfo.ObtainAudioURL();
-                    return trackInfo.AudioURL;
+                    return trackInfo;
                 }
             }
 

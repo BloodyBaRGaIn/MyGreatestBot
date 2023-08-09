@@ -49,7 +49,11 @@ namespace DicordNET.TrackClasses
         void ITrackInfo.ObtainAudioURL()
         {
             var result = YandexApiWrapper.Search(this);
-            if (result != null) AudioURL = result;
+            if (result != null)
+            {
+                AudioURL = result.AudioURL;
+                Duration = result.Duration;
+            }
             else
             {
                 Duration = TimeSpan.FromSeconds(30);
