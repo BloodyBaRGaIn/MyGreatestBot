@@ -1,73 +1,60 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Utils;
 using SpotifyAPI.Web;
-using libspotifydotnet;
 
 namespace DicordNET.TrackClasses
 {
     internal sealed class SpotifyTrackInfo : ITrackInfo
     {
-        private const string DomainURL = "https://open.spotify.com/";
+        public ITrackInfo Base => this;
+
+        public string Domain => "https://open.spotify.com/";
+
+        public string Id { get; }
+        public string Title => Base.Title;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
-        public string Id { get; }
-        public TimeSpan Duration { get; }
-        public TimeSpan Seek { get; set; }
-        public string AudioURL { get; set; }
+        
+        public TimeSpan Duration { get; private set; }
+        TimeSpan ITrackInfo.Seek { get; set; }
+
+        public string AudioURL { get; private set; }
         public string? CoverURL { get; }
-        public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
+        public bool IsLiveStream => false;
 
-        public ITrackInfo Base => this;
-
-        private readonly string _track_uri;
-
-        internal SpotifyTrackInfo(IPlayableItem item, FullPlaylist? playlist = null)
+        internal SpotifyTrackInfo(FullTrack track, FullPlaylist? playlist = null)
         {
-            switch (item)
-            {
-                case FullTrack track:
-                    Id = track.Id;
-                    TrackName = new(track.Name, $"{DomainURL}track/{Id}");
-                    ArtistArr = track.Artists.Select(a => new HyperLink(a.Name, $"{DomainURL}artist/{a.Id}")).ToArray();
-                    AlbumName = new(track.Album.Name, $"{DomainURL}album/{track.Album.Id}");
+            Id = track.Id;
+            TrackName = new(track.Name, $"{Domain}track/{Id}");
+            ArtistArr = track.Artists.Select(a => new HyperLink(a.Name, $"{Domain}artist/{a.Id}")).ToArray();
+            AlbumName = new(track.Album.Name, $"{Domain}album/{track.Album.Id}");
 
-                    Duration = TimeSpan.FromMilliseconds(track.DurationMs);
+            Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
-                    if (playlist == null)
-                    {
-                        PlaylistName = null;
-                    }
-                    else if (string.IsNullOrWhiteSpace(playlist.Name))
-                    {
-                        PlaylistName = null;
-                    }
-                    else if (string.IsNullOrWhiteSpace(playlist.Id))
-                    {
-                        PlaylistName = new(playlist.Name);
-                    }
-                    else
-                    {
-                        PlaylistName = new(playlist.Name, $"{DomainURL}playlist/{playlist.Id}");
-                    }
+            PlaylistName = playlist == null || string.IsNullOrWhiteSpace(playlist.Name)
+                ? null
+                : string.IsNullOrWhiteSpace(playlist.Id)
+                    ? new(playlist.Name)
+                    : new(playlist.Name, $"{Domain}playlist/{playlist.Id}");
 
-                    CoverURL = track.Album.Images.FirstOrDefault()?.Url;
+            CoverURL = track.Album.Images.FirstOrDefault()?.Url;
 
-                    AudioURL = track.PreviewUrl;
-
-                    _track_uri = track.Uri;
-
-                    break;
-
-                default:
-                    throw new ArgumentException(nameof(item));
-            }
+            // default
+            AudioURL = track.PreviewUrl;
         }
 
         void ITrackInfo.ObtainAudioURL()
         {
+            var result = YandexApiWrapper.Search(this);
+            if (result != null) AudioURL = result;
+            else
+            {
+                Duration = TimeSpan.FromSeconds(30);
+            }
+
             //var player = SpotifyApiWrapper.Player;
 
             //var devices = player.GetAvailableDevices().GetAwaiter().GetResult();

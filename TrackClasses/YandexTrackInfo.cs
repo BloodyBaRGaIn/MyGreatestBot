@@ -9,26 +9,30 @@ namespace DicordNET.TrackClasses
 {
     internal sealed class YandexTrackInfo : ITrackInfo
     {
-        private const string DomainURL = "https://music.yandex.ru/";
+        public ITrackInfo Base => this;
+
+        public string Domain => "https://music.yandex.ru/";
+
+        public string Id { get; }
+        public string Title => Base.Title;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
-        public string Id { get; }
+        
         public TimeSpan Duration { get; }
-        public TimeSpan Seek { get; set; }
-        public string AudioURL { get; set; }
-        public string? CoverURL { get; }
-        public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
+        TimeSpan ITrackInfo.Seek { get; set; }
 
-        public ITrackInfo Base => this;
+        public string AudioURL { get; private set; }
+        public string? CoverURL { get; }
+        public bool IsLiveStream => false;
 
         internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null)
         {
             Id = track.Id;
 
-            TrackName = new(track.Title, $"{DomainURL}track/{Id}");
+            TrackName = new(track.Title, $"{Domain}track/{Id}");
 
             List<YArtist> authors_list = track.Artists;
 
@@ -37,18 +41,14 @@ namespace DicordNET.TrackClasses
             for (int i = 0; i < authors_list.Count; i++)
             {
                 YArtist artist = authors_list[i];
-                ArtistArr[i] = new(artist.Name, $"{DomainURL}artist/{artist.Id}");
+                ArtistArr[i] = new(artist.Name, $"{Domain}artist/{artist.Id}");
             }
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
             AudioURL = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(track.CoverUri))
-            {
-                CoverURL = string.Empty;
-            }
-            else
+            if (!string.IsNullOrWhiteSpace(track.CoverUri))
             {
                 CoverURL = $"https://{track.CoverUri.Replace("/%%", "/100x100")}";
             }
@@ -56,27 +56,31 @@ namespace DicordNET.TrackClasses
             if (track.Albums.Any())
             {
                 YAlbum album = track.Albums.First();
-                AlbumName = new(album.Title, $"{DomainURL}album/{album.Id}");
-            }
-            else
-            {
-                AlbumName = null;
+                AlbumName = new(album.Title, $"{Domain}album/{album.Id}");
             }
 
             if (playlist != null)
             {
-                PlaylistName = new(playlist.Title, $"{DomainURL}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
+                PlaylistName = new(playlist.Title, $"{Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
             }
         }
 
         void ITrackInfo.ObtainAudioURL()
         {
-        start:
-            AudioURL = YandexApiWrapper.GetAudioURL(Id);
-            if (string.IsNullOrEmpty(AudioURL))
+            int retries = 0;
+            while (true)
             {
-                Base.Reload();
-                goto start;
+                if (retries > 2)
+                {
+                    throw new InvalidOperationException("Cannot get audio URL");
+                }
+                AudioURL = YandexApiWrapper.GetAudioURL(Id);
+                if (string.IsNullOrEmpty(AudioURL))
+                {
+                    Base.Reload();
+                    retries++;
+                }
+                else break;
             }
         }
 

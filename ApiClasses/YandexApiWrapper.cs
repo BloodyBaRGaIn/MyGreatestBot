@@ -1,7 +1,9 @@
 ﻿using DicordNET.ApiClasses.Extensions;
 using DicordNET.Config;
 using DicordNET.TrackClasses;
+using System.Linq;
 using System.Text.RegularExpressions;
+using VkNet.Utils;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Album;
@@ -87,6 +89,40 @@ namespace DicordNET.ApiClasses
         internal static void Logout()
         {
 
+        }
+
+        internal static string? Search(SpotifyTrackInfo spotifyTrack)
+        {
+            if (api == null)
+            {
+                return null;
+            }
+
+            var response = api?.Search.Track(storage, spotifyTrack.Title).Result;
+
+            if (response == null)
+            {
+                return null;
+            }
+
+            var tracks = response.Tracks.Results;
+
+            if (!tracks.Any())
+            {
+                return null;
+            }
+
+            foreach (var track in tracks)
+            {
+                ITrackInfo trackInfo = new YandexTrackInfo(track);
+                if (trackInfo.AlbumName == spotifyTrack.AlbumName || trackInfo.ArtistArr.Union(spotifyTrack.ArtistArr).Any())
+                {
+                    trackInfo.ObtainAudioURL();
+                    return trackInfo.AudioURL;
+                }
+            }
+
+            return null;
         }
 
         internal static List<YandexTrackInfo> GetTracks(string? query)

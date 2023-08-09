@@ -4,18 +4,39 @@ namespace DicordNET.TrackClasses
 {
     internal interface ITrackInfo
     {
-        ITrackInfo Base { get; }
+        protected ITrackInfo Base { get; }
+
+        protected string Domain { get; }
+
+        internal string Id { get; }
+        internal string Title => TrackName.Title;
 
         internal HyperLink TrackName { get; }
         internal HyperLink[] ArtistArr { get; }
         internal HyperLink? AlbumName { get; }
         internal HyperLink? PlaylistName { get; }
-        internal string Id { get; }
+        
         internal TimeSpan Duration { get; }
-        internal TimeSpan Seek { get; set; }
+        internal protected TimeSpan Seek { get; protected set; }
+
         internal string? CoverURL { get; }
-        protected internal string AudioURL { get; protected set; }
-        protected internal bool IsLiveStream { get; protected set; }
+        internal string AudioURL { get; }
+        internal bool IsLiveStream { get; }
+
+        internal bool TrySeek(TimeSpan span)
+        {
+            if (IsLiveStream || Duration == TimeSpan.Zero || span > Duration)
+            {
+                return false;
+            }
+
+            lock (this)
+            {
+                Seek = span;
+            }
+
+            return true;
+        }
 
         internal string GetMessage()
         {

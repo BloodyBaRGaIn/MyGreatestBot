@@ -7,7 +7,37 @@ namespace DicordNET.Player
     {
         internal static void RequestSeek(TimeSpan span)
         {
-            if (!IsPlaying || currentTrack == null)
+            if (IsPlaying && currentTrack != null)
+            {
+                bool result = currentTrack.TrySeek(span);
+
+                if (result)
+                {
+                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Purple,
+                        Title = "Seek",
+                        Description = currentTrack.GetMessage(),
+                        Thumbnail = currentTrack.GetThumbnail()
+                    });
+
+                    IsPaused = true;
+
+                    Task.Yield().GetAwaiter().GetResult();
+
+                    SeekRequested = true;
+                }
+                else
+                {
+                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Red,
+                        Title = "Seek",
+                        Description = "Cannot seek"
+                    });
+                }
+            }
+            else
             {
                 BotWrapper.SendMessage(new DiscordEmbedBuilder()
                 {
@@ -18,41 +48,6 @@ namespace DicordNET.Player
 
                 return;
             }
-
-            if (currentTrack == null
-                || currentTrack.IsLiveStream
-                || currentTrack.Duration == TimeSpan.Zero
-                || currentTrack.Duration <= span)
-            {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Seek",
-                    Description = "Cannot seek"
-                });
-
-                return;
-            }
-
-            lock (currentTrack)
-            {
-                Seek = span;
-                currentTrack.Seek = Seek;
-
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Seek",
-                    Description = currentTrack.GetMessage(),
-                    Thumbnail = currentTrack.GetThumbnail()
-                });
-            }
-
-            IsPaused = true;
-
-            Task.Yield().GetAwaiter().GetResult();
-
-            SeekRequested = true;
         }
     }
 }

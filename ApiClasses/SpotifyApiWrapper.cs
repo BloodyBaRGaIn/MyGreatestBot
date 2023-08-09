@@ -1,26 +1,22 @@
 ﻿using DicordNET.ApiClasses.Extensions;
 using DicordNET.Config;
 using DicordNET.TrackClasses;
-using EmbedIO.Sessions;
 using SpotifyAPI.Web;
-using SpotifyAPI.Web.Auth;
-using SpotifyAPI.Web.Http;
-using System.Net.Http.Headers;
+//using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
 namespace DicordNET.ApiClasses
 {
     internal static class SpotifyApiWrapper
     {
-        private static EmbedIOAuthServer server;
+        //private static EmbedIOAuthServer? server;
         private static SpotifyClient? SpotifyClientInstance;
-        private static nint session_id;
+
         private static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
         private static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClientInstance));
         private static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
         private static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-
+        //internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClientInstance));
 
         private static class SpotifyQueryDecomposer
         {
@@ -58,59 +54,64 @@ namespace DicordNET.ApiClasses
         {
             SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
-            server = new(new Uri("http://localhost:5543/callback"), 5543);
-            server.Start().Wait();
+            //server = new(new Uri("http://localhost:5543/callback"), 5543);
+            //server.Start().Wait();
 
-            server.AuthorizationCodeReceived += Server_AuthorizationCodeReceived;
-            server.ErrorReceived += Server_ErrorReceived;
+            //server.AuthorizationCodeReceived += Server_AuthorizationCodeReceived;
+            //server.ErrorReceived += Server_ErrorReceived;
 
-            var request = new LoginRequest(server.BaseUri, spotifyClientSecrets.ClientId, LoginRequest.ResponseType.Code)
+            //var request = new LoginRequest(server.BaseUri, spotifyClientSecrets.ClientId, LoginRequest.ResponseType.Code)
+            //{
+            //    Scope = new List<string> { Scopes.UserModifyPlaybackState, Scopes.UserReadPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadEmail }
+            //};
+            //BrowserUtil.Open(request.ToUri());
+
+            SpotifyClientConfig config = SpotifyClientConfig.CreateDefault()
+                .WithAuthenticator(
+                    new ClientCredentialsAuthenticator(
+                        spotifyClientSecrets.ClientId,
+                        spotifyClientSecrets.ClientSecret
+                        )
+                    );
+
+            if (SpotifyClientInstance != null)
             {
-                Scope = new List<string> { Scopes.UserModifyPlaybackState, Scopes.UserReadPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadEmail }
-            };
-            BrowserUtil.Open(request.ToUri());
-
-            //SpotifyClientConfig config = SpotifyClientConfig.CreateDefault()
-            //    .WithAuthenticator(
-            //        new ClientCredentialsAuthenticator(
-            //            spotifyClientSecrets.ClientId,
-            //            spotifyClientSecrets.ClientSecret
-            //            )
-            //        );
-
-            //if (SpotifyClientInstance != null)
-            //{
-            //    lock (SpotifyClientInstance)
-            //    {
-            //        SpotifyClientInstance = new(config);
-            //    }
-            //}
-            //else
-            //{
-            //    SpotifyClientInstance = new(config);
-            //}
+                lock (SpotifyClientInstance)
+                {
+                    SpotifyClientInstance = new(config);
+                }
+            }
+            else
+            {
+                SpotifyClientInstance = new(config);
+            }
         }
 
-        private static Task Server_ErrorReceived(object arg1, string arg2, string? arg3)
-        {
-            throw new NotImplementedException();
-        }
+        //private static Task Server_ErrorReceived(object arg1, string arg2, string? arg3)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        private static async Task Server_AuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
-        {
-            await server.Stop();
+        //private static async Task Server_AuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
+        //{
+        //    if (server == null)
+        //    {
+        //        return;
+        //    }
 
-            SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
+        //    await server.Stop();
 
-            var config = SpotifyClientConfig.CreateDefault();
-            var tokenResponse = await new OAuthClient(config).RequestToken(
-              new AuthorizationCodeTokenRequest(
-                spotifyClientSecrets.ClientId, spotifyClientSecrets.ClientSecret, response.Code, new Uri("http://localhost:5543/callback")
-              )
-            );
+        //    SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
-            SpotifyClientInstance = new(tokenResponse.AccessToken);
-        }
+        //    var config = SpotifyClientConfig.CreateDefault();
+        //    var tokenResponse = await new OAuthClient(config).RequestToken(
+        //      new AuthorizationCodeTokenRequest(
+        //        spotifyClientSecrets.ClientId, spotifyClientSecrets.ClientSecret, response.Code, new Uri("http://localhost:5543/callback")
+        //      )
+        //    );
+
+        //    SpotifyClientInstance = new(tokenResponse.AccessToken);
+        //}
 
         internal static void Logout()
         {
@@ -135,9 +136,9 @@ namespace DicordNET.ApiClasses
                     if (tracks_list != null)
                     {
                         var tracks_collection = tracks_list.Select(t => t.Track);
-                        foreach (var track in tracks_collection)
+                        foreach (var item in tracks_collection)
                         {
-                            tracks.Add(new SpotifyTrackInfo(track, playlist));
+                            if (item is FullTrack track) tracks.Add(new SpotifyTrackInfo(track, playlist));
                         }
                     }
 

@@ -132,10 +132,7 @@ namespace DicordNET.Player
 
         seek:
 
-            if (!track.IsLiveStream)
-            {
-                track.Seek = Seek;
-            }
+            track.TrySeek(Seek);
 
             IsPlaying = true;
 
@@ -256,10 +253,7 @@ namespace DicordNET.Player
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
 
-                if (!track.IsLiveStream)
-                {
-                    track.Seek = Seek;
-                }
+                track.TrySeek(Seek);
 
                 if (BotWrapper.TransmitSink == null)
                 {

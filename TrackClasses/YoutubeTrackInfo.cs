@@ -8,18 +8,45 @@ namespace DicordNET.TrackClasses
 {
     internal sealed class YoutubeTrackInfo : ITrackInfo
     {
-        public HyperLink TrackName { get; }
+        public ITrackInfo Base => this;
+
+        public string Domain => "https://www.youtube.com/";
+
         public string Id { get; }
+        public string Title => Base.Title;
+
+        public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
-        public TimeSpan Duration { get; }
-        public TimeSpan Seek { get; set; }
-        public string? CoverURL { get; }
-        public string AudioURL { get; set; }
-        public bool IsLiveStream { get; set; }
 
-        public ITrackInfo Base => this;
+        public TimeSpan Duration { get; }
+        TimeSpan ITrackInfo.Seek { get; set; }
+
+        public string? CoverURL { get; }
+        public string AudioURL { get; private set; }
+        public bool IsLiveStream { get; private set; }
+
+        internal YoutubeTrackInfo(IVideo video, Playlist? playlist = null)
+        {
+            Id = video.Id;
+
+            TrackName = new(video.Title, video.Url);
+
+            ArtistArr = new HyperLink[1] { new(video.Author.ChannelTitle, video.Author.ChannelUrl) };
+
+            Duration = video.Duration ?? TimeSpan.Zero;
+
+            IsLiveStream = Duration == TimeSpan.Zero;
+
+            AudioURL = string.Empty;
+            CoverURL = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
+
+            if (playlist != null)
+            {
+                PlaylistName = new(playlist.Title, playlist.Url);
+            }
+        }
 
         void ITrackInfo.ObtainAudioURL()
         {
@@ -33,49 +60,35 @@ namespace DicordNET.TrackClasses
                 throw new ArgumentNullException(nameof(YoutubeApiWrapper.YoutubeClientInstance));
             }
 
-            try
+            if (IsLiveStream)
+            {
+                var stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
+                    .GetAwaiter()
+                    .GetResult() ?? throw new InvalidOperationException("Stream URL was null");
+
+                AudioURL = stream_url;
+            }
+            else
             {
                 StreamManifest manifest = YoutubeApiWrapper.Streams.GetManifestAsync(Id)
-                                                                   .GetAwaiter()
-                                                                   .GetResult();
+                    .GetAwaiter()
+                    .GetResult() ?? throw new InvalidOperationException("Manifest was null");
 
                 IEnumerable<AudioOnlyStreamInfo> audioStreams = manifest.GetAudioOnlyStreams();
 
                 if (!audioStreams.Any())
                 {
-                    throw new InvalidOperationException("Cannot get audio");
+                    throw new InvalidOperationException("No streams found");
                 }
 
-                var audioStream = audioStreams.Where(a => a.Bitrate == audioStreams.Max(s => s.Bitrate)).First();
+                long bps = audioStreams.Max(s => s.Bitrate.BitsPerSecond);
+
+                var audioStream = audioStreams
+                    .Where(a => a.Bitrate.BitsPerSecond == bps)
+                    .First() ?? throw new InvalidOperationException("Stream URL was null");
 
                 AudioURL = audioStream.Url;
-
-                IsLiveStream = false;
             }
-            catch
-            {
-                var stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
-                                                  .GetAwaiter()
-                                                  .GetResult();
-                AudioURL = stream_url;
-
-                IsLiveStream = true;
-            }
-        }
-
-        internal YoutubeTrackInfo(IVideo video, Playlist? playlist = null)
-        {
-            Id = video.Id;
-
-            TrackName = new(video.Title, video.Url);
-
-            ArtistArr = new HyperLink[1] { new(video.Author.ChannelTitle, video.Author.ChannelUrl) };
-
-            Duration = video.Duration ?? TimeSpan.Zero;
-            AudioURL = string.Empty;
-            CoverURL = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
-
-            PlaylistName = playlist == null ? null : new(playlist.Title, playlist.Url);
         }
 
         void ITrackInfo.Reload()

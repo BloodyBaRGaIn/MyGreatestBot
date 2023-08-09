@@ -6,23 +6,31 @@ namespace DicordNET.TrackClasses
 {
     internal sealed class VkTrackInfo : ITrackInfo
     {
-        private const string DomainUrl = "https://vk.com/";
+        public ITrackInfo Base => this;
+
+        public string Domain => "https://www.vk.com/";
+
+        public string Id { get; }
+        public string Title => Base.Title;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
-        public string Id { get; }
+        
         public TimeSpan Duration { get; }
-        public TimeSpan Seek { get; set; }
-        public string? CoverURL { get; }
-        public string AudioURL { get; set; }
-        public bool IsLiveStream { get => false; set => throw new NotImplementedException(); }
+        TimeSpan ITrackInfo.Seek { get; set; }
 
-        public ITrackInfo Base => this;
+        public string? CoverURL { get; }
+        public string AudioURL { get; private set; }
+        public bool IsLiveStream => false;
+
+        private readonly Audio origin;
 
         internal VkTrackInfo(Audio audio, AudioPlaylist? playlist = null)
         {
+            origin = audio;
+
             var main_artists = audio.MainArtists;
             var feat_artists = audio.FeaturedArtists;
 
@@ -34,7 +42,7 @@ namespace DicordNET.TrackClasses
                 {
                     list.Add(string.IsNullOrWhiteSpace(artist.Id)
                         ? new(artist.Name)
-                        : new(artist.Name, $"{DomainUrl}artist/{artist.Id}"));
+                        : new(artist.Name, $"{Domain}artist/{artist.Id}"));
                 }
             }
             else if (feat_artists != null && feat_artists.Any())
@@ -43,7 +51,7 @@ namespace DicordNET.TrackClasses
                 {
                     list.Add(string.IsNullOrWhiteSpace(artist.Id)
                         ? new(artist.Name)
-                        : new(artist.Name, $"{DomainUrl}artist/{artist.Id}"));
+                        : new(artist.Name, $"{Domain}artist/{artist.Id}"));
                 }
             }
             else
@@ -57,18 +65,18 @@ namespace DicordNET.TrackClasses
 
             TrackName = audio.OwnerId == null || audio.Id == null
                 ? new(audio.Title)
-                : new(audio.Title, $"{DomainUrl}audio{audio.OwnerId}_{audio.Id}");
+                : new(audio.Title, $"{Domain}audio{audio.OwnerId}_{audio.Id}");
 
             if (playlist != null)
             {
                 PlaylistName = playlist.OwnerId == null || playlist.Id == null
                     ? new(playlist.Title)
-                    : new(playlist.Title, $"{DomainUrl}music/playlist/{playlist.OwnerId}_{playlist.Id}");
+                    : new(playlist.Title, $"{Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
             }
 
             if (album != null)
             {
-                AlbumName = new(album.Title, $"{DomainUrl}music/album/{album.OwnerId}_{album.Id}");
+                AlbumName = new(album.Title, $"{Domain}music/album/{album.OwnerId}_{album.Id}");
 
                 CoverURL = album.Thumb?.Photo135;
             }
@@ -80,14 +88,19 @@ namespace DicordNET.TrackClasses
 
             Id = audio.Id == null ? string.Empty : ((long)audio.Id).ToString();
 
-            Duration = audio.Duration > 0 ? TimeSpan.FromSeconds(audio.Duration) : TimeSpan.Zero;
+            Duration = TimeSpan.FromSeconds(audio.Duration);
 
-            AudioURL = audio.Url?.ToString() ?? string.Empty;
+            AudioURL = string.Empty;
         }
 
         void ITrackInfo.ObtainAudioURL()
         {
-
+            string url = origin.Url.ToString();
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new InvalidOperationException("Cannot get audio URL");
+            }
+            AudioURL = url;
         }
 
         void ITrackInfo.Reload()
