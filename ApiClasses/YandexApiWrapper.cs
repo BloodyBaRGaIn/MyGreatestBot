@@ -1,5 +1,5 @@
-﻿using DicordNET.ApiClasses.Extensions;
-using DicordNET.Config;
+﻿using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.TrackClasses;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
@@ -19,7 +19,7 @@ namespace DicordNET.ApiClasses
             private static readonly Regex TRACK_RE = new("/track/(\\d+)$");
             private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
             private static readonly Regex ARTIST_RE = new("/artist/(\\d+)$");
-            private static readonly Regex PLAYLIST_RE = new("/users/([\\w\\-._]+)/playlists/(\\d+)$");
+            private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/(\\d+)$");
 #pragma warning restore SYSLIB1045
 
             internal static string? TryGetTrackId(string query)
@@ -98,13 +98,11 @@ namespace DicordNET.ApiClasses
                 return null;
             }
 
-            string artists = string.Empty;
-            foreach (var artist in spotifyTrack.ArtistArr)
+            string artists = spotifyTrack.ArtistArr[0].Title.ToTransletters();
+            for (int i = 1; i < spotifyTrack.ArtistArr.Length; i++)
             {
-                artists += $"{artist.Title}, ";
+                artists += $", {spotifyTrack.ArtistArr[i].Title.ToTransletters()}";
             }
-
-            artists = artists[..^2];
 
             var response = api?.Search.Track(storage, $"{spotifyTrack.Title} - {artists}").Result;
 
@@ -120,21 +118,16 @@ namespace DicordNET.ApiClasses
                 return null;
             }
 
-            foreach (Yandex.Music.Api.Models.Search.Track.YSearchTrackModel? track in tracks)
+            IEnumerable<YandexTrackInfo> y_tracks = tracks.Select(t =>
             {
-                YTrack y_track = track;
-                y_track.Albums = track.Albums.Select(a => a as YAlbum).ToList();
-                ITrackInfo trackInfo = new YandexTrackInfo(y_track);
-                if (trackInfo.AlbumName == spotifyTrack.AlbumName
-                    || trackInfo.ArtistArr.Select(a => a.Title)
-                        .Intersect(spotifyTrack.ArtistArr.Select(a => a.Title)).Any())
-                {
-                    trackInfo.ObtainAudioURL();
-                    return trackInfo;
-                }
-            }
+                YTrack y = t;
+                y.Albums = t.Albums.Select(a => a as YAlbum).ToList();
+                return new YandexTrackInfo(y, null, true);
+            }).OrderBy(y => Math.Abs(y.CompareTo(spotifyTrack)));
 
-            return null;
+            ITrackInfo first = y_tracks.First();
+            first.ObtainAudioURL();
+            return first;
         }
 
         internal static List<YandexTrackInfo> GetTracks(string? query)

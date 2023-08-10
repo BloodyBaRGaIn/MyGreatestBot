@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DicordNET.ApiClasses.Extensions
+namespace DicordNET.Extensions
 {
     internal static class RegexExtensions
     {

@@ -6,11 +6,13 @@ using YoutubeExplode.Videos.Streams;
 
 namespace DicordNET.TrackClasses
 {
-    internal sealed class YoutubeTrackInfo : ITrackInfo
+    internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
 
         public string Domain => "https://www.youtube.com/";
+
+        public ApiIntents TrackType => ApiIntents.Youtube;
 
         public string Id { get; }
 
@@ -96,7 +98,12 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(ApiIntents.Youtube);
+            ApiConfig.ReloadApis(TrackType);
+        }
+
+        public int CompareTo(ITrackInfo? other)
+        {
+            return Base.CompareTo(other);
         }
     }
 }

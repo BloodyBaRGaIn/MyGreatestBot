@@ -1,5 +1,5 @@
-﻿using DicordNET.ApiClasses.Extensions;
-using DicordNET.Config;
+﻿using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.TrackClasses;
 using SpotifyAPI.Web;
 //using SpotifyAPI.Web.Auth;
@@ -12,19 +12,20 @@ namespace DicordNET.ApiClasses
         //private static EmbedIOAuthServer? server;
         private static SpotifyClient? SpotifyClientInstance;
 
-        private static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        private static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        private static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        private static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        //internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw new ArgumentException(nameof(SpotifyClientInstance));
 
         private static class SpotifyQueryDecomposer
         {
 #pragma warning disable SYSLIB1045
-            private static readonly Regex PLAYLIST_RE = new("/playlist/([a-zA-Z0-9]+)[\\?]?");
-            private static readonly Regex ALBUM_RE = new("/album/([a-zA-Z0-9]+)[\\?]?");
-            private static readonly Regex ARTIST_RE = new("/artist/([a-zA-Z0-9]+)[\\?]?");
-            private static readonly Regex TRACK_RE = new("/track/([a-zA-Z0-9]+)[\\?]?");
+            private static readonly Regex PLAYLIST_RE = new("/playlist/([^\\?]+)");
+            private static readonly Regex ALBUM_RE = new("/album/([^\\?]+)");
+            private static readonly Regex ARTIST_RE = new("/artist/([^\\?]+)");
+            private static readonly Regex TRACK_RE = new("/track/([^\\?]+)");
 #pragma warning restore SYSLIB1045
 
             internal static string? TryGetPlaylistId(string query)
@@ -116,9 +117,9 @@ namespace DicordNET.ApiClasses
 
         }
 
-        internal static List<ITrackInfo> GetTracks(string? query)
+        internal static List<SpotifyTrackInfo> GetTracks(string? query)
         {
-            List<ITrackInfo> tracks = new();
+            List<SpotifyTrackInfo> tracks = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -134,9 +135,12 @@ namespace DicordNET.ApiClasses
                     if (tracks_list != null)
                     {
                         var tracks_collection = tracks_list.Select(t => t.Track);
-                        foreach (var item in tracks_collection)
+                        foreach (IPlayableItem? item in tracks_collection)
                         {
-                            if (item is FullTrack track) tracks.Add(new SpotifyTrackInfo(track, playlist));
+                            if (item is not null and FullTrack track)
+                            {
+                                tracks.Add(new SpotifyTrackInfo(track, playlist));
+                            }
                         }
                     }
 
@@ -189,7 +193,7 @@ namespace DicordNET.ApiClasses
             return tracks;
         }
 
-        private static void FromAlbumId(string album_id, List<ITrackInfo> tracks)
+        private static void FromAlbumId(string album_id, List<SpotifyTrackInfo> tracks)
         {
             FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();
             if (album == null)
@@ -200,7 +204,6 @@ namespace DicordNET.ApiClasses
             {
                 Artists = album.Artists,
                 AlbumType = album.AlbumType,
-                AlbumGroup = string.Empty,
                 AvailableMarkets = album.AvailableMarkets,
                 ExternalUrls = album.ExternalUrls,
                 Href = album.Href,
@@ -215,12 +218,11 @@ namespace DicordNET.ApiClasses
                 Uri = album.Uri,
             };
             List<SimpleTrack>? tracks_list = album.Tracks?.Items ?? null;
-            if (tracks_list == null)
+            if (tracks_list == null || tracks_list.Any())
             {
                 return;
             }
-            var tracks_collection = tracks_list.Select(t => t);
-            foreach (var track in tracks_collection)
+            foreach (SimpleTrack track in tracks_list)
             {
                 FullTrack full = new()
                 {

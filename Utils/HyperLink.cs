@@ -1,6 +1,6 @@
 ﻿namespace DicordNET.Utils
 {
-    internal sealed class HyperLink
+    internal sealed class HyperLink : IComparable<HyperLink>
     {
         internal string Title { get; init; }
         private string Url { get; init; }
@@ -19,6 +19,15 @@
             }
 
             return $"[{Title}]({Url})";
+        }
+
+        public int CompareTo(HyperLink? other)
+        {
+            if (this is null || other is null)
+            {
+                return int.MaxValue;
+            }
+            return other.Title.CompareTo(Title);
         }
     }
 }

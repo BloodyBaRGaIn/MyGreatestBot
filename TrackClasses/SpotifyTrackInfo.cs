@@ -4,11 +4,13 @@ using SpotifyAPI.Web;
 
 namespace DicordNET.TrackClasses
 {
-    internal sealed class SpotifyTrackInfo : ITrackInfo
+    internal sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
 
         public string Domain => "https://open.spotify.com/";
+
+        public ApiIntents TrackType => ApiIntents.Spotify;
 
         public string Id { get; }
 
@@ -30,7 +32,13 @@ namespace DicordNET.TrackClasses
         {
             Id = track.Id;
             TrackName = new(track.Name, $"{Domain}track/{Id}");
-            ArtistArr = track.Artists.Select(a => new HyperLink(a.Name, $"{Domain}artist/{a.Id}")).ToArray();
+
+            ArtistArr = track.Artists.Select(a =>
+                new HyperLink(
+                    //SpotifyApiWrapper.Artists.Get(a.Id).GetAwaiter().GetResult().Name,
+                    a.Name,
+                    $"{Domain}artist/{a.Id}")).ToArray();
+
             AlbumName = new(track.Album.Name, $"{Domain}album/{track.Album.Id}");
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
@@ -47,7 +55,7 @@ namespace DicordNET.TrackClasses
             AudioURL = track.PreviewUrl;
         }
 
-        public void ObtainAudioURL()
+        void ITrackInfo.ObtainAudioURL()
         {
             var result = YandexApiWrapper.Search(this);
             if (result != null)
@@ -80,7 +88,12 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(ApiIntents.Spotify);
+            ApiConfig.ReloadApis(TrackType | ApiIntents.Yandex);
+        }
+
+        public int CompareTo(ITrackInfo? other)
+        {
+            return Base.CompareTo(other);
         }
     }
 }

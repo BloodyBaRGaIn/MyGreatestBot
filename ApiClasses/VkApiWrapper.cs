@@ -1,5 +1,5 @@
-﻿using DicordNET.ApiClasses.Extensions;
-using DicordNET.Config;
+﻿using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.TrackClasses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.RegularExpressions;

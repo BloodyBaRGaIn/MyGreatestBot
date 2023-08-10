@@ -33,7 +33,7 @@ namespace DicordNET.Player
         private static void PlayerTaskFunction()
         {
             Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
-            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 
             while (true)
             {
@@ -49,6 +49,7 @@ namespace DicordNET.Player
                         return;
                     }
                     Task.Delay(1).Wait();
+                    Task.Yield().GetAwaiter().GetResult();
                 }
                 while (IsPlaying)
                 {
@@ -57,6 +58,7 @@ namespace DicordNET.Player
                         return;
                     }
                     Task.Delay(1).Wait();
+                    Task.Yield().GetAwaiter().GetResult();
                 }
 
                 if (BotWrapper.VoiceConnection == null)
@@ -66,6 +68,7 @@ namespace DicordNET.Player
                         return;
                     }
                     Task.Delay(1).Wait();
+                    Task.Yield().GetAwaiter().GetResult();
                     continue;
                 }
 
@@ -104,9 +107,8 @@ namespace DicordNET.Player
 
         private static void PlayBody(ITrackInfo track)
         {
-            if (track == null
-                || BotWrapper.VoiceConnection == null
-                || track == null)
+            if (track is null
+                || BotWrapper.VoiceConnection is null)
             {
                 return;
             }
@@ -119,10 +121,7 @@ namespace DicordNET.Player
             {
                 BotWrapper.TransmitSink = BotWrapper.VoiceConnection.GetTransmitSink(TRANSMIT_SINK_MS);
             }
-            catch
-            {
-                ;
-            }
+            catch { }
 
         restart:
 
@@ -161,7 +160,7 @@ namespace DicordNET.Player
 
             if (ffmpeg.HasExited)
             {
-                BotWrapper.SendMessage("Session expired");
+                Console.WriteLine($"{track.TrackType} : Session expired");
                 track.Reload();
                 goto restart;
             }
@@ -172,7 +171,9 @@ namespace DicordNET.Player
             {
                 while (IsPaused && IsPlaying && !SeekRequested)
                 {
+                    Task.Yield().GetAwaiter().GetResult();
                     Task.Delay(1).Wait();
+                    Task.Yield().GetAwaiter().GetResult();
                 }
 
                 if (!IsPlaying)

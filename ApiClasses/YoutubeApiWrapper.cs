@@ -1,5 +1,5 @@
-﻿using DicordNET.ApiClasses.Extensions;
-using DicordNET.Config;
+﻿using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.TrackClasses;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;

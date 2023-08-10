@@ -1,4 +1,5 @@
 ﻿using DicordNET.ApiClasses;
+using DicordNET.Extensions;
 using DicordNET.Utils;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -7,11 +8,13 @@ using Yandex.Music.Api.Models.Track;
 
 namespace DicordNET.TrackClasses
 {
-    internal sealed class YandexTrackInfo : ITrackInfo
+    internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
 
         public string Domain => "https://music.yandex.ru/";
+
+        public ApiIntents TrackType => ApiIntents.Yandex;
 
         public string Id { get; }
 
@@ -29,7 +32,7 @@ namespace DicordNET.TrackClasses
         public string? CoverURL { get; }
         public bool IsLiveStream => false;
 
-        internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null)
+        internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null, bool transletters = false)
         {
             Id = track.Id;
 
@@ -42,7 +45,7 @@ namespace DicordNET.TrackClasses
             for (int i = 0; i < authors_list.Count; i++)
             {
                 YArtist artist = authors_list[i];
-                ArtistArr[i] = new(artist.Name, $"{Domain}artist/{artist.Id}");
+                ArtistArr[i] = new(transletters ? artist.Name.ToTransletters() : artist.Name, $"{Domain}artist/{artist.Id}");
             }
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
@@ -87,7 +90,12 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.DeinitApis(ApiIntents.Yandex);
+            ApiConfig.DeinitApis(TrackType);
+        }
+
+        public int CompareTo(ITrackInfo? other)
+        {
+            return Base.CompareTo(other);
         }
     }
 }

@@ -4,11 +4,13 @@ using VkNet.Model;
 
 namespace DicordNET.TrackClasses
 {
-    internal sealed class VkTrackInfo : ITrackInfo
+    internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
 
         public string Domain => "https://www.vk.com/";
+
+        public ApiIntents TrackType => ApiIntents.Vk;
 
         public string Id { get; }
 
@@ -106,7 +108,12 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(ApiIntents.Vk);
+            ApiConfig.ReloadApis(TrackType);
+        }
+
+        public int CompareTo(ITrackInfo? other)
+        {
+            return Base.CompareTo(other);
         }
     }
 }

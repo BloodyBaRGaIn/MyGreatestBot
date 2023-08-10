@@ -1,4 +1,5 @@
-﻿using DicordNET.Utils;
+﻿using DicordNET.ApiClasses;
+using DicordNET.Utils;
 
 namespace DicordNET.TrackClasses
 {
@@ -7,6 +8,8 @@ namespace DicordNET.TrackClasses
         protected ITrackInfo Base { get; }
 
         protected string Domain { get; }
+
+        internal ApiIntents TrackType { get; }
 
         internal string Id { get; }
 
@@ -98,5 +101,41 @@ namespace DicordNET.TrackClasses
 
         internal string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero ? "" : $"-ss {Seek} ")}" +
                                      $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
+
+        internal int CompareTo(ITrackInfo? other)
+        {
+            System.Numerics.BigInteger result = 0;
+            if (this is null || other is null) return int.MaxValue;
+            int name = other.TrackName.CompareTo(TrackName);
+            int album;
+            if (other.AlbumName is null)
+            {
+                album = int.MaxValue;
+            }
+            else
+            {
+                album = other.AlbumName.CompareTo(AlbumName);
+            }
+            int artist = 0;
+            if (other.ArtistArr.Length != ArtistArr.Length)
+            {
+                artist = int.MaxValue;
+            }
+            else
+            {
+                for (int i = 0; i < ArtistArr.Length; i++)
+                {
+                    artist += other.ArtistArr[i].CompareTo(ArtistArr[i]);
+                }
+            }
+
+            result += name;
+            result += album;
+            result += artist;
+
+            if (result > int.MaxValue) return int.MaxValue;
+            if (result < int.MinValue) return int.MinValue;
+            return (int)result;
+        }
     }
 }
