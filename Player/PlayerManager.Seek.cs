@@ -21,11 +21,11 @@ namespace DicordNET.Player
                         Thumbnail = currentTrack.GetThumbnail()
                     });
 
-                    IsPaused = true;
+                    //IsPaused = true;
 
-                    Task.Yield().GetAwaiter().GetResult();
-                    Task.Delay(100).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
+                    //Task.Yield().GetAwaiter().GetResult();
+                    //Task.Delay(100).Wait();
+                    //Task.Yield().GetAwaiter().GetResult();
 
                     SeekRequested = true;
                 }

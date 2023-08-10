@@ -1,4 +1,5 @@
-﻿using DicordNET.Config;
+﻿using DicordNET.ApiClasses.Spotify;
+using DicordNET.Config;
 using DicordNET.Extensions;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
@@ -90,22 +91,38 @@ namespace DicordNET.ApiClasses.Yandex
 
         }
 
-        internal static ITrackInfo? Search(ITrackInfo spotifyTrack)
+        internal static ITrackInfo? Search(SpotifyTrackInfo spotifyTrack)
         {
             if (api == null)
             {
                 return null;
             }
 
-            string artists = spotifyTrack.ArtistArr[0].Title.ToTransletters();
-            for (int i = 1; i < spotifyTrack.ArtistArr.Length; i++)
+            global::Yandex.Music.Api.Models.Search.YSearch? response = null;
+            string last_request = string.Empty;
+
+            if (spotifyTrack.AlbumName != null)
             {
-                artists += $", {spotifyTrack.ArtistArr[i].Title.ToTransletters()}";
+                last_request = $"{spotifyTrack.Title} - {spotifyTrack.AlbumName.Title}";
+                response = api?.Search.Track(storage, last_request).Result;
             }
 
-            global::Yandex.Music.Api.Models.Search.YSearch? response = api?.Search.Track(storage, $"{spotifyTrack.Title} - {artists}").Result;
-
             if (response == null)
+            {
+                return null;
+            }
+            if (response.Tracks == null)
+            {
+                string artists = spotifyTrack.ArtistArr[0].Title.ToTransletters();
+                for (int i = 1; i < spotifyTrack.ArtistArr.Length; i++)
+                {
+                    artists += $", {spotifyTrack.ArtistArr[i].Title.ToTransletters()}";
+                }
+                last_request = $"{spotifyTrack.Title} - {artists}";
+                response = api?.Search.Track(storage, last_request).Result;
+            }
+
+            if (response == null || response.Tracks == null)
             {
                 return null;
             }
@@ -117,14 +134,7 @@ namespace DicordNET.ApiClasses.Yandex
                 return null;
             }
 
-            IEnumerable<YandexTrackInfo> y_tracks = tracks.Select(t =>
-            {
-                YTrack y = t;
-                y.Albums = t.Albums.Select(a => a as YAlbum).ToList();
-                return new YandexTrackInfo(y, null, true);
-            }).OrderBy(y => Math.Abs(y.CompareTo(spotifyTrack)));
-
-            ITrackInfo first = y_tracks.First();
+            ITrackInfo first = new YandexTrackInfo(tracks.First(), null, true);
             first.ObtainAudioURL();
             return first;
         }

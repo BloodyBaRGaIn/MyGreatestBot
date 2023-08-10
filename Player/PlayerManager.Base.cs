@@ -33,7 +33,7 @@ namespace DicordNET.Player
         private static void PlayerTaskFunction()
         {
             Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
-            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             while (true)
             {
