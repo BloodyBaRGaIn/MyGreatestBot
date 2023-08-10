@@ -22,7 +22,10 @@ namespace DicordNET.Bot
         internal static DiscordChannel? VoiceChannel;
         internal static VoiceTransmitSink? TransmitSink;
 
-        internal static void Run() => BotInstance.RunAsync().GetAwaiter().GetResult();
+        internal static void Run()
+        {
+            BotInstance.RunAsync().GetAwaiter().GetResult();
+        }
 
         internal static VoiceNextConnection? GetVoiceConnection(DiscordGuild guild)
         {
@@ -40,7 +43,7 @@ namespace DicordNET.Bot
         {
             if (TextChannel != null)
             {
-                await TextChannel.SendMessageAsync(embed);
+                _ = await TextChannel.SendMessageAsync(embed);
             }
         }
 
@@ -48,7 +51,7 @@ namespace DicordNET.Bot
         {
             if (TextChannel != null)
             {
-                await TextChannel.SendMessageAsync(message);
+                _ = await TextChannel.SendMessageAsync(message);
             }
         }
 
@@ -73,7 +76,7 @@ namespace DicordNET.Bot
 
         internal static void Connect()
         {
-            VoiceNext?.ConnectAsync(VoiceChannel).Wait(1000);
+            _ = (VoiceNext?.ConnectAsync(VoiceChannel).Wait(1000));
         }
 
         internal static void Disconnect()

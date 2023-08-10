@@ -35,7 +35,7 @@ namespace DicordNET.Commands
         public async Task LogoutCommand(CommandContext ctx)
         {
             _ = await ctx.Channel.SendMessageAsync(":wave:");
-            var bot_client = BotWrapper.Client;
+            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
 
             if (bot_client != null)
             {

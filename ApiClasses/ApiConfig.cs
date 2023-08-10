@@ -1,4 +1,7 @@
-﻿using DicordNET.TrackClasses;
+﻿using DicordNET.ApiClasses.Spotify;
+using DicordNET.ApiClasses.Vk;
+using DicordNET.ApiClasses.Yandex;
+using DicordNET.ApiClasses.Youtube;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -134,10 +137,25 @@ namespace DicordNET.ApiClasses
             private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
 #pragma warning restore SYSLIB1045
 
-            internal static bool IsYoutubeURL([NotNull] string url) => YOUTUBE_RE.IsMatch(url);
-            internal static bool IsYandexURL([NotNull] string url) => YANDEX_RE.IsMatch(url);
-            internal static bool IsVkURL([NotNull] string url) => VK_RE.IsMatch(url);
-            internal static bool IsSpotifyURL([NotNull] string url) => SPOTIFY_RE.IsMatch(url);
+            internal static bool IsYoutubeURL([NotNull] string url)
+            {
+                return YOUTUBE_RE.IsMatch(url);
+            }
+
+            internal static bool IsYandexURL([NotNull] string url)
+            {
+                return YANDEX_RE.IsMatch(url);
+            }
+
+            internal static bool IsVkURL([NotNull] string url)
+            {
+                return VK_RE.IsMatch(url);
+            }
+
+            internal static bool IsSpotifyURL([NotNull] string url)
+            {
+                return SPOTIFY_RE.IsMatch(url);
+            }
         }
 
         internal static List<ITrackInfo> GetAll(string? query)
@@ -152,22 +170,30 @@ namespace DicordNET.ApiClasses
             if (QueryDecomposer.IsYoutubeURL(query))
             {
                 if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube)
+                {
                     tracks.AddRange(YoutubeApiWrapper.GetTracks(query));
+                }
             }
             else if (QueryDecomposer.IsYandexURL(query))
             {
                 if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
+                {
                     tracks.AddRange(YandexApiWrapper.GetTracks(query));
+                }
             }
             else if (QueryDecomposer.IsVkURL(query))
             {
                 if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk)
+                {
                     tracks.AddRange(VkApiWrapper.GetTracks(query));
+                }
             }
             else if (QueryDecomposer.IsSpotifyURL(query))
             {
                 if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify)
+                {
                     tracks.AddRange(SpotifyApiWrapper.GetTracks(query));
+                }
             }
             else
             {

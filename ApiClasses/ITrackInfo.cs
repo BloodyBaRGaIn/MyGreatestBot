@@ -1,7 +1,6 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Utils;
+﻿using DicordNET.Utils;
 
-namespace DicordNET.TrackClasses
+namespace DicordNET.ApiClasses
 {
     internal interface ITrackInfo
     {
@@ -19,9 +18,9 @@ namespace DicordNET.TrackClasses
         internal HyperLink? PlaylistName { get; }
 
         internal string Title { get; }
-        
+
         internal TimeSpan Duration { get; }
-        internal protected TimeSpan Seek { get; protected set; }
+        protected internal TimeSpan Seek { get; protected set; }
 
         internal string? CoverURL { get; }
         internal string AudioURL { get; }
@@ -65,13 +64,17 @@ namespace DicordNET.TrackClasses
             if (AlbumName != null)
             {
                 if (!string.IsNullOrWhiteSpace(AlbumName.Title))
+                {
                     result += $"Album: {AlbumName}\n";
+                }
             }
 
             if (PlaylistName != null)
             {
                 if (!string.IsNullOrWhiteSpace(PlaylistName.Title))
+                {
                     result += $"Playlist: {PlaylistName}\n";
+                }
             }
 
             if (Seek != TimeSpan.Zero)
@@ -105,7 +108,11 @@ namespace DicordNET.TrackClasses
         internal int CompareTo(ITrackInfo? other)
         {
             System.Numerics.BigInteger result = 0;
-            if (this is null || other is null) return int.MaxValue;
+            if (this is null || other is null)
+            {
+                return int.MaxValue;
+            }
+
             int name = other.TrackName.CompareTo(TrackName);
             int album;
             if (other.AlbumName is null)
@@ -133,8 +140,16 @@ namespace DicordNET.TrackClasses
             result += album;
             result += artist;
 
-            if (result > int.MaxValue) return int.MaxValue;
-            if (result < int.MinValue) return int.MinValue;
+            if (result > int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            if (result < int.MinValue)
+            {
+                return int.MinValue;
+            }
+
             return (int)result;
         }
     }

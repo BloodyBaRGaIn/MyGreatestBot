@@ -26,7 +26,7 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
-            var bot_client = BotWrapper.Client;
+            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
             if (bot_client == null)
             {
                 _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()

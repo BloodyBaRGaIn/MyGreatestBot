@@ -1,4 +1,4 @@
-﻿using DicordNET.TrackClasses;
+﻿using DicordNET.ApiClasses;
 using System.Diagnostics;
 
 namespace DicordNET.Player

@@ -1,6 +1,5 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
-using DicordNET.TrackClasses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.RegularExpressions;
 using VkNet;
@@ -8,7 +7,7 @@ using VkNet.Abstractions;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Model;
 
-namespace DicordNET.ApiClasses
+namespace DicordNET.ApiClasses.Vk
 {
     internal static class VkApiWrapper
     {
@@ -45,8 +44,8 @@ namespace DicordNET.ApiClasses
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddAudioBypass();
+            ServiceCollection serviceCollection = new();
+            _ = serviceCollection.AddAudioBypass();
             api = new VkApi(serviceCollection);
 
             try
@@ -90,8 +89,15 @@ namespace DicordNET.ApiClasses
                 throw new InvalidOperationException("Not authorized");
             }
 
-            if (TryAddAsCollection(query, tracks, is_playlist: true)) return tracks;
-            if (TryAddAsCollection(query, tracks, is_playlist: false)) return tracks;
+            if (TryAddAsCollection(query, tracks, is_playlist: true))
+            {
+                return tracks;
+            }
+
+            if (TryAddAsCollection(query, tracks, is_playlist: false))
+            {
+                return tracks;
+            }
 
             return tracks;
         }
@@ -123,7 +129,7 @@ namespace DicordNET.ApiClasses
                 ? api?.Audio.GetPlaylistById(user_l, id_l)
                 : null;
 
-            var vk_tracks = api?.Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
+            VkNet.Utils.VkCollection<Audio>? vk_tracks = api?.Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
 
             if (vk_tracks == null || !vk_tracks.Any())
             {

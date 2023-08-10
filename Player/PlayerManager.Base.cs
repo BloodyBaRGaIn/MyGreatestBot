@@ -1,5 +1,5 @@
-﻿using DicordNET.Bot;
-using DicordNET.TrackClasses;
+﻿using DicordNET.ApiClasses;
+using DicordNET.Bot;
 using DSharpPlus.Entities;
 using System.Diagnostics;
 
@@ -131,7 +131,7 @@ namespace DicordNET.Player
 
         seek:
 
-            track.TrySeek(Seek);
+            _ = track.TrySeek(Seek);
 
             IsPlaying = true;
 
@@ -254,7 +254,7 @@ namespace DicordNET.Player
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
 
-                track.TrySeek(Seek);
+                _ = track.TrySeek(Seek);
 
                 if (BotWrapper.TransmitSink == null)
                 {

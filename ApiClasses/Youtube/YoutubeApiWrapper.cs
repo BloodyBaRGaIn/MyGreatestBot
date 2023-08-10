@@ -1,6 +1,5 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
-using DicordNET.TrackClasses;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
@@ -11,7 +10,7 @@ using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace DicordNET.ApiClasses
+namespace DicordNET.ApiClasses.Youtube
 {
     internal static class YoutubeApiWrapper
     {
@@ -90,7 +89,7 @@ namespace DicordNET.ApiClasses
                                                                             .GetAwaiter()
                                                                             .GetResult();
 
-                    foreach (var pl_video in playlist_videos)
+                    foreach (PlaylistVideo pl_video in playlist_videos)
                     {
                         tracks.Add(new(pl_video, pl_instance));
                     }
@@ -103,7 +102,7 @@ namespace DicordNET.ApiClasses
 
             if (!string.IsNullOrWhiteSpace(video_id))
             {
-                var video = Videos.GetAsync(video_id)
+                Video video = Videos.GetAsync(video_id)
                                   .AsTask()
                                   .GetAwaiter()
                                   .GetResult();

@@ -1,6 +1,5 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
-using DicordNET.TrackClasses;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
@@ -9,7 +8,7 @@ using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
-namespace DicordNET.ApiClasses
+namespace DicordNET.ApiClasses.Yandex
 {
     internal static class YandexApiWrapper
     {
@@ -65,7 +64,7 @@ namespace DicordNET.ApiClasses
 
             try
             {
-                api.User.AuthorizeByAppPassword(storage, yandexCredStruct.Password);
+                _ = api.User.AuthorizeByAppPassword(storage, yandexCredStruct.Password);
             }
             catch
             {
@@ -104,14 +103,14 @@ namespace DicordNET.ApiClasses
                 artists += $", {spotifyTrack.ArtistArr[i].Title.ToTransletters()}";
             }
 
-            var response = api?.Search.Track(storage, $"{spotifyTrack.Title} - {artists}").Result;
+            global::Yandex.Music.Api.Models.Search.YSearch? response = api?.Search.Track(storage, $"{spotifyTrack.Title} - {artists}").Result;
 
             if (response == null)
             {
                 return null;
             }
 
-            var tracks = response.Tracks.Results;
+            List<global::Yandex.Music.Api.Models.Search.Track.YSearchTrackModel> tracks = response.Tracks.Results;
 
             if (!tracks.Any())
             {
@@ -161,7 +160,10 @@ namespace DicordNET.ApiClasses
                     {
                         foreach (YandexTrackInfo? track in tracks)
                         {
-                            if (track != null) tracks_collection.Add(track);
+                            if (track != null)
+                            {
+                                tracks_collection.Add(track);
+                            }
                         }
                     }
                     return tracks_collection;
@@ -177,7 +179,10 @@ namespace DicordNET.ApiClasses
                     {
                         foreach (YandexTrackInfo? track in tracks)
                         {
-                            if (track != null) tracks_collection.Add(track);
+                            if (track != null)
+                            {
+                                tracks_collection.Add(track);
+                            }
                         }
                     }
                     return tracks_collection;
@@ -192,7 +197,10 @@ namespace DicordNET.ApiClasses
                     {
                         foreach (YandexTrackInfo? track in tracks)
                         {
-                            if (track != null) tracks_collection.Add(track);
+                            if (track != null)
+                            {
+                                tracks_collection.Add(track);
+                            }
                         }
                     }
                     return tracks_collection;

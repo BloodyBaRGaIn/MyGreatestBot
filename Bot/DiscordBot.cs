@@ -41,7 +41,7 @@ namespace DicordNET.Bot
             Client.ClientErrored += Client_ClientErrored;
             Client.SocketErrored += Client_SocketErrored;
 
-            Client.UseInteractivity(new()
+            _ = Client.UseInteractivity(new()
             {
                 Timeout = TimeSpan.FromMinutes(20)
             });
@@ -64,7 +64,7 @@ namespace DicordNET.Bot
             Commands.CommandErrored += Commands_CommandErrored;
 
             await Client.ConnectAsync();
-            Client.UseVoiceNext();
+            _ = Client.UseVoiceNext();
 
             while (true)
             {
@@ -115,7 +115,7 @@ namespace DicordNET.Bot
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
-            await args.Context.Channel.SendMessageAsync($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            _ = await args.Context.Channel.SendMessageAsync($"{args.Exception.GetType().Name} : {args.Exception.Message}");
         }
     }
 }

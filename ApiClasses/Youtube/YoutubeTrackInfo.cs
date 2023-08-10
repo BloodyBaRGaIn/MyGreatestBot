@@ -1,10 +1,9 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Utils;
+﻿using DicordNET.Utils;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace DicordNET.TrackClasses
+namespace DicordNET.ApiClasses.Youtube
 {
     internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
@@ -65,7 +64,7 @@ namespace DicordNET.TrackClasses
 
             if (IsLiveStream)
             {
-                var stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
+                string stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
                     .AsTask()
                     .GetAwaiter()
                     .GetResult() ?? throw new InvalidOperationException("Stream URL was null");
@@ -88,7 +87,7 @@ namespace DicordNET.TrackClasses
 
                 long bps = audioStreams.Max(s => s.Bitrate.BitsPerSecond);
 
-                var audioStream = audioStreams
+                AudioOnlyStreamInfo audioStream = audioStreams
                     .Where(a => a.Bitrate.BitsPerSecond == bps)
                     .First() ?? throw new InvalidOperationException("Stream URL was null");
 

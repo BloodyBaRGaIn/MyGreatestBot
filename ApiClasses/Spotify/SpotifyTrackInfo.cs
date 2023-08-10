@@ -1,8 +1,8 @@
-﻿using DicordNET.ApiClasses;
+﻿using DicordNET.ApiClasses.Yandex;
 using DicordNET.Utils;
 using SpotifyAPI.Web;
 
-namespace DicordNET.TrackClasses
+namespace DicordNET.ApiClasses.Spotify
 {
     internal sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
@@ -57,7 +57,7 @@ namespace DicordNET.TrackClasses
 
         void ITrackInfo.ObtainAudioURL()
         {
-            var result = YandexApiWrapper.Search(this);
+            ITrackInfo? result = YandexApiWrapper.Search(this);
             if (result != null)
             {
                 AudioURL = result.AudioURL;

@@ -1,11 +1,10 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
-using DicordNET.TrackClasses;
 using SpotifyAPI.Web;
 //using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
-namespace DicordNET.ApiClasses
+namespace DicordNET.ApiClasses.Spotify
 {
     internal static class SpotifyApiWrapper
     {
@@ -134,7 +133,7 @@ namespace DicordNET.ApiClasses
                     List<PlaylistTrack<IPlayableItem>>? tracks_list = playlist.Tracks?.Items ?? null;
                     if (tracks_list != null)
                     {
-                        var tracks_collection = tracks_list.Select(t => t.Track);
+                        IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(t => t.Track);
                         foreach (IPlayableItem? item in tracks_collection)
                         {
                             if (item is not null and FullTrack track)
@@ -160,13 +159,13 @@ namespace DicordNET.ApiClasses
                 string? artist_id = SpotifyQueryDecomposer.TryGetArtistId(query);
                 if (!string.IsNullOrWhiteSpace(artist_id))
                 {
-                    var albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
+                    Paging<SimpleAlbum> albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
                     if (albums == null || albums.Items == null || !albums.Items.Any())
                     {
                         return tracks;
                     }
 
-                    foreach (var album in albums.Items)
+                    foreach (SimpleAlbum album in albums.Items)
                     {
                         FromAlbumId(album.Id, tracks);
                     }

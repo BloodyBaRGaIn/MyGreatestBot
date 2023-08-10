@@ -1,6 +1,6 @@
-﻿using DicordNET.Bot;
+﻿using DicordNET.ApiClasses;
+using DicordNET.Bot;
 using DicordNET.Commands;
-using DicordNET.TrackClasses;
 using DSharpPlus.Entities;
 
 namespace DicordNET.Player
@@ -15,7 +15,7 @@ namespace DicordNET.Player
             {
                 if ((source & CommandActionSource.External) == 0)
                 {
-                    foreach (var track in tracks)
+                    foreach (ITrackInfo track in tracks)
                     {
                         tracks_queue.Enqueue(track);
                     }

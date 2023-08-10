@@ -1,12 +1,11 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Extensions;
+﻿using DicordNET.Extensions;
 using DicordNET.Utils;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
-namespace DicordNET.TrackClasses
+namespace DicordNET.ApiClasses.Yandex
 {
     internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
@@ -84,7 +83,10 @@ namespace DicordNET.TrackClasses
                     Base.Reload();
                     retries++;
                 }
-                else break;
+                else
+                {
+                    break;
+                }
             }
         }
 

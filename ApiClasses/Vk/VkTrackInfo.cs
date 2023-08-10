@@ -1,8 +1,7 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Utils;
+﻿using DicordNET.Utils;
 using VkNet.Model;
 
-namespace DicordNET.TrackClasses
+namespace DicordNET.ApiClasses.Vk
 {
     internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
@@ -34,14 +33,14 @@ namespace DicordNET.TrackClasses
         {
             origin = audio;
 
-            var main_artists = audio.MainArtists;
-            var feat_artists = audio.FeaturedArtists;
+            IEnumerable<AudioArtist> main_artists = audio.MainArtists;
+            IEnumerable<AudioArtist> feat_artists = audio.FeaturedArtists;
 
             List<HyperLink> list = new();
 
             if (main_artists != null && main_artists.Any())
             {
-                foreach (var artist in main_artists)
+                foreach (AudioArtist? artist in main_artists)
                 {
                     list.Add(string.IsNullOrWhiteSpace(artist.Id)
                         ? new(artist.Name)
@@ -50,7 +49,7 @@ namespace DicordNET.TrackClasses
             }
             else if (feat_artists != null && feat_artists.Any())
             {
-                foreach (var artist in feat_artists)
+                foreach (AudioArtist? artist in feat_artists)
                 {
                     list.Add(string.IsNullOrWhiteSpace(artist.Id)
                         ? new(artist.Name)

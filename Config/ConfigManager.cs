@@ -7,7 +7,7 @@ namespace DicordNET.Config
         private const string CONFIG_DIR = "Config/Json";
 
         private const string DISCORD_JSON_PATH = $"{CONFIG_DIR}/config.json";
-        
+
         private const string GOOGLE_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/google_cred.json";
         private const string YANDEX_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/yandex_cred.json";
         private const string VK_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/vk_cred.json";
@@ -25,9 +25,9 @@ namespace DicordNET.Config
                 using StreamReader reader = new(file);
                 content = reader.ReadToEnd();
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException($"Cannot read file {filepath}");
+                throw new InvalidOperationException($"Cannot read file {filepath}", ex);
             }
 
             try

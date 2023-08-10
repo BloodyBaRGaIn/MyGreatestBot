@@ -1,5 +1,5 @@
-﻿using DicordNET.Bot;
-using DicordNET.TrackClasses;
+﻿using DicordNET.ApiClasses;
+using DicordNET.Bot;
 using DSharpPlus.Entities;
 
 namespace DicordNET.Player

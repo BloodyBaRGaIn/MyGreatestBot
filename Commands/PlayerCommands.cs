@@ -1,7 +1,6 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
 using DicordNET.Player;
-using DicordNET.TrackClasses;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.VoiceNext;
