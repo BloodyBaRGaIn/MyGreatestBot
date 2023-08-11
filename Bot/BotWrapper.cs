@@ -84,6 +84,7 @@ namespace DicordNET.Bot
             try
             {
                 VoiceConnection?.Disconnect();
+                VoiceConnection = null;
             }
             catch { }
         }
@@ -107,7 +108,7 @@ namespace DicordNET.Bot
 
             Connect();
 
-            PlayerManager.Resume(CommandActionSource.Mute);
+            await Task.Run(() => PlayerManager.Resume(CommandActionSource.Mute));
 
             await Task.Delay(1);
         }

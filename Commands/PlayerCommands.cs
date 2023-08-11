@@ -45,17 +45,17 @@ namespace DicordNET.Commands
         {
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
-            PlayerManager.Enqueue(tracks);
+            await Task.Run(() => PlayerManager.Enqueue(tracks));
         }
 
         [Command("tms")]
-        [Description("Place query result to queue head")]
+        [Description("Place query result to the head")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
         {
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
-            PlayerManager.Enqueue(tracks, CommandActionSource.External);
+            await Task.Run(() => PlayerManager.Enqueue(tracks, CommandActionSource.External));
         }
 
         [Command("seek")]
@@ -72,7 +72,7 @@ namespace DicordNET.Commands
                 throw new InvalidCastException();
             }
 
-            PlayerManager.RequestSeek(result);
+            await Task.Run(() => PlayerManager.RequestSeek(result));
 
             await Task.Delay(1);
         }
@@ -87,7 +87,7 @@ namespace DicordNET.Commands
             BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
 
-            PlayerManager.ReturnCurrentTrackToQueue();
+            await Task.Run(PlayerManager.ReturnCurrentTrackToQueue);
 
             await Task.Delay(1);
         }
@@ -100,7 +100,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.ShuffleQueue();
+            await Task.Run(PlayerManager.ShuffleQueue);
 
             await Task.Delay(1);
         }
@@ -113,7 +113,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.GetQueueLength();
+            await Task.Run(PlayerManager.GetQueueLength);
 
             await Task.Delay(1);
         }
@@ -126,7 +126,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.GetCurrentTrackInfo();
+            await Task.Run(PlayerManager.GetCurrentTrackInfo);
 
             await Task.Delay(1);
         }
@@ -139,7 +139,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.Pause();
+            await Task.Run(() => PlayerManager.Pause());
 
             await Task.Delay(1);
         }
@@ -152,7 +152,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.Resume();
+            await Task.Run(() => PlayerManager.Resume());
 
             await Task.Delay(1);
         }
@@ -182,7 +182,7 @@ namespace DicordNET.Commands
         {
             BotWrapper.TextChannel = ctx.Channel;
 
-            PlayerManager.Skip();
+            await Task.Run(() => PlayerManager.Skip());
 
             await Task.Delay(1);
         }

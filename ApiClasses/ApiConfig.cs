@@ -164,7 +164,7 @@ namespace DicordNET.ApiClasses
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                return tracks;
+                throw new ArgumentNullException(nameof(query), "Invalid query");
             }
 
             if (QueryDecomposer.IsYoutubeURL(query))
@@ -173,12 +173,20 @@ namespace DicordNET.ApiClasses
                 {
                     tracks.AddRange(YoutubeApiWrapper.GetTracks(query));
                 }
+                else
+                {
+                    throw new InvalidOperationException($"{ApiIntents.Youtube} API not started");
+                }
             }
             else if (QueryDecomposer.IsYandexURL(query))
             {
                 if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
                 {
                     tracks.AddRange(YandexApiWrapper.GetTracks(query));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"{ApiIntents.Yandex} API not started");
                 }
             }
             else if (QueryDecomposer.IsVkURL(query))
@@ -187,6 +195,10 @@ namespace DicordNET.ApiClasses
                 {
                     tracks.AddRange(VkApiWrapper.GetTracks(query));
                 }
+                else
+                {
+                    throw new InvalidOperationException($"{ApiIntents.Vk} API not started");
+                }
             }
             else if (QueryDecomposer.IsSpotifyURL(query))
             {
@@ -194,11 +206,14 @@ namespace DicordNET.ApiClasses
                 {
                     tracks.AddRange(SpotifyApiWrapper.GetTracks(query));
                 }
+                else
+                {
+                    throw new InvalidOperationException($"{ApiIntents.Spotify} API not started");
+                }
             }
             else
             {
-                // Unknown query type
-                ;
+                throw new InvalidOperationException("Unknown query type");
             }
 
             return tracks;

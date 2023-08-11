@@ -21,13 +21,13 @@ namespace DicordNET.Player
                         Thumbnail = currentTrack.GetThumbnail()
                     });
 
-                    //IsPaused = true;
+                    lock (currentTrack)
+                    {
+                        SeekRequested = true;
+                        IsPaused = true;
+                    }
 
-                    //Task.Yield().GetAwaiter().GetResult();
-                    //Task.Delay(100).Wait();
-                    //Task.Yield().GetAwaiter().GetResult();
-
-                    SeekRequested = true;
+                    Task.Yield().GetAwaiter().GetResult();
                 }
                 else
                 {
@@ -37,6 +37,8 @@ namespace DicordNET.Player
                         Title = "Seek",
                         Description = "Cannot seek"
                     });
+
+                    return;
                 }
             }
             else

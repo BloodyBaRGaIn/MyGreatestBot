@@ -7,6 +7,7 @@ using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
+using Yandex.Music.Api.Models.Search.Track;
 using Yandex.Music.Api.Models.Track;
 
 namespace DicordNET.ApiClasses.Yandex
@@ -127,7 +128,7 @@ namespace DicordNET.ApiClasses.Yandex
                 return null;
             }
 
-            List<global::Yandex.Music.Api.Models.Search.Track.YSearchTrackModel> tracks = response.Tracks.Results;
+            List<YSearchTrackModel> tracks = response.Tracks.Results;
 
             if (!tracks.Any())
             {

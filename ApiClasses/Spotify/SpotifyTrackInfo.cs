@@ -65,7 +65,7 @@ namespace DicordNET.ApiClasses.Spotify
             }
             else
             {
-                Duration = TimeSpan.FromSeconds(30);
+                Duration = TimeSpan.FromSeconds(29);
             }
 
             //var player = SpotifyApiWrapper.Player;
