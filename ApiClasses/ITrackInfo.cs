@@ -1,4 +1,5 @@
-﻿using DicordNET.Utils;
+﻿using DicordNET.Player;
+using DicordNET.Utils;
 
 namespace DicordNET.ApiClasses
 {
@@ -33,12 +34,18 @@ namespace DicordNET.ApiClasses
                 return false;
             }
 
-            lock (this)
-            {
-                Seek = span;
-            }
+            //Seek = span;
 
             return true;
+        }
+
+        internal void PerformSeek(TimeSpan span)
+        {
+            if (TrySeek(span))
+            {
+                PlayerManager.Seek = span;
+                Seek = span;
+            }
         }
 
         internal string GetMessage()

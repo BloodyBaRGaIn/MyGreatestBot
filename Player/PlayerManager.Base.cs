@@ -14,7 +14,7 @@ namespace DicordNET.Player
         private static volatile bool IsPlaying;
         private static volatile bool IsPaused;
         private static volatile bool SeekRequested;
-        private static TimeSpan Seek;
+        internal static TimeSpan Seek;
 
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
@@ -131,7 +131,7 @@ namespace DicordNET.Player
 
         seek:
 
-            _ = track.TrySeek(Seek);
+            track.PerformSeek(Seek);
 
             IsPlaying = true;
 
@@ -149,16 +149,18 @@ namespace DicordNET.Player
 
             Process ffmpeg = TrackManager.StartFFMPEG(track);
 
+            bool exit;
+
             if (track.IsLiveStream)
             {
-                _ = ffmpeg.WaitForExit(2000);
+                exit = ffmpeg.WaitForExit(2000);
             }
             else
             {
-                _ = ffmpeg.WaitForExit(500);
+                exit = ffmpeg.WaitForExit(1000);
             }
 
-            if (ffmpeg.HasExited)
+            if (ffmpeg.HasExited || exit)
             {
                 Console.WriteLine($"{track.TrackType} : Session expired");
                 track.Reload();
@@ -196,11 +198,16 @@ namespace DicordNET.Player
                 while (retries < 2)
                 {
                     CancellationTokenSource cts = new();
-                    Task<int> read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length, cts.Token);
+                    CancellationToken token = cts.Token;
+                    Task<int> read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length, token);
                     if (!read_task.Wait(100))
                     {
                         cts.Cancel();
                         bytesCount = 0;
+                        if (!read_task.IsCanceled || !read_task.IsCompleted)
+                        {
+                            read_task.Wait();
+                        }
                     }
                     else
                     {
@@ -254,8 +261,6 @@ namespace DicordNET.Player
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
 
-                _ = track.TrySeek(Seek);
-
                 if (BotWrapper.TransmitSink == null)
                 {
                     throw new ArgumentNullException(nameof(BotWrapper.TransmitSink), "Transmit sink not configured");
@@ -263,7 +268,8 @@ namespace DicordNET.Player
 
                 if (!BotWrapper.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    break;
+                    BotWrapper.TransmitSink = BotWrapper.VoiceConnection.GetTransmitSink(TRANSMIT_SINK_MS);
+                    continue;
                 }
             }
 

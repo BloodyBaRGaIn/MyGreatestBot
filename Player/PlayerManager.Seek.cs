@@ -13,6 +13,12 @@ namespace DicordNET.Player
 
                 if (result)
                 {
+                    lock (currentTrack)
+                    {
+                        currentTrack.PerformSeek(span);
+                        SeekRequested = true;
+                    }
+
                     BotWrapper.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Purple,
@@ -20,12 +26,6 @@ namespace DicordNET.Player
                         Description = currentTrack.GetMessage(),
                         Thumbnail = currentTrack.GetThumbnail()
                     });
-
-                    lock (currentTrack)
-                    {
-                        SeekRequested = true;
-                        IsPaused = true;
-                    }
 
                     Task.Yield().GetAwaiter().GetResult();
                 }

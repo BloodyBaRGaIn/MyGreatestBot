@@ -49,6 +49,7 @@ namespace DicordNET.Commands
         }
 
         [Command("tms")]
+        [Aliases("t")]
         [Description("Place query result to the head")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
@@ -59,6 +60,7 @@ namespace DicordNET.Commands
         }
 
         [Command("seek")]
+        [Aliases("sk")]
         [Description("Seek current track")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(CommandContext ctx, string span_str)

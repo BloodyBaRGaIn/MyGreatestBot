@@ -94,6 +94,7 @@ namespace DicordNET.Bot
                 }
                 else
                 {
+                    BotWrapper.VoiceChannel = e.After?.Channel;
                     PlayerManager.Resume(CommandActionSource.Mute | CommandActionSource.External);
                 }
             }
