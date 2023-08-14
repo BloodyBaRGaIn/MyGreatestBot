@@ -128,14 +128,22 @@ namespace DicordNET.ApiClasses.Yandex
                 return null;
             }
 
-            List<YSearchTrackModel> tracks = response.Tracks.Results;
+            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t is not null
+                && spotifyTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(spotifyTrack.AlbumName.Title)
+                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
+                           .Contains(spotifyTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
 
             if (!tracks.Any())
             {
                 return null;
             }
 
-            ITrackInfo first = new YandexTrackInfo(tracks.First(), null, true);
+            var t = tracks.First();
+            YTrack y = t;
+            y.Albums = t.Albums.Select(a => a as YAlbum).ToList();
+
+            ITrackInfo first = new YandexTrackInfo(y, null, true);
             first.ObtainAudioURL();
             return first;
         }
@@ -240,7 +248,7 @@ namespace DicordNET.ApiClasses.Yandex
 
         private static YandexTrackInfo? GetTrack(string? track_id_str)
         {
-            if (string.IsNullOrWhiteSpace(track_id_str) || api == null)
+            if (api == null || string.IsNullOrWhiteSpace(track_id_str))
             {
                 return null;
             }
@@ -316,13 +324,11 @@ namespace DicordNET.ApiClasses.Yandex
             return tracks_collection;
         }
 
-        private static List<YandexTrackInfo?> GetPlaylist(string? playlist_user_str, string? playlist_id_str)
+        private static List<YandexTrackInfo?> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
-            if (string.IsNullOrWhiteSpace(playlist_user_str)
-                || string.IsNullOrWhiteSpace(playlist_id_str)
-                || api == null)
+            if (api == null)
             {
                 return tracks_collection;
             }

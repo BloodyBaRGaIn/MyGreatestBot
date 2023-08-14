@@ -8,6 +8,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DicordNET.Bot
 {
@@ -16,6 +17,8 @@ namespace DicordNET.Bot
         internal DiscordClient? Client { get; private set; }
         internal InteractivityExtension? Interactivity { get; private set; }
         internal CommandsNextExtension? Commands { get; private set; }
+
+        internal ServiceProvider ServiceProvider { get; private set; } = new ServiceCollection().BuildServiceProvider();
 
         private string prefix = string.Empty;
 
@@ -51,15 +54,16 @@ namespace DicordNET.Bot
                 StringPrefixes = new string[] { config_js.Prefix },
                 EnableMentionPrefix = true,
                 EnableDms = true,
-                EnableDefaultHelp = false
+                EnableDefaultHelp = false,
+                Services = ServiceProvider
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
             Commands.RegisterCommands<ConnectionCommands>();
             Commands.RegisterCommands<PlayerCommands>();
             Commands.RegisterCommands<DebugCommands>();
-            Commands.SetHelpFormatter<CustomHelpFormatter>();
 
             Commands.CommandErrored += Commands_CommandErrored;
 

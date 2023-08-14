@@ -2,12 +2,31 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace DicordNET.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]
     internal class DebugCommands : BaseCommandModule
     {
+        [Command("help")]
+        [Aliases("h")]
+        [Description("Get help")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        public async Task HelpCommand(CommandContext ctx, [RemainingText] string? command_str)
+        {
+            CustomHelpFormatter? custom = null;
+            if (!string.IsNullOrWhiteSpace(command_str) && BotWrapper.Commands != null)
+            {
+                DSharpPlus.CommandsNext.Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command_str)
+                    ? BotWrapper.Commands.RegisteredCommands[command_str]
+                    : throw new ArgumentException("Invalid command");
+                custom = new CustomHelpFormatter(ctx).WithCommand(cmd) as CustomHelpFormatter;
+            }
+            custom ??= new(ctx);
+            _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
+        }
+
         [Command("test")]
         [Description("Get test message")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]

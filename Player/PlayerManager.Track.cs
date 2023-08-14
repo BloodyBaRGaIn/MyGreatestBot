@@ -11,6 +11,7 @@ namespace DicordNET.Player
             {
                 lock (currentTrack)
                 {
+                    currentTrack.PerformSeek(Seek);
                     BotWrapper.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Purple,

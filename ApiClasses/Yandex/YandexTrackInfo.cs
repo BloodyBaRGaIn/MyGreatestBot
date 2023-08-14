@@ -56,7 +56,7 @@ namespace DicordNET.ApiClasses.Yandex
                 CoverURL = $"https://{track.CoverUri.Replace("/%%", "/100x100")}";
             }
 
-            if (track.Albums.Any())
+            if (track.Albums != null && track.Albums.Any())
             {
                 YAlbum album = track.Albums.First();
                 AlbumName = new(album.Title, $"{Domain}album/{album.Id}");

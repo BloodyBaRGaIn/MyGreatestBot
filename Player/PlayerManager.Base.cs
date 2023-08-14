@@ -114,6 +114,7 @@ namespace DicordNET.Player
             }
 
             bool play_message = true;
+            bool already_restartd = false;
 
             byte[] buff = new byte[BUFFER_SIZE];
 
@@ -127,7 +128,14 @@ namespace DicordNET.Player
 
             Seek = TimeSpan.Zero;
 
-            track.ObtainAudioURL();
+            try
+            {
+                track.ObtainAudioURL();
+            }
+            catch
+            {
+                return;
+            }
 
         seek:
 
@@ -149,21 +157,17 @@ namespace DicordNET.Player
 
             Process ffmpeg = TrackManager.StartFFMPEG(track);
 
-            bool exit;
-
-            if (track.IsLiveStream)
-            {
-                exit = ffmpeg.WaitForExit(2000);
-            }
-            else
-            {
-                exit = ffmpeg.WaitForExit(1000);
-            }
+            bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : 1000);
 
             if (ffmpeg.HasExited || exit)
             {
+                if (already_restartd)
+                {
+                    throw new Exception("Cannot reauth");
+                }
                 Console.WriteLine($"{track.TrackType} : Session expired");
                 track.Reload();
+                already_restartd = true;
                 goto restart;
             }
 
@@ -260,6 +264,13 @@ namespace DicordNET.Player
                 }
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
+
+                if (Seek >= track.Duration)
+                {
+                    // track shold be ended
+                    Console.WriteLine("Stop ffmpeg");
+                    break;
+                }
 
                 if (BotWrapper.TransmitSink == null)
                 {

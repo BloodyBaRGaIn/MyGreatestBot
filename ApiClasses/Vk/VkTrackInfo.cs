@@ -97,7 +97,7 @@ namespace DicordNET.ApiClasses.Vk
 
         void ITrackInfo.ObtainAudioURL()
         {
-            string url = origin.Url.ToString();
+            string url = origin.Url?.ToString() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(url))
             {
                 throw new InvalidOperationException("Cannot get audio URL");
