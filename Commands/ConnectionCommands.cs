@@ -7,6 +7,9 @@ using DSharpPlus.Entities;
 
 namespace DicordNET.Commands
 {
+    /// <summary>
+    /// Connection commands
+    /// </summary>
     [Category(CommandStrings.ConnectionCategoryName)]
     internal class ConnectionCommands : BaseCommandModule
     {

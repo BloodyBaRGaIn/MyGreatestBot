@@ -8,6 +8,9 @@ using System.Reflection;
 
 namespace DicordNET.Commands
 {
+    /// <summary>
+    /// Help formatter
+    /// </summary>
     public class CustomHelpFormatter : BaseHelpFormatter
     {
         protected DiscordEmbedBuilder _embed;
@@ -52,37 +55,38 @@ namespace DicordNET.Commands
         private void AddField(Command cmd)
         {
             string title = cmd.Name;
-            List<string> argumets = new();
+            List<string> arguments = new();
 
             if (cmd.Module != null)
             {
-                IEnumerable<ParameterInfo>? parameters = cmd.Module.GetInstance(BotWrapper.BotInstance.ServiceProvider)
-                    .GetType()
-                    .GetMethods()
-                    .Where(m =>
-                        m.CustomAttributes.Any(a => a.AttributeType == typeof(CommandAttribute))
-                        && m.CustomAttributes.Select(a => a.ConstructorArguments)
-                            .Any(c => c != null
-                                && c.Any()
-                                && c.Select(i => i.Value?.ToString() ?? string.Empty)
-                                    .Contains(cmd.Name))).FirstOrDefault()?.GetParameters();
+                var moduleType = cmd.Module.GetInstance(BotWrapper.BotInstance.ServiceProvider).GetType();
+                var commandMethods = moduleType.GetMethods().Where(m =>
+                    m.CustomAttributes.Any(a => a.AttributeType == typeof(CommandAttribute))
+                    && m.CustomAttributes.Any(a => a.ConstructorArguments.Any(c =>
+                        c.Value?.ToString() == cmd.Name)));
 
-                if (parameters != null && parameters.Any() && parameters.Where(p => p.ParameterType == typeof(CommandContext)).Count() == 1)
+                var parameters = commandMethods.FirstOrDefault()?.GetParameters();
+
+                var contextParameterCount = parameters?.Count(p => p.ParameterType == typeof(CommandContext)) ?? 0;
+                if (contextParameterCount == 1)
                 {
-                    foreach (ParameterInfo? item in parameters.Where(p => p.ParameterType != typeof(CommandContext) && !string.IsNullOrWhiteSpace(p.Name)))
+                    var argument_parameters = parameters?
+                        .Where(p => p != null && p.ParameterType != typeof(CommandContext) && !string.IsNullOrWhiteSpace(p.Name));
+
+                    foreach (ParameterInfo parameter in argument_parameters ?? Enumerable.Empty<ParameterInfo>())
                     {
-                        string full_item = $"{item.Name} ({item.ParameterType.Name})";
-                        CustomAttributeData? descr_attr = item.CustomAttributes
-                            .FirstOrDefault(a => a.AttributeType == typeof(DescriptionAttribute) && a.ConstructorArguments != null && a.ConstructorArguments.Any());
-                        if (descr_attr != null)
+                        var descriptionAttribute = parameter.CustomAttributes
+                            .FirstOrDefault(a => a.AttributeType == typeof(DescriptionAttribute) && a.ConstructorArguments.Any());
+
+                        string description = descriptionAttribute?.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? string.Empty;
+                        string fullParameter = $"{parameter.Name} ({parameter.ParameterType.Name})";
+
+                        if (!string.IsNullOrWhiteSpace(description))
                         {
-                            string descr = descr_attr.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? string.Empty;
-                            if (!string.IsNullOrWhiteSpace(descr))
-                            {
-                                full_item += $" - {descr}";
-                            }
+                            fullParameter += $" - {description}";
                         }
-                        argumets.Add(full_item);
+
+                        arguments.Add(fullParameter);
                     }
                 }
             }
@@ -91,19 +95,13 @@ namespace DicordNET.Commands
             {
                 title += $" ({string.Join(", ", cmd.Aliases)})";
             }
+
             string content = cmd.Description ?? string.Empty;
 
-            if (argumets.Any())
+            if (arguments.Any())
             {
-                if (!string.IsNullOrWhiteSpace(content))
-                {
-                    content += "\n";
-                }
-                content += "Arguments";
-                foreach (string arg in argumets)
-                {
-                    content += $"\n{arg}";
-                }
+                content += string.IsNullOrWhiteSpace(content) ? "Arguments" : "\nArguments";
+                content += string.Join("\n", arguments);
             }
 
             _embed.AddField(title, content);

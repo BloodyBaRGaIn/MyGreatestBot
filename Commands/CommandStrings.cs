@@ -1,5 +1,8 @@
 ﻿namespace DicordNET.Commands
 {
+    /// <summary>
+    /// Commands categories
+    /// </summary>
     internal static class CommandStrings
     {
         internal const string ConnectionCategoryName = "connection";

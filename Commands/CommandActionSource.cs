@@ -1,5 +1,8 @@
 ﻿namespace DicordNET.Commands
 {
+    /// <summary>
+    /// Commands additional arguments
+    /// </summary>
     [Flags]
     internal enum CommandActionSource : uint
     {
