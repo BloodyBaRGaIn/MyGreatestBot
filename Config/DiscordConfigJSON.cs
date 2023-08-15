@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// Discord config content
+    /// </summary>
     internal struct DiscordConfigJSON
     {
         [JsonProperty("prefix")]

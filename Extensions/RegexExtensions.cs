@@ -2,6 +2,9 @@
 
 namespace DicordNET.Extensions
 {
+    /// <summary>
+    /// <see cref="Regex"/> extensions
+    /// </summary>
     internal static class RegexExtensions
     {
         internal static string? GetMatchValue(this Regex regex, string query)

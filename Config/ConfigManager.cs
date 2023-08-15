@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// JSON reader class
+    /// </summary>
     internal static class ConfigManager
     {
         private const string CONFIG_DIR = "Config/Json";
@@ -15,6 +18,13 @@ namespace DicordNET.Config
         private const string GOOGLE_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/google_secret.json";
         private const string SPOTIFY_CLIENT_SECRETS_JSON_PATH = $"{CONFIG_DIR}/spotify_secret.json";
 
+        /// <summary>
+        /// Reads JSON on path
+        /// </summary>
+        /// <typeparam name="T">Return struct type</typeparam>
+        /// <param name="filepath">JSON file path</param>
+        /// <returns>Deserialized object instance</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private static T ReadConfig<T>(string filepath) where T : struct
         {
             string content = string.Empty;
@@ -40,6 +50,13 @@ namespace DicordNET.Config
             }
         }
 
+        /// <summary>
+        /// Reads JSON on path
+        /// </summary>
+        /// <param name="filepath">JSON file path</param>
+        /// <returns>Filestream</returns>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
         private static FileStream GetFileStream(string filepath)
         {
             if (!Directory.Exists(CONFIG_DIR))
@@ -54,31 +71,55 @@ namespace DicordNET.Config
             return File.OpenRead(filepath);
         }
 
+        /// <summary>
+        /// Reads Discord bot config
+        /// </summary>
+        /// <returns>Discord bot config</returns>
         internal static DiscordConfigJSON GetDiscordConfigJSON()
         {
             return ReadConfig<DiscordConfigJSON>(DISCORD_JSON_PATH);
         }
 
+        /// <summary>
+        /// Reads Google credentials
+        /// </summary>
+        /// <returns>Google credentials</returns>
         internal static GoogleCredentialsJSON GetGoogleCredentialsJSON()
         {
             return ReadConfig<GoogleCredentialsJSON>(GOOGLE_CREDENTIALS_JSON_PATH);
         }
 
+        /// <summary>
+        /// Reads Yandex credentials
+        /// </summary>
+        /// <returns>Yandex credentials</returns>
         internal static YandexCredentialsJSON GetYandexCredentialsJSON()
         {
             return ReadConfig<YandexCredentialsJSON>(YANDEX_CREDENTIALS_JSON_PATH);
         }
 
+        /// <summary>
+        /// Reads Vk credentials
+        /// </summary>
+        /// <returns>Vk credentials</returns>
         internal static VkCredentialsJSON GetVkCredentialsJSON()
         {
             return ReadConfig<VkCredentialsJSON>(VK_CREDENTIALS_JSON_PATH);
         }
 
+        /// <summary>
+        /// Reads Google client secret
+        /// </summary>
+        /// <returns>Google client secret filestream</returns>
         internal static FileStream GetGoogleClientSecretsFileStream()
         {
             return GetFileStream(GOOGLE_CLIENT_SECRETS_JSON_PATH);
         }
 
+        /// <summary>
+        /// Reads Spotify client secret
+        /// </summary>
+        /// <returns>Spotify client secret</returns>
         internal static SpotifyClientSecretsJSON GetSpotifyClientSecretsJSON()
         {
             return ReadConfig<SpotifyClientSecretsJSON>(SPOTIFY_CLIENT_SECRETS_JSON_PATH);

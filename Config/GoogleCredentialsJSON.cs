@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// Google credentials content
+    /// </summary>
     internal struct GoogleCredentialsJSON
     {
         [JsonProperty("username")]

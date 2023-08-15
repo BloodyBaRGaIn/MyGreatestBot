@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// Yandex credentials content
+    /// </summary>
     internal struct YandexCredentialsJSON
     {
         [JsonProperty("username")]

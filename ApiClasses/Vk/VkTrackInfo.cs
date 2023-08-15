@@ -3,6 +3,9 @@ using VkNet.Model;
 
 namespace DicordNET.ApiClasses.Vk
 {
+    /// <summary>
+    /// Vk track info implementation
+    /// </summary>
     internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
@@ -29,6 +32,11 @@ namespace DicordNET.ApiClasses.Vk
 
         private readonly Audio origin;
 
+        /// <summary>
+        /// Vk track info constructor
+        /// </summary>
+        /// <param name="audio">Track instance from Vk API</param>
+        /// <param name="playlist">Playlist instance from Vk API</param>
         internal VkTrackInfo(Audio audio, AudioPlaylist? playlist = null)
         {
             origin = audio;

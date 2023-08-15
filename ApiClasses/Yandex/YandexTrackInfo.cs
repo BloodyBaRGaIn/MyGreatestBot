@@ -7,6 +7,9 @@ using Yandex.Music.Api.Models.Track;
 
 namespace DicordNET.ApiClasses.Yandex
 {
+    /// <summary>
+    /// Yandex track info implementation
+    /// </summary>
     internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
@@ -31,6 +34,12 @@ namespace DicordNET.ApiClasses.Yandex
         public string? CoverURL { get; }
         public bool IsLiveStream => false;
 
+        /// <summary>
+        /// Yandex track info constructor
+        /// </summary>
+        /// <param name="track">Track instance from Yandex API</param>
+        /// <param name="playlist">Playlist instance from Yandex API</param>
+        /// <param name="transletters">Make transletters from cyrillic</param>
         internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null, bool transletters = false)
         {
             Id = track.Id;

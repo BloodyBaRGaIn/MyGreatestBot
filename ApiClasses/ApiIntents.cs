@@ -1,5 +1,8 @@
 ﻿namespace DicordNET.ApiClasses
 {
+    /// <summary>
+    /// API flags
+    /// </summary>
     [Flags]
     internal enum ApiIntents : uint
     {

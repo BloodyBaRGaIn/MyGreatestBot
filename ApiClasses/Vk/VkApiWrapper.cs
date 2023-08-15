@@ -9,6 +9,9 @@ using VkNet.Model;
 
 namespace DicordNET.ApiClasses.Vk
 {
+    /// <summary>
+    /// Vk API wrapper class
+    /// </summary>
     internal static class VkApiWrapper
     {
         private static class VkQueryDecomposer

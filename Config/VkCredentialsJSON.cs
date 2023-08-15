@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// Vk credentials content
+    /// </summary>
     internal struct VkCredentialsJSON
     {
         [JsonProperty("username")]

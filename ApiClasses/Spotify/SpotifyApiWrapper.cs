@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace DicordNET.ApiClasses.Spotify
 {
+    /// <summary>
+    /// Spotify API wrapper class
+    /// </summary>
     internal static class SpotifyApiWrapper
     {
         //private static EmbedIOAuthServer? server;

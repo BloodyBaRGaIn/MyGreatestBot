@@ -2,6 +2,9 @@
 
 namespace DicordNET.Config
 {
+    /// <summary>
+    /// Spotify client secret content
+    /// </summary>
     internal struct SpotifyClientSecretsJSON
     {
         [JsonProperty("clientId")]

@@ -14,6 +14,9 @@ namespace DicordNET.ApiClasses.Yandex
 {
     internal static class YandexApiWrapper
     {
+        /// <summary>
+        /// Yandex API wpapper class
+        /// </summary>
         private static class YandexQueryDecomposer
         {
 #pragma warning disable SYSLIB1045

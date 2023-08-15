@@ -12,6 +12,9 @@ using YoutubeExplode.Videos.Streams;
 
 namespace DicordNET.ApiClasses.Youtube
 {
+    /// <summary>
+    /// Youtube API wrapper class
+    /// </summary>
     internal static class YoutubeApiWrapper
     {
         private static UserCredential? GoogleUserCredential;

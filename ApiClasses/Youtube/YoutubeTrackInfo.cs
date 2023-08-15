@@ -5,6 +5,9 @@ using YoutubeExplode.Videos.Streams;
 
 namespace DicordNET.ApiClasses.Youtube
 {
+    /// <summary>
+    /// Youtube track info implementation
+    /// </summary>
     internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
@@ -29,6 +32,11 @@ namespace DicordNET.ApiClasses.Youtube
         public string AudioURL { get; private set; }
         public bool IsLiveStream { get; private set; }
 
+        /// <summary>
+        /// Youtube track info constructor
+        /// </summary>
+        /// <param name="video">Track instance from Youtube API</param>
+        /// <param name="playlist">Playlist instance from Youtube API</param>
         internal YoutubeTrackInfo(IVideo video, Playlist? playlist = null)
         {
             Id = video.Id;

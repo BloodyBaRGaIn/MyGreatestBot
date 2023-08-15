@@ -1,14 +1,18 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
 using System.Diagnostics;
-using System.Runtime.Versioning;
 using System.Text;
 
 namespace DicordNET
 {
+    /// <summary>
+    /// Main class
+    /// </summary>
     internal class Program
     {
-        [SupportedOSPlatform("windows")]
+        /// <summary>
+        /// Main entry point
+        /// </summary>
         private static void Main()
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;

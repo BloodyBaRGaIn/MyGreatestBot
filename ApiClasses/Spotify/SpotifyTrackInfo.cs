@@ -4,6 +4,9 @@ using SpotifyAPI.Web;
 
 namespace DicordNET.ApiClasses.Spotify
 {
+    /// <summary>
+    /// Spotify track info implementation
+    /// </summary>
     internal sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;
@@ -28,6 +31,11 @@ namespace DicordNET.ApiClasses.Spotify
         public string? CoverURL { get; }
         public bool IsLiveStream => false;
 
+        /// <summary>
+        /// Spotify track info constructor
+        /// </summary>
+        /// <param name="track">Track instance from Spotify API</param>
+        /// <param name="playlist">Playlist instance from Spotify API</param>
         internal SpotifyTrackInfo(FullTrack track, FullPlaylist? playlist = null)
         {
             Id = track.Id;
