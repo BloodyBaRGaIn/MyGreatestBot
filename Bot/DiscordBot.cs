@@ -52,10 +52,11 @@ namespace DicordNET.Bot
             CommandsNextConfiguration commandsConfig = new()
             {
                 StringPrefixes = new string[] { config_js.Prefix },
+                CaseSensitive = false,
                 EnableMentionPrefix = true,
                 EnableDms = true,
                 EnableDefaultHelp = false,
-                Services = ServiceProvider
+                Services = ServiceProvider,
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);

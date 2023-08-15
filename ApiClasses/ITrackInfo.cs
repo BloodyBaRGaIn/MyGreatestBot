@@ -54,13 +54,7 @@ namespace DicordNET.ApiClasses
             result += $"Playing: {TrackName}\n";
             result += "Author: ";
 
-            result += ArtistArr[0].ToString();
-
-            for (int i = 1; i < ArtistArr.Length; i++)
-            {
-                result += $", {ArtistArr[i]}";
-            }
-
+            result += string.Join(", ", ArtistArr.Select(a => a.ToString()));
             result += '\n';
 
             if (Duration != TimeSpan.Zero)

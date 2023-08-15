@@ -36,32 +36,26 @@ namespace DicordNET.ApiClasses.Vk
             IEnumerable<AudioArtist> main_artists = audio.MainArtists;
             IEnumerable<AudioArtist> feat_artists = audio.FeaturedArtists;
 
-            List<HyperLink> list = new();
+            IEnumerable<AudioArtist> audioArtists;
 
             if (main_artists != null && main_artists.Any())
             {
-                foreach (AudioArtist? artist in main_artists)
-                {
-                    list.Add(string.IsNullOrWhiteSpace(artist.Id)
-                        ? new(artist.Name)
-                        : new(artist.Name, $"{Domain}artist/{artist.Id}"));
-                }
+                audioArtists = main_artists;
             }
             else if (feat_artists != null && feat_artists.Any())
             {
-                foreach (AudioArtist? artist in feat_artists)
-                {
-                    list.Add(string.IsNullOrWhiteSpace(artist.Id)
-                        ? new(artist.Name)
-                        : new(artist.Name, $"{Domain}artist/{artist.Id}"));
-                }
+                audioArtists = feat_artists;
             }
             else
             {
-                list.Add(new(audio.Artist));
+                audioArtists = new[] { new AudioArtist() { Name = audio.Artist } };
             }
 
-            ArtistArr = list.ToArray();
+            ArtistArr = audioArtists.Select(artist =>
+                string.IsNullOrWhiteSpace(artist.Id)
+                ? new HyperLink(artist.Name)
+                : new HyperLink(artist.Name, $"{Domain}artist/{artist.Id}"))
+                .ToArray();
 
             AudioAlbum album = audio.Album;
 

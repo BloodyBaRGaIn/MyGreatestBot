@@ -52,7 +52,7 @@ namespace DicordNET.Commands
         [Aliases("t")]
         [Description("Place query result to the head")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task TmsCommand(CommandContext ctx, [RemainingText] string? query)
+        public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string? query)
         {
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
@@ -63,15 +63,15 @@ namespace DicordNET.Commands
         [Aliases("sk")]
         [Description("Seek current track")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task SeekCommand(CommandContext ctx, string span_str)
+        public async Task SeekCommand(CommandContext ctx, [Description("Timespan in format HH:MM:SS")] string timespan)
         {
             BotWrapper.TextChannel = ctx.Channel;
             BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
 
-            if (!TimeSpan.TryParse(span_str, out TimeSpan result))
+            if (!TimeSpan.TryParse(timespan, out TimeSpan result))
             {
-                throw new InvalidCastException();
+                throw new InvalidCastException("Invalid argument format");
             }
 
             await Task.Run(() => PlayerManager.RequestSeek(result));

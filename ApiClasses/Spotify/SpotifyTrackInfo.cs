@@ -35,7 +35,6 @@ namespace DicordNET.ApiClasses.Spotify
 
             ArtistArr = track.Artists.Select(a =>
                 new HyperLink(
-                    //SpotifyApiWrapper.Artists.Get(a.Id).GetAwaiter().GetResult().Name,
                     a.Name,
                     $"{Domain}artist/{a.Id}")).ToArray();
 

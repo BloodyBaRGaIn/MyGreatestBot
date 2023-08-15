@@ -26,11 +26,15 @@ namespace DicordNET.ApiClasses
                 try
                 {
                     YoutubeApiWrapper.PerformAuth();
+                    Console.WriteLine($"{ApiIntents.Youtube} SUCCESS");
                 }
                 catch
                 {
-                    throw new ApplicationException("Youtube auth failed");
+                    Console.WriteLine($"{ApiIntents.Youtube} FAILED");
+                    throw new ApplicationException($"{ApiIntents.Youtube} auth failed");
                 }
+
+                Task.Delay(1000).Wait();
             }
 
             if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
@@ -38,11 +42,15 @@ namespace DicordNET.ApiClasses
                 try
                 {
                     YandexApiWrapper.PerformAuth();
+                    Console.WriteLine($"{ApiIntents.Yandex} SUCCESS");
                 }
                 catch
                 {
-                    throw new ApplicationException("Yandex auth failed");
+                    Console.WriteLine($"{ApiIntents.Yandex} FAILED");
+                    throw new ApplicationException($"{ApiIntents.Yandex} auth failed");
                 }
+
+                Task.Delay(1000).Wait();
             }
 
             if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk)
@@ -50,11 +58,15 @@ namespace DicordNET.ApiClasses
                 try
                 {
                     VkApiWrapper.PerformAuth();
+                    Console.WriteLine($"{ApiIntents.Vk} SUCCESS");
                 }
                 catch
                 {
-                    throw new ApplicationException("Vk auth failed");
+                    Console.WriteLine($"{ApiIntents.Vk} FAILED");
+                    throw new ApplicationException($"{ApiIntents.Vk} auth failed");
                 }
+
+                Task.Delay(1000).Wait();
             }
 
             if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify)
@@ -62,11 +74,15 @@ namespace DicordNET.ApiClasses
                 try
                 {
                     SpotifyApiWrapper.PerformAuth();
+                    Console.WriteLine($"{ApiIntents.Spotify} SUCCESS");
                 }
                 catch
                 {
-                    throw new ApplicationException("Spotify auth failed");
+                    Console.WriteLine($"{ApiIntents.Spotify} FAILED");
+                    throw new ApplicationException($"{ApiIntents.Spotify} auth failed");
                 }
+
+                Task.Delay(1000).Wait();
             }
         }
 

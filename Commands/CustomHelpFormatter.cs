@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
+using System.Reflection;
 
 namespace DicordNET.Commands
 {
@@ -13,22 +14,17 @@ namespace DicordNET.Commands
 
         public CustomHelpFormatter(CommandContext ctx) : base(ctx)
         {
-            _embed = new DiscordEmbedBuilder();
-
-            // Help formatters do support dependency injection.
-            // Any required services can be specified by declaring constructor parameters. 
-
-            // Other required initialization here ...
+            _embed = new DiscordEmbedBuilder().WithColor(DiscordColor.Cyan).WithTitle("Help");
         }
 
-        public override BaseHelpFormatter WithCommand(Command command)
+        public override CustomHelpFormatter WithCommand(Command command)
         {
             AddField(command);
 
             return this;
         }
 
-        public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
+        public override CustomHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
         {
             foreach (var cmd in cmds)
             {
@@ -58,46 +54,42 @@ namespace DicordNET.Commands
             string title = cmd.Name;
             List<string> argumets = new();
 
-            var module = cmd.Module;
-            if (module != null)
+            if (cmd.Module != null)
             {
-                var methods = module.GetInstance(BotWrapper.BotInstance.ServiceProvider).GetType().GetMethods();
-                var cmd_attr = methods.Where(m => (m.CustomAttributes.Select(a => a.AttributeType.FullName).Contains(typeof(CommandAttribute).FullName))
-                && (m.CustomAttributes.Select(a => a.ConstructorArguments).Where(c => c != null && c.Count != 0 && c.Select(i => i.Value?.ToString() ?? string.Empty).Contains(cmd.Name))).Any()).FirstOrDefault();
-                if (cmd_attr != null)
+                IEnumerable<ParameterInfo>? parameters = cmd.Module.GetInstance(BotWrapper.BotInstance.ServiceProvider)
+                    .GetType()
+                    .GetMethods()
+                    .Where(m =>
+                        m.CustomAttributes.Any(a => a.AttributeType == typeof(CommandAttribute))
+                        && m.CustomAttributes.Select(a => a.ConstructorArguments)
+                            .Any(c => c != null
+                                && c.Any()
+                                && c.Select(i => i.Value?.ToString() ?? string.Empty)
+                                    .Contains(cmd.Name))).FirstOrDefault()?.GetParameters();
+
+                if (parameters != null && parameters.Any() && parameters.Where(p => p.ParameterType == typeof(CommandContext)).Count() == 1)
                 {
-                    var parameters = cmd_attr.GetParameters();
-                    foreach (var item in parameters)
+                    foreach (ParameterInfo? item in parameters.Where(p => p.ParameterType != typeof(CommandContext) && !string.IsNullOrWhiteSpace(p.Name)))
                     {
-                        if (item.ParameterType.FullName != typeof(CommandContext).FullName)
+                        string full_item = $"{item.Name} ({item.ParameterType.Name})";
+                        CustomAttributeData? descr_attr = item.CustomAttributes
+                            .FirstOrDefault(a => a.AttributeType == typeof(DescriptionAttribute) && a.ConstructorArguments != null && a.ConstructorArguments.Any());
+                        if (descr_attr != null)
                         {
-                            
-                            if (!string.IsNullOrWhiteSpace(item.Name))
+                            string descr = descr_attr.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? string.Empty;
+                            if (!string.IsNullOrWhiteSpace(descr))
                             {
-                                string full_item = $"{item.Name} ({item.ParameterType.Name})";
-                                var descr_attr = item.CustomAttributes.Where(a => a.AttributeType.FullName == typeof(DescriptionAttribute).FullName && a.ConstructorArguments != null && a.ConstructorArguments.Any()).FirstOrDefault();
-                                if (descr_attr != null)
-                                {
-                                    string descr = descr_attr.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? string.Empty;
-                                    if (!string.IsNullOrWhiteSpace(descr))
-                                    {
-                                        full_item += $" - {descr}";
-                                    }
-                                }
-                                argumets.Add(full_item);
+                                full_item += $" - {descr}";
                             }
                         }
+                        argumets.Add(full_item);
                     }
                 }
             }
-            if (cmd.Aliases!= null && cmd.Aliases.Any())
+
+            if (cmd.Aliases != null && cmd.Aliases.Any())
             {
-                title += $" ({cmd.Aliases[0]}";
-                for (int i = 1; i < cmd.Aliases.Count; i++)
-                {
-                    title += cmd.Aliases[i] + ", ";
-                }
-                title += ")";
+                title += $" ({string.Join(", ", cmd.Aliases)})";
             }
             string content = cmd.Description ?? string.Empty;
 

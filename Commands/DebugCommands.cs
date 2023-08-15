@@ -2,33 +2,14 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace DicordNET.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]
     internal class DebugCommands : BaseCommandModule
     {
-        [Command("help")]
-        [Aliases("h")]
-        [Description("Get help")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task HelpCommand(CommandContext ctx, [RemainingText] string? command_str)
-        {
-            CustomHelpFormatter? custom = null;
-            if (!string.IsNullOrWhiteSpace(command_str) && BotWrapper.Commands != null)
-            {
-                DSharpPlus.CommandsNext.Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command_str)
-                    ? BotWrapper.Commands.RegisteredCommands[command_str]
-                    : throw new ArgumentException("Invalid command");
-                custom = new CustomHelpFormatter(ctx).WithCommand(cmd) as CustomHelpFormatter;
-            }
-            custom ??= new(ctx);
-            _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
-        }
-
         [Command("test")]
-        [Description("Get test message")]
+        [Description("Get \"Hello World\" response message")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TestCommand(CommandContext ctx)
         {
@@ -64,6 +45,24 @@ namespace DicordNET.Commands
                     Description = $"My name is {bot_client.CurrentUser.Username}"
                 });
             }
+        }
+
+        [Command("help")]
+        [Aliases("h")]
+        [Description("Get help")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        public async Task HelpCommand(CommandContext ctx, [RemainingText, Description("Command name")] string? command)
+        {
+            CustomHelpFormatter? custom = null;
+            if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)
+            {
+                Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command)
+                    ? BotWrapper.Commands.RegisteredCommands[command]
+                    : throw new ArgumentException("Invalid command");
+                custom = new CustomHelpFormatter(ctx).WithCommand(cmd);
+            }
+            custom ??= new(ctx);
+            _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
         }
     }
 }

@@ -114,12 +114,7 @@ namespace DicordNET.ApiClasses.Yandex
             }
             if (response.Tracks == null)
             {
-                string artists = spotifyTrack.ArtistArr[0].Title.ToTransletters();
-                for (int i = 1; i < spotifyTrack.ArtistArr.Length; i++)
-                {
-                    artists += $", {spotifyTrack.ArtistArr[i].Title.ToTransletters()}";
-                }
-                last_request = $"{spotifyTrack.Title} - {artists}";
+                last_request = $"{spotifyTrack.Title} - {string.Join(", ", spotifyTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
                 response = api?.Search.Track(storage, last_request).Result;
             }
 

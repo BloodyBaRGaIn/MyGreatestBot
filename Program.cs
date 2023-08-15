@@ -18,6 +18,8 @@ namespace DicordNET
             ApiConfig.InitApis();
 
             BotWrapper.Run();
+
+            ApiConfig.DeinitApis();
         }
     }
 }

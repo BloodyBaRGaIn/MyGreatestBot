@@ -39,13 +39,8 @@ namespace DicordNET.ApiClasses.Yandex
 
             List<YArtist> authors_list = track.Artists;
 
-            ArtistArr = new HyperLink[authors_list.Count];
-
-            for (int i = 0; i < authors_list.Count; i++)
-            {
-                YArtist artist = authors_list[i];
-                ArtistArr[i] = new(transletters ? artist.Name.ToTransletters() : artist.Name, $"{Domain}artist/{artist.Id}");
-            }
+            ArtistArr = authors_list.Select(a =>
+                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Domain}artist/{a.Id}")).ToArray();
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
