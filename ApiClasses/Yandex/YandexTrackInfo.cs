@@ -68,7 +68,12 @@ namespace DicordNET.ApiClasses.Yandex
 
             if (playlist != null)
             {
-                PlaylistName = new(playlist.Title, $"{Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
+                string title = playlist.Title;
+                if (title == string.Empty)
+                {
+                    title = "Playlist";
+                }
+                PlaylistName = new(title, $"{Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
             }
         }
 

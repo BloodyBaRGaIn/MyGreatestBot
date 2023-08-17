@@ -43,6 +43,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string? query)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
             await Task.Run(() => PlayerManager.Enqueue(tracks));
@@ -54,6 +59,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string? query)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
 
             await Task.Run(() => PlayerManager.Enqueue(tracks, CommandActionSource.External));
@@ -65,6 +75,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(CommandContext ctx, [Description("Timespan in format HH:MM:SS")] string timespan)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
             BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
@@ -85,6 +100,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task ReturnCommand(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
             BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
@@ -100,6 +120,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Shuffle(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(PlayerManager.ShuffleQueue);
@@ -113,6 +138,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task GetCount(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(PlayerManager.GetQueueLength);
@@ -126,6 +156,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task GetTrackInfo(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(PlayerManager.GetCurrentTrackInfo);
@@ -139,6 +174,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Pause(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(() => PlayerManager.Pause());
@@ -152,6 +192,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Resume(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(() => PlayerManager.Resume());
@@ -165,6 +210,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Stop(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             try
@@ -182,6 +232,11 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Skip(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(() => PlayerManager.Skip());

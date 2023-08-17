@@ -15,6 +15,7 @@ namespace DicordNET.Bot
 
         internal static DiscordClient? Client => BotInstance.Client;
         internal static CommandsNextExtension? Commands => BotInstance.Commands;
+        internal static IServiceProvider ServiceProvider => BotInstance.ServiceProvider;
 
         internal static VoiceNextExtension? VoiceNext;
         internal static VoiceNextConnection? VoiceConnection;
@@ -27,7 +28,7 @@ namespace DicordNET.Bot
             BotInstance.RunAsync().GetAwaiter().GetResult();
         }
 
-        internal static VoiceNextConnection? GetVoiceConnection(DiscordGuild guild)
+        internal static VoiceNextConnection? GetVoiceConnection(DiscordGuild? guild)
         {
             try
             {
@@ -91,6 +92,11 @@ namespace DicordNET.Bot
 
         internal static async Task Join(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             TextChannel = ctx.Channel;
             VoiceNext = ctx.Client.GetVoiceNext();
             VoiceConnection = GetVoiceConnection(ctx.Guild);
@@ -115,16 +121,21 @@ namespace DicordNET.Bot
 
         public static async Task Leave(CommandContext ctx)
         {
-            PlayerManager.Stop();
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
+            PlayerManager.Stop(CommandActionSource.Mute);
 
             TextChannel = ctx.Channel;
             VoiceNext = ctx.Client.GetVoiceNext();
             VoiceConnection = GetVoiceConnection(ctx.Guild);
 
-            if (VoiceConnection == null)
-            {
-                throw new InvalidOperationException("Not connected in this guild.");
-            }
+            //if (VoiceConnection == null)
+            //{
+            //    throw new InvalidOperationException("Not connected in this guild.");
+            //}
 
             Disconnect();
 

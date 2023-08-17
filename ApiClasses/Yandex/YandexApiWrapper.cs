@@ -134,7 +134,18 @@ namespace DicordNET.ApiClasses.Yandex
 
             if (!tracks.Any())
             {
-                return null;
+                last_request = $"{spotifyTrack.Title} - {string.Join(", ", spotifyTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+                response = api?.Search.Track(storage, last_request).Result;
+                if (response == null || response.Tracks == null)
+                {
+                    return null;
+                }
+                tracks = response.Tracks.Results.Where(t => t is not null
+                && spotifyTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(spotifyTrack.AlbumName.Title)
+                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
+                           .Contains(spotifyTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+                if (!tracks.Any()) return null;
             }
 
             var t = tracks.First();

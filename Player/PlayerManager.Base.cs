@@ -132,8 +132,9 @@ namespace DicordNET.Player
             {
                 track.ObtainAudioURL();
             }
-            catch
+            catch (Exception ex)
             {
+                BotWrapper.SendMessage($"{ex.GetType().Name} : {ex.Message}");
                 return;
             }
 
@@ -208,10 +209,6 @@ namespace DicordNET.Player
                     {
                         cts.Cancel();
                         bytesCount = 0;
-                        if (!read_task.IsCanceled || !read_task.IsCompleted)
-                        {
-                            read_task.Wait();
-                        }
                     }
                     else
                     {
@@ -265,11 +262,14 @@ namespace DicordNET.Player
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
 
-                if (Seek >= track.Duration)
+                if (!track.IsLiveStream)
                 {
-                    // track shold be ended
-                    Console.WriteLine("Stop ffmpeg");
-                    break;
+                    if (Seek >= track.Duration)
+                    {
+                        // track shold be ended
+                        Console.WriteLine("Stop ffmpeg");
+                        break;
+                    }
                 }
 
                 if (BotWrapper.TransmitSink == null)
@@ -279,6 +279,10 @@ namespace DicordNET.Player
 
                 if (!BotWrapper.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
+                    if (BotWrapper.VoiceConnection == null)
+                    {
+                        break;
+                    }
                     BotWrapper.TransmitSink = BotWrapper.VoiceConnection.GetTransmitSink(TRANSMIT_SINK_MS);
                     continue;
                 }

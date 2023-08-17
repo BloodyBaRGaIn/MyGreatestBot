@@ -17,7 +17,6 @@ namespace DicordNET.Bot
         internal DiscordClient? Client { get; private set; }
         internal InteractivityExtension? Interactivity { get; private set; }
         internal CommandsNextExtension? Commands { get; private set; }
-
         internal ServiceProvider ServiceProvider { get; private set; } = new ServiceCollection().BuildServiceProvider();
 
         private string prefix = string.Empty;

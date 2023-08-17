@@ -29,7 +29,7 @@ namespace DicordNET.Commands
 
         public override CustomHelpFormatter WithSubcommands(IEnumerable<Command> cmds)
         {
-            foreach (var cmd in cmds)
+            foreach (Command cmd in cmds)
             {
                 AddField(cmd);
             }
@@ -59,26 +59,28 @@ namespace DicordNET.Commands
 
             if (cmd.Module != null)
             {
-                var moduleType = cmd.Module.GetInstance(BotWrapper.BotInstance.ServiceProvider).GetType();
-                var commandMethods = moduleType.GetMethods().Where(m =>
-                    m.CustomAttributes.Any(a => a.AttributeType == typeof(CommandAttribute))
-                    && m.CustomAttributes.Any(a => a.ConstructorArguments.Any(c =>
-                        c.Value?.ToString() == cmd.Name)));
+                IEnumerable<ParameterInfo> parameters = cmd.Module.GetInstance(BotWrapper.ServiceProvider)
+                    .GetType().GetMethods().FirstOrDefault(m =>
+                        m.CustomAttributes.FirstOrDefault(a =>
+                            a.AttributeType == typeof(CommandAttribute))?.ConstructorArguments?.Any(c =>
+                                c.Value?.ToString() == cmd.Name) ?? false)?.GetParameters()
+                    ?? Enumerable.Empty<ParameterInfo>();
 
-                var parameters = commandMethods.FirstOrDefault()?.GetParameters();
-
-                var contextParameterCount = parameters?.Count(p => p.ParameterType == typeof(CommandContext)) ?? 0;
-                if (contextParameterCount == 1)
+                int contextParameterCount = parameters.Count(p => p.ParameterType == typeof(CommandContext));
+                if (contextParameterCount == 1 && parameters.Count() - contextParameterCount > 0)
                 {
-                    var argument_parameters = parameters?
-                        .Where(p => p != null && p.ParameterType != typeof(CommandContext) && !string.IsNullOrWhiteSpace(p.Name));
+                    IEnumerable<ParameterInfo> argument_parameters = parameters
+                        .Where(p =>
+                            p != null
+                            && p.ParameterType != typeof(CommandContext)
+                            && !string.IsNullOrWhiteSpace(p.Name));
 
-                    foreach (ParameterInfo parameter in argument_parameters ?? Enumerable.Empty<ParameterInfo>())
+                    foreach (ParameterInfo parameter in argument_parameters)
                     {
-                        var descriptionAttribute = parameter.CustomAttributes
+                        CustomAttributeData? descriptionAttribute = parameter.CustomAttributes
                             .FirstOrDefault(a => a.AttributeType == typeof(DescriptionAttribute) && a.ConstructorArguments.Any());
 
-                        string description = descriptionAttribute?.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? string.Empty;
+                        string? description = descriptionAttribute?.ConstructorArguments.FirstOrDefault().Value?.ToString();
                         string fullParameter = $"{parameter.Name} ({parameter.ParameterType.Name})";
 
                         if (!string.IsNullOrWhiteSpace(description))
@@ -100,7 +102,8 @@ namespace DicordNET.Commands
 
             if (arguments.Any())
             {
-                content += string.IsNullOrWhiteSpace(content) ? "Arguments" : "\nArguments";
+                content += string.IsNullOrWhiteSpace(content) ? "**Arguments" : "\n**Arguments";
+                content += ":**\n";
                 content += string.Join("\n", arguments);
             }
 

@@ -56,8 +56,9 @@ namespace DicordNET.Commands
             CustomHelpFormatter? custom = null;
             if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)
             {
-                Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command)
-                    ? BotWrapper.Commands.RegisteredCommands[command]
+                string command_key = command.ToLowerInvariant();
+                Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command_key)
+                    ? BotWrapper.Commands.RegisteredCommands[command_key]
                     : throw new ArgumentException("Invalid command");
                 custom = new CustomHelpFormatter(ctx).WithCommand(cmd);
             }

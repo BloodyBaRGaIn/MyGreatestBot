@@ -142,9 +142,9 @@ namespace DicordNET.ApiClasses
                 }
             }
 
-            if (Seek != TimeSpan.Zero)
+            if (PlayerManager.Seek != TimeSpan.Zero)
             {
-                result += $"Position: {Seek:hh\\:mm\\:ss}\n";
+                result += $"Time: {PlayerManager.Seek:hh\\:mm\\:ss}\n";
             }
 
             return result.Trim('\n');
@@ -180,7 +180,7 @@ namespace DicordNET.ApiClasses
         /// <summary>
         /// Arguments string for FFMPEG
         /// </summary>
-        internal string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero ? "" : $"-ss {Seek} ")}" +
+        internal string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
                                      $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
         /// <summary>

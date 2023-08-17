@@ -19,6 +19,10 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Join(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
             await BotWrapper.Join(ctx);
         }
 
@@ -28,6 +32,10 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task Leave(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
             await BotWrapper.Leave(ctx);
         }
 
@@ -37,7 +45,14 @@ namespace DicordNET.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
         public async Task LogoutCommand(CommandContext ctx)
         {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
             _ = await ctx.Channel.SendMessageAsync(":wave:");
+            await BotWrapper.Leave(ctx);
+
             DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
 
             if (bot_client != null)
