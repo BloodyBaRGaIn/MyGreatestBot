@@ -4,6 +4,7 @@ using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.VoiceNext;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DicordNET.Commands
 {
@@ -230,16 +231,21 @@ namespace DicordNET.Commands
         [Aliases("s")]
         [Description("Skip")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task Skip(CommandContext ctx)
+        public async Task Skip(CommandContext ctx, [AllowNull, Description("Number of tracks to skip")] int number = 1)
         {
             if (ctx.Guild == null)
             {
                 return;
             }
 
+            if (number < 1)
+            {
+                throw new ArgumentException("Number must be positive");
+            }
+
             BotWrapper.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Skip());
+            await Task.Run(() => PlayerManager.Skip((int)number - 1));
 
             await Task.Delay(1);
         }
