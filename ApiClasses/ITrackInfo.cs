@@ -150,6 +150,22 @@ namespace DicordNET.ApiClasses
             return result.Trim('\n');
         }
 
+        internal string GetShortInfo()
+        {
+            return $"{TrackType}\t{Id}\t{TrackName.Title}";
+        }
+
+        internal static (ApiIntents type, string id) ParseShortInfo(string shortInfo)
+        {
+            string[] split = shortInfo.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length != 3)
+            {
+                throw new ArgumentException("Invalid input text format");
+            }
+
+            return (Enum.Parse<ApiIntents>(split[0]), split[1]);
+        }
+
         /// <summary>
         /// Get Discord message thumbnail with track cover image
         /// </summary>

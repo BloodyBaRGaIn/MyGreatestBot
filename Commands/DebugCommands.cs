@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DicordNET.Commands
 {
@@ -10,7 +11,7 @@ namespace DicordNET.Commands
     {
         [Command("test")]
         [Description("Get \"Hello World\" response message")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task TestCommand(CommandContext ctx)
         {
             _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
@@ -23,7 +24,7 @@ namespace DicordNET.Commands
 
         [Command("name")]
         [Description("Get origin bot name")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
             DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
@@ -50,8 +51,8 @@ namespace DicordNET.Commands
         [Command("help")]
         [Aliases("h")]
         [Description("Get help")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task HelpCommand(CommandContext ctx, [RemainingText, Description("Command name")] string? command)
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task HelpCommand(CommandContext ctx, [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
             CustomHelpFormatter? custom = null;
             if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)

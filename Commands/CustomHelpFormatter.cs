@@ -4,7 +4,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace DicordNET.Commands
 {
@@ -86,6 +88,12 @@ namespace DicordNET.Commands
                         if (!string.IsNullOrWhiteSpace(description))
                         {
                             fullParameter += $" - {description}";
+                        }
+
+                        if (parameter.CustomAttributes.Any(a => a.AttributeType == typeof(OptionalAttribute)
+                            || a.AttributeType == typeof(AllowNullAttribute)))
+                        {
+                            fullParameter += " (*optional*)";
                         }
 
                         arguments.Add(fullParameter);

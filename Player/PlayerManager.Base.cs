@@ -7,6 +7,8 @@ namespace DicordNET.Player
 {
     internal static partial class PlayerManager
     {
+        private const string IgnoredPath = "IgnoredTracks.txt";
+
         private static readonly Queue<ITrackInfo> tracks_queue = new();
 
         private static volatile ITrackInfo? currentTrack;
@@ -74,8 +76,12 @@ namespace DicordNET.Player
 
                 try
                 {
-                    currentTrack = tracks_queue.Dequeue();
-                    PlayBody(currentTrack);
+                    Dequeue();
+
+                    if (currentTrack is not null)
+                    {
+                        PlayBody(currentTrack);
+                    }
 
                     if (MainPlayerCancellationToken.IsCancellationRequested)
                     {
@@ -158,7 +164,7 @@ namespace DicordNET.Player
 
             Process ffmpeg = TrackManager.StartFFMPEG(track);
 
-            bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : 1000);
+            bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : (int)(1000 * (track.Duration.TotalHours + 1)));
 
             if (ffmpeg.HasExited || exit)
             {

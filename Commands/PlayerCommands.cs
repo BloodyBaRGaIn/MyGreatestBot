@@ -41,8 +41,8 @@ namespace DicordNET.Commands
         [Command("play")]
         [Aliases("p")]
         [Description("Add tracks")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string? query)
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string query)
         {
             if (ctx.Guild == null)
             {
@@ -57,8 +57,8 @@ namespace DicordNET.Commands
         [Command("tms")]
         [Aliases("t")]
         [Description("Place query result to the head")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
-        public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string? query)
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string query)
         {
             if (ctx.Guild == null)
             {
@@ -73,7 +73,7 @@ namespace DicordNET.Commands
         [Command("seek")]
         [Aliases("sk")]
         [Description("Seek current track")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(CommandContext ctx, [Description("Timespan in format HH:MM:SS")] string timespan)
         {
             if (ctx.Guild == null)
@@ -98,7 +98,7 @@ namespace DicordNET.Commands
         [Command("return")]
         [Aliases("rt")]
         [Description("Return track to queue")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task ReturnCommand(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -118,7 +118,7 @@ namespace DicordNET.Commands
         [Command("shuffle")]
         [Aliases("sh")]
         [Description("Shuffle queue")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Shuffle(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -136,7 +136,7 @@ namespace DicordNET.Commands
         [Command("count")]
         [Aliases("cn")]
         [Description("Get queue length")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task GetCount(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -154,7 +154,7 @@ namespace DicordNET.Commands
         [Command("track")]
         [Aliases("tr")]
         [Description("Get current track")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task GetTrackInfo(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -172,7 +172,7 @@ namespace DicordNET.Commands
         [Command("pause")]
         [Aliases("ps")]
         [Description("Pause")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Pause(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -190,7 +190,7 @@ namespace DicordNET.Commands
         [Command("resume")]
         [Aliases("rs")]
         [Description("Resume")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Resume(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -208,7 +208,7 @@ namespace DicordNET.Commands
         [Command("stop")]
         [Aliases("st")]
         [Description("Stop")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Stop(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -230,7 +230,7 @@ namespace DicordNET.Commands
         [Command("skip")]
         [Aliases("s")]
         [Description("Skip")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Skip(CommandContext ctx, [AllowNull, Description("Number of tracks to skip")] int number = 1)
         {
             if (ctx.Guild == null)
@@ -245,7 +245,25 @@ namespace DicordNET.Commands
 
             BotWrapper.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Skip((int)number - 1));
+            await Task.Run(() => PlayerManager.Skip(number - 1));
+
+            await Task.Delay(1);
+        }
+
+        [Command("ignore")]
+        [Aliases("i")]
+        [Description("Ignore current track")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task Ignore(CommandContext ctx)
+        {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
+            BotWrapper.TextChannel = ctx.Channel;
+
+            await Task.Run(() => PlayerManager.Ignore());
 
             await Task.Delay(1);
         }

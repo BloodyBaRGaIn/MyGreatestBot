@@ -4,6 +4,7 @@ using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DicordNET.Commands
 {
@@ -16,7 +17,7 @@ namespace DicordNET.Commands
         [Command("join")]
         [Aliases("j")]
         [Description("Join voice channel")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Join(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -29,7 +30,7 @@ namespace DicordNET.Commands
         [Command("leave")]
         [Aliases("l")]
         [Description("Leave voice channel")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task Leave(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -42,7 +43,7 @@ namespace DicordNET.Commands
         [Command("logout")]
         [Aliases("bye")]
         [Description("Logout and exit")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task LogoutCommand(CommandContext ctx)
         {
             if (ctx.Guild == null)
