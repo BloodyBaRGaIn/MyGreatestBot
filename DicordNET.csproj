@@ -8,8 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Новая папка\**" />
+    <EmbeddedResource Remove="Новая папка\**" />
+    <None Remove="Новая папка\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="C:\Users\kydravcev_ra\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
     <Content Remove="C:\Users\User\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Database1.mdf" />
+    <None Remove="Database1_log.ldf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +35,7 @@
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3141" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.4.1" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.4.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.10" />
@@ -52,6 +64,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\Json\vk_cred.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DB\Database1.mdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DB\Database1_log.ldf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ffmpeg_binaries\ffmpeg.exe">

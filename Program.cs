@@ -1,5 +1,6 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
+using DicordNET.DB;
 using System.Diagnostics;
 using System.Text;
 
@@ -19,9 +20,13 @@ namespace DicordNET
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+            DataBaseManager.Open();
+
             ApiConfig.InitApis();
 
             BotWrapper.Run();
+
+            DataBaseManager.Close();
 
             ApiConfig.DeinitApis();
         }

@@ -1,6 +1,5 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
-using DicordNET.Commands;
+﻿using DicordNET.Bot;
+using DicordNET.DB;
 using DSharpPlus.Entities;
 
 namespace DicordNET.Player
@@ -9,16 +8,6 @@ namespace DicordNET.Player
     {
         internal static void Dequeue()
         {
-            string content;
-
-            using (var stream = File.Open(IgnoredPath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-            {
-                using var reader = new StreamReader(stream);
-                content = reader.ReadToEnd();
-            }
-
-            string[] split = content.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
         get_track:
 
             if (!tracks_queue.TryDequeue(out var track))
@@ -27,26 +16,14 @@ namespace DicordNET.Player
                 return;
             }
 
-            foreach (var str in split)
+            if (DataBaseManager.IsIgnored(track))
             {
-                (ApiIntents type, string id) short_info;
-                try
+                BotWrapper.SendMessage(new DiscordEmbedBuilder()
                 {
-                    short_info = ITrackInfo.ParseShortInfo(str);
-                }
-                catch
-                {
-                    continue;
-                }
-                if (track.TrackType == short_info.type && track.Id == short_info.id)
-                {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Skipping ignored track"
-                    });
-                    goto get_track;
-                }
+                    Color = DiscordColor.Yellow,
+                    Title = "Skipping ignored track"
+                });
+                goto get_track;
             }
 
             currentTrack = track;

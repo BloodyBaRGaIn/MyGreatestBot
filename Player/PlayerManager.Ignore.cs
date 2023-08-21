@@ -1,5 +1,6 @@
 ﻿using DicordNET.Bot;
 using DicordNET.Commands;
+using DicordNET.DB;
 using DSharpPlus.Entities;
 
 namespace DicordNET.Player
@@ -22,13 +23,7 @@ namespace DicordNET.Player
                 return;
             }
 
-            lock (currentTrack)
-            {
-                using var stream = File.Open(IgnoredPath, FileMode.Append, FileAccess.Write);
-                using var writer = new StreamWriter(stream);
-                writer.WriteLine(currentTrack.GetShortInfo());
-                writer.Close();
-            }
+            DataBaseManager.AddIgnoredTrack(currentTrack);
 
             Skip(0, CommandActionSource.Mute);
 

@@ -1,5 +1,6 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
+using DicordNET.DB;
 using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -62,6 +63,7 @@ namespace DicordNET.Commands
 
                 PlayerManager.Terminate();
                 ApiConfig.DeinitApis();
+                DataBaseManager.Close();
 
                 await bot_client.DisconnectAsync();
                 bot_client.Dispose();
