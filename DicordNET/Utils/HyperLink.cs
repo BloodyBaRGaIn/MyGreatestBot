@@ -15,6 +15,8 @@
         /// </summary>
         private string Url { get; init; }
 
+        internal string InnerId { get; private set; } = string.Empty;
+
         /// <summary>
         /// Generic constructor
         /// </summary>
@@ -24,6 +26,12 @@
         {
             Title = title;
             Url = url ?? string.Empty;
+        }
+
+        internal HyperLink WithId(string id)
+        {
+            InnerId = id;
+            return this;
         }
 
         /// <summary>

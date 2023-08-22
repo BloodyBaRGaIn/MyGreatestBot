@@ -42,8 +42,11 @@ namespace DicordNET.ApiClasses.Youtube
             Id = video.Id;
 
             TrackName = new(video.Title, video.Url);
-
-            ArtistArr = new HyperLink[1] { new(video.Author.ChannelTitle, video.Author.ChannelUrl) };
+            ArtistArr = new HyperLink[1]
+            {
+                new HyperLink(video.Author.ChannelTitle, video.Author.ChannelUrl)
+                    .WithId(video.Author.ChannelId.Value)
+            };
 
             Duration = video.Duration ?? TimeSpan.Zero;
 

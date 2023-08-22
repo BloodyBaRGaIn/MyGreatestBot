@@ -231,7 +231,9 @@ namespace DicordNET.Commands
         [Aliases("s")]
         [Description("Skip")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Skip(CommandContext ctx, [AllowNull, Description("Number of tracks to skip")] int number = 1)
+        public async Task Skip(
+            CommandContext ctx,
+            [AllowNull, Description("Number of tracks to skip")] int number = 1)
         {
             if (ctx.Guild == null)
             {
@@ -251,7 +253,7 @@ namespace DicordNET.Commands
         }
 
         [Command("ignore")]
-        [Aliases("i")]
+        [Aliases("it", "i")]
         [Description("Ignore current track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task Ignore(CommandContext ctx)
@@ -264,6 +266,26 @@ namespace DicordNET.Commands
             BotWrapper.TextChannel = ctx.Channel;
 
             await Task.Run(() => PlayerManager.Ignore());
+
+            await Task.Delay(1);
+        }
+
+        [Command("ignoreartist")]
+        [Aliases("ia")]
+        [Description("Ignore current track artist")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task IgnoreArtist(
+            CommandContext ctx,
+            [AllowNull, Description("Artist zero-based index")] int artist_index = -1)
+        {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
+            BotWrapper.TextChannel = ctx.Channel;
+
+            await Task.Run(() => PlayerManager.IgnoreArtist(artist_index));
 
             await Task.Delay(1);
         }

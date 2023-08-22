@@ -66,10 +66,10 @@
     <None Update="Config\Json\vk_cred.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DB\Database1.mdf">
+    <None Update="DB\BotStorageDB.mdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DB\Database1_log.ldf">
+    <None Update="DB\BotStorageDB_log.ldf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ffmpeg_binaries\ffmpeg.exe">

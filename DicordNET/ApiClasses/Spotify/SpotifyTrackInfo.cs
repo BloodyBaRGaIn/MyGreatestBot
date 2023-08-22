@@ -44,7 +44,7 @@ namespace DicordNET.ApiClasses.Spotify
             ArtistArr = track.Artists.Select(a =>
                 new HyperLink(
                     a.Name,
-                    $"{Domain}artist/{a.Id}")).ToArray();
+                    $"{Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
 
             AlbumName = new(track.Album.Name, $"{Domain}album/{track.Album.Id}");
 

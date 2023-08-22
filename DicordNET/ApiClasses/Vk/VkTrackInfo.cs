@@ -59,10 +59,10 @@ namespace DicordNET.ApiClasses.Vk
                 audioArtists = new[] { new AudioArtist() { Name = audio.Artist } };
             }
 
-            ArtistArr = audioArtists.Select(artist =>
-                string.IsNullOrWhiteSpace(artist.Id)
-                ? new HyperLink(artist.Name)
-                : new HyperLink(artist.Name, $"{Domain}artist/{artist.Id}"))
+            ArtistArr = audioArtists.Select(a =>
+                string.IsNullOrWhiteSpace(a.Id)
+                ? new HyperLink(a.Name)
+                : new HyperLink(a.Name, $"{Domain}artist/{a.Id}").WithId(a.Id))
                 .ToArray();
 
             AudioAlbum album = audio.Album;
