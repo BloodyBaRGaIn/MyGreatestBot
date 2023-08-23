@@ -7,7 +7,7 @@ namespace DicordNET.DB
     internal static class DataBaseManager
     {
         private const string DB_PATH = "DB\\BotStorageDB.mdf";
-        private static readonly string CONNECTION_STRING = $@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={Directory.GetCurrentDirectory()}\{DB_PATH};Integrated Security=True";
+        private static readonly string CONNECTION_STRING = "Data Source=USER-PC\\MSSQLSERVER01;Initial Catalog=master;Integrated Security=True;Persist Security Info=False;Pooling=False;Multiple Active Result Sets=False;Connect Timeout=60;Encrypt=False;Trust Server Certificate=False;Command Timeout=0";//$@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={Directory.GetCurrentDirectory()}\{DB_PATH};Integrated Security=True";
         private static SqlConnection? Connection;
 
         internal static void Open()

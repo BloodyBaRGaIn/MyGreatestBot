@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DicordNET", "DicordNET\DicordNET.csproj", "{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "BotStorage", "BotStorage\BotStorage.sqlproj", "{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,12 @@ Global
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF57AE28-DE0B-4D46-AB61-0FC935CE730E}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
