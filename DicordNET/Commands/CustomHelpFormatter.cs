@@ -7,12 +7,15 @@ using DSharpPlus.Entities;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Commands
 {
     /// <summary>
     /// Help formatter
     /// </summary>
+
+    [SupportedOSPlatform("windows")]
     public class CustomHelpFormatter : BaseHelpFormatter
     {
         protected DiscordEmbedBuilder _embed;

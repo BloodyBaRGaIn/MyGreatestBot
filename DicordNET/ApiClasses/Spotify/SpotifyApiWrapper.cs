@@ -1,6 +1,7 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
 using SpotifyAPI.Web;
+using System.Runtime.Versioning;
 //using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
@@ -9,6 +10,7 @@ namespace DicordNET.ApiClasses.Spotify
     /// <summary>
     /// Spotify API wrapper class
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal static class SpotifyApiWrapper
     {
         //private static EmbedIOAuthServer? server;

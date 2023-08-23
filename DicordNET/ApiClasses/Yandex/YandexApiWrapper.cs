@@ -1,6 +1,7 @@
 ﻿using DicordNET.ApiClasses.Spotify;
 using DicordNET.Config;
 using DicordNET.Extensions;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
@@ -12,6 +13,7 @@ using Yandex.Music.Api.Models.Track;
 
 namespace DicordNET.ApiClasses.Yandex
 {
+    [SupportedOSPlatform("windows")]
     internal static class YandexApiWrapper
     {
         /// <summary>

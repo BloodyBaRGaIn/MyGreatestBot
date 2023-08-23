@@ -1,12 +1,14 @@
 ﻿using DicordNET.ApiClasses.Yandex;
 using DicordNET.Utils;
 using SpotifyAPI.Web;
+using System.Runtime.Versioning;
 
 namespace DicordNET.ApiClasses.Spotify
 {
     /// <summary>
     /// Spotify track info implementation
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;

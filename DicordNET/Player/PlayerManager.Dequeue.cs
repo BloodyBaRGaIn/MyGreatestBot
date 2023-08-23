@@ -1,9 +1,11 @@
 ﻿using DicordNET.Bot;
-using DicordNET.DB;
+using DicordNET.Sql;
 using DSharpPlus.Entities;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Player
 {
+    [SupportedOSPlatform("windows")]
     internal partial class PlayerManager
     {
         internal static void Dequeue()
@@ -16,7 +18,7 @@ namespace DicordNET.Player
                     return;
                 }
 
-                if (DataBaseManager.IsIgnored(track))
+                if (SqlServerWrapper.IsTrackIgnored(track))
                 {
                     BotWrapper.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -26,7 +28,7 @@ namespace DicordNET.Player
                     continue;
                 }
 
-                if (DataBaseManager.IsArtistIgnored(track))
+                if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
                     BotWrapper.SendMessage(new DiscordEmbedBuilder()
                     {

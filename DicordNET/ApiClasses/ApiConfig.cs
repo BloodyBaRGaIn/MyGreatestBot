@@ -3,10 +3,12 @@ using DicordNET.ApiClasses.Vk;
 using DicordNET.ApiClasses.Yandex;
 using DicordNET.ApiClasses.Youtube;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
 namespace DicordNET.ApiClasses
 {
+    [SupportedOSPlatform("windows")]
     internal static class ApiConfig
     {
         /// <summary>

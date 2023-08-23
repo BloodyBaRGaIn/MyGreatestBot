@@ -4,7 +4,7 @@
     /// API flags
     /// </summary>
     [Flags]
-    internal enum ApiIntents : uint
+    internal enum ApiIntents : int
     {
         None = 0x00,
         Youtube = 0x01,

@@ -3,6 +3,7 @@ using DicordNET.Extensions;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using YoutubeExplode;
 using YoutubeExplode.Common;
@@ -15,6 +16,7 @@ namespace DicordNET.ApiClasses.Youtube
     /// <summary>
     /// Youtube API wrapper class
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal static class YoutubeApiWrapper
     {
         private static UserCredential? GoogleUserCredential;

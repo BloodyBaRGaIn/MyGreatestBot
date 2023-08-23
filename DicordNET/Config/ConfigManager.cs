@@ -10,6 +10,8 @@ namespace DicordNET.Config
         private const string CONFIG_DIR = "Config/Json";
 
         private const string DISCORD_JSON_PATH = $"{CONFIG_DIR}/config.json";
+        private const string SQL_DATABASE_JSON_PATH = $"{CONFIG_DIR}/sql_db_config.json";
+        private const string SQL_SERVICE_JSON_PATH = $"{CONFIG_DIR}/sql_service_config.json";
 
         private const string GOOGLE_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/google_cred.json";
         private const string YANDEX_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/yandex_cred.json";
@@ -123,6 +125,24 @@ namespace DicordNET.Config
         internal static SpotifyClientSecretsJSON GetSpotifyClientSecretsJSON()
         {
             return ReadConfig<SpotifyClientSecretsJSON>(SPOTIFY_CLIENT_SECRETS_JSON_PATH);
+        }
+
+        /// <summary>
+        /// Reads Sql database config
+        /// </summary>
+        /// <returns>Sql database config</returns>
+        internal static SqlDatabaseConfigJSON GetSqlDatabaseConfigJSON()
+        {
+            return ReadConfig<SqlDatabaseConfigJSON>(SQL_DATABASE_JSON_PATH);
+        }
+
+        /// <summary>
+        /// Reads Sql service config
+        /// </summary>
+        /// <returns>Sql service config</returns>
+        internal static SqlServiceConfigJSON GetSqlServiceConfigJSON()
+        {
+            return ReadConfig<SqlServiceConfigJSON>(SQL_SERVICE_JSON_PATH);
         }
     }
 }

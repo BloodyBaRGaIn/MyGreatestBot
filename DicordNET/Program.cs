@@ -1,7 +1,8 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
-using DicordNET.DB;
+using DicordNET.Sql;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace DicordNET
@@ -9,6 +10,7 @@ namespace DicordNET
     /// <summary>
     /// Main class
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal class Program
     {
         /// <summary>
@@ -20,13 +22,13 @@ namespace DicordNET
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            DataBaseManager.Open();
+            SqlServerWrapper.Open();
 
             ApiConfig.InitApis();
 
             BotWrapper.Run();
 
-            DataBaseManager.Close();
+            SqlServerWrapper.Close();
 
             ApiConfig.DeinitApis();
         }

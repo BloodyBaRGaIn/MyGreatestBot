@@ -2,9 +2,11 @@
 using DicordNET.Bot;
 using DSharpPlus.Entities;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Player
 {
+    [SupportedOSPlatform("windows")]
     internal static partial class PlayerManager
     {
         private const string IgnoredPath = "IgnoredTracks.txt";

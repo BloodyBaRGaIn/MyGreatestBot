@@ -1,10 +1,12 @@
 ﻿using DicordNET.Bot;
 using DicordNET.Commands;
-using DicordNET.DB;
+using DicordNET.Sql;
 using DSharpPlus.Entities;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Player
 {
+    [SupportedOSPlatform("windows")]
     internal partial class PlayerManager
     {
         internal static void Ignore(CommandActionSource source = CommandActionSource.None)
@@ -23,7 +25,7 @@ namespace DicordNET.Player
                 return;
             }
 
-            DataBaseManager.AddIgnoredTrack(currentTrack);
+            SqlServerWrapper.AddIgnoredTrack(currentTrack);
 
             Skip(0, CommandActionSource.Mute);
 
@@ -68,7 +70,7 @@ namespace DicordNET.Player
                 }
             }
 
-            DataBaseManager.AddIgnoredArtist(currentTrack, index);
+            SqlServerWrapper.AddIgnoredArtist(currentTrack, index);
 
             Skip(0, CommandActionSource.Mute);
 

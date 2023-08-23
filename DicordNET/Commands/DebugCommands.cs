@@ -3,10 +3,12 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]
+    [SupportedOSPlatform("windows")]
     internal class DebugCommands : BaseCommandModule
     {
         [Command("test")]

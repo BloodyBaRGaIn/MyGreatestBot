@@ -1,11 +1,13 @@
 ﻿using DicordNET.Player;
 using DicordNET.Utils;
+using System.Runtime.Versioning;
 
 namespace DicordNET.ApiClasses
 {
     /// <summary>
     /// Track information abstraction
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal interface ITrackInfo
     {
         /// <summary>

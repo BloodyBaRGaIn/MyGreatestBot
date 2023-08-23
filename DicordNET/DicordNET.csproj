@@ -5,13 +5,8 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Новая папка\**" />
-    <EmbeddedResource Remove="Новая папка\**" />
-    <None Remove="Новая папка\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="C:\Users\kydravcev_ra\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
@@ -39,6 +34,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.10" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NickBuhro.Translit" Version="1.4.5" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
@@ -54,6 +50,7 @@
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Net.Sockets" Version="4.3.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
     <PackageReference Include="VkNet" Version="1.75.0" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
     <PackageReference Include="YoutubeExplode" Version="6.3.1" />
@@ -63,13 +60,13 @@
     <None Update="Config\Json\spotify_secret.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Config\Json\sql_db_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\sql_service_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Config\Json\vk_cred.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="DB\BotStorageDB.mdf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="DB\BotStorageDB_log.ldf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ffmpeg_binaries\ffmpeg.exe">

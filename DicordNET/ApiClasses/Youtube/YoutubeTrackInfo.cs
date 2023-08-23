@@ -1,4 +1,5 @@
 ﻿using DicordNET.Utils;
+using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -8,6 +9,7 @@ namespace DicordNET.ApiClasses.Youtube
     /// <summary>
     /// Youtube track info implementation
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;

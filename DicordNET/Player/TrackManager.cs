@@ -1,8 +1,10 @@
 ﻿using DicordNET.ApiClasses;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Player
 {
+    [SupportedOSPlatform("windows")]
     internal static class TrackManager
     {
         internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";

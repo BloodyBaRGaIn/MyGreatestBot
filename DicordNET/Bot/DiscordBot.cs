@@ -9,9 +9,11 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Bot
 {
+    [SupportedOSPlatform("windows")]
     internal sealed class DiscordBot
     {
         internal DiscordClient? Client { get; private set; }

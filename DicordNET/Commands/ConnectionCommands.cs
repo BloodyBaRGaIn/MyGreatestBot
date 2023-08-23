@@ -1,11 +1,12 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
-using DicordNET.DB;
+using DicordNET.Sql;
 using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Commands
 {
@@ -13,6 +14,7 @@ namespace DicordNET.Commands
     /// Connection commands
     /// </summary>
     [Category(CommandStrings.ConnectionCategoryName)]
+    [SupportedOSPlatform("windows")]
     internal class ConnectionCommands : BaseCommandModule
     {
         [Command("join")]
@@ -45,6 +47,7 @@ namespace DicordNET.Commands
         [Aliases("bye")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
+        
         public async Task LogoutCommand(CommandContext ctx)
         {
             if (ctx.Guild == null)
@@ -63,7 +66,7 @@ namespace DicordNET.Commands
 
                 PlayerManager.Terminate();
                 ApiConfig.DeinitApis();
-                DataBaseManager.Close();
+                SqlServerWrapper.Close();
 
                 await bot_client.DisconnectAsync();
                 bot_client.Dispose();

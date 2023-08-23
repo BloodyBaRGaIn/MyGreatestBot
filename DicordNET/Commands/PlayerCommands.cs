@@ -5,10 +5,12 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.VoiceNext;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Commands
 {
     [Category(CommandStrings.PlayerCategoryName)]
+    [SupportedOSPlatform("windows")]
     internal class PlayerCommands : BaseCommandModule
     {
         private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, string? query)

@@ -1,5 +1,6 @@
 ﻿using DicordNET.Extensions;
 using DicordNET.Utils;
+using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
@@ -10,6 +11,7 @@ namespace DicordNET.ApiClasses.Yandex
     /// <summary>
     /// Yandex track info implementation
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;

@@ -1,4 +1,5 @@
 ﻿using DicordNET.Utils;
+using System.Runtime.Versioning;
 using VkNet.Model;
 
 namespace DicordNET.ApiClasses.Vk
@@ -6,6 +7,7 @@ namespace DicordNET.ApiClasses.Vk
     /// <summary>
     /// Vk track info implementation
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         public ITrackInfo Base => this;

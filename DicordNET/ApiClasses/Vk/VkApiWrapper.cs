@@ -1,6 +1,7 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using VkNet;
 using VkNet.Abstractions;
@@ -12,6 +13,7 @@ namespace DicordNET.ApiClasses.Vk
     /// <summary>
     /// Vk API wrapper class
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal static class VkApiWrapper
     {
         private static class VkQueryDecomposer

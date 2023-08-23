@@ -4,9 +4,11 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
+using System.Runtime.Versioning;
 
 namespace DicordNET.Bot
 {
+    [SupportedOSPlatform("windows")]
     internal static class BotWrapper
     {
         private const int SEND_MESSAGE_WAIT_MS = 1000;
