@@ -66,7 +66,6 @@ namespace DicordNET.Commands
 
                 PlayerManager.Terminate();
                 ApiConfig.DeinitApis();
-                SqlServerWrapper.Close();
 
                 await bot_client.DisconnectAsync();
                 bot_client.Dispose();

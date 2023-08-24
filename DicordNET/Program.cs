@@ -19,16 +19,11 @@ namespace DicordNET
         private static void Main()
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            SqlServerWrapper.Open();
 
             ApiConfig.InitApis();
 
             BotWrapper.Run();
-
-            SqlServerWrapper.Close();
 
             ApiConfig.DeinitApis();
         }

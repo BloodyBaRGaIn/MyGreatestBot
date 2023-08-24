@@ -1,0 +1,5 @@
+{
+  "local_dir": "%SQL_SERVER_INSTANCE_DIRECTORY%\\MSSQL\\DATA",
+  "local_name": "database_name",
+  "server_name": "server_name"
+}

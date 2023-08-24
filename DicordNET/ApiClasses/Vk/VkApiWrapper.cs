@@ -80,7 +80,7 @@ namespace DicordNET.ApiClasses.Vk
             api?.LogOut();
         }
 
-        internal static List<VkTrackInfo> GetTracks(string? query)
+        internal static IEnumerable<VkTrackInfo> GetTracks(string? query)
         {
             List<VkTrackInfo> tracks = new();
 
