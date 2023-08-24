@@ -1,5 +1,6 @@
 ﻿using DicordNET.Commands;
 using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.Player;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -83,13 +84,13 @@ namespace DicordNET.Bot
 
         private Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
         {
-            Console.WriteLine($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            Console.WriteLine(args.Exception.GetExtendedMessage());
             return Task.CompletedTask;
         }
 
         private Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
         {
-            Console.WriteLine($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            Console.WriteLine(args.Exception.GetExtendedMessage());
             return Task.CompletedTask;
         }
 
@@ -125,7 +126,7 @@ namespace DicordNET.Bot
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
-            _ = await args.Context.Channel.SendMessageAsync($"{args.Exception.GetType().Name} : {args.Exception.Message}");
+            _ = await args.Context.Channel.SendMessageAsync(args.Exception.GetExtendedMessage());
         }
     }
 }

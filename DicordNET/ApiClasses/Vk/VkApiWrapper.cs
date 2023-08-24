@@ -73,7 +73,7 @@ namespace DicordNET.ApiClasses.Vk
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.GetExtendedMessage());
                 Environment.Exit(1);
             }
         }

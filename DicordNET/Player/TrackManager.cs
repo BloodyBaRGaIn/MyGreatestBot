@@ -1,6 +1,7 @@
 ﻿using DicordNET.ApiClasses;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.Versioning;
 
 namespace DicordNET.Player
@@ -9,6 +10,16 @@ namespace DicordNET.Player
     internal static class TrackManager
     {
         internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
+
+        static TrackManager()
+        {
+            if (!File.Exists(FFMPEG_PATH))
+            {
+                throw new FileNotFoundException($"ffmpeg executable file not found{Environment.NewLine}" +
+                    "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
+                    FFMPEG_PATH);
+            }
+        }
 
         internal static Process StartFFMPEG(ITrackInfo track)
         {

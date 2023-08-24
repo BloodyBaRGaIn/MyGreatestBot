@@ -1,5 +1,6 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
+using DicordNET.Extensions;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -105,7 +106,13 @@ namespace DicordNET.Player
                         });
                     }
                 }
-                catch
+                catch (Exception ex) when (ex is TypeInitializationException)
+                {
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
+                    Environment.Exit(1);
+                    return;
+                }
+                catch (Exception ex)
                 {
                     if (MainPlayerCancellationToken.IsCancellationRequested)
                     {
@@ -113,6 +120,9 @@ namespace DicordNET.Player
                     }
 
                     IsPlaying = false;
+
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
+
                     continue;
                 }
             }
@@ -147,7 +157,7 @@ namespace DicordNET.Player
             }
             catch (Exception ex)
             {
-                BotWrapper.SendMessage($"{ex.GetType().Name} : {ex.Message}");
+                BotWrapper.SendMessage(ex.GetExtendedMessage());
                 return;
             }
 
