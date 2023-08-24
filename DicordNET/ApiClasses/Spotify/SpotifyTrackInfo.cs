@@ -1,6 +1,8 @@
 ﻿using DicordNET.ApiClasses.Yandex;
 using DicordNET.Utils;
 using SpotifyAPI.Web;
+using System;
+using System.Linq;
 using System.Runtime.Versioning;
 
 namespace DicordNET.ApiClasses.Spotify

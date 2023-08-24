@@ -5,6 +5,9 @@ using DicordNET.Utils;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 
 namespace DicordNET.Sql

@@ -1,8 +1,13 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
 using DSharpPlus.Entities;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DicordNET.Player
 {

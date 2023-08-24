@@ -1,5 +1,8 @@
 ﻿using DicordNET.Extensions;
 using DicordNET.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -48,9 +51,7 @@ namespace DicordNET.ApiClasses.Yandex
 
             TrackName = new(track.Title, $"{Domain}track/{Id}");
 
-            List<YArtist> authors_list = track.Artists;
-
-            ArtistArr = authors_list.Select(a =>
+            ArtistArr = track.Artists.Select(a =>
                 new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);

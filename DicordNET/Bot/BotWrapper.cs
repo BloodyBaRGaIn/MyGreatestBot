@@ -4,7 +4,9 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
+using System;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DicordNET.Bot
 {

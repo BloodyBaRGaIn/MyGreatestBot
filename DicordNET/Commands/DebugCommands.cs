@@ -2,8 +2,10 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DicordNET.Commands
 {

@@ -1,4 +1,7 @@
 ﻿using DicordNET.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;

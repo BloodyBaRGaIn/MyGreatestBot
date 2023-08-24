@@ -1,5 +1,7 @@
 ﻿using DicordNET.Player;
 using DicordNET.Utils;
+using System;
+using System.Linq;
 using System.Runtime.Versioning;
 
 namespace DicordNET.ApiClasses

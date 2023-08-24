@@ -1,4 +1,6 @@
-﻿namespace DicordNET.Sql
+﻿using System.IO;
+
+namespace DicordNET.Sql
 {
     internal sealed class DatabaseScriptProvider
     {

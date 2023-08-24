@@ -1,6 +1,9 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
 using SpotifyAPI.Web;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 //using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;

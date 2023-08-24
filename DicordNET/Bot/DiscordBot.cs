@@ -9,7 +9,10 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DicordNET.Bot
 {

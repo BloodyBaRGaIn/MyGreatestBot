@@ -2,6 +2,7 @@
 using DicordNET.Commands;
 using DicordNET.Sql;
 using DSharpPlus.Entities;
+using System;
 using System.Runtime.Versioning;
 
 namespace DicordNET.Player

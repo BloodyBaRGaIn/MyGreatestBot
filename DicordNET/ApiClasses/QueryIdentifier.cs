@@ -2,6 +2,8 @@
 using DicordNET.ApiClasses.Vk;
 using DicordNET.ApiClasses.Yandex;
 using DicordNET.ApiClasses.Youtube;
+using System;
+using System.Collections.Generic;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 

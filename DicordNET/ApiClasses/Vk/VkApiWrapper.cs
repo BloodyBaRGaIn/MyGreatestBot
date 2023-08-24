@@ -1,6 +1,9 @@
 ﻿using DicordNET.Config;
 using DicordNET.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using VkNet;

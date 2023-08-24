@@ -7,6 +7,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
+using System;
 
 namespace DicordNET.Commands
 {

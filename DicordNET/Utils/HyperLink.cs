@@ -1,4 +1,6 @@
-﻿namespace DicordNET.Utils
+﻿using System;
+
+namespace DicordNET.Utils
 {
     /// <summary>
     /// Hypertext string

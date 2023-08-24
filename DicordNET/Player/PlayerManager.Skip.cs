@@ -2,6 +2,8 @@
 using DicordNET.Bot;
 using DicordNET.Commands;
 using DSharpPlus.Entities;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DicordNET.Player
 {

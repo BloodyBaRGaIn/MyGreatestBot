@@ -3,7 +3,7 @@
     /// <summary>
     /// Commands additional arguments
     /// </summary>
-    [Flags]
+    [System.Flags]
     internal enum CommandActionSource : uint
     {
         None = 0x00,

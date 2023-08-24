@@ -3,7 +3,7 @@
     /// <summary>
     /// API and services flags
     /// </summary>
-    [Flags]
+    [System.Flags]
     internal enum ApiIntents : int
     {
         None = 0x00,

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System;
 
 namespace DicordNET.Sql.TableClasses
 {

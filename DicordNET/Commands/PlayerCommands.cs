@@ -4,8 +4,12 @@ using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.VoiceNext;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DicordNET.Commands
 {

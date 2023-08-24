@@ -3,7 +3,11 @@ using DicordNET.ApiClasses.Vk;
 using DicordNET.ApiClasses.Yandex;
 using DicordNET.ApiClasses.Youtube;
 using DicordNET.Sql;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace DicordNET.ApiClasses
 {

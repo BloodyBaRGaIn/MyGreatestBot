@@ -1,6 +1,7 @@
 ﻿using DicordNET.Bot;
 using DicordNET.Commands;
 using DSharpPlus.Entities;
+using System.Linq;
 
 namespace DicordNET.Player
 {

@@ -1,6 +1,9 @@
 ﻿using DicordNET.ApiClasses.Spotify;
 using DicordNET.Config;
 using DicordNET.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
