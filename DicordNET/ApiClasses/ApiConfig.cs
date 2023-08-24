@@ -2,6 +2,7 @@
 using DicordNET.ApiClasses.Vk;
 using DicordNET.ApiClasses.Yandex;
 using DicordNET.ApiClasses.Youtube;
+using DicordNET.Sql;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -14,7 +15,7 @@ namespace DicordNET.ApiClasses
         /// <summary>
         /// Intents used on initialization
         /// </summary>
-        private static ApiIntents InitIntents;
+        internal static ApiIntents InitIntents { get; private set; }
 
         /// <summary>
         /// <para>Performs auth for APIs</para>
@@ -32,68 +33,34 @@ namespace DicordNET.ApiClasses
                 InitIntents |= ApiIntents.Yandex;
             }
 
-            if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube)
-            {
-                try
-                {
-                    YoutubeApiWrapper.PerformAuth();
-                    Console.WriteLine($"{ApiIntents.Youtube} SUCCESS");
-                }
-                catch
-                {
-                    Console.WriteLine($"{ApiIntents.Youtube} FAILED");
-                    throw new ApplicationException($"{ApiIntents.Youtube} auth failed");
-                }
+            Init(ApiIntents.Sql, SqlServerWrapper.Open);
+            Init(ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
+            Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
+            Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
+            Init(ApiIntents.Vk, VkApiWrapper.PerformAuth);
+            Init(ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth);
+        }
 
-                Task.Delay(1000).Wait();
+        private static void Init(ApiIntents desired, Action init_action, int delay = 500)
+        {
+            if (init_action is null || !InitIntents.HasFlag(desired))
+            {
+                return;
             }
 
-            if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
+            try
             {
-                try
-                {
-                    YandexApiWrapper.PerformAuth();
-                    Console.WriteLine($"{ApiIntents.Yandex} SUCCESS");
-                }
-                catch
-                {
-                    Console.WriteLine($"{ApiIntents.Yandex} FAILED");
-                    throw new ApplicationException($"{ApiIntents.Yandex} auth failed");
-                }
-
-                Task.Delay(1000).Wait();
+                init_action.Invoke();
+                Console.WriteLine($"{desired} SUCCESS");
             }
-
-            if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk)
+            catch (Exception ex)
             {
-                try
-                {
-                    VkApiWrapper.PerformAuth();
-                    Console.WriteLine($"{ApiIntents.Vk} SUCCESS");
-                }
-                catch
-                {
-                    Console.WriteLine($"{ApiIntents.Vk} FAILED");
-                    throw new ApplicationException($"{ApiIntents.Vk} auth failed");
-                }
-
-                Task.Delay(1000).Wait();
+                Console.WriteLine($"{desired} FAILED");
+                throw new ApplicationException($"{desired} auth failed", ex);
             }
-
-            if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify)
+            finally
             {
-                try
-                {
-                    SpotifyApiWrapper.PerformAuth();
-                    Console.WriteLine($"{ApiIntents.Spotify} SUCCESS");
-                }
-                catch
-                {
-                    Console.WriteLine($"{ApiIntents.Spotify} FAILED");
-                    throw new ApplicationException($"{ApiIntents.Spotify} auth failed");
-                }
-
-                Task.Delay(1000).Wait();
+                Task.Delay(delay).Wait();
             }
         }
 
@@ -107,44 +74,17 @@ namespace DicordNET.ApiClasses
         {
             intents &= InitIntents;
 
-            try
-            {
-                if ((intents & ApiIntents.Youtube) == ApiIntents.Youtube)
-                {
-                    YoutubeApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                    YoutubeApiWrapper.PerformAuth();
-                    Task.Delay(500).Wait();
-                }
+            Reload(intents, ApiIntents.Sql, SqlServerWrapper.Open, SqlServerWrapper.Close);
+            Reload(intents, ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
+            Reload(intents, ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
+            Reload(intents, ApiIntents.Vk, VkApiWrapper.PerformAuth, VkApiWrapper.Logout);
+            Reload(intents, ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth);
+        }
 
-                if ((intents & ApiIntents.Yandex) == ApiIntents.Yandex)
-                {
-                    YandexApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                    YandexApiWrapper.PerformAuth();
-                    Task.Delay(500).Wait();
-                }
-
-                if ((intents & ApiIntents.Vk) == ApiIntents.Vk)
-                {
-                    VkApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                    VkApiWrapper.PerformAuth();
-                    Task.Delay(500).Wait();
-                }
-
-                if ((intents & ApiIntents.Spotify) == ApiIntents.Spotify)
-                {
-                    SpotifyApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                    SpotifyApiWrapper.PerformAuth();
-                    Task.Delay(500).Wait();
-                }
-            }
-            catch
-            {
-                throw new ApplicationException();
-            }
+        private static void Reload(ApiIntents allowed, ApiIntents desied, Action init_action, Action? deinit_action = null, int delay = 500)
+        {
+            Deinit(allowed, desied, deinit_action, delay);
+            Init(desied, init_action, delay);
         }
 
         /// <summary>
@@ -152,73 +92,35 @@ namespace DicordNET.ApiClasses
         /// <para>Throws an exception if API logout process failed</para>
         /// </summary>
         /// <param name="intents">APIs intents for logout</param>
-        /// <exception cref="ApplicationException"></exception>
         internal static void DeinitApis(ApiIntents intents = ApiIntents.All)
         {
             intents &= InitIntents;
 
+            Deinit(intents, ApiIntents.Sql, SqlServerWrapper.Close);
+            Deinit(intents, ApiIntents.Youtube);
+            Deinit(intents, ApiIntents.Yandex);
+            Deinit(intents, ApiIntents.Vk, VkApiWrapper.Logout);
+            Deinit(intents, ApiIntents.Spotify);
+        }
+
+        private static void Deinit(ApiIntents allowed, ApiIntents desied, Action? deinit_action = null, int delay = 500)
+        {
+            if (deinit_action is null || !allowed.HasFlag(desied))
+            {
+                return;
+            }
+
             try
             {
-                if ((intents & ApiIntents.Youtube) == ApiIntents.Youtube)
-                {
-                    YoutubeApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                }
-
-                if ((intents & ApiIntents.Yandex) == ApiIntents.Yandex)
-                {
-                    YandexApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                }
-
-                if ((intents & ApiIntents.Vk) == ApiIntents.Vk)
-                {
-                    VkApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                }
-
-                if ((intents & ApiIntents.Spotify) == ApiIntents.Spotify)
-                {
-                    SpotifyApiWrapper.Logout();
-                    Task.Delay(500).Wait();
-                }
+                deinit_action.Invoke();
             }
             catch
             {
-                throw new ApplicationException();
+                ;
             }
-        }
-
-        /// <summary>
-        /// Links identifier class
-        /// </summary>
-        private static class QueryDecomposer
-        {
-#pragma warning disable SYSLIB1045
-            private static readonly Regex YOUTUBE_RE = new("^((http([s])?://)?((www|m)\\.)?youtube\\.([\\w])+/)");
-            private static readonly Regex YANDEX_RE = new("^((http([s])?://)?music\\.yandex\\.([\\w])+/)");
-            private static readonly Regex VK_RE = new("^((http([s])?://)?((www|m)\\.)?vk\\.com/)");
-            private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
-#pragma warning restore SYSLIB1045
-
-            internal static bool IsYoutubeURL([NotNull] string url)
+            finally
             {
-                return YOUTUBE_RE.IsMatch(url);
-            }
-
-            internal static bool IsYandexURL([NotNull] string url)
-            {
-                return YANDEX_RE.IsMatch(url);
-            }
-
-            internal static bool IsVkURL([NotNull] string url)
-            {
-                return VK_RE.IsMatch(url);
-            }
-
-            internal static bool IsSpotifyURL([NotNull] string url)
-            {
-                return SPOTIFY_RE.IsMatch(url);
+                Task.Delay(delay).Wait();
             }
         }
 
@@ -229,62 +131,20 @@ namespace DicordNET.ApiClasses
         /// <returns>List of tracks</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        internal static List<ITrackInfo> GetAll(string? query)
+        internal static IEnumerable<ITrackInfo> GetAll(string? query)
         {
-            List<ITrackInfo> tracks = new();
+            IEnumerable<ITrackInfo> tracks;
 
             if (string.IsNullOrWhiteSpace(query))
             {
                 throw new ArgumentNullException(nameof(query), "Invalid query");
             }
 
-            if (QueryDecomposer.IsYoutubeURL(query))
+            tracks = QueryIdentifier.Execute(query);
+
+            if (!tracks.Any())
             {
-                if ((InitIntents & ApiIntents.Youtube) == ApiIntents.Youtube)
-                {
-                    tracks.AddRange(YoutubeApiWrapper.GetTracks(query));
-                }
-                else
-                {
-                    throw new InvalidOperationException($"{ApiIntents.Youtube} API not started");
-                }
-            }
-            else if (QueryDecomposer.IsYandexURL(query))
-            {
-                if ((InitIntents & ApiIntents.Yandex) == ApiIntents.Yandex)
-                {
-                    tracks.AddRange(YandexApiWrapper.GetTracks(query));
-                }
-                else
-                {
-                    throw new InvalidOperationException($"{ApiIntents.Yandex} API not started");
-                }
-            }
-            else if (QueryDecomposer.IsVkURL(query))
-            {
-                if ((InitIntents & ApiIntents.Vk) == ApiIntents.Vk)
-                {
-                    tracks.AddRange(VkApiWrapper.GetTracks(query));
-                }
-                else
-                {
-                    throw new InvalidOperationException($"{ApiIntents.Vk} API not started");
-                }
-            }
-            else if (QueryDecomposer.IsSpotifyURL(query))
-            {
-                if ((InitIntents & ApiIntents.Spotify) == ApiIntents.Spotify)
-                {
-                    tracks.AddRange(SpotifyApiWrapper.GetTracks(query));
-                }
-                else
-                {
-                    throw new InvalidOperationException($"{ApiIntents.Spotify} API not started");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Unknown query type");
+                throw new InvalidOperationException("No results");
             }
 
             return tracks;

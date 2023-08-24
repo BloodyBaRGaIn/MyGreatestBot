@@ -65,7 +65,7 @@ namespace DicordNET.ApiClasses.Youtube
             YoutubeClientInstance = new(GoogleService.HttpClient);
         }
 
-        internal static List<YoutubeTrackInfo> GetTracks(string? query)
+        internal static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
         {
             if (YoutubeClientInstance == null)
             {
@@ -119,11 +119,6 @@ namespace DicordNET.ApiClasses.Youtube
             }
 
             return tracks;
-        }
-
-        internal static void Logout()
-        {
-
         }
     }
 }

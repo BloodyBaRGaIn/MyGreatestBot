@@ -1,0 +1,5 @@
+{
+  "service_browser": "SQL Browser service name (SQLBrowser)",
+  "service_server": "SQL Server service name (MSSQLSERVER)",
+  "service_server_arg": "-sSERVERNAME (-sMSSQLSERVER)"
+}

@@ -92,11 +92,6 @@ namespace DicordNET.ApiClasses.Yandex
             }
         }
 
-        internal static void Logout()
-        {
-
-        }
-
         internal static ITrackInfo? Search(SpotifyTrackInfo spotifyTrack)
         {
             if (api == null)
@@ -159,7 +154,7 @@ namespace DicordNET.ApiClasses.Yandex
             return first;
         }
 
-        internal static List<YandexTrackInfo> GetTracks(string? query)
+        internal static IEnumerable<YandexTrackInfo> GetTracks(string? query)
         {
             List<YandexTrackInfo> tracks_collection = new();
 

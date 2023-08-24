@@ -9,79 +9,83 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="C:\Users\kydravcev_ra\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
-    <Content Remove="C:\Users\User\.nuget\packages\km.yandex.music.client\1.4.1\contentFiles\any\net6.0\README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Database1.mdf" />
-    <None Remove="Database1_log.ldf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
     <PackageReference Include="DSharpPlus" Version="4.4.2" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.2" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.2" />
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.2" />
     <PackageReference Include="DSharpPlus.VoiceNext" Version="4.4.2" />
-    <PackageReference Include="DSharpPlus.VoiceNext.Natives" Version="1.0.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3141" />
-    <PackageReference Include="KM.Yandex.Music.Api" Version="1.4.1" />
-    <PackageReference Include="KM.Yandex.Music.Client" Version="1.4.1" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.61.0.3155" />
+    <PackageReference Include="KM.Yandex.Music.Api" Version="1.4.2" />
+    <PackageReference Include="KM.Yandex.Music.Client" Version="1.4.2" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.10" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NickBuhro.Translit" Version="1.4.5" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="SpotifyAPI.Web" Version="7.0.0" />
     <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.0.0" />
-    <PackageReference Include="SQLite" Version="3.13.0" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.5" />
-    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.5" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.5" />
-    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.3.0" />
-    <PackageReference Include="System.IO" Version="4.3.0" />
-    <PackageReference Include="System.Linq" Version="4.3.0" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.Net.Sockets" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
     <PackageReference Include="VkNet" Version="1.75.0" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.3.1" />
+    <PackageReference Include="YoutubeExplode" Version="6.3.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Config\Json\spotify_secret.json">
+    <None Update="ConfigSamples\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Config\Json\sql_db_config.json">
+    <None Update="ConfigSamples\google_cred.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Config\Json\sql_service_config.json">
+    <None Update="ConfigSamples\google_secret.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Config\Json\vk_cred.json">
+    <None Update="ConfigSamples\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ConfigSamples\spotify_secret.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ConfigSamples\sql_db_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ConfigSamples\sql_service_config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ConfigSamples\vk_cred.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ConfigSamples\yandex_cred.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\config.json" Condition="Exists('Config\Json\config.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\google_cred.json" Condition="Exists('Config\Json\google_cred.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\google_secret.json" Condition="Exists('Config\Json\google_secret.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\yandex_cred.json" Condition="Exists('Config\Json\yandex_cred.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\vk_cred.json" Condition="Exists('Config\Json\vk_cred.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\spotify_secret.json" Condition="Exists('Config\Json\spotify_secret.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\sql_db_config.json" Condition="Exists('Config\Json\sql_db_config.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Json\sql_service_config.json" Condition="Exists('Config\Json\sql_service_config.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ffmpeg_binaries\ffmpeg.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\google_secret.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\google_cred.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\yandex_cred.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

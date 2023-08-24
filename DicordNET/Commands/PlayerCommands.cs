@@ -30,14 +30,7 @@ namespace DicordNET.Commands
                 }
             }
 
-            List<ITrackInfo> tracks = ApiConfig.GetAll(query);
-
-            if (!tracks.Any())
-            {
-                throw new InvalidOperationException("No results");
-            }
-
-            return tracks;
+            return ApiConfig.GetAll(query);
         }
 
         [Command("play")]

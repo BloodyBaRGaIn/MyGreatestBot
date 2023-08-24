@@ -1,7 +1,7 @@
 ﻿namespace DicordNET.ApiClasses
 {
     /// <summary>
-    /// API flags
+    /// API and services flags
     /// </summary>
     [Flags]
     internal enum ApiIntents : int
@@ -11,7 +11,8 @@
         Yandex = 0x02,
         Vk = 0x04,
         Spotify = 0x08,
+        Sql = 0x10,
 
-        All = Youtube | Yandex | Vk | Spotify
+        All = Youtube | Yandex | Vk | Spotify | Sql
     }
 }

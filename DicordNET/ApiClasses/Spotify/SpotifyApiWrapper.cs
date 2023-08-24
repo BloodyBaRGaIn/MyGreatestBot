@@ -116,12 +116,7 @@ namespace DicordNET.ApiClasses.Spotify
         //    SpotifyClientInstance = new(tokenResponse.AccessToken);
         //}
 
-        internal static void Logout()
-        {
-
-        }
-
-        internal static List<SpotifyTrackInfo> GetTracks(string? query)
+        internal static IEnumerable<SpotifyTrackInfo> GetTracks(string? query)
         {
             List<SpotifyTrackInfo> tracks = new();
 
