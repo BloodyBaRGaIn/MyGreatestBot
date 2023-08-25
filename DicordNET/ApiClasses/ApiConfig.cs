@@ -2,6 +2,7 @@
 using DicordNET.ApiClasses.Vk;
 using DicordNET.ApiClasses.Yandex;
 using DicordNET.ApiClasses.Youtube;
+using DicordNET.Extensions;
 using DicordNET.Sql;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,6 @@ namespace DicordNET.ApiClasses
             Init(ApiIntents.Sql, SqlServerWrapper.Open);
             Init(ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
             Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
-            Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
             Init(ApiIntents.Vk, VkApiWrapper.PerformAuth);
             Init(ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth);
         }
@@ -68,7 +68,8 @@ namespace DicordNET.ApiClasses
             catch (Exception ex)
             {
                 Console.WriteLine($"{desired} FAILED");
-                throw new ApplicationException($"{desired} auth failed", ex);
+                Console.Error.WriteLine(ex.GetExtendedMessage());
+                //throw new ApplicationException($"{desired} auth failed", ex);
             }
             finally
             {

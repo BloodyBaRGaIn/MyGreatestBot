@@ -48,9 +48,9 @@ namespace DicordNET.Config
             {
                 return JsonConvert.DeserializeObject<T>(content);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Invalid file content");
+                throw new InvalidOperationException("Invalid file content", ex);
             }
         }
 

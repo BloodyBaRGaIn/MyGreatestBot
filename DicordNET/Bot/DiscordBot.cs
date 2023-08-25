@@ -29,52 +29,74 @@ namespace DicordNET.Bot
 
         internal async Task RunAsync()
         {
-            DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
-
-            prefix = config_js.Prefix;
-
-            DiscordConfiguration discordConfig = new()
+            try
             {
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Error,
-                Intents = DiscordIntents.All,
-                Token = config_js.Token,
-                TokenType = TokenType.Bot,
-                AutoReconnect = true
-            };
+                DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
 
-            Client = new DiscordClient(discordConfig);
+                prefix = config_js.Prefix;
 
-            Client.Ready += Client_Ready;
-            Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-            Client.ClientErrored += Client_ClientErrored;
-            Client.SocketErrored += Client_SocketErrored;
+                DiscordConfiguration discordConfig = new()
+                {
+                    MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Error,
+                    Intents = DiscordIntents.All,
+                    Token = config_js.Token,
+                    TokenType = TokenType.Bot,
+                    AutoReconnect = true
+                };
 
-            _ = Client.UseInteractivity(new()
+                Client = new DiscordClient(discordConfig);
+
+                Client.Ready += Client_Ready;
+                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+                Client.ClientErrored += Client_ClientErrored;
+                Client.SocketErrored += Client_SocketErrored;
+
+                _ = Client.UseInteractivity(new()
+                {
+                    Timeout = TimeSpan.FromMinutes(20)
+                });
+
+                CommandsNextConfiguration commandsConfig = new()
+                {
+                    StringPrefixes = new string[] { config_js.Prefix },
+                    CaseSensitive = false,
+                    EnableMentionPrefix = true,
+                    EnableDms = true,
+                    EnableDefaultHelp = false,
+                    Services = ServiceProvider,
+                };
+
+                Commands = Client.UseCommandsNext(commandsConfig);
+
+                Commands.SetHelpFormatter<CustomHelpFormatter>();
+                Commands.RegisterCommands<ConnectionCommands>();
+                Commands.RegisterCommands<PlayerCommands>();
+                Commands.RegisterCommands<DebugCommands>();
+
+                Commands.CommandErrored += Commands_CommandErrored;
+
+                if (!Client.ConnectAsync().Wait(10000))
+                {
+                    throw new ApplicationException("Cannot connect to Discord");
+                }
+                _ = Client.UseVoiceNext();
+            }
+            catch (Exception ex)
             {
-                Timeout = TimeSpan.FromMinutes(20)
-            });
-
-            CommandsNextConfiguration commandsConfig = new()
-            {
-                StringPrefixes = new string[] { config_js.Prefix },
-                CaseSensitive = false,
-                EnableMentionPrefix = true,
-                EnableDms = true,
-                EnableDefaultHelp = false,
-                Services = ServiceProvider,
-            };
-
-            Commands = Client.UseCommandsNext(commandsConfig);
-
-            Commands.SetHelpFormatter<CustomHelpFormatter>();
-            Commands.RegisterCommands<ConnectionCommands>();
-            Commands.RegisterCommands<PlayerCommands>();
-            Commands.RegisterCommands<DebugCommands>();
-
-            Commands.CommandErrored += Commands_CommandErrored;
-
-            await Client.ConnectAsync();
-            _ = Client.UseVoiceNext();
+                try
+                {
+                    if (Client != null)
+                    {
+                        await Client.DisconnectAsync();
+                        Client.Dispose();
+                    }
+                }
+                catch { }
+                Console.Error.WriteLine(ex.GetExtendedMessage());
+                Console.WriteLine("Press any key to exit");
+                _ = Console.ReadKey(true);
+                return;
+            }
 
             while (true)
             {

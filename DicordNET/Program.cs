@@ -18,7 +18,12 @@ namespace DicordNET
         /// </summary>
         private static void Main()
         {
-            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+            try
+            {
+                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+            }
+            catch { }
+
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             ApiConfig.InitApis();

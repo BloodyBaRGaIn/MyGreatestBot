@@ -71,10 +71,9 @@ namespace DicordNET.ApiClasses.Vk
                     throw new InvalidOperationException("Cannot authorize");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Console.Error.WriteLine(ex.GetExtendedMessage());
-                Environment.Exit(1);
+                throw;
             }
         }
 

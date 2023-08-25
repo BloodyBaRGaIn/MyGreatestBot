@@ -67,18 +67,18 @@ namespace DicordNET.ApiClasses.Yandex
             {
                 _ = api.User.CreateAuthSession(storage, yandexCredStruct.Username);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot create auth session");
+                throw new InvalidOperationException("Cannot create auth session", ex);
             }
 
             try
             {
                 _ = api.User.AuthorizeByAppPassword(storage, yandexCredStruct.Password);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot authorize");
+                throw new InvalidOperationException("Cannot authorize", ex);
             }
 
             try
@@ -89,9 +89,9 @@ namespace DicordNET.ApiClasses.Yandex
                     throw new ArgumentNullException(nameof(token));
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot get valid token");
+                throw new InvalidOperationException("Cannot get valid token", ex);
             }
         }
 
