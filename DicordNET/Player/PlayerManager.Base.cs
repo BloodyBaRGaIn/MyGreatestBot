@@ -26,7 +26,7 @@ namespace DicordNET.Player
         private static volatile bool SeekRequested;
         internal static TimeSpan Seek;
 
-        private const int TRANSMIT_SINK_MS = 10;
+        internal const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
@@ -108,6 +108,7 @@ namespace DicordNET.Player
                 }
                 catch (Exception ex) when (ex is TypeInitializationException)
                 {
+                    Clear();
                     Console.Error.WriteLine(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;
@@ -143,7 +144,7 @@ namespace DicordNET.Player
 
             try
             {
-                BotWrapper.TransmitSink = BotWrapper.VoiceConnection.GetTransmitSink(TRANSMIT_SINK_MS);
+                BotWrapper.UpdateSink();
             }
             catch { }
 
@@ -306,7 +307,8 @@ namespace DicordNET.Player
                     {
                         break;
                     }
-                    BotWrapper.TransmitSink = BotWrapper.VoiceConnection.GetTransmitSink(TRANSMIT_SINK_MS);
+
+                    BotWrapper.UpdateSink();
                     continue;
                 }
             }

@@ -23,6 +23,7 @@ namespace DicordNET.Bot
         internal DiscordClient? Client { get; private set; }
         internal InteractivityExtension? Interactivity { get; private set; }
         internal CommandsNextExtension? Commands { get; private set; }
+        internal VoiceNextExtension? Voice { get; private set; }
         internal ServiceProvider ServiceProvider { get; private set; } = new ServiceCollection().BuildServiceProvider();
 
         private string prefix = string.Empty;
@@ -51,7 +52,7 @@ namespace DicordNET.Bot
                 Client.ClientErrored += Client_ClientErrored;
                 Client.SocketErrored += Client_SocketErrored;
 
-                _ = Client.UseInteractivity(new()
+                Interactivity = Client.UseInteractivity(new()
                 {
                     Timeout = TimeSpan.FromMinutes(20)
                 });
@@ -79,7 +80,7 @@ namespace DicordNET.Bot
                 {
                     throw new ApplicationException("Cannot connect to Discord");
                 }
-                _ = Client.UseVoiceNext();
+                Voice = Client.UseVoiceNext();
             }
             catch (Exception ex)
             {
@@ -127,6 +128,8 @@ namespace DicordNET.Bot
                 else
                 {
                     BotWrapper.VoiceChannel = e.After?.Channel;
+                    BotWrapper.VoiceConnection = Voice?.GetConnection(e.Guild);
+                    BotWrapper.UpdateSink();
                     PlayerManager.Resume(CommandActionSource.Mute | CommandActionSource.External);
                 }
             }

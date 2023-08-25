@@ -20,8 +20,7 @@ namespace DicordNET.Bot
         internal static DiscordClient? Client => BotInstance.Client;
         internal static CommandsNextExtension? Commands => BotInstance.Commands;
         internal static IServiceProvider ServiceProvider => BotInstance.ServiceProvider;
-
-        internal static VoiceNextExtension? VoiceNext;
+        internal static VoiceNextExtension? VoiceNext => BotInstance.Voice;
         internal static VoiceNextConnection? VoiceConnection;
         internal static DiscordChannel? TextChannel;
         internal static DiscordChannel? VoiceChannel;
@@ -30,6 +29,11 @@ namespace DicordNET.Bot
         internal static void Run()
         {
             BotInstance.RunAsync().GetAwaiter().GetResult();
+        }
+
+        internal static void UpdateSink()
+        {
+            TransmitSink = VoiceConnection?.GetTransmitSink(PlayerManager.TRANSMIT_SINK_MS);
         }
 
         internal static VoiceNextConnection? GetVoiceConnection(DiscordGuild? guild)
@@ -89,6 +93,7 @@ namespace DicordNET.Bot
             try
             {
                 VoiceConnection?.Disconnect();
+                VoiceConnection?.Dispose();
                 VoiceConnection = null;
             }
             catch { }
@@ -102,7 +107,6 @@ namespace DicordNET.Bot
             }
 
             TextChannel = ctx.Channel;
-            VoiceNext = ctx.Client.GetVoiceNext();
             VoiceConnection = GetVoiceConnection(ctx.Guild);
 
             if (VoiceConnection != null)
@@ -133,7 +137,6 @@ namespace DicordNET.Bot
             PlayerManager.Stop(CommandActionSource.Mute);
 
             TextChannel = ctx.Channel;
-            VoiceNext = ctx.Client.GetVoiceNext();
             VoiceConnection = GetVoiceConnection(ctx.Guild);
 
             //if (VoiceConnection == null)

@@ -20,7 +20,6 @@ namespace DicordNET.Commands
         private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, string? query)
         {
             BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
 
             if (BotWrapper.VoiceConnection == null)
@@ -81,7 +80,6 @@ namespace DicordNET.Commands
             }
 
             BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
 
             if (!TimeSpan.TryParse(timespan, out TimeSpan result))
@@ -106,7 +104,6 @@ namespace DicordNET.Commands
             }
 
             BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceNext = ctx.Client.GetVoiceNext();
             BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
 
             await Task.Run(PlayerManager.ReturnCurrentTrackToQueue);
