@@ -1,6 +1,5 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
-using DicordNET.Sql;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;

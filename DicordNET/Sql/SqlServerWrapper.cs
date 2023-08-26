@@ -1,5 +1,6 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Config;
+using DicordNET.Extensions;
 using DicordNET.Sql.TableClasses;
 using DicordNET.Utils;
 using Microsoft.Data.SqlClient;
@@ -58,6 +59,7 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -177,6 +179,7 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -217,6 +220,7 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -263,6 +267,7 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
+                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:

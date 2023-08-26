@@ -168,7 +168,14 @@ namespace DicordNET.ApiClasses
                 throw new ArgumentNullException(nameof(query), "Invalid query");
             }
 
-            tracks = QueryIdentifier.Execute(query);
+            try
+            {
+                tracks = QueryIdentifier.Execute(query);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Query execution failed", ex);
+            }
 
             if (!tracks.Any())
             {

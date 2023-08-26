@@ -31,32 +31,28 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
-            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
-            if (bot_client == null)
-            {
-                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+            _ = BotWrapper.Client == null
+                ? await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Red,
                     Title = "Name",
                     Description = "Cannot get my username"
-                });
-            }
-            else
-            {
-                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                })
+                : await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.White,
                     Title = "Name",
-                    Description = $"My name is {bot_client.CurrentUser.Username}"
+                    Description = $"My name is {BotWrapper.Client.CurrentUser.Username}"
                 });
-            }
         }
 
         [Command("help")]
         [Aliases("h")]
         [Description("Get help")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task HelpCommand(CommandContext ctx, [AllowNull, RemainingText, Description("Command name")] string command = null)
+        public async Task HelpCommand(
+            CommandContext ctx,
+            [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
             CustomHelpFormatter? custom = null;
             if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)

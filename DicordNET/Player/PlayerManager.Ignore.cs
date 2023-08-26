@@ -10,7 +10,7 @@ namespace DicordNET.Player
     [SupportedOSPlatform("windows")]
     internal partial class PlayerManager
     {
-        internal static void Ignore(CommandActionSource source = CommandActionSource.None)
+        internal static void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
         {
             if (!IsPlaying || currentTrack == null)
             {

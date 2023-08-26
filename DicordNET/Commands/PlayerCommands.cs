@@ -29,7 +29,7 @@ namespace DicordNET.Commands
 
                 if (BotWrapper.VoiceConnection == null)
                 {
-                    return Enumerable.Empty<ITrackInfo>();
+                    throw new InvalidOperationException("Cannot establish a voice connection");
                 }
             }
 
@@ -165,6 +165,24 @@ namespace DicordNET.Commands
             await Task.Delay(1);
         }
 
+        [Command("next")]
+        [Aliases("ntr")]
+        [Description("Get next track")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task GetNextTrackInfo(CommandContext ctx)
+        {
+            if (ctx.Guild == null)
+            {
+                return;
+            }
+
+            BotWrapper.TextChannel = ctx.Channel;
+
+            await Task.Run(PlayerManager.GetNextTrackInfo);
+
+            await Task.Delay(1);
+        }
+
         [Command("pause")]
         [Aliases("ps")]
         [Description("Pause")]
@@ -261,7 +279,7 @@ namespace DicordNET.Commands
 
             BotWrapper.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Ignore());
+            await Task.Run(() => PlayerManager.IgnoreTrack());
 
             await Task.Delay(1);
         }
