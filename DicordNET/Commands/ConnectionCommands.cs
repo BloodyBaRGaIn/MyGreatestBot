@@ -1,14 +1,12 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Bot;
-using DicordNET.Sql;
-using DicordNET.Player;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
-using System;
 
 namespace DicordNET.Commands
 {
@@ -25,11 +23,7 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Join(CommandContext ctx)
         {
-            if (ctx.Guild == null)
-            {
-                return;
-            }
-            await BotWrapper.Join(ctx);
+            await ConnectionHandler.Join(ctx);
         }
 
         [Command("leave")]
@@ -38,11 +32,7 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Leave(CommandContext ctx)
         {
-            if (ctx.Guild == null)
-            {
-                return;
-            }
-            await BotWrapper.Leave(ctx);
+            await ConnectionHandler.Leave(ctx);
         }
 
         [Command("logout")]
@@ -52,13 +42,14 @@ namespace DicordNET.Commands
         
         public async Task LogoutCommand(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
             _ = await ctx.Channel.SendMessageAsync(":wave:");
-            await BotWrapper.Leave(ctx);
+            await ConnectionHandler.Leave(ctx);
 
             DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
 
@@ -66,7 +57,7 @@ namespace DicordNET.Commands
             {
                 await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
 
-                PlayerManager.Terminate();
+                handler.PlayerInstance.Terminate();
                 ApiConfig.DeinitApis();
 
                 await bot_client.DisconnectAsync();

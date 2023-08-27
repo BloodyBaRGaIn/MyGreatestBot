@@ -1,14 +1,13 @@
-﻿using DicordNET.Bot;
-using DicordNET.Sql;
+﻿using DicordNET.Sql;
 using DSharpPlus.Entities;
 using System.Runtime.Versioning;
 
 namespace DicordNET.Player
 {
     [SupportedOSPlatform("windows")]
-    internal partial class PlayerManager
+    internal partial class Player
     {
-        internal static void Dequeue()
+        internal void Dequeue()
         {
             while (true)
             {
@@ -20,7 +19,7 @@ namespace DicordNET.Player
 
                 if (SqlServerWrapper.IsTrackIgnored(track))
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Skipping ignored track"
@@ -30,7 +29,7 @@ namespace DicordNET.Player
 
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Skipping track with ignored artist(s)"

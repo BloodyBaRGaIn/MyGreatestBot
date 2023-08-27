@@ -1,5 +1,4 @@
 ﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
 using DicordNET.Commands;
 using DSharpPlus.Entities;
 using System.Collections.Generic;
@@ -7,9 +6,9 @@ using System.Linq;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void Skip(int add_count = 0, CommandActionSource source = CommandActionSource.None)
+        internal void Skip(int add_count = 0, CommandActionSource source = CommandActionSource.None)
         {
             lock (tracks_queue)
             {
@@ -17,7 +16,7 @@ namespace DicordNET.Player
                 {
                     if ((source & CommandActionSource.Mute) == 0)
                     {
-                        BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                        Handler.SendMessage(new DiscordEmbedBuilder()
                         {
                             Color = DiscordColor.Blue,
                             Title = "Cannot skip"
@@ -41,7 +40,7 @@ namespace DicordNET.Player
             {
                 if (IsPlaying)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Blue,
                         Title = $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"
@@ -49,7 +48,7 @@ namespace DicordNET.Player
                 }
                 else
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Nothing to skip"

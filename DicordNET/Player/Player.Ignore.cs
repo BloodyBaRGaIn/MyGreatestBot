@@ -1,5 +1,4 @@
-﻿using DicordNET.Bot;
-using DicordNET.Commands;
+﻿using DicordNET.Commands;
 using DicordNET.Sql;
 using DSharpPlus.Entities;
 using System;
@@ -8,15 +7,15 @@ using System.Runtime.Versioning;
 namespace DicordNET.Player
 {
     [SupportedOSPlatform("windows")]
-    internal partial class PlayerManager
+    internal partial class Player
     {
-        internal static void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
+        internal void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
         {
             if (!IsPlaying || currentTrack == null)
             {
                 if ((source & CommandActionSource.Mute) == 0)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Nothing to ignore"
@@ -32,7 +31,7 @@ namespace DicordNET.Player
 
             if ((source & CommandActionSource.Mute) == 0)
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Track ignored"
@@ -40,13 +39,13 @@ namespace DicordNET.Player
             }
         }
 
-        internal static void IgnoreArtist(int index = -1, CommandActionSource source = CommandActionSource.None)
+        internal void IgnoreArtist(int index = -1, CommandActionSource source = CommandActionSource.None)
         {
             if (!IsPlaying || currentTrack == null)
             {
                 if ((source & CommandActionSource.Mute) == 0)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Nothing to ignore"
@@ -77,7 +76,7 @@ namespace DicordNET.Player
 
             if ((source & CommandActionSource.Mute) == 0)
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Artist ignored"

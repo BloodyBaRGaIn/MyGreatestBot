@@ -17,17 +17,17 @@ namespace DicordNET.Commands
     [SupportedOSPlatform("windows")]
     internal class PlayerCommands : BaseCommandModule
     {
-        private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, string? query)
+        private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, ConnectionHandler handler, string? query)
         {
-            BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
+            handler.TextChannel = ctx.Channel;
+            handler.VoiceConnection = handler.GetVoiceConnection();
 
-            if (BotWrapper.VoiceConnection == null)
+            if (handler.VoiceConnection == null)
             {
-                await BotWrapper.Join(ctx);
-                BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
+                await ConnectionHandler.Join(ctx);
+                handler.VoiceConnection = handler.GetVoiceConnection();
 
-                if (BotWrapper.VoiceConnection == null)
+                if (handler.VoiceConnection == null)
                 {
                     throw new InvalidOperationException("Cannot establish a voice connection");
                 }
@@ -42,14 +42,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string query)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
+            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
 
-            await Task.Run(() => PlayerManager.Enqueue(tracks));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks));
         }
 
         [Command("tms")]
@@ -58,14 +59,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string query)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, query);
+            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
 
-            await Task.Run(() => PlayerManager.Enqueue(tracks, CommandActionSource.External));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.External));
         }
 
         [Command("seek")]
@@ -74,20 +76,21 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(CommandContext ctx, [Description("Timespan in format HH:MM:SS")] string timespan)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
+            handler.TextChannel = ctx.Channel;
+            handler.VoiceConnection = handler.GetVoiceConnection();
 
             if (!TimeSpan.TryParse(timespan, out TimeSpan result))
             {
                 throw new InvalidCastException("Invalid argument format");
             }
 
-            await Task.Run(() => PlayerManager.RequestSeek(result));
+            await Task.Run(() => handler.PlayerInstance.RequestSeek(result));
 
             await Task.Delay(1);
         }
@@ -98,15 +101,16 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task ReturnCommand(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
-            BotWrapper.VoiceConnection = BotWrapper.GetVoiceConnection(ctx.Guild);
+            handler.TextChannel = ctx.Channel;
+            handler.VoiceConnection = handler.GetVoiceConnection();
 
-            await Task.Run(PlayerManager.ReturnCurrentTrackToQueue);
+            await Task.Run(handler.PlayerInstance.ReturnCurrentTrackToQueue);
 
             await Task.Delay(1);
         }
@@ -117,14 +121,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Shuffle(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(PlayerManager.ShuffleQueue);
+            await Task.Run(handler.PlayerInstance.ShuffleQueue);
 
             await Task.Delay(1);
         }
@@ -135,14 +140,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task GetCount(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(PlayerManager.GetQueueLength);
+            await Task.Run(handler.PlayerInstance.GetQueueLength);
 
             await Task.Delay(1);
         }
@@ -153,14 +159,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task GetTrackInfo(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(PlayerManager.GetCurrentTrackInfo);
+            await Task.Run(handler.PlayerInstance.GetCurrentTrackInfo);
 
             await Task.Delay(1);
         }
@@ -171,14 +178,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task GetNextTrackInfo(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(PlayerManager.GetNextTrackInfo);
+            await Task.Run(handler.PlayerInstance.GetNextTrackInfo);
 
             await Task.Delay(1);
         }
@@ -189,14 +197,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Pause(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Pause());
+            await Task.Run(() => handler.PlayerInstance.Pause());
 
             await Task.Delay(1);
         }
@@ -207,14 +216,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Resume(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Resume());
+            await Task.Run(() => handler.PlayerInstance.Resume());
 
             await Task.Delay(1);
         }
@@ -225,16 +235,17 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Stop(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
             try
             {
-                await BotWrapper.Leave(ctx);
+                await ConnectionHandler.Leave(ctx);
             }
             catch { }
 
@@ -249,7 +260,8 @@ namespace DicordNET.Commands
             CommandContext ctx,
             [AllowNull, Description("Number of tracks to skip")] int number = 1)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
@@ -259,9 +271,9 @@ namespace DicordNET.Commands
                 throw new ArgumentException("Number must be positive");
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.Skip(number - 1));
+            await Task.Run(() => handler.PlayerInstance.Skip(number - 1));
 
             await Task.Delay(1);
         }
@@ -272,14 +284,15 @@ namespace DicordNET.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task Ignore(CommandContext ctx)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.IgnoreTrack());
+            await Task.Run(() => handler.PlayerInstance.IgnoreTrack());
 
             await Task.Delay(1);
         }
@@ -292,14 +305,15 @@ namespace DicordNET.Commands
             CommandContext ctx,
             [AllowNull, Description("Artist zero-based index")] int artist_index = -1)
         {
-            if (ctx.Guild == null)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            BotWrapper.TextChannel = ctx.Channel;
+            handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => PlayerManager.IgnoreArtist(artist_index));
+            await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index));
 
             await Task.Delay(1);
         }

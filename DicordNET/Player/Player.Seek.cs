@@ -1,13 +1,12 @@
-﻿using DicordNET.Bot;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using System;
 using System.Threading.Tasks;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void RequestSeek(TimeSpan span)
+        internal void RequestSeek(TimeSpan span)
         {
             if (IsPlaying && currentTrack != null)
             {
@@ -21,7 +20,7 @@ namespace DicordNET.Player
                         SeekRequested = true;
                     }
 
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Purple,
                         Title = "Seek",
@@ -33,7 +32,7 @@ namespace DicordNET.Player
                 }
                 else
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Seek",
@@ -45,7 +44,7 @@ namespace DicordNET.Player
             }
             else
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Seek",

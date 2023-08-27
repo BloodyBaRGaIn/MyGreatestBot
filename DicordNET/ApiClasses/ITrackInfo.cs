@@ -107,7 +107,6 @@ namespace DicordNET.ApiClasses
         {
             if (TrySeek(span))
             {
-                PlayerManager.Seek = span;
                 Seek = span;
             }
         }
@@ -146,9 +145,9 @@ namespace DicordNET.ApiClasses
                 }
             }
 
-            if (PlayerManager.Seek != TimeSpan.Zero)
+            if (Seek != TimeSpan.Zero)
             {
-                result += $"Time: {PlayerManager.Seek:hh\\:mm\\:ss}\n";
+                result += $"Time: {Seek:hh\\:mm\\:ss}\n";
             }
 
             return result.Trim('\n');

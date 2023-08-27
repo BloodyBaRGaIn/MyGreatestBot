@@ -121,16 +121,20 @@ namespace DicordNET.Bot
         {
             if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
             {
-                if (e.After?.Channel == null)
+                ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+                if (handler != null)
                 {
-                    PlayerManager.Pause(CommandActionSource.Mute | CommandActionSource.External);
-                }
-                else
-                {
-                    BotWrapper.VoiceChannel = e.After?.Channel;
-                    BotWrapper.VoiceConnection = Voice?.GetConnection(e.Guild);
-                    BotWrapper.UpdateSink();
-                    PlayerManager.Resume(CommandActionSource.Mute | CommandActionSource.External);
+                    if (e.After?.Channel == null)
+                    {
+                        handler.PlayerInstance.Pause(CommandActionSource.Mute | CommandActionSource.External);
+                    }
+                    else
+                    {
+                        handler.VoiceChannel = e.After?.Channel;
+                        handler.VoiceConnection = Voice?.GetConnection(e.Guild);
+                        handler.UpdateSink();
+                        handler.PlayerInstance.Resume(CommandActionSource.Mute | CommandActionSource.External);
+                    }
                 }
             }
             return Task.CompletedTask;

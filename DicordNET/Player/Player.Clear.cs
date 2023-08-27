@@ -2,11 +2,11 @@
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060")]
-        internal static void Clear(CommandActionSource source = CommandActionSource.None)
+        internal void Clear(CommandActionSource source = CommandActionSource.None)
         {
+            _ = source;
             lock (tracks_queue)
             {
                 tracks_queue.Clear();

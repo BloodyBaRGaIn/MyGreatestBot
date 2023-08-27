@@ -1,15 +1,14 @@
-﻿using DicordNET.Bot;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void ReturnCurrentTrackToQueue()
+        internal void ReturnCurrentTrackToQueue()
         {
             if (currentTrack == null)
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Red,
                     Title = "Return",
@@ -26,7 +25,7 @@ namespace DicordNET.Player
                     }
                 }
 
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Return",

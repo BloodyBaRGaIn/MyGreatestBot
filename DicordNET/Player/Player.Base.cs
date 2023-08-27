@@ -13,34 +13,37 @@ using System.Threading.Tasks;
 namespace DicordNET.Player
 {
     [SupportedOSPlatform("windows")]
-    internal static partial class PlayerManager
+    internal partial class Player
     {
         private const string IgnoredPath = "IgnoredTracks.txt";
 
-        private static readonly Queue<ITrackInfo> tracks_queue = new();
+        private readonly Queue<ITrackInfo> tracks_queue = new();
 
-        private static volatile ITrackInfo? currentTrack;
+        private volatile ITrackInfo? currentTrack;
 
-        private static volatile bool IsPlaying;
-        private static volatile bool IsPaused;
-        private static volatile bool SeekRequested;
-        internal static TimeSpan Seek;
+        private volatile bool IsPlaying;
+        private volatile bool IsPaused;
+        private volatile bool SeekRequested;
+        internal TimeSpan Seek;
 
         internal const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
-        private static readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
-        private static readonly CancellationToken MainPlayerCancellationToken;
-        private static readonly Task MainPlayerTask;
+        private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
+        private readonly CancellationToken MainPlayerCancellationToken;
+        private readonly Task MainPlayerTask;
 
-        static PlayerManager()
+        private readonly ConnectionHandler Handler;
+
+        internal Player(ConnectionHandler handler)
         {
+            Handler = handler;
             MainPlayerCancellationToken = MainPlayerCancellationTokenSource.Token;
             MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
         }
 
-        private static void PlayerTaskFunction()
+        private void PlayerTaskFunction()
         {
             Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
@@ -71,7 +74,7 @@ namespace DicordNET.Player
                     Task.Yield().GetAwaiter().GetResult();
                 }
 
-                if (BotWrapper.VoiceConnection == null)
+                if (Handler.VoiceConnection == null)
                 {
                     if (MainPlayerCancellationToken.IsCancellationRequested)
                     {
@@ -98,7 +101,7 @@ namespace DicordNET.Player
 
                     if (!tracks_queue.Any())
                     {
-                        BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                        Handler.SendMessage(new DiscordEmbedBuilder()
                         {
                             Color = DiscordColor.Red,
                             Title = "Play",
@@ -109,7 +112,7 @@ namespace DicordNET.Player
                 catch (Exception ex) when (ex is TypeInitializationException)
                 {
                     Clear();
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
+                    Handler.LogError(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;
                 }
@@ -122,17 +125,17 @@ namespace DicordNET.Player
 
                     IsPlaying = false;
 
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
+                    Handler.LogError(ex.GetExtendedMessage());
 
                     continue;
                 }
             }
         }
 
-        private static void PlayBody(ITrackInfo track)
+        private void PlayBody(ITrackInfo track)
         {
             if (track is null
-                || BotWrapper.VoiceConnection is null)
+                || Handler.VoiceConnection is null)
             {
                 return;
             }
@@ -144,7 +147,7 @@ namespace DicordNET.Player
 
             try
             {
-                BotWrapper.UpdateSink();
+                Handler.UpdateSink();
             }
             catch { }
 
@@ -158,7 +161,7 @@ namespace DicordNET.Player
             }
             catch (Exception ex)
             {
-                BotWrapper.SendMessage(ex.GetExtendedMessage());
+                Handler.SendMessage(ex.GetExtendedMessage());
                 return;
             }
 
@@ -171,7 +174,7 @@ namespace DicordNET.Player
             if (play_message)
             {
                 play_message = false;
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Purple,
                     Title = "Play",
@@ -190,13 +193,13 @@ namespace DicordNET.Player
                 {
                     throw new Exception("Cannot reauth");
                 }
-                Console.WriteLine($"{track.TrackType} : Session expired");
+                Handler.Log($"{track.TrackType} : Session expired");
                 track.Reload();
                 already_restartd = true;
                 goto restart;
             }
 
-            BotWrapper.SendSpeaking(true); // send a speaking indicator
+            Handler.SendSpeaking(true); // send a speaking indicator
 
             while (true)
             {
@@ -217,8 +220,11 @@ namespace DicordNET.Player
                     SeekRequested = false;
                     IsPaused = false;
                     TrackManager.DisposeFFMPEG(ffmpeg);
+                    Seek = track.Seek;
                     goto seek;
                 }
+
+                track.PerformSeek(Seek);
 
                 int retries = 0;
 
@@ -262,19 +268,19 @@ namespace DicordNET.Player
                     if (track.IsLiveStream)
                     {
                         //StaticBotInstanceContainer.SendMessage("Restarting");
-                        Console.WriteLine("Restart ffmpeg");
+                        Handler.Log("Restart ffmpeg");
                     }
                     else
                     {
                         if (track.Duration - Seek >= TimeSpan.FromSeconds(5))
                         {
                             //StaticBotInstanceContainer.SendMessage($"Restarting at {span}");
-                            Console.WriteLine("Restart ffmpeg");
+                            Handler.Log("Restart ffmpeg");
                         }
                         else
                         {
                             // track almost ended
-                            Console.WriteLine("Stop ffmpeg");
+                            Handler.Log("Stop ffmpeg");
                             break;
                         }
                     }
@@ -291,29 +297,29 @@ namespace DicordNET.Player
                     if (Seek >= track.Duration)
                     {
                         // track shold be ended
-                        Console.WriteLine("Stop ffmpeg");
+                        Handler.Log("Stop ffmpeg");
                         break;
                     }
                 }
 
-                if (BotWrapper.TransmitSink == null)
+                if (Handler.TransmitSink == null)
                 {
-                    throw new ArgumentNullException(nameof(BotWrapper.TransmitSink), "Transmit sink not configured");
+                    throw new ArgumentNullException(nameof(Handler.TransmitSink), "Transmit sink not configured");
                 }
 
-                if (!BotWrapper.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
+                if (!Handler.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    if (BotWrapper.VoiceConnection == null)
+                    if (Handler.VoiceConnection == null)
                     {
                         break;
                     }
 
-                    BotWrapper.UpdateSink();
+                    Handler.UpdateSink();
                     continue;
                 }
             }
 
-            BotWrapper.SendSpeaking(false); // we're not speaking anymore
+            Handler.SendSpeaking(false); // we're not speaking anymore
 
             IsPlaying = false;
 

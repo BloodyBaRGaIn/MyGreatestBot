@@ -1,18 +1,16 @@
-﻿using DicordNET.Bot;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void GetCurrentTrackInfo()
+        internal void GetCurrentTrackInfo()
         {
             if (IsPlaying && currentTrack != null)
             {
                 lock (currentTrack)
                 {
-                    currentTrack.PerformSeek(Seek);
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Purple,
                         Title = "Track",
@@ -23,7 +21,7 @@ namespace DicordNET.Player
             }
             else
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Red,
                     Title = "Track",
@@ -32,11 +30,11 @@ namespace DicordNET.Player
             }
         }
 
-        internal static void GetNextTrackInfo()
+        internal void GetNextTrackInfo()
         {
             if (tracks_queue.TryPeek(out var track))
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Purple,
                     Title = "Next track",
@@ -46,7 +44,7 @@ namespace DicordNET.Player
             }
             else
             {
-                BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                Handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Red,
                     Title = "Next track",

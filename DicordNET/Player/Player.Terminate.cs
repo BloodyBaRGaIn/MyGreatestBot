@@ -2,9 +2,9 @@
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void Terminate(CommandActionSource source = CommandActionSource.None)
+        internal void Terminate(CommandActionSource source = CommandActionSource.None)
         {
             MainPlayerCancellationTokenSource.Cancel();
             Clear(source);

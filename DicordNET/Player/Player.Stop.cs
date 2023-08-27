@@ -1,19 +1,18 @@
-﻿using DicordNET.Bot;
-using DicordNET.Commands;
+﻿using DicordNET.Commands;
 using DSharpPlus.Entities;
 using System.Linq;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void Stop(CommandActionSource source = CommandActionSource.None)
+        internal void Stop(CommandActionSource source = CommandActionSource.None)
         {
             if (IsPlaying || tracks_queue.Any())
             {
                 if ((source & CommandActionSource.External) != 0)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Kicked from voice channel"
@@ -25,7 +24,7 @@ namespace DicordNET.Player
 
                 if ((source & CommandActionSource.Mute) == 0)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Blue,
                         Title = "Stopped"
@@ -36,7 +35,7 @@ namespace DicordNET.Player
             {
                 if ((source & (CommandActionSource.Mute | CommandActionSource.External)) == 0)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Nothing to stop"

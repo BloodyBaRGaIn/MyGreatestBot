@@ -1,18 +1,17 @@
-﻿using DicordNET.Bot;
-using DicordNET.Commands;
+﻿using DicordNET.Commands;
 using DSharpPlus.Entities;
 
 namespace DicordNET.Player
 {
-    internal static partial class PlayerManager
+    internal partial class Player
     {
-        internal static void Resume(CommandActionSource source = CommandActionSource.None)
+        internal void Resume(CommandActionSource source = CommandActionSource.None)
         {
             if ((source & CommandActionSource.Mute) == 0)
             {
                 if (IsPlaying)
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Green,
                         Title = "Resumed"
@@ -20,7 +19,7 @@ namespace DicordNET.Player
                 }
                 else
                 {
-                    BotWrapper.SendMessage(new DiscordEmbedBuilder()
+                    Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Green,
                         Title = "Nothing to resume"
