@@ -10,6 +10,7 @@ namespace MyGreatestBot
     /// Main class
     /// </summary>
     [SupportedOSPlatform("windows")]
+    [UnsupportedOSPlatform("linux")]
     internal class Program
     {
         /// <summary>
