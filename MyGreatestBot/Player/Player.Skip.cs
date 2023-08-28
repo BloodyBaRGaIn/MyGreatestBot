@@ -1,8 +1,5 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MyGreatestBot.Player
 {
@@ -24,15 +21,9 @@ namespace MyGreatestBot.Player
                         return;
                     }
                 }
-                List<ITrackInfo> collection = new();
-                while (tracks_queue.Any())
+                for (int i = 0; i < add_count; i++)
                 {
-                    collection.Add(tracks_queue.Dequeue());
-                }
-                collection = collection.Skip(add_count).ToList();
-                foreach (ITrackInfo track in collection)
-                {
-                    tracks_queue.Enqueue(track);
+                    _ = tracks_queue.Dequeue();
                 }
             }
 

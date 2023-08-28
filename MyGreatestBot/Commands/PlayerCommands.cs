@@ -265,7 +265,7 @@ namespace MyGreatestBot.Commands
 
             try
             {
-                await ConnectionHandler.Leave(ctx);
+                await Task.Run(() => handler.PlayerInstance.Stop());
             }
             catch { }
 
