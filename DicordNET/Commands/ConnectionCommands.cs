@@ -39,7 +39,7 @@ namespace DicordNET.Commands
         [Aliases("bye")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
-        
+
         public async Task LogoutCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);

@@ -32,7 +32,7 @@ namespace DicordNET.Player
 
         internal void GetNextTrackInfo()
         {
-            if (tracks_queue.TryPeek(out var track))
+            if (tracks_queue.TryPeek(out ApiClasses.ITrackInfo? track))
             {
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {

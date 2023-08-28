@@ -11,7 +11,7 @@ namespace DicordNET.Player
         {
             while (true)
             {
-                if (!tracks_queue.TryDequeue(out var track))
+                if (!tracks_queue.TryDequeue(out ApiClasses.ITrackInfo? track))
                 {
                     currentTrack = null;
                     return;

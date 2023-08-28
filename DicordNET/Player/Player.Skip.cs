@@ -30,7 +30,7 @@ namespace DicordNET.Player
                     collection.Add(tracks_queue.Dequeue());
                 }
                 collection = collection.Skip(add_count).ToList();
-                foreach (var track in collection)
+                foreach (ITrackInfo track in collection)
                 {
                     tracks_queue.Enqueue(track);
                 }

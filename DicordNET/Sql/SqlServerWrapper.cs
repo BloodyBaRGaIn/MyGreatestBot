@@ -1,6 +1,5 @@
 ﻿using DicordNET.ApiClasses;
 using DicordNET.Config;
-using DicordNET.Extensions;
 using DicordNET.Sql.TableClasses;
 using DicordNET.Utils;
 using Microsoft.Data.SqlClient;
@@ -59,7 +58,6 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -73,7 +71,7 @@ namespace DicordNET.Sql
                         case 4060:
                             _connection = new(ServerString);
                             Server server = new(new ServerConnection(_connection));
-                            server.ConnectionContext.ExecuteNonQuery(scriptProvider.GetDatabaseScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(scriptProvider.GetDatabaseScript());
                             break;
 
                         default:
@@ -107,7 +105,7 @@ namespace DicordNET.Sql
             {
                 try
                 {
-                    using var reader = command.ExecuteReader();
+                    using SqlDataReader reader = command.ExecuteReader();
                     bool result = reader.HasRows;
                     reader.Close();
                     return result;
@@ -126,7 +124,7 @@ namespace DicordNET.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
                             break;
 
                         default:
@@ -172,14 +170,13 @@ namespace DicordNET.Sql
 
                 try
                 {
-                    using var reader = command.ExecuteReader();
+                    using SqlDataReader reader = command.ExecuteReader();
                     bool result = reader.HasRows;
                     reader.Close();
                     return result;
                 }
                 catch (SqlException ex)
                 {
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -192,7 +189,7 @@ namespace DicordNET.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
                             break;
 
                         default:
@@ -220,7 +217,6 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -233,7 +229,7 @@ namespace DicordNET.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
                             break;
 
                         default:
@@ -267,7 +263,6 @@ namespace DicordNET.Sql
                 }
                 catch (SqlException ex)
                 {
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
                     switch (ex.Number)
                     {
                         case -2:
@@ -280,7 +275,7 @@ namespace DicordNET.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
                             break;
 
                         default:

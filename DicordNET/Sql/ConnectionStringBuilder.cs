@@ -28,7 +28,10 @@ namespace DicordNET.Sql
             builder.InitialCatalog = catalog;
         }
 
-        internal string Build() => ToString();
+        internal string Build()
+        {
+            return ToString();
+        }
 
         public override string ToString()
         {

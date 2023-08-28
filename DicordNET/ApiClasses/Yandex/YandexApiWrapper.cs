@@ -145,10 +145,13 @@ namespace DicordNET.ApiClasses.Yandex
                 && !string.IsNullOrWhiteSpace(spotifyTrack.AlbumName.Title)
                 && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
                            .Contains(spotifyTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
-                if (!tracks.Any()) return null;
+                if (!tracks.Any())
+                {
+                    return null;
+                }
             }
 
-            var t = tracks.First();
+            YSearchTrackModel t = tracks.First();
             YTrack y = t;
             y.Albums = t.Albums.Select(a => a as YAlbum).ToList();
 

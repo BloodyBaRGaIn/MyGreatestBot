@@ -65,8 +65,8 @@ namespace DicordNET.Sql.TableClasses
             SqlCommand command = new($"SELECT Type, ID FROM {Name} WHERE Type=@type AND ID=@id");
 
             command.Parameters.Clear();
-            command.Parameters.AddWithValue("@type", type);
-            command.Parameters.AddWithValue("@id", id);
+            _ = command.Parameters.AddWithValue("@type", type);
+            _ = command.Parameters.AddWithValue("@id", id);
 
             command.Connection = connection;
 
@@ -104,9 +104,9 @@ namespace DicordNET.Sql.TableClasses
             SqlCommand command = new($"INSERT INTO {Name} (Type, ID, Hyper) VALUES (@type, @id, @hyper)");
 
             command.Parameters.Clear();
-            command.Parameters.AddWithValue("@type", type);
-            command.Parameters.AddWithValue("@id", id);
-            command.Parameters.AddWithValue("@hyper", hyper);
+            _ = command.Parameters.AddWithValue("@type", type);
+            _ = command.Parameters.AddWithValue("@id", id);
+            _ = command.Parameters.AddWithValue("@hyper", hyper);
 
             command.Connection = connection;
 

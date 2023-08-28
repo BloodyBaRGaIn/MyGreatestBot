@@ -22,7 +22,10 @@ namespace DicordNET.ApiClasses
         private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
 #pragma warning restore SYSLIB1045
 
-        internal static IEnumerable<ITrackInfo> Execute(string query) => TracksReceiver.Execute(query);
+        internal static IEnumerable<ITrackInfo> Execute(string query)
+        {
+            return TracksReceiver.Execute(query);
+        }
 
         private sealed class TracksReceiver
         {

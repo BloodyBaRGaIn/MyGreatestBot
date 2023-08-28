@@ -1,7 +1,6 @@
 ﻿using DicordNET.Commands;
 using DicordNET.Config;
 using DicordNET.Extensions;
-using DicordNET.Player;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -20,6 +19,8 @@ namespace DicordNET.Bot
     [SupportedOSPlatform("windows")]
     internal sealed class DiscordBot
     {
+        private const int DiscordConnectionTimeout = 10000;
+
         internal DiscordClient? Client { get; private set; }
         internal InteractivityExtension? Interactivity { get; private set; }
         internal CommandsNextExtension? Commands { get; private set; }
@@ -75,8 +76,9 @@ namespace DicordNET.Bot
                 Commands.RegisterCommands<DebugCommands>();
 
                 Commands.CommandErrored += Commands_CommandErrored;
+                Commands.CommandExecuted += Commands_CommandExecuted;
 
-                if (!Client.ConnectAsync().Wait(10000))
+                if (!Client.ConnectAsync().Wait(DiscordConnectionTimeout))
                 {
                     throw new ApplicationException("Cannot connect to Discord");
                 }
@@ -105,19 +107,19 @@ namespace DicordNET.Bot
             }
         }
 
-        private Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
+
+        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
         {
-            Console.WriteLine(args.Exception.GetExtendedMessage());
-            return Task.CompletedTask;
+            await sender.UpdateStatusAsync(new()
+            {
+                ActivityType = ActivityType.ListeningTo,
+                Name = $"{prefix}help"
+            }, UserStatus.Online);
+
+            Console.WriteLine("### READY ###");
         }
 
-        private Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
-        {
-            Console.WriteLine(args.Exception.GetExtendedMessage());
-            return Task.CompletedTask;
-        }
-
-        private Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
+        private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
             if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
             {
@@ -137,24 +139,65 @@ namespace DicordNET.Bot
                     }
                 }
             }
-            return Task.CompletedTask;
+
+            await Task.Delay(1);
         }
 
-        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
+        private async Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
         {
-            await sender.UpdateStatusAsync(new()
-            {
-                ActivityType = ActivityType.ListeningTo,
-                Name = $"{prefix}help"
-            }, UserStatus.Online);
+            await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+        }
 
-            Console.WriteLine("### READY ###");
+        private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+        {
+            await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+        }
+
+        private static string GetCommandInfo(CommandEventArgs args)
+        {
+            string result = string.Empty;
+            if (args.Context.Member != null)
+            {
+                result += $"{args.Context.Member.DisplayName} : ";
+            }
+
+            if (args.Command != null)
+            {
+                result += $"{args.Command.Name} ";
+            }
+
+            if (!string.IsNullOrWhiteSpace(args.Context.RawArgumentString))
+            {
+                result += $"{args.Context.RawArgumentString}";
+            }
+
+            return result;
+        }
+
+        private async Task Commands_CommandExecuted(
+            CommandsNextExtension sender,
+            CommandExecutionEventArgs args)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            await handler.LogAsync(GetCommandInfo(args));
         }
 
         private async Task Commands_CommandErrored(
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
+            if (handler != null)
+            {
+                await handler.LogErrorAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
+                    $"Command errored{Environment.NewLine}" +
+                    $"{args.Exception.GetExtendedMessage()}");
+            }
             _ = await args.Context.Channel.SendMessageAsync(args.Exception.GetExtendedMessage());
         }
     }

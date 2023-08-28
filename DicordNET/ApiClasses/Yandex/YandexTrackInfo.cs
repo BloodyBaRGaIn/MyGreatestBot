@@ -1,11 +1,9 @@
 ﻿using DicordNET.Extensions;
 using DicordNET.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
-using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 

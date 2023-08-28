@@ -15,17 +15,17 @@ namespace DicordNET.Bot
     {
         private const int SEND_MESSAGE_WAIT_MS = 1000;
 
-        internal DiscordGuild Guild { get; }
+        private readonly DiscordGuild Guild;
+        internal readonly Player.Player PlayerInstance;
 
         private static VoiceNextExtension? VoiceNext => BotWrapper.VoiceNext;
 
-        internal VoiceNextConnection? VoiceConnection;
-        internal DiscordChannel? TextChannel;
-        internal DiscordChannel? VoiceChannel;
-        internal VoiceTransmitSink? TransmitSink;
-        internal Player.Player PlayerInstance;
+        internal VoiceNextConnection? VoiceConnection { get; set; }
+        internal DiscordChannel? TextChannel { get; set; }
+        internal DiscordChannel? VoiceChannel { get; set; }
+        internal VoiceTransmitSink? TransmitSink { get; private set; }
 
-        internal static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = new();
+        private static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = new();
 
         internal static ConnectionHandler? GetConnectionHandler(DiscordGuild guild)
         {
@@ -43,25 +43,43 @@ namespace DicordNET.Bot
             return handler;
         }
 
-        internal ConnectionHandler(DiscordGuild guild)
-        { 
+        private ConnectionHandler(DiscordGuild guild)
+        {
             Guild = guild;
             PlayerInstance = new(this);
         }
 
-        private void GenericWriteLine(TextWriter writer, string text)
+        internal ConnectionHandler()
         {
-            writer.WriteLine($"{DateTime.Now:dd.MM.yyyy HH:mm:ss}\t{Guild.Name}{Environment.NewLine}{text}");
+            throw new NotImplementedException();
+        }
+
+        private async Task GenericWriteLineAsync(TextWriter writer, string text)
+        {
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                await writer.WriteLineAsync($"{DateTime.Now:dd.MM.yyyy HH:mm:ss}\t{Guild.Name}{Environment.NewLine}{text}");
+            }
+        }
+
+        internal async Task LogAsync(string text)
+        {
+            await GenericWriteLineAsync(Console.Out, text);
         }
 
         internal void Log(string text)
         {
-            GenericWriteLine(Console.Out, text);
+            GenericWriteLineAsync(Console.Out, text).Wait();
+        }
+
+        internal async Task LogErrorAsync(string text)
+        {
+            await GenericWriteLineAsync(Console.Error, text);
         }
 
         internal void LogError(string text)
         {
-            GenericWriteLine(Console.Error, text);
+            GenericWriteLineAsync(Console.Error, text).Wait();
         }
 
         internal VoiceNextConnection? GetVoiceConnection()

@@ -46,14 +46,12 @@ namespace DicordNET.Commands
 
         public override CommandHelpMessage Build()
         {
-            if (_embed.Fields.Count == 0)
+            _ = _embed.ClearFields();
+            if (BotWrapper.Commands != null)
             {
-                if (BotWrapper.Commands != null)
+                foreach (Command? cmd in BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name))
                 {
-                    foreach (var cmd in BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name))
-                    {
-                        AddField(cmd);
-                    }
+                    AddField(cmd);
                 }
             }
             return new CommandHelpMessage(embed: _embed);
@@ -120,7 +118,7 @@ namespace DicordNET.Commands
                 content += string.Join("\n", arguments);
             }
 
-            _embed.AddField(title, content);
+            _ = _embed.AddField(title, content);
         }
     }
 }
