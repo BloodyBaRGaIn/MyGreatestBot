@@ -152,6 +152,11 @@ namespace MyGreatestBot.ApiClasses
             return result.Trim('\n');
         }
 
+        internal string GetShortMessage()
+        {
+            return $"Playing: {TrackName.Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
+        }
+
         /// <summary>
         /// Get Discord message thumbnail with track cover image
         /// </summary>

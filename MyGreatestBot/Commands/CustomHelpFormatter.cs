@@ -44,16 +44,17 @@ namespace MyGreatestBot.Commands
             return this;
         }
 
+        public CustomHelpFormatter WithAllCommands()
+        {
+            if (BotWrapper.Commands == null)
+            {
+                return this;
+            }
+            return WithSubcommands(BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name));
+        }
+
         public override CommandHelpMessage Build()
         {
-            _ = _embed.ClearFields();
-            if (BotWrapper.Commands != null)
-            {
-                foreach (Command? cmd in BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name))
-                {
-                    AddField(cmd);
-                }
-            }
             return new CommandHelpMessage(embed: _embed);
         }
 

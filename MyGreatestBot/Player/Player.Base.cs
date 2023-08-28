@@ -150,6 +150,8 @@ namespace MyGreatestBot.Player
             }
             catch { }
 
+            Handler.Log(track.GetShortMessage());
+
         restart:
 
             Seek = TimeSpan.Zero;
@@ -184,6 +186,8 @@ namespace MyGreatestBot.Player
 
             Process ffmpeg = TrackManager.StartFFMPEG(track);
 
+            Handler.Log("Start ffmpeg");
+
             bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : (int)(1000 * (track.Duration.TotalHours + 1)));
 
             if (ffmpeg.HasExited || exit)
@@ -198,7 +202,7 @@ namespace MyGreatestBot.Player
                 goto restart;
             }
 
-            Handler.SendSpeaking(true); // send a speaking indicator
+            Handler.SendSpeaking(true);
 
             while (true)
             {
@@ -279,7 +283,6 @@ namespace MyGreatestBot.Player
                         else
                         {
                             // track almost ended
-                            Handler.Log("Stop ffmpeg");
                             break;
                         }
                     }
@@ -293,10 +296,9 @@ namespace MyGreatestBot.Player
 
                 if (!track.IsLiveStream)
                 {
-                    if (Seek >= track.Duration)
+                    if (track.Duration - Seek <= TimeSpan.FromSeconds(1))
                     {
-                        // track shold be ended
-                        Handler.Log("Stop ffmpeg");
+                        // track should be ended
                         break;
                     }
                 }
@@ -318,11 +320,13 @@ namespace MyGreatestBot.Player
                 }
             }
 
-            Handler.SendSpeaking(false); // we're not speaking anymore
+            Handler.SendSpeaking(false);
 
             IsPlaying = false;
 
             TrackManager.DisposeFFMPEG(ffmpeg);
+
+            Handler.Log("Stop ffmpeg");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.Bot;
 using MyGreatestBot.Utils;
+using System;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
@@ -25,6 +26,8 @@ namespace MyGreatestBot
             catch { }
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            Environment.SetEnvironmentVariable("SLAVA_UKRAINI", "1");
 
             ApiManager.InitApis();
 

@@ -77,7 +77,9 @@ namespace MyGreatestBot.Commands
         [Aliases("t")]
         [Description("Place query result to the head")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task TmsCommand(CommandContext ctx, [RemainingText, Description("URL")] string query)
+        public async Task TmsCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -94,7 +96,9 @@ namespace MyGreatestBot.Commands
         [Aliases("sk")]
         [Description("Seek current track")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task SeekCommand(CommandContext ctx, [Description("Timespan in format HH:MM:SS")] string timespan)
+        public async Task SeekCommand(
+            CommandContext ctx,
+            [Description("Timespan in format HH:MM:SS")] string timespan)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -155,7 +159,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("count")]
-        [Aliases("cn")]
+        [Aliases("cnt", "cn")]
         [Description("Get queue length")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task CountCommand(CommandContext ctx)
@@ -193,7 +197,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("next")]
-        [Aliases("ntr")]
+        [Aliases("ntr", "nex")]
         [Description("Get next track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NextTrackInfoCommand(CommandContext ctx)

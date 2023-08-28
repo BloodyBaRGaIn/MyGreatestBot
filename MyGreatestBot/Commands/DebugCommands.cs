@@ -4,6 +4,7 @@ using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -42,7 +43,8 @@ namespace MyGreatestBot.Commands
                 {
                     Color = DiscordColor.White,
                     Title = "Name",
-                    Description = $"My name is {BotWrapper.Client.CurrentUser.Username}"
+                    Description = $"My name is {ctx.Guild.Members.Values.Where(x =>
+                        x.Id == BotWrapper.Client.CurrentUser.Id).FirstOrDefault()?.DisplayName}"
                 });
         }
 
@@ -54,7 +56,7 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
-            CustomHelpFormatter? custom = null;
+            CustomHelpFormatter custom;
             if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)
             {
                 string command_key = command.ToLowerInvariant();
@@ -63,7 +65,10 @@ namespace MyGreatestBot.Commands
                     : throw new ArgumentException("Invalid command");
                 custom = new CustomHelpFormatter(ctx).WithCommand(cmd);
             }
-            custom ??= new(ctx);
+            else
+            {
+                custom = new CustomHelpFormatter(ctx).WithAllCommands();
+            }
             _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
         }
     }
