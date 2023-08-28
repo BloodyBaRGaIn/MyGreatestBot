@@ -46,7 +46,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ConfigSamples\README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="ConfigSamples\spotify_secret.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -73,7 +73,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\Json\README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Config\Json\yandex_cred.json" Condition="Exists('Config\Json\yandex_cred.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
