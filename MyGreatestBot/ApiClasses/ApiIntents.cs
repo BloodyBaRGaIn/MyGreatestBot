@@ -1,4 +1,4 @@
-﻿namespace DicordNET.ApiClasses
+﻿namespace MyGreatestBot.ApiClasses
 {
     /// <summary>
     /// API and services flags

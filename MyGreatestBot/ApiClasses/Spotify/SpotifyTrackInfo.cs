@@ -1,11 +1,11 @@
-﻿using DicordNET.ApiClasses.Yandex;
-using DicordNET.Utils;
+﻿using MyGreatestBot.ApiClasses.Yandex;
+using MyGreatestBot.Utils;
 using SpotifyAPI.Web;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
 
-namespace DicordNET.ApiClasses.Spotify
+namespace MyGreatestBot.ApiClasses.Spotify
 {
     /// <summary>
     /// Spotify track info implementation
@@ -99,7 +99,7 @@ namespace DicordNET.ApiClasses.Spotify
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(TrackType | ApiIntents.Yandex);
+            ApiManager.ReloadApis(TrackType | ApiIntents.Yandex);
         }
 
         public int CompareTo(ITrackInfo? other)

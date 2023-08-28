@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DicordNET.Extensions
+namespace MyGreatestBot.Extensions
 {
     /// <summary>
     /// <see cref="Regex"/> extensions

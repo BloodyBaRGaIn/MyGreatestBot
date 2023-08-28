@@ -1,10 +1,11 @@
-﻿using DicordNET.Config;
+﻿using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Utils;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.ServiceProcess;
 
-namespace DicordNET.Sql
+namespace MyGreatestBot.Sql
 {
     [SupportedOSPlatform("windows")]
     internal static class SqlServiceWrapper

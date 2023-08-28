@@ -1,16 +1,16 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Config;
-using DicordNET.Sql.TableClasses;
-using DicordNET.Utils;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
+using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Sql.TableClasses;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 
-namespace DicordNET.Sql
+namespace MyGreatestBot.Sql
 {
     [SupportedOSPlatform("windows")]
     internal static class SqlServerWrapper

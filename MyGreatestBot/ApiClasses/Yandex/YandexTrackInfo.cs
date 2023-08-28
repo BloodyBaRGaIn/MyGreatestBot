@@ -1,5 +1,5 @@
-﻿using DicordNET.Extensions;
-using DicordNET.Utils;
+﻿using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -7,7 +7,7 @@ using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
-namespace DicordNET.ApiClasses.Yandex
+namespace MyGreatestBot.ApiClasses.Yandex
 {
     /// <summary>
     /// Yandex track info implementation
@@ -102,7 +102,7 @@ namespace DicordNET.ApiClasses.Yandex
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.DeinitApis(TrackType);
+            ApiManager.DeinitApis(TrackType);
         }
 
         public int CompareTo(ITrackInfo? other)

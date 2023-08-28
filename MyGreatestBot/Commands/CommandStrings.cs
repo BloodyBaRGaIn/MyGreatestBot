@@ -1,4 +1,4 @@
-﻿namespace DicordNET.Commands
+﻿namespace MyGreatestBot.Commands
 {
     /// <summary>
     /// Commands categories

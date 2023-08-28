@@ -1,4 +1,4 @@
-﻿namespace DicordNET.Sql.TableClasses
+﻿namespace MyGreatestBot.Sql.TableClasses
 {
     internal sealed class IgnoredArtistsTable : GenericIgnoredTable
     {

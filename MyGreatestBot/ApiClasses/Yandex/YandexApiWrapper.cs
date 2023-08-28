@@ -1,6 +1,7 @@
-﻿using DicordNET.ApiClasses.Spotify;
-using DicordNET.Config;
-using DicordNET.Extensions;
+﻿using MyGreatestBot.ApiClasses.Spotify;
+using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Search.Track;
 using Yandex.Music.Api.Models.Track;
 
-namespace DicordNET.ApiClasses.Yandex
+namespace MyGreatestBot.ApiClasses.Yandex
 {
     [SupportedOSPlatform("windows")]
     internal static class YandexApiWrapper

@@ -1,10 +1,10 @@
-﻿using DicordNET.ApiClasses;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {

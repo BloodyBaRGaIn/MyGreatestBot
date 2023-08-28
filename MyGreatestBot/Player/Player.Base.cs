@@ -1,7 +1,7 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
-using DicordNET.Extensions;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Bot;
+using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
     internal partial class Player

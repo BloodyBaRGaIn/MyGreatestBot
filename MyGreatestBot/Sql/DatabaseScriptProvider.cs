@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace DicordNET.Sql
+namespace MyGreatestBot.Sql
 {
     internal sealed class DatabaseScriptProvider
     {

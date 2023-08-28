@@ -1,8 +1,8 @@
-﻿using DicordNET.Commands;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands;
 using System.Linq;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {

@@ -1,7 +1,4 @@
-﻿using DicordNET.Commands;
-using DicordNET.Config;
-using DicordNET.Extensions;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -9,12 +6,16 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
+using MyGreatestBot.Commands;
+using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DicordNET.Bot
+namespace MyGreatestBot.Bot
 {
     [SupportedOSPlatform("windows")]
     internal sealed class DiscordBot

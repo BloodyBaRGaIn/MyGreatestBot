@@ -4,7 +4,7 @@ using DSharpPlus.VoiceNext;
 using System;
 using System.Runtime.Versioning;
 
-namespace DicordNET.Bot
+namespace MyGreatestBot.Bot
 {
     [SupportedOSPlatform("windows")]
     internal static class BotWrapper

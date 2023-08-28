@@ -1,10 +1,10 @@
-﻿using DicordNET.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
     internal static class TrackManager

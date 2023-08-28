@@ -1,8 +1,9 @@
-﻿using DicordNET.Sql;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Sql;
 using System.Runtime.Versioning;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
     internal partial class Player
@@ -11,7 +12,7 @@ namespace DicordNET.Player
         {
             while (true)
             {
-                if (!tracks_queue.TryDequeue(out ApiClasses.ITrackInfo? track))
+                if (!tracks_queue.TryDequeue(out ITrackInfo? track))
                 {
                     currentTrack = null;
                     return;

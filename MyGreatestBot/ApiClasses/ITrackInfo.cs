@@ -1,9 +1,9 @@
-﻿using DicordNET.Utils;
+﻿using MyGreatestBot.Utils;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
 
-namespace DicordNET.ApiClasses
+namespace MyGreatestBot.ApiClasses
 {
     /// <summary>
     /// Track information abstraction

@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {

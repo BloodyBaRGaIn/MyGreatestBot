@@ -1,17 +1,15 @@
 ﻿using Newtonsoft.Json;
 
-namespace DicordNET.Config
+namespace MyGreatestBot.ConfigStructs
 {
     /// <summary>
-    /// Google credentials content
+    /// Vk credentials content
     /// </summary>
-    internal struct GoogleCredentialsJSON
+    internal struct VkCredentialsJSON
     {
         [JsonProperty("username")]
         public string Username { get; private set; }
         [JsonProperty("password")]
         public string Password { get; private set; }
-        [JsonProperty("key")]
-        public string Key { get; private set; }
     }
 }

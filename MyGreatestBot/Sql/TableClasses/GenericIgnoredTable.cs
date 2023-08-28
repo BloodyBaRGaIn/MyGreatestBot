@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 
-namespace DicordNET.Sql.TableClasses
+namespace MyGreatestBot.Sql.TableClasses
 {
     internal class GenericIgnoredTable : BaseTableProvider
     {

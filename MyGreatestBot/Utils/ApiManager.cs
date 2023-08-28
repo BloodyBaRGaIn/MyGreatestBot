@@ -1,22 +1,23 @@
-﻿using DicordNET.ApiClasses.Spotify;
-using DicordNET.ApiClasses.Vk;
-using DicordNET.ApiClasses.Yandex;
-using DicordNET.ApiClasses.Youtube;
-using DicordNET.Extensions;
-using DicordNET.Sql;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Spotify;
+using MyGreatestBot.ApiClasses.Vk;
+using MyGreatestBot.ApiClasses.Yandex;
+using MyGreatestBot.ApiClasses.Youtube;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Sql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace DicordNET.ApiClasses
+namespace MyGreatestBot.Utils
 {
     /// <summary>
     /// API configuration
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal static class ApiConfig
+    internal static class ApiManager
     {
         /// <summary>
         /// Intents used on initialization

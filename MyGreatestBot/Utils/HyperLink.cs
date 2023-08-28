@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DicordNET.Utils
+namespace MyGreatestBot.Utils
 {
     /// <summary>
     /// Hypertext string

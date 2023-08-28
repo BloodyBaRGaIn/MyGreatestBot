@@ -1,8 +1,9 @@
-﻿using DicordNET.Config;
-using DicordNET.Extensions;
-using Google.Apis.Auth.OAuth2;
+﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +16,7 @@ using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace DicordNET.ApiClasses.Youtube
+namespace MyGreatestBot.ApiClasses.Youtube
 {
     /// <summary>
     /// Youtube API wrapper class

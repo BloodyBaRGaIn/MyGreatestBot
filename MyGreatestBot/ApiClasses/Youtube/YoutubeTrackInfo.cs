@@ -1,4 +1,4 @@
-﻿using DicordNET.Utils;
+﻿using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace DicordNET.ApiClasses.Youtube
+namespace MyGreatestBot.ApiClasses.Youtube
 {
     /// <summary>
     /// Youtube track info implementation
@@ -113,7 +113,7 @@ namespace DicordNET.ApiClasses.Youtube
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(TrackType);
+            ApiManager.ReloadApis(TrackType);
         }
 
         public int CompareTo(ITrackInfo? other)

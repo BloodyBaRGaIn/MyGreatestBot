@@ -1,13 +1,14 @@
-﻿using DicordNET.ApiClasses.Spotify;
-using DicordNET.ApiClasses.Vk;
-using DicordNET.ApiClasses.Yandex;
-using DicordNET.ApiClasses.Youtube;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Spotify;
+using MyGreatestBot.ApiClasses.Vk;
+using MyGreatestBot.ApiClasses.Yandex;
+using MyGreatestBot.ApiClasses.Youtube;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
-namespace DicordNET.ApiClasses
+namespace MyGreatestBot.Utils
 {
     /// <summary>
     /// Links identifier class
@@ -50,7 +51,7 @@ namespace DicordNET.ApiClasses
                     {
                         continue;
                     }
-                    if (ApiConfig.InitIntents.HasFlag(receiver.desired))
+                    if (ApiManager.InitIntents.HasFlag(receiver.desired))
                     {
                         return receiver.get_tracks.Invoke(query);
                     }

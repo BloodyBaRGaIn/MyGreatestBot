@@ -1,15 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using MyGreatestBot.ConfigStructs;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 
-namespace DicordNET.Config
+namespace MyGreatestBot.Utils
 {
     /// <summary>
     /// JSON reader class
     /// </summary>
     internal static class ConfigManager
     {
-        private const string CONFIG_DIR = "Config/Json";
+        private const string CONFIG_DIR = "Config";
 
         private const string DISCORD_JSON_PATH = $"{CONFIG_DIR}/config.json";
         private const string SQL_DATABASE_JSON_PATH = $"{CONFIG_DIR}/sql_db_config.json";

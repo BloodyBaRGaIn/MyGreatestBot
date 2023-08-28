@@ -1,6 +1,7 @@
-﻿using DicordNET.Config;
-using DicordNET.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using VkNet.Abstractions;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Model;
 
-namespace DicordNET.ApiClasses.Vk
+namespace MyGreatestBot.ApiClasses.Vk
 {
     /// <summary>
     /// Vk API wrapper class

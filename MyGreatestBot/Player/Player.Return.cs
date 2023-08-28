@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {

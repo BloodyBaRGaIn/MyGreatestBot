@@ -1,4 +1,4 @@
-﻿namespace DicordNET.Extensions
+﻿namespace MyGreatestBot.Extensions
 {
     /// <summary>
     /// <see cref="string"/> extensions

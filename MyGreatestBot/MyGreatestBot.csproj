@@ -6,6 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <BaseOutputPath>..\build\</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,63 +37,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ConfigSamples\config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\google_cred.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\google_secret.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\README.md">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\spotify_secret.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\sql_db_config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\sql_service_config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\vk_cred.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="ConfigSamples\yandex_cred.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\config.json" Condition="Exists('Config\Json\config.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\google_cred.json" Condition="Exists('Config\Json\google_cred.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\google_secret.json" Condition="Exists('Config\Json\google_secret.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\README.md">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\yandex_cred.json" Condition="Exists('Config\Json\yandex_cred.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\vk_cred.json" Condition="Exists('Config\Json\vk_cred.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\spotify_secret.json" Condition="Exists('Config\Json\spotify_secret.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\sql_db_config.json" Condition="Exists('Config\Json\sql_db_config.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Json\sql_service_config.json" Condition="Exists('Config\Json\sql_service_config.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="ffmpeg_binaries\ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /Y /I /C /E &quot;$(ProjectDir)..\Config\*.json&quot; &quot;$(OutDir)Config\&quot; &gt; NUL&#xD;&#xA;xcopy /Y /I /C /E &quot;$(ProjectDir)..\ffmpeg_binaries\ffmpeg.exe&quot; &quot;$(OutDir)ffmpeg_binaries\&quot; &gt; NUL&#xD;&#xA;" />
+  </Target>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DicordNET.Extensions
+namespace MyGreatestBot.Extensions
 {
     /// <summary>
     /// <see cref="Exception"/> extensions
@@ -16,7 +16,7 @@ namespace DicordNET.Extensions
             string result = $"{exception.GetType().Name} : {exception.Message}";
             if (exception.InnerException != null)
             {
-                result += $"{Environment.NewLine}{GetExtendedMessage(exception.InnerException)}";
+                result += $"{Environment.NewLine}{exception.InnerException.GetExtendedMessage()}";
             }
             return result;
         }

@@ -1,5 +1,6 @@
-﻿using DicordNET.Config;
-using DicordNET.Extensions;
+﻿using MyGreatestBot.ConfigStructs;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Runtime.Versioning;
 //using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
-namespace DicordNET.ApiClasses.Spotify
+namespace MyGreatestBot.ApiClasses.Spotify
 {
     /// <summary>
     /// Spotify API wrapper class

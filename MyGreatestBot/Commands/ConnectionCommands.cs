@@ -1,14 +1,14 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MyGreatestBot.Bot;
+using MyGreatestBot.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace DicordNET.Commands
+namespace MyGreatestBot.Commands
 {
     /// <summary>
     /// Connection commands
@@ -21,7 +21,7 @@ namespace DicordNET.Commands
         [Aliases("j")]
         [Description("Join voice channel")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Join(CommandContext ctx)
+        public async Task JoinCommand(CommandContext ctx)
         {
             await ConnectionHandler.Join(ctx);
         }
@@ -30,7 +30,7 @@ namespace DicordNET.Commands
         [Aliases("l")]
         [Description("Leave voice channel")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Leave(CommandContext ctx)
+        public async Task LeaveCommand(CommandContext ctx)
         {
             await ConnectionHandler.Leave(ctx);
         }
@@ -39,7 +39,6 @@ namespace DicordNET.Commands
         [Aliases("bye")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
-
         public async Task LogoutCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -58,7 +57,7 @@ namespace DicordNET.Commands
                 await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
 
                 handler.PlayerInstance.Terminate();
-                ApiConfig.DeinitApis();
+                ApiManager.DeinitApis();
 
                 await bot_client.DisconnectAsync();
                 bot_client.Dispose();

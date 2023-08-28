@@ -1,6 +1,6 @@
-﻿using DicordNET.Commands;
+﻿using MyGreatestBot.Commands;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {

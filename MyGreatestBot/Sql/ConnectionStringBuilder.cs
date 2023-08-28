@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace DicordNET.Sql
+namespace MyGreatestBot.Sql
 {
     internal sealed class ConnectionStringBuilder
     {

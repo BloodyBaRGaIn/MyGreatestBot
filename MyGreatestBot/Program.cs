@@ -1,10 +1,10 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
+﻿using MyGreatestBot.Bot;
+using MyGreatestBot.Utils;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
 
-namespace DicordNET
+namespace MyGreatestBot
 {
     /// <summary>
     /// Main class
@@ -25,11 +25,11 @@ namespace DicordNET
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            ApiConfig.InitApis();
+            ApiManager.InitApis();
 
             BotWrapper.Run();
 
-            ApiConfig.DeinitApis();
+            ApiManager.DeinitApis();
         }
     }
 }

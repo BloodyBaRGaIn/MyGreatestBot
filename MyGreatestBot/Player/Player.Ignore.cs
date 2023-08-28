@@ -1,10 +1,10 @@
-﻿using DicordNET.Commands;
-using DicordNET.Sql;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands;
+using MyGreatestBot.Sql;
 using System;
 using System.Runtime.Versioning;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
     internal partial class Player

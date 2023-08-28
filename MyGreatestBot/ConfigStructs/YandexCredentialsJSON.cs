@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DicordNET.Config
+namespace MyGreatestBot.ConfigStructs
 {
     /// <summary>
     /// Yandex credentials content

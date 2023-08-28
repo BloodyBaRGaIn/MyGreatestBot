@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
 
-namespace DicordNET.Player
+namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
@@ -32,7 +33,7 @@ namespace DicordNET.Player
 
         internal void GetNextTrackInfo()
         {
-            if (tracks_queue.TryPeek(out ApiClasses.ITrackInfo? track))
+            if (tracks_queue.TryPeek(out ITrackInfo? track))
             {
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {

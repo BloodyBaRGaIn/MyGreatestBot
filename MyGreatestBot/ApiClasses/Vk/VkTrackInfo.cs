@@ -1,11 +1,11 @@
-﻿using DicordNET.Utils;
+﻿using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 using VkNet.Model;
 
-namespace DicordNET.ApiClasses.Vk
+namespace MyGreatestBot.ApiClasses.Vk
 {
     /// <summary>
     /// Vk track info implementation
@@ -114,7 +114,7 @@ namespace DicordNET.ApiClasses.Vk
 
         void ITrackInfo.Reload()
         {
-            ApiConfig.ReloadApis(TrackType);
+            ApiManager.ReloadApis(TrackType);
         }
 
         public int CompareTo(ITrackInfo? other)

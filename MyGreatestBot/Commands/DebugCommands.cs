@@ -1,13 +1,13 @@
-﻿using DicordNET.Bot;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MyGreatestBot.Bot;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace DicordNET.Commands
+namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]
     [SupportedOSPlatform("windows")]

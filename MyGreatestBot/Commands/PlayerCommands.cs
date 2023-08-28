@@ -1,14 +1,15 @@
-﻿using DicordNET.ApiClasses;
-using DicordNET.Bot;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Bot;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace DicordNET.Commands
+namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.PlayerCategoryName)]
     [SupportedOSPlatform("windows")]
@@ -30,14 +31,16 @@ namespace DicordNET.Commands
                 }
             }
 
-            return ApiConfig.GetAll(query);
+            return ApiManager.GetAll(query);
         }
 
         [Command("play")]
         [Aliases("p")]
         [Description("Add tracks")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Play(CommandContext ctx, [RemainingText, Description("URL")] string query)
+        public async Task PlayCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -116,7 +119,7 @@ namespace DicordNET.Commands
         [Aliases("sh")]
         [Description("Shuffle queue")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Shuffle(CommandContext ctx)
+        public async Task ShuffleCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -135,7 +138,7 @@ namespace DicordNET.Commands
         [Aliases("cn")]
         [Description("Get queue length")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task GetCount(CommandContext ctx)
+        public async Task CountCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -154,7 +157,7 @@ namespace DicordNET.Commands
         [Aliases("tr")]
         [Description("Get current track")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task GetTrackInfo(CommandContext ctx)
+        public async Task TrackInfoCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -173,7 +176,7 @@ namespace DicordNET.Commands
         [Aliases("ntr")]
         [Description("Get next track")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task GetNextTrackInfo(CommandContext ctx)
+        public async Task NextTrackInfoCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -192,7 +195,7 @@ namespace DicordNET.Commands
         [Aliases("ps")]
         [Description("Pause")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Pause(CommandContext ctx)
+        public async Task PauseCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -211,7 +214,7 @@ namespace DicordNET.Commands
         [Aliases("rs")]
         [Description("Resume")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Resume(CommandContext ctx)
+        public async Task ResumeCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -230,7 +233,7 @@ namespace DicordNET.Commands
         [Aliases("st")]
         [Description("Stop")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Stop(CommandContext ctx)
+        public async Task StopCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -253,7 +256,7 @@ namespace DicordNET.Commands
         [Aliases("s")]
         [Description("Skip")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Skip(
+        public async Task SkipCommand(
             CommandContext ctx,
             [AllowNull, Description("Number of tracks to skip")] int number = 1)
         {
@@ -279,7 +282,7 @@ namespace DicordNET.Commands
         [Aliases("it", "i")]
         [Description("Ignore current track")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task Ignore(CommandContext ctx)
+        public async Task IgnoreCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -298,7 +301,7 @@ namespace DicordNET.Commands
         [Aliases("ia")]
         [Description("Ignore current track artist")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task IgnoreArtist(
+        public async Task IgnoreArtistCommand(
             CommandContext ctx,
             [AllowNull, Description("Artist zero-based index")] int artist_index = -1)
         {
