@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
-using System;
+using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,13 +14,12 @@ namespace MyGreatestBot.Player
             {
                 lock (tracks_queue)
                 {
-                    Random rnd = new();
                     List<ITrackInfo> collection = new();
                     while (tracks_queue.Any())
                     {
                         collection.Add(tracks_queue.Dequeue());
                     }
-                    collection = collection.OrderBy(x => rnd.Next()).ToList();
+                    collection = collection.Shuffle().ToList();
                     while (collection.Any())
                     {
                         tracks_queue.Enqueue(collection[0]);

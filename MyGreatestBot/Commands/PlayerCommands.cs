@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,25 @@ namespace MyGreatestBot.Commands
             IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
 
             await Task.Run(() => handler.PlayerInstance.Enqueue(tracks));
+        }
+
+        [Command("playshuffled")]
+        [Aliases("psh")]
+        [Description("Add shuffled tracks")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task PlayShuffledCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
+
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks.Shuffle()));
         }
 
         [Command("tms")]
