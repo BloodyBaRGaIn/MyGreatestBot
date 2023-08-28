@@ -15,21 +15,19 @@ namespace MyGreatestBot.Player
     [SupportedOSPlatform("windows")]
     internal partial class Player
     {
-        private const string IgnoredPath = "IgnoredTracks.txt";
-
-        private readonly Queue<ITrackInfo> tracks_queue = new();
+        internal const int TRANSMIT_SINK_MS = 10;
+        private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
+        private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
         private volatile ITrackInfo? currentTrack;
 
         private volatile bool IsPlaying;
         private volatile bool IsPaused;
         private volatile bool SeekRequested;
-        internal TimeSpan Seek;
 
-        internal const int TRANSMIT_SINK_MS = 10;
-        private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
-        private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
+        private TimeSpan Seek;
 
+        private readonly Queue<ITrackInfo> tracks_queue = new();
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly CancellationToken MainPlayerCancellationToken;
         private readonly Task MainPlayerTask;
