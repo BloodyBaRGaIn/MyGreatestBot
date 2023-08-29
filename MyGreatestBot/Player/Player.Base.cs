@@ -184,7 +184,7 @@ namespace MyGreatestBot.Player
                 });
             }
 
-            Process ffmpeg = TrackManager.StartFFMPEG(track);
+            Process ffmpeg = FFMPEG.StartProcess(track);
 
             Handler.Log("Start ffmpeg");
 
@@ -222,7 +222,7 @@ namespace MyGreatestBot.Player
                 {
                     SeekRequested = false;
                     IsPaused = false;
-                    TrackManager.DisposeFFMPEG(ffmpeg);
+                    FFMPEG.StopProcess(ffmpeg);
                     Seek = track.Seek;
                     goto seek;
                 }
@@ -288,7 +288,7 @@ namespace MyGreatestBot.Player
                     }
 
                     // restart ffmpeg
-                    TrackManager.DisposeFFMPEG(ffmpeg);
+                    FFMPEG.StopProcess(ffmpeg);
                     goto seek;
                 }
 
@@ -324,7 +324,7 @@ namespace MyGreatestBot.Player
 
             IsPlaying = false;
 
-            TrackManager.DisposeFFMPEG(ffmpeg);
+            FFMPEG.StopProcess(ffmpeg);
 
             Handler.Log("Stop ffmpeg");
         }

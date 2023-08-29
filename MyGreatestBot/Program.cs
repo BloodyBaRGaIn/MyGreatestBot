@@ -1,5 +1,5 @@
-﻿using MyGreatestBot.Bot;
-using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Bot;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;

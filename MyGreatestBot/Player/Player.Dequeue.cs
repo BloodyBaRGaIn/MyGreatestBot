@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
-using MyGreatestBot.Sql;
+using MyGreatestBot.ApiClasses.Services.Sql;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player

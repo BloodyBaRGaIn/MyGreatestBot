@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
-using MyGreatestBot.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
