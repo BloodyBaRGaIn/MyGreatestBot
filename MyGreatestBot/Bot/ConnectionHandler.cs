@@ -38,9 +38,8 @@ namespace MyGreatestBot.Bot
             {
                 return handler;
             }
-            handler = new(guild);
-            ConnectionDictionary.Add(key, handler);
-            return handler;
+            ConnectionDictionary.Add(key, new(guild));
+            return ConnectionDictionary[key];
         }
 
         private ConnectionHandler(DiscordGuild guild)
