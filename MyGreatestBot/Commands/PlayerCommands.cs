@@ -24,12 +24,21 @@ namespace MyGreatestBot.Commands
             if (handler.VoiceConnection == null)
             {
                 await ConnectionHandler.Join(ctx);
-                handler.VoiceConnection = handler.GetVoiceConnection();
 
-                if (handler.VoiceConnection == null)
+                do
                 {
-                    throw new InvalidOperationException("Cannot establish a voice connection");
+                    handler.VoiceConnection = handler.GetVoiceConnection();
+
+                    if (handler.VoiceConnection != null)
+                    {
+                        break;
+                    }
+
+                    Task.Yield().GetAwaiter().GetResult();
+                    Task.Delay(1).Wait();
+                    Task.Yield().GetAwaiter().GetResult();
                 }
+                while (true);
             }
 
             return ApiManager.GetAll(query);

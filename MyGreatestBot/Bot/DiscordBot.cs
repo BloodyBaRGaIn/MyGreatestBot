@@ -129,17 +129,33 @@ namespace MyGreatestBot.Bot
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 if (handler != null)
                 {
-                    if (e.After?.Channel == null)
+                    await ConnectionHandler.Join(e);
+
+                    do
                     {
-                        handler.PlayerInstance.Pause(CommandActionSource.Mute | CommandActionSource.External);
+                        handler.VoiceConnection = handler.GetVoiceConnection();
+
+                        if (handler.VoiceConnection != null)
+                        {
+                            break;
+                        }
+
+                        Task.Yield().GetAwaiter().GetResult();
+                        Task.Delay(1).Wait();
+                        Task.Yield().GetAwaiter().GetResult();
                     }
-                    else
-                    {
-                        handler.VoiceChannel = e.After?.Channel;
-                        handler.VoiceConnection = Voice?.GetConnection(e.Guild);
-                        handler.UpdateSink();
-                        handler.PlayerInstance.Resume(CommandActionSource.Mute | CommandActionSource.External);
-                    }
+                    while (true);
+                    //if (e.After?.Channel == null)
+                    //{
+                    //    handler.PlayerInstance.Pause(CommandActionSource.Mute | CommandActionSource.External);
+                    //}
+                    //else
+                    //{
+                    //    handler.VoiceChannel = e.After?.Channel;
+                    //    handler.VoiceConnection = Voice?.GetConnection(e.Guild);
+                    //    handler.UpdateSink();
+                    //    handler.PlayerInstance.Resume(CommandActionSource.Mute | CommandActionSource.External);
+                    //}
                 }
             }
 

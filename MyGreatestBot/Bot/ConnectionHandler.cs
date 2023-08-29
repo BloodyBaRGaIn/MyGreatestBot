@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
 using MyGreatestBot.Commands;
 using System;
@@ -125,9 +126,12 @@ namespace MyGreatestBot.Bot
             handler.TextChannel = ctx.Channel;
             handler.VoiceConnection = handler.GetVoiceConnection();
 
-            if (handler.VoiceConnection != null)
+            await Task.Yield();
+
+            if (handler.VoiceConnection != null && handler.VoiceChannel != ctx.Member?.VoiceState?.Channel)
             {
                 handler.Disconnect();
+                await Task.Yield();
                 await Join(ctx);
                 return;
                 //throw new InvalidOperationException("Already connected in this guild.");
@@ -137,6 +141,39 @@ namespace MyGreatestBot.Bot
                 ?? throw new InvalidOperationException("You need to be in a voice channel.");
 
             handler.Connect();
+
+            await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Mute));
+
+            await Task.Delay(1);
+        }
+
+        internal static async Task Join(VoiceStateUpdateEventArgs args)
+        {
+            ConnectionHandler? handler = GetConnectionHandler(args.Guild);
+
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.VoiceConnection = handler.GetVoiceConnection();
+
+            await Task.Yield();
+
+            if (handler.VoiceConnection != null && handler.VoiceChannel != args.After.Channel)
+            {
+                handler.Disconnect();
+                await Task.Yield();
+                await Join(args);
+                return;
+                //throw new InvalidOperationException("Already connected in this guild.");
+            }
+
+            if (args.After.Channel != null)
+            {
+                handler.VoiceChannel = args.After.Channel;
+                handler.Connect();
+            }
 
             await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Mute));
 

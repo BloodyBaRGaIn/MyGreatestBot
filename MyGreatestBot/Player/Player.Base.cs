@@ -299,10 +299,20 @@ namespace MyGreatestBot.Player
 
                 if (!Handler.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    if (Handler.VoiceConnection == null)
+                    do
                     {
-                        break;
+                        Handler.VoiceConnection = Handler.GetVoiceConnection();
+
+                        if (Handler.VoiceConnection != null)
+                        {
+                            break;
+                        }
+
+                        Task.Yield().GetAwaiter().GetResult();
+                        Task.Delay(1).Wait();
+                        Task.Yield().GetAwaiter().GetResult();
                     }
+                    while (true);
 
                     Handler.UpdateSink();
                     continue;
@@ -316,6 +326,8 @@ namespace MyGreatestBot.Player
             FFMPEG.StopProcess(ffmpeg);
 
             Handler.Log("Stop ffmpeg");
+
+            currentTrack = null;
         }
     }
 }
