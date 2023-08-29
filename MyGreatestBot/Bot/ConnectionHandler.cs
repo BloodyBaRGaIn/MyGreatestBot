@@ -16,7 +16,7 @@ namespace MyGreatestBot.Bot
         private const int SEND_MESSAGE_WAIT_MS = 1000;
 
         private readonly DiscordGuild Guild;
-        internal readonly MyGreatestBot.Player.Player PlayerInstance;
+        internal readonly Player.Player PlayerInstance;
 
         private static VoiceNextExtension? VoiceNext => BotWrapper.VoiceNext;
 

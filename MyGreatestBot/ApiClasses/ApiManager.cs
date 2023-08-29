@@ -22,7 +22,30 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Intents used on initialization
         /// </summary>
-        internal static ApiIntents InitIntents { get; private set; }
+        internal static ApiIntents InitIntents { get; private set; } = ApiIntents.None;
+
+        internal static ApiIntents FailedIntents { get; private set; } = ApiIntents.None; 
+
+        private sealed class AuthActions
+        {
+            internal readonly Action InitAction;
+            internal readonly Action DeinitAction;
+
+            internal AuthActions(Action initAction, Action deinitAction)
+            {
+                InitAction = initAction;
+                DeinitAction = deinitAction;
+            }
+        }
+
+        private static readonly Dictionary<ApiIntents, AuthActions> AuthActionsDictionary = new()
+        {
+            [ApiIntents.Youtube] = new AuthActions(YoutubeApiWrapper.PerformAuth, YoutubeApiWrapper.Logout),
+            [ApiIntents.Yandex] = new AuthActions(YandexApiWrapper.PerformAuth, YandexApiWrapper.Logout),
+            [ApiIntents.Vk] = new AuthActions(VkApiWrapper.PerformAuth, VkApiWrapper.Logout),
+            [ApiIntents.Spotify] = new AuthActions(SpotifyApiWrapper.PerformAuth, SpotifyApiWrapper.Logout),
+            [ApiIntents.Sql] = new AuthActions(SqlServerWrapper.Open, SqlServerWrapper.Close)
+        };
 
         /// <summary>
         /// <para>Performs auth for APIs</para>
@@ -46,11 +69,11 @@ namespace MyGreatestBot.ApiClasses
                 YoutubeExplodeBypass.Bypass();
             }
 
-            Init(ApiIntents.Sql, SqlServerWrapper.Open);
-            Init(ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
-            Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
-            Init(ApiIntents.Vk, VkApiWrapper.PerformAuth);
-            Init(ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth);
+            Init(ApiIntents.Sql);
+            Init(ApiIntents.Youtube);
+            Init(ApiIntents.Yandex);
+            Init(ApiIntents.Vk);
+            Init(ApiIntents.Spotify);
         }
 
         /// <summary>
@@ -60,22 +83,30 @@ namespace MyGreatestBot.ApiClasses
         /// <param name="init_action">Init action</param>
         /// <param name="delay">Sleep after invocation</param>
         /// <exception cref="ApplicationException">Throws if failed</exception>
-        private static void Init(ApiIntents desired, Action init_action, int delay = 500)
+        private static void Init(ApiIntents desired, int delay = 500)
         {
-            if (init_action is null || !InitIntents.HasFlag(desired))
+            if (!InitIntents.HasFlag(desired))
             {
                 return;
             }
 
+            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            {
+                throw new ArgumentException(nameof(ApiIntents));
+            }
+
             try
             {
-                init_action.Invoke();
+                actions.InitAction.Invoke();
                 Console.WriteLine($"{desired} SUCCESS");
+                FailedIntents &= ~desired;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"{desired} FAILED");
                 Console.Error.WriteLine(ex.GetExtendedMessage());
+                actions.DeinitAction.Invoke();
+                FailedIntents |= desired;
                 //throw new ApplicationException($"{desired} auth failed", ex);
             }
             finally
@@ -93,30 +124,35 @@ namespace MyGreatestBot.ApiClasses
         {
             intents &= InitIntents;
 
-            Deinit(intents, ApiIntents.Sql, SqlServerWrapper.Close);
-            Deinit(intents, ApiIntents.Youtube, YoutubeApiWrapper.Logout);
-            Deinit(intents, ApiIntents.Yandex, YandexApiWrapper.Logout);
-            Deinit(intents, ApiIntents.Vk, VkApiWrapper.Logout);
-            Deinit(intents, ApiIntents.Spotify, SpotifyApiWrapper.Logout);
+            Deinit(intents, ApiIntents.Sql);
+            Deinit(intents, ApiIntents.Youtube);
+            Deinit(intents, ApiIntents.Yandex);
+            Deinit(intents, ApiIntents.Vk);
+            Deinit(intents, ApiIntents.Spotify);
         }
 
         /// <summary>
         /// Deinit API
         /// </summary>
         /// <param name="allowed">Alowed APIs</param>
-        /// <param name="desied">API flag</param>
+        /// <param name="desired">API flag</param>
         /// <param name="deinit_action">Deinit action</param>
         /// <param name="delay">Delay after invocation</param>
-        private static void Deinit(ApiIntents allowed, ApiIntents desied, Action? deinit_action = null, int delay = 500)
+        private static void Deinit(ApiIntents allowed, ApiIntents desired, int delay = 500)
         {
-            if (deinit_action is null || !allowed.HasFlag(desied))
+            if (!allowed.HasFlag(desired))
             {
                 return;
             }
 
+            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            {
+                throw new ArgumentException(nameof(ApiIntents));
+            }
+
             try
             {
-                deinit_action.Invoke();
+                actions.DeinitAction.Invoke();
             }
             catch
             {
@@ -138,25 +174,68 @@ namespace MyGreatestBot.ApiClasses
         {
             intents &= InitIntents;
 
-            Reload(intents, ApiIntents.Sql, SqlServerWrapper.Open, SqlServerWrapper.Close);
-            Reload(intents, ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth, YoutubeApiWrapper.Logout);
-            Reload(intents, ApiIntents.Yandex, YandexApiWrapper.PerformAuth, YandexApiWrapper.Logout);
-            Reload(intents, ApiIntents.Vk, VkApiWrapper.PerformAuth, VkApiWrapper.Logout);
-            Reload(intents, ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth, SpotifyApiWrapper.Logout);
+            Reload(intents, ApiIntents.Sql);
+            Reload(intents, ApiIntents.Youtube);
+            Reload(intents, ApiIntents.Yandex);
+            Reload(intents, ApiIntents.Vk);
+            Reload(intents, ApiIntents.Spotify);
+        }
+
+        internal static void ReloadFailedApis()
+        {
+            ReloadApis(FailedIntents);
         }
 
         /// <summary>
         /// Reloads API
         /// </summary>
         /// <param name="allowed">Allowed APIs</param>
-        /// <param name="desied">API flag</param>
+        /// <param name="desired">API flag</param>
         /// <param name="init_action">Init action</param>
         /// <param name="deinit_action">Deinit action</param>
         /// <param name="delay">Delay after invocation</param>
-        private static void Reload(ApiIntents allowed, ApiIntents desied, Action init_action, Action? deinit_action = null, int delay = 500)
+        private static void Reload(ApiIntents allowed, ApiIntents desired, int delay = 500)
         {
-            Deinit(allowed, desied, deinit_action, delay);
-            Init(desied, init_action, delay);
+            if (!allowed.HasFlag(desired))
+            {
+                return;
+            }
+
+            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            {
+                throw new ArgumentException(nameof(ApiIntents));
+            }
+
+            try
+            {
+                actions.DeinitAction.Invoke();
+            }
+            catch
+            {
+                ;
+            }
+            finally
+            {
+                Task.Delay(delay).Wait();
+            }
+
+            try
+            {
+                actions.InitAction.Invoke();
+                Console.WriteLine($"{desired} SUCCESS");
+                FailedIntents &= ~desired;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{desired} FAILED");
+                Console.Error.WriteLine(ex.GetExtendedMessage());
+                actions.DeinitAction.Invoke();
+                FailedIntents |= desired;
+            }
+            finally
+            {
+                Task.Delay(delay).Wait();
+            }
         }
 
         /// <summary>

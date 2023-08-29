@@ -53,31 +53,16 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                while (!tracks_queue.Any())
+                if (!tracks_queue.Any())
                 {
-                    if (MainPlayerCancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
                     Task.Delay(1).Wait();
                     Task.Yield().GetAwaiter().GetResult();
-                }
-                while (IsPlaying)
-                {
-                    if (MainPlayerCancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-                    Task.Delay(1).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
+                    continue;
                 }
 
                 if (Handler.VoiceConnection == null)
                 {
-                    if (MainPlayerCancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
+                    Handler.VoiceConnection = Handler.GetVoiceConnection();
                     Task.Delay(1).Wait();
                     Task.Yield().GetAwaiter().GetResult();
                     continue;
@@ -85,7 +70,10 @@ namespace MyGreatestBot.Player
 
                 try
                 {
-                    Dequeue();
+                    if (currentTrack is null)
+                    {
+                        Dequeue();
+                    }
 
                     if (currentTrack is not null)
                     {
@@ -153,7 +141,7 @@ namespace MyGreatestBot.Player
 
         restart:
 
-            Seek = TimeSpan.Zero;
+            Seek = track.Seek;
 
             try
             {

@@ -35,8 +35,48 @@ namespace MyGreatestBot.Commands
             await ConnectionHandler.Leave(ctx);
         }
 
+        [Command("reload")]
+        [Description("Reload failed APIs")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task ReloadCommand(CommandContext ctx)
+        {
+            if (ApiManager.FailedIntents == ApiIntents.None)
+            {
+                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Title = "Reload",
+                    Description = "No failed APIs to reload"
+                });
+                return;
+            }
+
+            ApiManager.ReloadFailedApis();
+
+            if (ApiManager.FailedIntents == ApiIntents.None)
+            {
+                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Blue,
+                    Title = "Reload",
+                    Description = "Reload success"
+                });
+            }
+            else
+            {
+                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Title = "Reload",
+                    Description = "Reload failed"
+                });
+            }
+
+            await Task.Delay(1);
+        }
+
         [Command("logout")]
-        [Aliases("bye")]
+        [Aliases("bye", "bb", "b")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task LogoutCommand(CommandContext ctx)
