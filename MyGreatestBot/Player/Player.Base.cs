@@ -2,7 +2,6 @@
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Extensions;
-using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -190,7 +189,9 @@ namespace MyGreatestBot.Player
 
             bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : (int)(1000 * (track.Duration.TotalHours + 1)));
 
-            if (ffmpeg.HasExited || exit)
+            // should be tested on extremely short tracks
+            // https://www.youtube.com/watch?v=tPEE9ZwTmy0&ab_channel=MylotheCat
+            if ((ffmpeg.HasExited || exit) && !ffmpeg.StandardOutput.EndOfStream)
             {
                 if (already_restartd)
                 {
