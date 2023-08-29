@@ -29,19 +29,26 @@ namespace MyGreatestBot.Sql
 
         static SqlServerWrapper()
         {
-            config = ConfigManager.GetSqlDatabaseConfigJSON();
-
-            scriptProvider = new()
+            try
             {
-                LocalStoreDirectory = config.LocalDirectory,
-                DatabaseName = config.DatabaseName
-            };
+                config = ConfigManager.GetSqlDatabaseConfigJSON();
 
-            ServerString = new ConnectionStringBuilder(config.ServerName).Build();
-            ConnectionString = new ConnectionStringBuilder(config.ServerName, config.DatabaseName).Build();
+                scriptProvider = new()
+                {
+                    LocalStoreDirectory = config.LocalDirectory,
+                    DatabaseName = config.DatabaseName
+                };
 
-            IgnoredTracks = new(config.DatabaseName);
-            IgnoredArtists = new(config.DatabaseName);
+                ServerString = new ConnectionStringBuilder(config.ServerName).Build();
+                ConnectionString = new ConnectionStringBuilder(config.ServerName, config.DatabaseName).Build();
+
+                IgnoredTracks = new(config.DatabaseName);
+                IgnoredArtists = new(config.DatabaseName);
+            }
+            catch (Exception ex)
+            {
+                throw new SqlApiException("Initialization failed", ex);
+            }
         }
 
         internal static void Open()

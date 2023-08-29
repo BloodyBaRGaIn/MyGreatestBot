@@ -26,58 +26,65 @@ namespace MyGreatestBot.Sql
 
         private static void RunService(string name, params string[] arguments)
         {
-            using ServiceController service = new(name);
-
-            switch (service.Status)
+            try
             {
-                case ServiceControllerStatus.Running:
-                    return;
+                using ServiceController service = new(name);
 
-                case ServiceControllerStatus.StartPending:
-                case ServiceControllerStatus.ContinuePending:
-                    break;
+                switch (service.Status)
+                {
+                    case ServiceControllerStatus.Running:
+                        return;
 
-                case ServiceControllerStatus.Stopped:
-                case ServiceControllerStatus.StopPending:
-                    if (service.Status == ServiceControllerStatus.StopPending)
-                    {
-                        service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
-                    }
-                    if (service.Status != ServiceControllerStatus.Stopped)
-                    {
-                        throw new ApplicationException($"Service {name} timeout");
-                    }
+                    case ServiceControllerStatus.StartPending:
+                    case ServiceControllerStatus.ContinuePending:
+                        break;
 
-                    if (arguments == null || !arguments.Any(a => !string.IsNullOrWhiteSpace(a)))
-                    {
-                        service.Start();
-                    }
-                    else
-                    {
-                        service.Start(arguments);
-                    }
+                    case ServiceControllerStatus.Stopped:
+                    case ServiceControllerStatus.StopPending:
+                        if (service.Status == ServiceControllerStatus.StopPending)
+                        {
+                            service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+                        }
+                        if (service.Status != ServiceControllerStatus.Stopped)
+                        {
+                            throw new ApplicationException($"Service {name} timeout");
+                        }
 
-                    break;
+                        if (arguments == null || !arguments.Any(a => !string.IsNullOrWhiteSpace(a)))
+                        {
+                            service.Start();
+                        }
+                        else
+                        {
+                            service.Start(arguments);
+                        }
 
-                case ServiceControllerStatus.Paused:
-                case ServiceControllerStatus.PausePending:
-                    if (service.Status == ServiceControllerStatus.PausePending)
-                    {
-                        service.WaitForStatus(ServiceControllerStatus.Paused, timeout);
-                    }
-                    if (service.Status != ServiceControllerStatus.Paused)
-                    {
-                        throw new ApplicationException($"Service {name} timeout");
-                    }
+                        break;
 
-                    service.Continue();
-                    break;
+                    case ServiceControllerStatus.Paused:
+                    case ServiceControllerStatus.PausePending:
+                        if (service.Status == ServiceControllerStatus.PausePending)
+                        {
+                            service.WaitForStatus(ServiceControllerStatus.Paused, timeout);
+                        }
+                        if (service.Status != ServiceControllerStatus.Paused)
+                        {
+                            throw new ApplicationException($"Service {name} timeout");
+                        }
+
+                        service.Continue();
+                        break;
+                }
+
+                service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+                if (service.Status != ServiceControllerStatus.Running)
+                {
+                    throw new ApplicationException($"Service {name} timeout");
+                }
             }
-
-            service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-            if (service.Status != ServiceControllerStatus.Running)
+            catch (Exception ex)
             {
-                throw new ApplicationException($"Service {name} timeout");
+                throw new ApiClasses.SqlApiException("Cannot run service", ex);
             }
         }
     }
