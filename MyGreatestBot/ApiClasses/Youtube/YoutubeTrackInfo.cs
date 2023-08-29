@@ -82,7 +82,7 @@ namespace MyGreatestBot.ApiClasses.Youtube
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot get audio URL", ex);
+                throw new YoutubeApiException("Cannot get audio URL", ex);
             }
         }
 

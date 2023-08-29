@@ -85,7 +85,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
             {
                 if (retries > 2)
                 {
-                    throw new InvalidOperationException("Cannot get audio URL");
+                    throw new YandexApiException("Cannot get audio URL");
                 }
                 AudioURL = YandexApiWrapper.GetAudioURL(Id);
                 if (string.IsNullOrEmpty(AudioURL))

@@ -107,7 +107,7 @@ namespace MyGreatestBot.ApiClasses.Vk
             string? url = origin.Url?.ToString();
             if (string.IsNullOrWhiteSpace(url))
             {
-                throw new InvalidOperationException("Cannot get audio URL");
+                throw new VkApiException("Cannot get audio URL");
             }
             AudioURL = url;
         }

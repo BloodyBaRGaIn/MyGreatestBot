@@ -68,15 +68,22 @@ namespace MyGreatestBot.ApiClasses.Spotify
 
         void ITrackInfo.ObtainAudioURL()
         {
-            ITrackInfo? result = YandexApiWrapper.SearchTrack(this);
-            if (result != null)
+            try
             {
-                AudioURL = result.AudioURL;
-                Duration = result.Duration;
+                ITrackInfo? result = YandexApiWrapper.SearchTrack(this);
+                if (result != null)
+                {
+                    AudioURL = result.AudioURL;
+                    Duration = result.Duration;
+                }
+                else
+                {
+                    Duration = TimeSpan.FromSeconds(29);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Duration = TimeSpan.FromSeconds(29);
+                throw new SpotifyApiException("Cannot get audio URL", ex);
             }
 
             //var player = SpotifyApiWrapper.Player;
