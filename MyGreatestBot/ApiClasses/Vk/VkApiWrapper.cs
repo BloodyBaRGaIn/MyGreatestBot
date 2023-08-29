@@ -49,6 +49,8 @@ namespace MyGreatestBot.ApiClasses.Vk
 
         private static IVkApi? api;
 
+        private static IAudioCategory Audio => api?.Audio ?? throw new ArgumentNullException(nameof(IVkApi));
+
         internal static void PerformAuth()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
@@ -59,7 +61,7 @@ namespace MyGreatestBot.ApiClasses.Vk
 
             try
             {
-                api.LogOut();
+                Logout();
 
                 api.Authorize(new ApiAuthParams()
                 {
@@ -110,11 +112,6 @@ namespace MyGreatestBot.ApiClasses.Vk
             return tracks;
         }
 
-        internal static GetMusiciansResult? GetArtist(string artist_name)
-        {
-            return api?.Ads.GetMusicians(artist_name).FirstOrDefault();
-        }
-
         private static bool TryAddAsCollection(string query, List<VkTrackInfo> tracks, bool is_playlist)
         {
             bool success = false;
@@ -134,10 +131,10 @@ namespace MyGreatestBot.ApiClasses.Vk
             success = true;
 
             AudioPlaylist? playlist = is_playlist
-                ? api?.Audio.GetPlaylistById(user_l, id_l)
+                ? Audio.GetPlaylistById(user_l, id_l)
                 : null;
 
-            VkNet.Utils.VkCollection<Audio>? vk_tracks = api?.Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
+            VkNet.Utils.VkCollection<Audio>? vk_tracks = Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
 
             if (vk_tracks == null || !vk_tracks.Any())
             {

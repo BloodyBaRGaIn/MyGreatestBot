@@ -4,7 +4,6 @@ using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -32,23 +31,38 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
-            _ = BotWrapper.Client == null
-                ? await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+            DiscordEmbedBuilder _embed = new DiscordEmbedBuilder().WithTitle("Name");
+
+            if (BotWrapper.Client == null)
+            {
+                _embed = _embed
+                    .WithColor(DiscordColor.Red)
+                    .WithDescription("Cannot get my username");
+            }
+            else
+            {
+                _embed = _embed
+                    .WithColor(DiscordColor.White);
+
+                DiscordUser current_user = BotWrapper.Client.CurrentUser;
+
+                try
                 {
-                    Color = DiscordColor.Red,
-                    Title = "Name",
-                    Description = "Cannot get my username"
-                })
-                : await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                    DiscordMember member = ctx.Guild.GetMemberAsync(current_user.Id).GetAwaiter().GetResult();
+                    _embed = _embed
+                        .WithDescription($"My display name is {member.DisplayName}");
+                }
+                catch
                 {
-                    Color = DiscordColor.White,
-                    Title = "Name",
-                    Description = $"My name is {ctx.Guild.Members.Values.Where(x =>
-                        x.Id == BotWrapper.Client.CurrentUser.Id).FirstOrDefault()?.DisplayName}"
-                });
+                    _embed = _embed
+                        .WithDescription($"My user name is {current_user.Username}");
+                }
+            }
+
+            _ = await ctx.Channel.SendMessageAsync(_embed);
         }
 
-        [Command("help")]
+        [Command(CommandStrings.HelpCommandName)]
         [Aliases("h")]
         [Description("Get help")]
         [SuppressMessage("Performance", "CA1822")]
@@ -56,19 +70,17 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
-            CustomHelpFormatter custom;
-            if (!string.IsNullOrWhiteSpace(command) && BotWrapper.Commands != null)
+            if (BotWrapper.Commands == null)
             {
-                string command_key = command.ToLowerInvariant();
-                Command cmd = BotWrapper.Commands.RegisteredCommands.ContainsKey(command_key)
-                    ? BotWrapper.Commands.RegisteredCommands[command_key]
+                throw new ArgumentNullException(nameof(BotWrapper.Commands), "Commands not initialized");
+            }
+
+            CustomHelpFormatter custom = string.IsNullOrWhiteSpace(command)
+                ? new CustomHelpFormatter(ctx).WithAllCommands()
+                : BotWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd)
+                    ? new CustomHelpFormatter(ctx).WithCommand(cmd)
                     : throw new ArgumentException("Invalid command");
-                custom = new CustomHelpFormatter(ctx).WithCommand(cmd);
-            }
-            else
-            {
-                custom = new CustomHelpFormatter(ctx).WithAllCommands();
-            }
+
             _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
         }
     }

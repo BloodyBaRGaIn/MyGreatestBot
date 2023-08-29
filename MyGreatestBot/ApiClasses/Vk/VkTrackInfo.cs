@@ -104,7 +104,7 @@ namespace MyGreatestBot.ApiClasses.Vk
 
         void ITrackInfo.ObtainAudioURL()
         {
-            string url = origin.Url?.ToString() ?? string.Empty;
+            string? url = origin.Url?.ToString();
             if (string.IsNullOrWhiteSpace(url))
             {
                 throw new InvalidOperationException("Cannot get audio URL");

@@ -24,13 +24,11 @@ namespace MyGreatestBot.ApiClasses.Youtube
     [SupportedOSPlatform("windows")]
     internal static class YoutubeApiWrapper
     {
-        private static UserCredential? GoogleUserCredential;
-        private static YouTubeService? GoogleService;
-        internal static YoutubeClient? YoutubeClientInstance { get; private set; }
+        private static YoutubeClient? YoutubeClientInstance;
 
-        internal static VideoClient Videos => YoutubeClientInstance?.Videos ?? throw new ArgumentNullException(nameof(VideoClient));
-        internal static StreamClient Streams => YoutubeClientInstance?.Videos.Streams ?? throw new ArgumentNullException(nameof(StreamClient));
-        internal static PlaylistClient Playlists => YoutubeClientInstance?.Playlists ?? throw new ArgumentNullException(nameof(PlaylistClient));
+        internal static VideoClient Videos => YoutubeClientInstance?.Videos ?? throw new ArgumentNullException(nameof(YoutubeClient));
+        internal static StreamClient Streams => YoutubeClientInstance?.Videos.Streams ?? throw new ArgumentNullException(nameof(YoutubeClient));
+        internal static PlaylistClient Playlists => YoutubeClientInstance?.Playlists ?? throw new ArgumentNullException(nameof(YoutubeClient));
 
         private static class YoutubeQueryDecomposer
         {
@@ -54,14 +52,13 @@ namespace MyGreatestBot.ApiClasses.Youtube
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
-
-            GoogleUserCredential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+            _ = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets: GoogleClientSecrets.FromStream(fileStream).Secrets,
                 scopes: new string[1] { YouTubeService.Scope.YoutubeReadonly },
                 user: user.Username,
                 taskCancellationToken: CancellationToken.None).GetAwaiter().GetResult();
 
-            GoogleService = new(new BaseClientService.Initializer()
+            YouTubeService GoogleService = new(new BaseClientService.Initializer()
             {
                 ApiKey = user.Key,
                 ApplicationName = typeof(YoutubeApiWrapper).ToString()
@@ -70,11 +67,16 @@ namespace MyGreatestBot.ApiClasses.Youtube
             YoutubeClientInstance = new(GoogleService.HttpClient);
         }
 
+        internal static void Logout()
+        {
+            YoutubeClientInstance = null;
+        }
+
         internal static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
         {
             if (YoutubeClientInstance == null)
             {
-                throw new ArgumentNullException(nameof(YoutubeClientInstance), "Auth failed");
+                throw new InvalidOperationException("Not authorized");
             }
 
             List<YoutubeTrackInfo> tracks = new();

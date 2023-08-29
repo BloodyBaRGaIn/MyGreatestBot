@@ -6,11 +6,10 @@
     [System.Flags]
     internal enum CommandActionSource : uint
     {
-        None = 0x00,
-        Command = 0x01,
-        External = 0x02,
+        None = 0x00000000U,
+        Command = 0x00000001U,
+        External = 0x00000002U,
 
-
-        Mute = 0x10000000
+        Mute = 0x10000000U
     }
 }

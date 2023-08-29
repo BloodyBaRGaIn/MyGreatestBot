@@ -92,7 +92,7 @@ namespace MyGreatestBot.Sql
             return IsTrackIgnored((int)track.TrackType, track.Id);
         }
 
-        internal static bool IsTrackIgnored(int type, string id)
+        private static bool IsTrackIgnored(int type, string id)
         {
             if (_connection is null)
             {
@@ -140,7 +140,7 @@ namespace MyGreatestBot.Sql
             return IsAnyArtistIgnored((int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
         }
 
-        internal static bool IsAnyArtistIgnored(int type, IEnumerable<string> ids)
+        private static bool IsAnyArtistIgnored(int type, IEnumerable<string> ids)
         {
             if (_connection is null || ids is null || !ids.Any())
             {
@@ -157,7 +157,7 @@ namespace MyGreatestBot.Sql
             }
         }
 
-        internal static bool IsArtistIgnored(int type, string id)
+        private static bool IsArtistIgnored(int type, string id)
         {
             if (_connection is null || string.IsNullOrWhiteSpace(id))
             {
@@ -245,7 +245,7 @@ namespace MyGreatestBot.Sql
             AddIgnoredTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
         }
 
-        internal static void AddIgnoredArtist(int type, string id, string hyper)
+        private static void AddIgnoredArtist(int type, string id, string hyper)
         {
             if (_connection is null)
             {

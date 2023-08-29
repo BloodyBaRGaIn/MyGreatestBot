@@ -17,7 +17,7 @@ namespace MyGreatestBot.Utils
     internal static class QueryIdentifier
     {
 #pragma warning disable SYSLIB1045
-        private static readonly Regex YOUTUBE_RE = new("^((http([s])?://)?((www|m)\\.)?youtube\\.([\\w])+/)");
+        private static readonly Regex YOUTUBE_RE = new("^((http([s])?://)?((www|m)\\.)?((youtube\\.([\\w])+)|(youtu\\.be))/)");
         private static readonly Regex YANDEX_RE = new("^((http([s])?://)?music\\.yandex\\.([\\w])+/)");
         private static readonly Regex VK_RE = new("^((http([s])?://)?((www|m)\\.)?vk\\.com/)");
         private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
@@ -57,7 +57,7 @@ namespace MyGreatestBot.Utils
                     }
                     else
                     {
-                        throw new InvalidOperationException($"{receiver.desired} API not started");
+                        throw new InvalidOperationException($"{receiver.desired} is disabled");
                     }
                 }
 

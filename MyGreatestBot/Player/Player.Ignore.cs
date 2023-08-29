@@ -1,6 +1,8 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands;
 using MyGreatestBot.Sql;
+using MyGreatestBot.Utils;
 using System;
 using System.Runtime.Versioning;
 
@@ -11,6 +13,18 @@ namespace MyGreatestBot.Player
     {
         internal void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
         {
+            if ((ApiManager.InitIntents & ApiIntents.Sql) == 0)
+            {
+                Handler.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Title = "IgnoreTrack",
+                    Description = "SQL is disabled"
+                });
+
+                return;
+            }
+
             if (!IsPlaying || currentTrack == null)
             {
                 if ((source & CommandActionSource.Mute) == 0)
@@ -41,6 +55,18 @@ namespace MyGreatestBot.Player
 
         internal void IgnoreArtist(int index = -1, CommandActionSource source = CommandActionSource.None)
         {
+            if ((ApiManager.InitIntents & ApiIntents.Sql) == 0)
+            {
+                Handler.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Title = "IgnoreArtist",
+                    Description = "SQL is disabled"
+                });
+
+                return;
+            }
+
             if (!IsPlaying || currentTrack == null)
             {
                 if ((source & CommandActionSource.Mute) == 0)

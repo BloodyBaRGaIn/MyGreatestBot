@@ -18,22 +18,22 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                if (SqlServerWrapper.IsTrackIgnored(track))
-                {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Skipping ignored track"
-                    });
-                    continue;
-                }
-
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Skipping track with ignored artist(s)"
+                    });
+                    continue;
+                }
+
+                if (SqlServerWrapper.IsTrackIgnored(track))
+                {
+                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Yellow,
+                        Title = "Skipping ignored track"
                     });
                     continue;
                 }

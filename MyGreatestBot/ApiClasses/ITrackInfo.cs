@@ -118,30 +118,21 @@ namespace MyGreatestBot.ApiClasses
         {
             string result = string.Empty;
             result += $"Playing: {TrackName}\n";
-            result += "Author: ";
-
-            result += string.Join(", ", ArtistArr.Select(a => a.ToString()));
-            result += '\n';
+            result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}\n";
 
             if (Duration != TimeSpan.Zero)
             {
                 result += $"Duration: {Duration:hh\\:mm\\:ss}\n";
             }
 
-            if (AlbumName != null)
+            if (AlbumName != null && !string.IsNullOrWhiteSpace(AlbumName.Title))
             {
-                if (!string.IsNullOrWhiteSpace(AlbumName.Title))
-                {
-                    result += $"Album: {AlbumName}\n";
-                }
+                result += $"Album: {AlbumName}\n";
             }
 
-            if (PlaylistName != null)
+            if (PlaylistName != null && !string.IsNullOrWhiteSpace(PlaylistName.Title))
             {
-                if (!string.IsNullOrWhiteSpace(PlaylistName.Title))
-                {
-                    result += $"Playlist: {PlaylistName}\n";
-                }
+                result += $"Playlist: {PlaylistName}\n";
             }
 
             if (Seek != TimeSpan.Zero)

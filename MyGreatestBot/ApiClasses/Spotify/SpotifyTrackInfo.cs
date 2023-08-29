@@ -68,7 +68,7 @@ namespace MyGreatestBot.ApiClasses.Spotify
 
         void ITrackInfo.ObtainAudioURL()
         {
-            ITrackInfo? result = YandexApiWrapper.Search(this);
+            ITrackInfo? result = YandexApiWrapper.SearchTrack(this);
             if (result != null)
             {
                 AudioURL = result.AudioURL;

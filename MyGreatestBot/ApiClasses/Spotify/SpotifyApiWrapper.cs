@@ -20,12 +20,12 @@ namespace MyGreatestBot.ApiClasses.Spotify
         //private static EmbedIOAuthServer? server;
         private static SpotifyClient? SpotifyClientInstance;
 
-        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClientInstance));
-        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw new ArgumentException(nameof(SpotifyClientInstance));
+        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClient));
+        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClient));
+        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClient));
+        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClient));
+        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClient));
+        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw new ArgumentException(nameof(SpotifyClient));
 
         private static class SpotifyQueryDecomposer
         {
@@ -81,17 +81,12 @@ namespace MyGreatestBot.ApiClasses.Spotify
                         )
                     );
 
-            if (SpotifyClientInstance != null)
-            {
-                lock (SpotifyClientInstance)
-                {
-                    SpotifyClientInstance = new(config);
-                }
-            }
-            else
-            {
-                SpotifyClientInstance = new(config);
-            }
+            SpotifyClientInstance = new(config);
+        }
+
+        internal static void Logout()
+        {
+            SpotifyClientInstance = null;
         }
 
         //private static Task Server_ErrorReceived(object arg1, string arg2, string? arg3)
@@ -127,6 +122,11 @@ namespace MyGreatestBot.ApiClasses.Spotify
             if (string.IsNullOrWhiteSpace(query))
             {
                 return tracks;
+            }
+
+            if (SpotifyClientInstance == null)
+            {
+                throw new InvalidOperationException("Not authorized");
             }
 
             {

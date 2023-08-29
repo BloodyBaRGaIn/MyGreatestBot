@@ -40,6 +40,12 @@ namespace MyGreatestBot.Utils
                 InitIntents |= ApiIntents.Yandex;
             }
 
+            if ((InitIntents & ApiIntents.Youtube) != 0)
+            {
+                // YoutubeExplode won't work without specific environment variable
+                YoutubeExplodeUtils.Bypass();
+            }
+
             Init(ApiIntents.Sql, SqlServerWrapper.Open);
             Init(ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
             Init(ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
@@ -88,10 +94,10 @@ namespace MyGreatestBot.Utils
             intents &= InitIntents;
 
             Deinit(intents, ApiIntents.Sql, SqlServerWrapper.Close);
-            Deinit(intents, ApiIntents.Youtube);
-            Deinit(intents, ApiIntents.Yandex);
+            Deinit(intents, ApiIntents.Youtube, YoutubeApiWrapper.Logout);
+            Deinit(intents, ApiIntents.Yandex, YandexApiWrapper.Logout);
             Deinit(intents, ApiIntents.Vk, VkApiWrapper.Logout);
-            Deinit(intents, ApiIntents.Spotify);
+            Deinit(intents, ApiIntents.Spotify, SpotifyApiWrapper.Logout);
         }
 
         /// <summary>
@@ -133,10 +139,10 @@ namespace MyGreatestBot.Utils
             intents &= InitIntents;
 
             Reload(intents, ApiIntents.Sql, SqlServerWrapper.Open, SqlServerWrapper.Close);
-            Reload(intents, ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth);
-            Reload(intents, ApiIntents.Yandex, YandexApiWrapper.PerformAuth);
+            Reload(intents, ApiIntents.Youtube, YoutubeApiWrapper.PerformAuth, YoutubeApiWrapper.Logout);
+            Reload(intents, ApiIntents.Yandex, YandexApiWrapper.PerformAuth, YandexApiWrapper.Logout);
             Reload(intents, ApiIntents.Vk, VkApiWrapper.PerformAuth, VkApiWrapper.Logout);
-            Reload(intents, ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth);
+            Reload(intents, ApiIntents.Spotify, SpotifyApiWrapper.PerformAuth, SpotifyApiWrapper.Logout);
         }
 
         /// <summary>

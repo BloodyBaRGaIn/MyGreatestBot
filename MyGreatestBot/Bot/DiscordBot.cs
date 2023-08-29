@@ -28,15 +28,11 @@ namespace MyGreatestBot.Bot
         internal VoiceNextExtension? Voice { get; private set; }
         internal ServiceProvider ServiceProvider { get; private set; } = new ServiceCollection().BuildServiceProvider();
 
-        private string prefix = string.Empty;
-
         internal async Task RunAsync()
         {
             try
             {
                 DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
-
-                prefix = config_js.Prefix;
 
                 DiscordConfiguration discordConfig = new()
                 {
@@ -49,10 +45,28 @@ namespace MyGreatestBot.Bot
 
                 Client = new DiscordClient(discordConfig);
 
-                Client.Ready += Client_Ready;
+                Client.Ready += async (sender, args) =>
+                {
+                    await sender.UpdateStatusAsync(new()
+                    {
+                        ActivityType = ActivityType.ListeningTo,
+                        Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
+                    }, UserStatus.Online);
+
+                    Console.WriteLine("Discord SUCCESS");
+                };
+
+                Client.ClientErrored += async (sender, args) =>
+                {
+                    await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+                };
+
+                Client.SocketErrored += async (sender, args) =>
+                {
+                    await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+                };
+
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                Client.ClientErrored += Client_ClientErrored;
-                Client.SocketErrored += Client_SocketErrored;
 
                 Interactivity = Client.UseInteractivity(new()
                 {
@@ -108,18 +122,6 @@ namespace MyGreatestBot.Bot
             }
         }
 
-
-        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
-        {
-            await sender.UpdateStatusAsync(new()
-            {
-                ActivityType = ActivityType.ListeningTo,
-                Name = $"{prefix}help"
-            }, UserStatus.Online);
-
-            Console.WriteLine("### READY ###");
-        }
-
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
             if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
@@ -144,16 +146,6 @@ namespace MyGreatestBot.Bot
             await Task.Delay(1);
         }
 
-        private async Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
-        {
-            await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
-        }
-
-        private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
-        {
-            await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
-        }
-
         private static string GetCommandInfo(CommandEventArgs args)
         {
             string result = string.Empty;
@@ -164,12 +156,12 @@ namespace MyGreatestBot.Bot
 
             if (args.Command != null)
             {
-                result += $"{args.Command.Name} ";
+                result += $"{args.Command.Name}";
             }
 
             if (!string.IsNullOrWhiteSpace(args.Context.RawArgumentString))
             {
-                result += $"{args.Context.RawArgumentString}";
+                result += $" {args.Context.RawArgumentString}";
             }
 
             return result;
@@ -180,12 +172,10 @@ namespace MyGreatestBot.Bot
             CommandExecutionEventArgs args)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
-            if (handler == null)
+            if (handler != null)
             {
-                return;
+                await handler.LogAsync(GetCommandInfo(args));
             }
-
-            await handler.LogAsync(GetCommandInfo(args));
         }
 
         private async Task Commands_CommandErrored(

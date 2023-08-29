@@ -73,11 +73,6 @@ namespace MyGreatestBot.ApiClasses.Youtube
                 throw new InvalidOperationException("No results");
             }
 
-            if (YoutubeApiWrapper.YoutubeClientInstance == null)
-            {
-                throw new ArgumentNullException(nameof(YoutubeApiWrapper.YoutubeClientInstance));
-            }
-
             if (IsLiveStream)
             {
                 string stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
@@ -101,11 +96,9 @@ namespace MyGreatestBot.ApiClasses.Youtube
                     throw new InvalidOperationException("No streams found");
                 }
 
-                long bps = audioStreams.Max(s => s.Bitrate.BitsPerSecond);
-
                 AudioOnlyStreamInfo audioStream = audioStreams
-                    .Where(a => a.Bitrate.BitsPerSecond == bps)
-                    .First() ?? throw new InvalidOperationException("Stream URL was null");
+                    .MaxBy(a => a.Bitrate.BitsPerSecond)
+                    ?? throw new InvalidOperationException("Stream URL was null");
 
                 AudioURL = audioStream.Url;
             }

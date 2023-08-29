@@ -50,7 +50,7 @@ namespace MyGreatestBot.Commands
             {
                 return this;
             }
-            return WithSubcommands(BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name));
+            return WithSubcommands(BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name.ToLowerInvariant()));
         }
 
         public override CommandHelpMessage Build()
@@ -114,9 +114,7 @@ namespace MyGreatestBot.Commands
 
             if (arguments.Any())
             {
-                content += string.IsNullOrWhiteSpace(content) ? "**Arguments" : "\n**Arguments";
-                content += ":**\n";
-                content += string.Join("\n", arguments);
+                content += $"{(string.IsNullOrWhiteSpace(content) ? "**Arguments:**\n" : "\n**Arguments:**\n")}{string.Join("\n", arguments)}";
             }
 
             _ = _embed.AddField(title, content);

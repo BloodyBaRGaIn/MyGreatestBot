@@ -1,5 +1,4 @@
-﻿using MyGreatestBot.ApiClasses.Spotify;
-using MyGreatestBot.ConfigStructs;
+﻿using MyGreatestBot.ConfigStructs;
 using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
 using System;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api;
+using Yandex.Music.Api.API;
 using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -57,6 +57,13 @@ namespace MyGreatestBot.ApiClasses.Yandex
         private static YandexMusicApi? api;
         private static AuthStorage? storage;
 
+        internal static YUserAPI User => api?.User ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        internal static YSearchAPI Search => api?.Search ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        internal static YTrackAPI Track => api?.Track ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        internal static YArtistAPI Artist => api?.Artist ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        internal static YAlbumAPI Album => api?.Album ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        internal static YPlaylistAPI Playlist => api?.Playlist ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+
         internal static void PerformAuth()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
@@ -66,7 +73,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
 
             try
             {
-                _ = api.User.CreateAuthSession(storage, yandexCredStruct.Username);
+                _ = User.CreateAuthSession(storage, yandexCredStruct.Username);
             }
             catch (Exception ex)
             {
@@ -75,7 +82,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
 
             try
             {
-                _ = api.User.AuthorizeByAppPassword(storage, yandexCredStruct.Password);
+                _ = User.AuthorizeByAppPassword(storage, yandexCredStruct.Password);
             }
             catch (Exception ex)
             {
@@ -84,7 +91,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
 
             try
             {
-                string token = api.User.GetAccessToken(storage).AccessToken;
+                string token = User.GetAccessToken(storage).AccessToken;
                 if (string.IsNullOrWhiteSpace(token))
                 {
                     throw new ArgumentNullException(nameof(token));
@@ -96,20 +103,31 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
         }
 
-        internal static ITrackInfo? Search(SpotifyTrackInfo spotifyTrack)
+        internal static void Logout()
         {
-            if (api == null)
+            api = null;
+            storage = null;
+        }
+
+        /// <summary>
+        /// Search similar track on Yandex
+        /// </summary>
+        /// <param name="otherTrack">Track info from another API</param>
+        /// <returns>Track info</returns>
+        internal static ITrackInfo? SearchTrack(ITrackInfo otherTrack)
+        {
+            if (otherTrack.TrackType == ApiIntents.Yandex)
             {
-                return null;
+                return otherTrack;
             }
 
             global::Yandex.Music.Api.Models.Search.YSearch? response = null;
             string last_request = string.Empty;
 
-            if (spotifyTrack.AlbumName != null)
+            if (otherTrack.AlbumName != null)
             {
-                last_request = $"{spotifyTrack.Title} - {spotifyTrack.AlbumName.Title}";
-                response = api?.Search.Track(storage, last_request).Result;
+                last_request = $"{otherTrack.Title} - {otherTrack.AlbumName.Title}";
+                response = Search.Track(storage, last_request).Result;
             }
 
             if (response == null)
@@ -118,8 +136,8 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
             if (response.Tracks == null)
             {
-                last_request = $"{spotifyTrack.Title} - {string.Join(", ", spotifyTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = api?.Search.Track(storage, last_request).Result;
+                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+                response = Search.Track(storage, last_request).Result;
             }
 
             if (response == null || response.Tracks == null)
@@ -128,24 +146,24 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
 
             IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t is not null
-                && spotifyTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(spotifyTrack.AlbumName.Title)
+                && otherTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
                 && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(spotifyTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
 
             if (!tracks.Any())
             {
-                last_request = $"{spotifyTrack.Title} - {string.Join(", ", spotifyTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = api?.Search.Track(storage, last_request).Result;
+                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+                response = Search.Track(storage, last_request).Result;
                 if (response == null || response.Tracks == null)
                 {
                     return null;
                 }
                 tracks = response.Tracks.Results.Where(t => t is not null
-                && spotifyTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(spotifyTrack.AlbumName.Title)
+                && otherTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
                 && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(spotifyTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
                 if (!tracks.Any())
                 {
                     return null;
@@ -244,29 +262,17 @@ namespace MyGreatestBot.ApiClasses.Yandex
 
         internal static string GetAudioURL(string track_id)
         {
-            if (api == null)
-            {
-                return string.Empty;
-            }
-
-            try
-            {
-                return api.Track.GetFileLinkAsync(storage, track_id).GetAwaiter().GetResult();
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            return Track.GetFileLinkAsync(storage, track_id).GetAwaiter().GetResult();
         }
 
         private static YandexTrackInfo? GetTrack(string? track_id_str)
         {
-            if (api == null || string.IsNullOrWhiteSpace(track_id_str))
+            if (string.IsNullOrWhiteSpace(track_id_str))
             {
                 return null;
             }
 
-            List<YTrack> tracks = api.Track.GetAsync(storage, track_id_str).GetAwaiter().GetResult().Result;
+            List<YTrack> tracks = Track.GetAsync(storage, track_id_str).GetAwaiter().GetResult().Result;
             if (tracks.Count == 0)
             {
                 return null;
@@ -286,12 +292,12 @@ namespace MyGreatestBot.ApiClasses.Yandex
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
-            if (string.IsNullOrWhiteSpace(album_id_str) || api == null)
+            if (string.IsNullOrWhiteSpace(album_id_str))
             {
                 return tracks_collection;
             }
 
-            YAlbum album = api.Album.GetAsync(storage, album_id_str).GetAwaiter().GetResult().Result;
+            YAlbum album = Album.GetAsync(storage, album_id_str).GetAwaiter().GetResult().Result;
 
             try
             {
@@ -313,12 +319,12 @@ namespace MyGreatestBot.ApiClasses.Yandex
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
-            if (string.IsNullOrWhiteSpace(artist_id_str) || api == null)
+            if (string.IsNullOrWhiteSpace(artist_id_str))
             {
                 return tracks_collection;
             }
 
-            YArtistBriefInfo info = api.Artist.GetAsync(storage, artist_id_str).GetAwaiter().GetResult().Result;
+            YArtistBriefInfo info = Artist.GetAsync(storage, artist_id_str).GetAwaiter().GetResult().Result;
             foreach (YAlbum? album in info.Albums.Concat(info.AlsoAlbums).DistinctBy(t => t.Id).OrderByDescending(a => a.ReleaseDate))
             {
                 if (album != null)
@@ -341,14 +347,9 @@ namespace MyGreatestBot.ApiClasses.Yandex
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
-            if (api == null)
-            {
-                return tracks_collection;
-            }
-
-            YPlaylist playlist = api.Playlist.GetAsync(storage, playlist_user_str, playlist_id_str)
-                                             .GetAwaiter()
-                                             .GetResult().Result;
+            YPlaylist playlist = Playlist.GetAsync(storage, playlist_user_str, playlist_id_str)
+                                         .GetAwaiter()
+                                         .GetResult().Result;
 
             if (playlist == null)
             {
@@ -366,12 +367,9 @@ namespace MyGreatestBot.ApiClasses.Yandex
                 return tracks_collection;
             }
 
-            foreach (YTrack track in tracks)
+            foreach (YTrack track in tracks.Where(t => t != null))
             {
-                if (track != null)
-                {
-                    tracks_collection.Add(new(track, playlist));
-                }
+                tracks_collection.Add(new(track, playlist));
             }
 
             return tracks_collection;
