@@ -4,7 +4,6 @@ using MyGreatestBot.ApiClasses.Music.Yandex;
 using MyGreatestBot.ApiClasses.Music.Youtube;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Extensions;
-using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +43,7 @@ namespace MyGreatestBot.ApiClasses
             if ((InitIntents & ApiIntents.Youtube) != 0)
             {
                 // YoutubeExplode won't work without specific environment variable
-                YoutubeExplodeUtils.Bypass();
+                YoutubeExplodeBypass.Bypass();
             }
 
             Init(ApiIntents.Sql, SqlServerWrapper.Open);

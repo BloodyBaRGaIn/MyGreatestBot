@@ -4,28 +4,28 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace MyGreatestBot.Utils
+namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
     /// <summary>
     /// Source code from YoutubeExplode
     /// </summary>
-    internal static class YoutubeExplodeUtils
+    internal static class YoutubeExplodeBypass
     {
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [SuppressMessage("Globalization", "CA2101")]
         [SuppressMessage("Interoperability", "SYSLIB1054")]
         private static extern int RegOpenKeyEx(
-            UIntPtr hKey,
+            nuint hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            out UIntPtr hkResult
+            out nuint hkResult
         );
 
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [SuppressMessage("Globalization", "CA2101")]
         private static extern int RegQueryValueEx(
-            UIntPtr hKey,
+            nuint hKey,
             string lpValueName,
             int lpReserved,
             out uint lpType,
@@ -35,7 +35,7 @@ namespace MyGreatestBot.Utils
 
         private static string? GetCurrentUserRegistryValue(string key, string entry)
         {
-            if (RegOpenKeyEx(new UIntPtr(0x80000001u), key, 0, 0x20019, out nuint keyHandle) != 0)
+            if (RegOpenKeyEx(new nuint(0x80000001u), key, 0, 0x20019, out nuint keyHandle) != 0)
             {
                 return null;
             }
