@@ -46,6 +46,7 @@ namespace MyGreatestBot.Player
                     });
                 }
             }
+            currentTrack = null;
             IsPlaying = false;
         }
     }
