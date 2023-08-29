@@ -13,21 +13,14 @@ namespace MyGreatestBot.Player
     {
         internal void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
         {
-            if ((ApiManager.InitIntents & ApiIntents.Sql) == 0)
+            if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "IgnoreTrack",
-                    Description = "SQL is disabled"
-                });
-
-                return;
+                throw new SqlApiException();
             }
 
             if (!IsPlaying || currentTrack == null)
             {
-                if ((source & CommandActionSource.Mute) == 0)
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -43,7 +36,7 @@ namespace MyGreatestBot.Player
 
             Skip(0, CommandActionSource.Mute);
 
-            if ((source & CommandActionSource.Mute) == 0)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {
@@ -55,21 +48,14 @@ namespace MyGreatestBot.Player
 
         internal void IgnoreArtist(int index = -1, CommandActionSource source = CommandActionSource.None)
         {
-            if ((ApiManager.InitIntents & ApiIntents.Sql) == 0)
+            if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "IgnoreArtist",
-                    Description = "SQL is disabled"
-                });
-
-                return;
+                throw new SqlApiException();
             }
 
             if (!IsPlaying || currentTrack == null)
             {
-                if ((source & CommandActionSource.Mute) == 0)
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -100,7 +86,7 @@ namespace MyGreatestBot.Player
 
             Skip(0, CommandActionSource.Mute);
 
-            if ((source & CommandActionSource.Mute) == 0)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {

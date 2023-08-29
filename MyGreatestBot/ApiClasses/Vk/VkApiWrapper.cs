@@ -49,7 +49,9 @@ namespace MyGreatestBot.ApiClasses.Vk
 
         private static IVkApi? api;
 
-        private static IAudioCategory Audio => api?.Audio ?? throw new ArgumentNullException(nameof(IVkApi));
+        private static readonly VkApiException GenericException = new();
+
+        private static IAudioCategory Audio => api?.Audio ?? throw GenericException;
 
         internal static void PerformAuth()
         {
@@ -68,15 +70,15 @@ namespace MyGreatestBot.ApiClasses.Vk
                     Login = credentials.Username,
                     Password = credentials.Password
                 });
-
-                if (!api.IsAuthorized)
-                {
-                    throw new InvalidOperationException("Cannot authorize");
-                }
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new VkApiException("Cannot authorize", ex);
+            }
+
+            if (!api.IsAuthorized)
+            {
+                throw new VkApiException("Cannot authorize");
             }
         }
 
@@ -87,16 +89,16 @@ namespace MyGreatestBot.ApiClasses.Vk
 
         internal static IEnumerable<VkTrackInfo> GetTracks(string? query)
         {
+            if (api == null || !api.IsAuthorized)
+            {
+                throw GenericException;
+            }
+
             List<VkTrackInfo> tracks = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
                 return tracks;
-            }
-
-            if (api == null || !api.IsAuthorized)
-            {
-                throw new InvalidOperationException("Not authorized");
             }
 
             if (TryAddAsCollection(query, tracks, is_playlist: true))

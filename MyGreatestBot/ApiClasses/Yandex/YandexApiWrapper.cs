@@ -57,12 +57,14 @@ namespace MyGreatestBot.ApiClasses.Yandex
         private static YandexMusicApi? api;
         private static AuthStorage? storage;
 
-        internal static YUserAPI User => api?.User ?? throw new ArgumentNullException(nameof(YandexMusicApi));
-        internal static YSearchAPI Search => api?.Search ?? throw new ArgumentNullException(nameof(YandexMusicApi));
-        internal static YTrackAPI Track => api?.Track ?? throw new ArgumentNullException(nameof(YandexMusicApi));
-        internal static YArtistAPI Artist => api?.Artist ?? throw new ArgumentNullException(nameof(YandexMusicApi));
-        internal static YAlbumAPI Album => api?.Album ?? throw new ArgumentNullException(nameof(YandexMusicApi));
-        internal static YPlaylistAPI Playlist => api?.Playlist ?? throw new ArgumentNullException(nameof(YandexMusicApi));
+        private static readonly YandexApiException GenericException = new();
+
+        internal static YUserAPI User => api?.User ?? throw GenericException;
+        internal static YSearchAPI Search => api?.Search ?? throw GenericException;
+        internal static YTrackAPI Track => api?.Track ?? throw GenericException;
+        internal static YArtistAPI Artist => api?.Artist ?? throw GenericException;
+        internal static YAlbumAPI Album => api?.Album ?? throw GenericException;
+        internal static YPlaylistAPI Playlist => api?.Playlist ?? throw GenericException;
 
         internal static void PerformAuth()
         {
@@ -77,7 +79,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot create auth session", ex);
+                throw new YandexApiException("Cannot create auth session", ex);
             }
 
             try
@@ -86,7 +88,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot authorize", ex);
+                throw new YandexApiException("Cannot authorize", ex);
             }
 
             try
@@ -99,7 +101,7 @@ namespace MyGreatestBot.ApiClasses.Yandex
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot get valid token", ex);
+                throw new YandexApiException("Cannot get valid access token", ex);
             }
         }
 
@@ -181,6 +183,11 @@ namespace MyGreatestBot.ApiClasses.Yandex
 
         internal static IEnumerable<YandexTrackInfo> GetTracks(string? query)
         {
+            if (api == null)
+            {
+                throw GenericException;
+            }
+
             List<YandexTrackInfo> tracks_collection = new();
 
             if (string.IsNullOrWhiteSpace(query))

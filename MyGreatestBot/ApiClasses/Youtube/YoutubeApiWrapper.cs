@@ -4,7 +4,6 @@ using Google.Apis.YouTube.v3;
 using MyGreatestBot.ConfigStructs;
 using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
@@ -24,11 +23,13 @@ namespace MyGreatestBot.ApiClasses.Youtube
     [SupportedOSPlatform("windows")]
     internal static class YoutubeApiWrapper
     {
-        private static YoutubeClient? YoutubeClientInstance;
+        private static YoutubeClient? api;
 
-        internal static VideoClient Videos => YoutubeClientInstance?.Videos ?? throw new ArgumentNullException(nameof(YoutubeClient));
-        internal static StreamClient Streams => YoutubeClientInstance?.Videos.Streams ?? throw new ArgumentNullException(nameof(YoutubeClient));
-        internal static PlaylistClient Playlists => YoutubeClientInstance?.Playlists ?? throw new ArgumentNullException(nameof(YoutubeClient));
+        private static readonly YoutubeApiException GenericException = new();
+
+        internal static VideoClient Videos => api?.Videos ?? throw GenericException;
+        internal static StreamClient Streams => api?.Videos.Streams ?? throw GenericException;
+        internal static PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
 
         private static class YoutubeQueryDecomposer
         {
@@ -64,19 +65,19 @@ namespace MyGreatestBot.ApiClasses.Youtube
                 ApplicationName = typeof(YoutubeApiWrapper).ToString()
             });
 
-            YoutubeClientInstance = new(GoogleService.HttpClient);
+            api = new(GoogleService.HttpClient);
         }
 
         internal static void Logout()
         {
-            YoutubeClientInstance = null;
+            api = null;
         }
 
         internal static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
         {
-            if (YoutubeClientInstance == null)
+            if (api == null)
             {
-                throw new InvalidOperationException("Not authorized");
+                throw GenericException;
             }
 
             List<YoutubeTrackInfo> tracks = new();

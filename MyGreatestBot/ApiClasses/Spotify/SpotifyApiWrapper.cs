@@ -2,7 +2,6 @@
 using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
 using SpotifyAPI.Web;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -20,12 +19,14 @@ namespace MyGreatestBot.ApiClasses.Spotify
         //private static EmbedIOAuthServer? server;
         private static SpotifyClient? SpotifyClientInstance;
 
-        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw new ArgumentException(nameof(SpotifyClient));
-        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw new ArgumentException(nameof(SpotifyClient));
-        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw new ArgumentException(nameof(SpotifyClient));
-        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw new ArgumentException(nameof(SpotifyClient));
-        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw new ArgumentException(nameof(SpotifyClient));
-        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw new ArgumentException(nameof(SpotifyClient));
+        private static readonly SpotifyApiException GenericException = new();
+
+        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw GenericException;
+        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw GenericException;
+        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw GenericException;
+        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw GenericException;
+        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw GenericException;
+        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw GenericException;
 
         private static class SpotifyQueryDecomposer
         {
@@ -126,7 +127,7 @@ namespace MyGreatestBot.ApiClasses.Spotify
 
             if (SpotifyClientInstance == null)
             {
-                throw new InvalidOperationException("Not authorized");
+                throw GenericException;
             }
 
             {

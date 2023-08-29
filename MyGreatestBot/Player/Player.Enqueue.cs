@@ -14,7 +14,7 @@ namespace MyGreatestBot.Player
 
             lock (tracks_queue)
             {
-                if ((source & CommandActionSource.External) == 0)
+                if (!source.HasFlag(CommandActionSource.External))
                 {
                     foreach (ITrackInfo track in tracks)
                     {
@@ -39,7 +39,7 @@ namespace MyGreatestBot.Player
                 count = tracks_queue.Count;
             }
 
-            if ((source & CommandActionSource.Mute) == 0)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {

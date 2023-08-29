@@ -1,7 +1,5 @@
 ﻿using MyGreatestBot.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
@@ -25,7 +23,7 @@ namespace MyGreatestBot.ApiClasses.Youtube
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        public HyperLink? AlbumName { get; }
+        public HyperLink? AlbumName => null;
         public HyperLink? PlaylistName { get; }
 
         public string Title => TrackName.Title;
@@ -35,7 +33,7 @@ namespace MyGreatestBot.ApiClasses.Youtube
 
         public string? CoverURL { get; }
         public string AudioURL { get; private set; }
-        public bool IsLiveStream { get; private set; }
+        public bool IsLiveStream => Duration == TimeSpan.Zero;
 
         /// <summary>
         /// Youtube track info constructor
@@ -55,8 +53,6 @@ namespace MyGreatestBot.ApiClasses.Youtube
 
             Duration = video.Duration ?? TimeSpan.Zero;
 
-            IsLiveStream = Duration == TimeSpan.Zero;
-
             AudioURL = string.Empty;
             CoverURL = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
 
@@ -68,39 +64,25 @@ namespace MyGreatestBot.ApiClasses.Youtube
 
         void ITrackInfo.ObtainAudioURL()
         {
-            if (string.IsNullOrWhiteSpace(Id))
+            try
             {
-                throw new InvalidOperationException("No results");
+                AudioURL = IsLiveStream
+                    ? YoutubeApiWrapper.Streams
+                        .GetHttpLiveStreamUrlAsync(Id)
+                        .AsTask()
+                        .GetAwaiter()
+                        .GetResult()
+                    : YoutubeApiWrapper.Streams
+                        .GetManifestAsync(Id)
+                        .AsTask()
+                        .GetAwaiter()
+                        .GetResult()
+                        .GetAudioOnlyStreams()
+                        .GetWithHighestBitrate().Url;
             }
-
-            if (IsLiveStream)
+            catch (Exception ex)
             {
-                string stream_url = YoutubeApiWrapper.Streams.GetHttpLiveStreamUrlAsync(Id)
-                    .AsTask()
-                    .GetAwaiter()
-                    .GetResult() ?? throw new InvalidOperationException("Stream URL was null");
-
-                AudioURL = stream_url;
-            }
-            else
-            {
-                StreamManifest manifest = YoutubeApiWrapper.Streams.GetManifestAsync(Id)
-                    .AsTask()
-                    .GetAwaiter()
-                    .GetResult() ?? throw new InvalidOperationException("Manifest was null");
-
-                IEnumerable<AudioOnlyStreamInfo> audioStreams = manifest.GetAudioOnlyStreams();
-
-                if (!audioStreams.Any())
-                {
-                    throw new InvalidOperationException("No streams found");
-                }
-
-                AudioOnlyStreamInfo audioStream = audioStreams
-                    .MaxBy(a => a.Bitrate.BitsPerSecond)
-                    ?? throw new InvalidOperationException("Stream URL was null");
-
-                AudioURL = audioStream.Url;
+                throw new InvalidOperationException("Cannot get audio URL", ex);
             }
         }
 

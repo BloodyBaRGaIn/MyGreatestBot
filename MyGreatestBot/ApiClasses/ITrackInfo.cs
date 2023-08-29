@@ -57,7 +57,7 @@ namespace MyGreatestBot.ApiClasses
         internal string Title { get; }
 
         /// <summary>
-        /// Track duration
+        /// Current track duration
         /// </summary>
         internal TimeSpan Duration { get; }
 
@@ -77,7 +77,7 @@ namespace MyGreatestBot.ApiClasses
         internal string AudioURL { get; }
 
         /// <summary>
-        /// Is a stream
+        /// Does the track have a duration
         /// </summary>
         internal bool IsLiveStream { get; }
 
@@ -86,16 +86,9 @@ namespace MyGreatestBot.ApiClasses
         /// </summary>
         /// <param name="span">Specified position</param>
         /// <returns>True if possible to seek</returns>
-        internal bool TrySeek(TimeSpan span)
+        internal bool IsSeekPossible(TimeSpan span)
         {
-            if (IsLiveStream || Duration == TimeSpan.Zero || span > Duration)
-            {
-                return false;
-            }
-
-            //Seek = span;
-
-            return true;
+            return !(IsLiveStream || span > Duration);
         }
 
         /// <summary>
@@ -104,7 +97,7 @@ namespace MyGreatestBot.ApiClasses
         /// <param name="span">Specified position</param>
         internal void PerformSeek(TimeSpan span)
         {
-            if (TrySeek(span))
+            if (IsSeekPossible(span))
             {
                 Seek = span;
             }
@@ -120,7 +113,7 @@ namespace MyGreatestBot.ApiClasses
             result += $"Playing: {TrackName}\n";
             result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}\n";
 
-            if (Duration != TimeSpan.Zero)
+            if (!IsLiveStream)
             {
                 result += $"Duration: {Duration:hh\\:mm\\:ss}\n";
             }

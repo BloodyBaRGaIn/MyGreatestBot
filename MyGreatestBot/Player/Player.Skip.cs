@@ -11,7 +11,7 @@ namespace MyGreatestBot.Player
             {
                 if (tracks_queue.Count < add_count)
                 {
-                    if ((source & CommandActionSource.Mute) == 0)
+                    if (!source.HasFlag(CommandActionSource.Mute))
                     {
                         Handler.SendMessage(new DiscordEmbedBuilder()
                         {
@@ -27,7 +27,7 @@ namespace MyGreatestBot.Player
                 }
             }
 
-            if ((source & CommandActionSource.Mute) == 0)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 if (IsPlaying)
                 {

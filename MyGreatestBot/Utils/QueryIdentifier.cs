@@ -57,7 +57,7 @@ namespace MyGreatestBot.Utils
                     }
                     else
                     {
-                        throw new InvalidOperationException($"{receiver.desired} is disabled");
+                        throw new GenericApiException(receiver.desired);
                     }
                 }
 

@@ -10,7 +10,7 @@ namespace MyGreatestBot.Player
         {
             if (IsPlaying || tracks_queue.Any())
             {
-                if ((source & CommandActionSource.External) != 0)
+                if (!source.HasFlag(CommandActionSource.External))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -22,7 +22,7 @@ namespace MyGreatestBot.Player
 
                 Clear(source);
 
-                if ((source & CommandActionSource.Mute) == 0)
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -33,7 +33,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                if ((source & (CommandActionSource.Mute | CommandActionSource.External)) == 0)
+                if (!source.HasFlag(CommandActionSource.Mute | CommandActionSource.External))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {

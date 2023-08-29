@@ -7,7 +7,7 @@ namespace MyGreatestBot.Player
     {
         internal void Pause(CommandActionSource source = CommandActionSource.None)
         {
-            if ((source & CommandActionSource.Mute) == 0)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 if (IsPlaying)
                 {

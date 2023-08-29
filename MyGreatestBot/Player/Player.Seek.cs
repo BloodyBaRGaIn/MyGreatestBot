@@ -10,7 +10,7 @@ namespace MyGreatestBot.Player
         {
             if (IsPlaying && currentTrack != null)
             {
-                bool result = currentTrack.TrySeek(span);
+                bool result = currentTrack.IsSeekPossible(span);
 
                 if (result)
                 {

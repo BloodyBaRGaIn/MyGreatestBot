@@ -7,6 +7,7 @@ using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -98,7 +99,7 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(
             CommandContext ctx,
-            [Description("Timespan in format HH:MM:SS")] string timespan)
+            [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -109,12 +110,51 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
             handler.VoiceConnection = handler.GetVoiceConnection();
 
-            if (!TimeSpan.TryParse(timespan, out TimeSpan result))
+            TimeSpan time = TimeSpan.Zero;
+
+            InvalidCastException invalidCastException = new("Invalid argument format");
+
+            IEnumerable<string> split = timespan.Split(':').Reverse();
+
+            int count = split.Count();
+
+            if (count is < 2 or > 3)
             {
-                throw new InvalidCastException("Invalid argument format");
+                throw invalidCastException;
             }
 
-            await Task.Run(() => handler.PlayerInstance.RequestSeek(result));
+            string? seconds = split.ElementAtOrDefault(0);
+            string? minutes = split.ElementAtOrDefault(1);
+            string? hours = split.ElementAtOrDefault(2);
+
+            if (seconds != null)
+            {
+                if (!uint.TryParse(seconds, out uint value) || value > 59)
+                {
+                    throw invalidCastException;
+                }
+                time += TimeSpan.FromSeconds(value);
+            }
+
+            if (minutes != null)
+            {
+                if (!uint.TryParse(minutes, out uint value) || value > 59)
+                {
+                    throw invalidCastException;
+                }
+                time += TimeSpan.FromMinutes(value);
+            }
+
+            if (hours != null && count == 3)
+            {
+                if (!uint.TryParse(hours, out uint value))
+                {
+                    throw invalidCastException;
+                }
+                time += TimeSpan.FromHours(value);
+            }
+
+            await Task.Run(() => handler.PlayerInstance.RequestSeek(time));
 
             await Task.Delay(1);
         }
@@ -177,8 +217,8 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("track")]
-        [Aliases("tr")]
+        [Command("currenttrack")]
+        [Aliases("track", "tr")]
         [Description("Get current track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task TrackInfoCommand(CommandContext ctx)
@@ -196,8 +236,8 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("next")]
-        [Aliases("ntr", "nex")]
+        [Command("nexttrack")]
+        [Aliases("next", "ntr", "nex")]
         [Description("Get next track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NextTrackInfoCommand(CommandContext ctx)
