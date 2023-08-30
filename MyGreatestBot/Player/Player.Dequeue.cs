@@ -38,6 +38,16 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
+                if (track.Duration >= MaxTrackDuration)
+                {
+                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Yellow,
+                        Title = "Track is too long"
+                    });
+                    continue;
+                }
+
                 currentTrack = track;
                 break;
             }

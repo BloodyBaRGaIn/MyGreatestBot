@@ -10,19 +10,18 @@ namespace MyGreatestBot.Player
         {
             if (IsPlaying || tracks_queue.Any())
             {
-                if (source.HasFlag(CommandActionSource.External))
+                if (source.HasFlag(CommandActionSource.External) && !source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Red,
                         Title = "Kicked from voice channel"
                     });
-                    return;
                 }
 
                 Clear(source);
 
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!source.HasFlag(CommandActionSource.External) && !source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {

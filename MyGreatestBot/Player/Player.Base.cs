@@ -19,6 +19,8 @@ namespace MyGreatestBot.Player
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
+        private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
+
         private volatile ITrackInfo? currentTrack;
 
         private volatile bool IsPlaying;
@@ -299,21 +301,7 @@ namespace MyGreatestBot.Player
 
                 if (!Handler.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    do
-                    {
-                        Handler.VoiceConnection = Handler.GetVoiceConnection();
-
-                        if (Handler.VoiceConnection != null)
-                        {
-                            break;
-                        }
-
-                        Task.Yield().GetAwaiter().GetResult();
-                        Task.Delay(1).Wait();
-                        Task.Yield().GetAwaiter().GetResult();
-                    }
-                    while (true);
-
+                    Handler.WaitForConnectionAsync().Wait();
                     Handler.UpdateSink();
                     continue;
                 }

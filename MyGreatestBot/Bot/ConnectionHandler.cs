@@ -4,6 +4,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
 using MyGreatestBot.Commands;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
@@ -18,6 +19,8 @@ namespace MyGreatestBot.Bot
 
         private readonly DiscordGuild Guild;
         internal readonly Player.Player PlayerInstance;
+
+        internal volatile bool IsManualDisconnect;
 
         private static VoiceNextExtension? VoiceNext => BotWrapper.VoiceNext;
 
@@ -39,8 +42,16 @@ namespace MyGreatestBot.Bot
             {
                 return handler;
             }
-            ConnectionDictionary.Add(key, new(guild));
+            if (!ConnectionDictionary.TryAdd(key, new(guild)))
+            {
+                throw new ApplicationException("Cannot initialize connection handler");
+            }
             return ConnectionDictionary[key];
+        }
+
+        internal void Update(DiscordGuild guild)
+        {
+            ConnectionDictionary[guild.Id] = this;
         }
 
         private ConnectionHandler(DiscordGuild guild)
@@ -94,17 +105,41 @@ namespace MyGreatestBot.Bot
             }
         }
 
+        internal async Task WaitForConnectionAsync()
+        {
+            while (VoiceConnection == null)
+            {
+                VoiceConnection = GetVoiceConnection();
+                await Task.Yield();
+                await Task.Delay(1);
+            }
+        }
+
+        internal async Task WaitForDisconnectionAsync()
+        {
+            while (VoiceConnection != null)
+            {
+                VoiceConnection = GetVoiceConnection();
+                await Task.Yield();
+                await Task.Delay(1);
+            }
+        }
+
         internal void Connect()
         {
             try
             {
-                _ = (VoiceNext?.ConnectAsync(VoiceChannel).Wait(1000));
+                if (VoiceNext != null && VoiceConnection?.TargetChannel != VoiceChannel && VoiceChannel != null)
+                {
+                    _ = (VoiceNext?.ConnectAsync(VoiceChannel).Wait(1000));
+                }
             }
             catch { }
         }
 
         internal void Disconnect()
         {
+            IsManualDisconnect = true;
             try
             {
                 VoiceConnection?.Disconnect();
@@ -114,68 +149,51 @@ namespace MyGreatestBot.Bot
             catch { }
         }
 
-        internal static async Task Join(CommandContext ctx)
+        internal async Task Join(CommandContext ctx)
         {
-            ConnectionHandler? handler = GetConnectionHandler(ctx.Guild);
-
-            if (handler == null)
-            {
-                return;
-            }
-
-            handler.TextChannel = ctx.Channel;
-            handler.VoiceConnection = handler.GetVoiceConnection();
-
-            await Task.Yield();
-
-            if (handler.VoiceConnection != null && handler.VoiceChannel != ctx.Member?.VoiceState?.Channel)
-            {
-                handler.Disconnect();
-                await Task.Yield();
-                await Join(ctx);
-                return;
-                //throw new InvalidOperationException("Already connected in this guild.");
-            }
-
-            handler.VoiceChannel = (ctx.Member?.VoiceState?.Channel)
-                ?? throw new InvalidOperationException("You need to be in a voice channel.");
-
-            handler.Connect();
-
-            await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Mute));
-
-            await Task.Delay(1);
+            await Join(ctx.Channel, ctx.Member?.VoiceState?.Channel, true);
         }
 
-        internal static async Task Join(VoiceStateUpdateEventArgs args)
+        internal async Task Join(VoiceStateUpdateEventArgs args)
         {
-            ConnectionHandler? handler = GetConnectionHandler(args.Guild);
+            await Join(null, args.After?.Channel, false);
+        }
 
-            if (handler == null)
+        internal async Task Join(DiscordChannel? text, DiscordChannel? channel, bool throw_exception = false)
+        {
+            if (text != null)
             {
-                return;
+                TextChannel = text;
             }
 
-            handler.VoiceConnection = handler.GetVoiceConnection();
+            VoiceConnection = GetVoiceConnection();
 
             await Task.Yield();
 
-            if (handler.VoiceConnection != null && handler.VoiceChannel != args.After.Channel)
+            if (VoiceConnection != null && (VoiceChannel != channel || VoiceConnection.TargetChannel != channel))
             {
-                handler.Disconnect();
+                Disconnect();
+                WaitForDisconnectionAsync().Wait();
                 await Task.Yield();
-                await Join(args);
+                if (channel != null)
+                {
+                    await Join(text, channel, throw_exception);
+                }
                 return;
-                //throw new InvalidOperationException("Already connected in this guild.");
             }
 
-            if (args.After.Channel != null)
+            if (channel != null)
             {
-                handler.VoiceChannel = args.After.Channel;
-                handler.Connect();
+                VoiceChannel = channel;
+                Connect();
+                WaitForConnectionAsync().Wait();
+            }
+            else if (throw_exception)
+            {
+                throw new InvalidOperationException("You need to be in the voice channel");
             }
 
-            await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Mute));
+            await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
 
             await Task.Delay(1);
         }
@@ -200,6 +218,7 @@ namespace MyGreatestBot.Bot
             //}
 
             handler.Disconnect();
+            await handler.WaitForDisconnectionAsync();
 
             await Task.Delay(1);
         }

@@ -23,22 +23,9 @@ namespace MyGreatestBot.Commands
 
             if (handler.VoiceConnection == null)
             {
-                await ConnectionHandler.Join(ctx);
-
-                do
-                {
-                    handler.VoiceConnection = handler.GetVoiceConnection();
-
-                    if (handler.VoiceConnection != null)
-                    {
-                        break;
-                    }
-
-                    Task.Yield().GetAwaiter().GetResult();
-                    Task.Delay(1).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
-                }
-                while (true);
+                await handler.Join(ctx);
+                await handler.WaitForConnectionAsync();
+                handler.Update(ctx.Guild);
             }
 
             return ApiManager.GetAll(query);
@@ -137,7 +124,7 @@ namespace MyGreatestBot.Commands
 
             if (seconds != null)
             {
-                if (!uint.TryParse(seconds, out uint value) || value > 59)
+                if (seconds.Length != 2 || !uint.TryParse(seconds, out uint value) || value > 59)
                 {
                     throw invalidCastException;
                 }
@@ -146,7 +133,7 @@ namespace MyGreatestBot.Commands
 
             if (minutes != null)
             {
-                if (!uint.TryParse(minutes, out uint value) || value > 59)
+                if (minutes.Length != 2 || !uint.TryParse(minutes, out uint value) || value > 59)
                 {
                     throw invalidCastException;
                 }

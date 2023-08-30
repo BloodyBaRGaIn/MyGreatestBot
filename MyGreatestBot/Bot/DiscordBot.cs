@@ -12,7 +12,6 @@ using MyGreatestBot.Commands;
 using MyGreatestBot.Extensions;
 using System;
 using System.Runtime.Versioning;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Bot
@@ -118,7 +117,14 @@ namespace MyGreatestBot.Bot
 
             while (true)
             {
-                await Task.Delay(Timeout.Infinite);
+                try
+                {
+                    await Task.Delay(1);
+                }
+                catch
+                {
+                    return;
+                }
             }
         }
 
@@ -129,33 +135,22 @@ namespace MyGreatestBot.Bot
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 if (handler != null)
                 {
-                    await ConnectionHandler.Join(e);
-
-                    do
+                    if (e.After?.Channel != null)
                     {
-                        handler.VoiceConnection = handler.GetVoiceConnection();
-
-                        if (handler.VoiceConnection != null)
-                        {
-                            break;
-                        }
-
-                        Task.Yield().GetAwaiter().GetResult();
-                        Task.Delay(1).Wait();
-                        Task.Yield().GetAwaiter().GetResult();
+                        await handler.Join(e);
+                        await handler.WaitForConnectionAsync();
+                        handler.Update(e.Guild);
                     }
-                    while (true);
-                    //if (e.After?.Channel == null)
-                    //{
-                    //    handler.PlayerInstance.Pause(CommandActionSource.Mute | CommandActionSource.External);
-                    //}
-                    //else
-                    //{
-                    //    handler.VoiceChannel = e.After?.Channel;
-                    //    handler.VoiceConnection = Voice?.GetConnection(e.Guild);
-                    //    handler.UpdateSink();
-                    //    handler.PlayerInstance.Resume(CommandActionSource.Mute | CommandActionSource.External);
-                    //}
+                    else
+                    {
+                        if (!handler.IsManualDisconnect)
+                        {
+                            handler.PlayerInstance.Stop(CommandActionSource.External);
+                        }
+                        handler.IsManualDisconnect = false;
+                    }
+
+                    handler.Update(e.Guild);
                 }
             }
 

@@ -23,7 +23,11 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task JoinCommand(CommandContext ctx)
         {
-            await ConnectionHandler.Join(ctx);
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler != null)
+            {
+                await handler.Join(ctx);
+            }
         }
 
         [Command("leave")]
