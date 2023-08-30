@@ -74,9 +74,10 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
+                Handler.VoiceConnection = Handler.GetVoiceConnection();
+
                 if (Handler.VoiceConnection == null)
                 {
-                    Handler.VoiceConnection = Handler.GetVoiceConnection();
                     Wait();
                     continue;
                 }
@@ -200,6 +201,7 @@ namespace MyGreatestBot.Player
 
                 if (low_result == LowPlayerResult.Restart)
                 {
+                    Handler.Log("Restart ffmpeg");
                     obtain_audio = false;
                     continue;
                 }
@@ -265,7 +267,6 @@ namespace MyGreatestBot.Player
                     }
 
                     // restart ffmpeg
-                    Handler.Log("Restart ffmpeg");
                     return LowPlayerResult.Restart;
                 }
 
