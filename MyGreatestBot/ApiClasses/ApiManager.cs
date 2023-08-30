@@ -24,7 +24,7 @@ namespace MyGreatestBot.ApiClasses
         /// </summary>
         internal static ApiIntents InitIntents { get; private set; } = ApiIntents.None;
 
-        internal static ApiIntents FailedIntents { get; private set; } = ApiIntents.None; 
+        internal static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
 
         private sealed class AuthActions
         {
@@ -90,7 +90,7 @@ namespace MyGreatestBot.ApiClasses
                 return;
             }
 
-            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            if (!AuthActionsDictionary.TryGetValue(desired, out AuthActions? actions))
             {
                 throw new ArgumentException(nameof(ApiIntents));
             }
@@ -145,7 +145,7 @@ namespace MyGreatestBot.ApiClasses
                 return;
             }
 
-            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            if (!AuthActionsDictionary.TryGetValue(desired, out AuthActions? actions))
             {
                 throw new ArgumentException(nameof(ApiIntents));
             }
@@ -201,7 +201,7 @@ namespace MyGreatestBot.ApiClasses
                 return;
             }
 
-            if (!AuthActionsDictionary.TryGetValue(desired, out var actions))
+            if (!AuthActionsDictionary.TryGetValue(desired, out AuthActions? actions))
             {
                 throw new ArgumentException(nameof(ApiIntents));
             }

@@ -6,7 +6,7 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System.Globalization;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -105,48 +105,27 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
             handler.VoiceConnection = handler.GetVoiceConnection();
 
-            TimeSpan time = TimeSpan.Zero;
-
-            InvalidCastException invalidCastException = new("Invalid argument format");
-
-            IEnumerable<string> split = timespan.Split(':').Reverse();
-
-            int count = split.Count();
-
-            if (count is < 2 or > 3)
+            string[] formats = new[]
             {
-                throw invalidCastException;
+                "HH:mm:ss",
+                "mm:ss"
+            };
+
+            TimeSpan time = TimeSpan.MinValue;
+
+            foreach (string format in formats)
+            {
+                try
+                {
+                    time = DateTime.ParseExact(timespan, format, CultureInfo.InvariantCulture).TimeOfDay;
+                    break;
+                }
+                catch { }
             }
 
-            string? seconds = split.ElementAtOrDefault(0);
-            string? minutes = split.ElementAtOrDefault(1);
-            string? hours = split.ElementAtOrDefault(2);
-
-            if (seconds != null)
+            if (time == TimeSpan.MinValue)
             {
-                if (seconds.Length != 2 || !uint.TryParse(seconds, out uint value) || value > 59)
-                {
-                    throw invalidCastException;
-                }
-                time += TimeSpan.FromSeconds(value);
-            }
-
-            if (minutes != null)
-            {
-                if (minutes.Length != 2 || !uint.TryParse(minutes, out uint value) || value > 59)
-                {
-                    throw invalidCastException;
-                }
-                time += TimeSpan.FromMinutes(value);
-            }
-
-            if (hours != null && count == 3)
-            {
-                if (!uint.TryParse(hours, out uint value))
-                {
-                    throw invalidCastException;
-                }
-                time += TimeSpan.FromHours(value);
+                throw new ArgumentException("Wrong format");
             }
 
             await Task.Run(() => handler.PlayerInstance.RequestSeek(time));

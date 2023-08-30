@@ -7,9 +7,13 @@ namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        private static class FFMPEG
+        private class FFMPEG
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
+            private Process? Process;
+
+            internal bool HasExited => Process?.HasExited ?? true;
+            internal StreamReader? StandardOutput => Process?.StandardOutput;
 
             static FFMPEG()
             {
@@ -21,8 +25,10 @@ namespace MyGreatestBot.Player
                 }
             }
 
-            internal static Process StartProcess(ITrackInfo track)
+            internal void Start(ITrackInfo track)
             {
+                Stop();
+
                 Process process = Process.Start(new ProcessStartInfo()
                 {
                     FileName = FFMPEG_PATH,
@@ -31,25 +37,51 @@ namespace MyGreatestBot.Player
                     UseShellExecute = false
                 }) ?? throw new InvalidOperationException("ffmpeg not started");
 
-                process.PriorityClass = ProcessPriorityClass.RealTime;
+                try
+                {
+                    process.PriorityClass = ProcessPriorityClass.RealTime;
+                }
+                catch { }
 
-                return process;
+                Process = process;
             }
 
-            internal static void StopProcess(Process ffmpeg)
+            internal bool WaitForExit(int milliseconds)
             {
-                if (!ffmpeg.HasExited)
+                return Process == null || Process.WaitForExit(milliseconds);
+            }
+
+            internal bool TryLoad(int milliseconds)
+            {
+                if (Process == null || StandardOutput == null)
                 {
-                    try
-                    {
-                        ffmpeg.Kill();
-                    }
-                    catch { }
+                    return false;
+                }
+                bool exit = WaitForExit(milliseconds);
+                if (HasExited || exit || StandardOutput.EndOfStream)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            internal void Stop()
+            {
+                if (Process == null)
+                {
+                    return;
                 }
 
                 try
                 {
-                    ffmpeg.Dispose();
+                    Process.Kill();
+                }
+                catch { }
+
+                try
+                {
+                    Process.Dispose();
                 }
                 catch { }
             }

@@ -4,7 +4,6 @@ using MyGreatestBot.Bot;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -21,7 +20,7 @@ namespace MyGreatestBot.Player
 
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
 
-        internal int TransmitSinkDelay => TRANSMIT_SINK_MS;
+        internal int TransmitSinkDelay { get; private set; } = TRANSMIT_SINK_MS;
 
         private volatile ITrackInfo? currentTrack;
 
@@ -36,6 +35,7 @@ namespace MyGreatestBot.Player
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly CancellationToken MainPlayerCancellationToken;
         private readonly Task MainPlayerTask;
+        private readonly FFMPEG ffmpeg = new();
 
         private readonly ConnectionHandler Handler;
 
@@ -46,10 +46,20 @@ namespace MyGreatestBot.Player
             MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
         }
 
+        private static void Wait()
+        {
+            Task.Delay(1).Wait();
+            Task.Yield().GetAwaiter().GetResult();
+        }
+
         private async void PlayerTaskFunction()
         {
-            Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
-            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            try
+            {
+                Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
+                Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            }
+            catch { }
 
             while (true)
             {
@@ -60,34 +70,27 @@ namespace MyGreatestBot.Player
 
                 if (!tracks_queue.Any())
                 {
-                    Task.Delay(1).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
+                    Wait();
                     continue;
                 }
 
                 if (Handler.VoiceConnection == null)
                 {
                     Handler.VoiceConnection = Handler.GetVoiceConnection();
-                    Task.Delay(1).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
+                    Wait();
                     continue;
                 }
 
                 try
                 {
-                    if (currentTrack is null)
+                    if (currentTrack == null)
                     {
                         Dequeue();
                     }
 
-                    if (currentTrack is not null)
+                    if (currentTrack != null)
                     {
-                        PlayBody(currentTrack);
-                    }
-
-                    if (MainPlayerCancellationToken.IsCancellationRequested)
-                    {
-                        return;
+                        PlayBody();
                     }
 
                     if (!tracks_queue.Any() && !StopRequested)
@@ -104,39 +107,55 @@ namespace MyGreatestBot.Player
                 }
                 catch (Exception ex) when (ex is TypeInitializationException)
                 {
-                    Clear();
+                    Clear(Commands.CommandActionSource.Mute);
                     await Handler.LogErrorAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;
                 }
+                catch (Exception ex) when (ex is TaskCanceledException)
+                {
+                    return;
+                }
                 catch (Exception ex)
                 {
-                    if (MainPlayerCancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
                     IsPlaying = false;
-
                     await Handler.LogErrorAsync(ex.GetExtendedMessage());
-
-                    continue;
                 }
             }
         }
 
-        private void PlayBody(ITrackInfo track)
+        private bool TryObtainAudio()
         {
-            if (track is null
+            if (currentTrack is null)
+            {
+                return false;
+            }
+
+            Seek = currentTrack.Seek;
+
+            try
+            {
+                currentTrack.ObtainAudioURL();
+            }
+            catch (Exception ex)
+            {
+                Handler.SendMessage(ex.GetExtendedMessage());
+                return false;
+            }
+
+            return true;
+        }
+
+        private void PlayBody()
+        {
+            if (currentTrack is null
                 || Handler.VoiceConnection is null)
             {
                 return;
             }
 
-            bool play_message = true;
             bool already_restartd = false;
-
-            byte[] buff = new byte[BUFFER_SIZE];
+            bool obtain_audio = true;
 
             try
             {
@@ -144,183 +163,168 @@ namespace MyGreatestBot.Player
             }
             catch { }
 
-            Handler.Log(track.GetShortMessage());
-
-        restart:
-
-            Seek = track.Seek;
-
-            try
-            {
-                track.ObtainAudioURL();
-            }
-            catch (Exception ex)
-            {
-                Handler.SendMessage(ex.GetExtendedMessage());
-                return;
-            }
-
-        seek:
-
-            track.PerformSeek(Seek);
+            Handler.Log(currentTrack.GetShortMessage());
 
             IsPlaying = true;
 
-            if (play_message)
+            while (true)
             {
-                play_message = false;
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                if (obtain_audio && !TryObtainAudio())
                 {
-                    Color = DiscordColor.Purple,
-                    Title = "Play",
-                    Description = track.GetMessage(),
-                    Thumbnail = track.GetThumbnail()
-                });
-            }
-
-            Process ffmpeg = FFMPEG.StartProcess(track);
-
-            Handler.Log("Start ffmpeg");
-
-            bool exit = ffmpeg.WaitForExit(track.IsLiveStream ? 2000 : (int)(1000 * (track.Duration.TotalHours + 1)));
-
-            // should be tested on extremely short tracks
-            // https://www.youtube.com/watch?v=tPEE9ZwTmy0&ab_channel=MylotheCat
-            if ((ffmpeg.HasExited || exit) && !ffmpeg.StandardOutput.EndOfStream)
-            {
-                if (already_restartd)
-                {
-                    throw new Exception("Cannot reauth");
+                    break;
                 }
-                Handler.Log($"{track.TrackType} : Session expired");
-                track.Reload();
-                already_restartd = true;
-                goto restart;
+
+                currentTrack.PerformSeek(Seek);
+
+                ffmpeg.Start(currentTrack);
+
+                Handler.Log("Start ffmpeg");
+
+                if (!ffmpeg.TryLoad(currentTrack.IsLiveStream ? 2000 : (int)(1000 * (currentTrack.Duration.TotalHours + 1))))
+                {
+                    if (already_restartd)
+                    {
+                        throw new GenericApiException(currentTrack.TrackType, "Cannot reauth");
+                    }
+                    currentTrack.Reload();
+                    already_restartd = true;
+                    obtain_audio = true;
+                    continue;
+                }
+
+                Handler.SendSpeaking(true);
+
+                LowPlayerResult low_result = LowPlayer();
+
+                Handler.SendSpeaking(false);
+
+                if (low_result == LowPlayerResult.Restart)
+                {
+                    obtain_audio = false;
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
 
-            Handler.SendSpeaking(true);
+            IsPlaying = false;
+
+            ffmpeg.Stop();
+
+            Handler.Log("Stop ffmpeg");
+
+            currentTrack = null;
+        }
+
+        private enum LowPlayerResult : int
+        {
+            TrackNull = -1,
+            Success = 0,
+            Restart = 1
+        }
+
+        private LowPlayerResult LowPlayer()
+        {
+            if (currentTrack == null)
+            {
+                return LowPlayerResult.TrackNull;
+            }
+
+            byte[] buff = new byte[BUFFER_SIZE];
 
             while (true)
             {
                 while (IsPaused && IsPlaying && !SeekRequested)
                 {
-                    Task.Yield().GetAwaiter().GetResult();
-                    Task.Delay(1).Wait();
-                    Task.Yield().GetAwaiter().GetResult();
+                    Wait();
                 }
 
                 if (!IsPlaying)
                 {
-                    break;
+                    return LowPlayerResult.Success;
                 }
 
                 if (SeekRequested)
                 {
                     SeekRequested = false;
                     IsPaused = false;
-                    FFMPEG.StopProcess(ffmpeg);
-                    Seek = track.Seek;
-                    goto seek;
+                    Seek = currentTrack.Seek;
+                    return LowPlayerResult.Restart;
                 }
 
-                track.PerformSeek(Seek);
+                currentTrack.PerformSeek(Seek);
 
-                int retries = 0;
-
-                int bytesCount;
-
-                while (retries < 2)
+                if (!PerformRead(buff))
                 {
-                    CancellationTokenSource cts = new();
-                    CancellationToken token = cts.Token;
-                    Task<int> read_task = ffmpeg.StandardOutput.BaseStream.ReadAsync(buff, 0, buff.Length, token);
-                    if (!read_task.Wait(100))
+                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(5))
                     {
-                        cts.Cancel();
-                        bytesCount = 0;
-                    }
-                    else
-                    {
-                        bytesCount = read_task.Result;
-                    }
-
-                    if (bytesCount != 0)
-                    {
-                        if (bytesCount < buff.Length)
-                        {
-                            Task.Delay(100).Wait();
-                            while (bytesCount < buff.Length)
-                            {
-                                buff[bytesCount++] = 0;
-                            }
-                        }
-                        break;
-                    }
-
-                    retries++;
-
-                    Task.Delay(10).Wait();
-                }
-
-                if (retries == 2)
-                {
-                    if (track.IsLiveStream)
-                    {
-                        //StaticBotInstanceContainer.SendMessage("Restarting");
-                        Handler.Log("Restart ffmpeg");
-                    }
-                    else
-                    {
-                        if (track.Duration - Seek >= TimeSpan.FromSeconds(5))
-                        {
-                            //StaticBotInstanceContainer.SendMessage($"Restarting at {span}");
-                            Handler.Log("Restart ffmpeg");
-                        }
-                        else
-                        {
-                            // track almost ended
-                            break;
-                        }
+                        // track almost ended
+                        return LowPlayerResult.Success;
                     }
 
                     // restart ffmpeg
-                    FFMPEG.StopProcess(ffmpeg);
-                    goto seek;
+                    Handler.Log("Restart ffmpeg");
+                    return LowPlayerResult.Restart;
                 }
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
 
-                if (!track.IsLiveStream)
+                if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek <= TimeSpan.FromSeconds(1))
                 {
-                    if (track.Duration - Seek <= TimeSpan.FromSeconds(1))
-                    {
-                        // track should be ended
-                        break;
-                    }
+                    // track should be ended
+                    return LowPlayerResult.Success;
                 }
 
-                if (Handler.TransmitSink == null)
+                while (Handler.TransmitSink == null)
                 {
-                    throw new ArgumentNullException(nameof(Handler.TransmitSink), "Transmit sink not configured");
+                    Handler.UpdateSink();
+                    Wait();
                 }
 
-                if (!Handler.TransmitSink.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
+                if (!Handler.TransmitSink.WriteAsync(buff).Wait(TransmitSinkDelay * 100))
                 {
                     Handler.WaitForConnectionAsync().Wait();
                     Handler.UpdateSink();
-                    continue;
                 }
             }
+        }
 
-            Handler.SendSpeaking(false);
+        private bool PerformRead(byte[] buff)
+        {
+            int bytesCount;
+            CancellationTokenSource cts = new();
+            CancellationToken token = cts.Token;
+            Task<int>? read_task = ffmpeg.StandardOutput?.BaseStream?.ReadAsync(buff, 0, buff.Length, token);
+            if (read_task == null)
+            {
+                return false;
+            }
+            if (!read_task.Wait(100))
+            {
+                cts.Cancel();
+                bytesCount = 0;
+            }
+            else
+            {
+                bytesCount = read_task.Result;
+            }
 
-            IsPlaying = false;
+            if (bytesCount == 0)
+            {
+                return false;
+            }
 
-            FFMPEG.StopProcess(ffmpeg);
-
-            Handler.Log("Stop ffmpeg");
-
-            currentTrack = null;
+            if (bytesCount < buff.Length)
+            {
+                Task.Delay(100).Wait();
+                while (bytesCount < buff.Length)
+                {
+                    buff[bytesCount++] = 0;
+                }
+            }
+            return true;
         }
     }
 }

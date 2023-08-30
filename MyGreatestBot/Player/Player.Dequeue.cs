@@ -18,6 +18,14 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
+                Handler.SendMessage(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Purple,
+                    Title = "Play",
+                    Description = track.GetMessage(),
+                    Thumbnail = track.GetThumbnail()
+                });
+
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
@@ -49,6 +57,7 @@ namespace MyGreatestBot.Player
                 }
 
                 currentTrack = track;
+
                 break;
             }
         }
