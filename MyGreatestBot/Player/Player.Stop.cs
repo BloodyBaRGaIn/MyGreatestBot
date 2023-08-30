@@ -10,18 +10,11 @@ namespace MyGreatestBot.Player
         {
             if (IsPlaying || tracks_queue.Any())
             {
-                if (source.HasFlag(CommandActionSource.External) && !source.HasFlag(CommandActionSource.Mute))
-                {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Kicked from voice channel"
-                    });
-                }
+                StopRequested = true;
 
                 Clear(source);
 
-                if (!source.HasFlag(CommandActionSource.External) && !source.HasFlag(CommandActionSource.Mute))
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -36,7 +29,7 @@ namespace MyGreatestBot.Player
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
-                        Color = DiscordColor.Red,
+                        Color = DiscordColor.Blue,
                         Title = "Nothing to stop"
                     });
                 }

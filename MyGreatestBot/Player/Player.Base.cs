@@ -15,17 +15,20 @@ namespace MyGreatestBot.Player
     [SupportedOSPlatform("windows")]
     internal partial class Player
     {
-        internal const int TRANSMIT_SINK_MS = 10;
+        private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
 
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
+
+        internal int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
         private volatile ITrackInfo? currentTrack;
 
         private volatile bool IsPlaying;
         private volatile bool IsPaused;
         private volatile bool SeekRequested;
+        private volatile bool StopRequested;
 
         private TimeSpan Seek;
 
@@ -43,7 +46,7 @@ namespace MyGreatestBot.Player
             MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
         }
 
-        private void PlayerTaskFunction()
+        private async void PlayerTaskFunction()
         {
             Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
@@ -87,20 +90,22 @@ namespace MyGreatestBot.Player
                         return;
                     }
 
-                    if (!tracks_queue.Any())
+                    if (!tracks_queue.Any() && !StopRequested)
                     {
-                        Handler.SendMessage(new DiscordEmbedBuilder()
+                        await Handler.SendMessageAsync(new DiscordEmbedBuilder()
                         {
                             Color = DiscordColor.Red,
                             Title = "Play",
                             Description = "No more tracks"
                         });
                     }
+
+                    StopRequested = false;
                 }
                 catch (Exception ex) when (ex is TypeInitializationException)
                 {
                     Clear();
-                    Handler.LogError(ex.GetExtendedMessage());
+                    await Handler.LogErrorAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;
                 }
@@ -113,7 +118,7 @@ namespace MyGreatestBot.Player
 
                     IsPlaying = false;
 
-                    Handler.LogError(ex.GetExtendedMessage());
+                    await Handler.LogErrorAsync(ex.GetExtendedMessage());
 
                     continue;
                 }

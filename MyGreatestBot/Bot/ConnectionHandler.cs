@@ -225,7 +225,7 @@ namespace MyGreatestBot.Bot
 
         internal void UpdateSink()
         {
-            TransmitSink = VoiceConnection?.GetTransmitSink(Player.Player.TRANSMIT_SINK_MS);
+            TransmitSink = VoiceConnection?.GetTransmitSink(PlayerInstance.TransmitSinkDelay);
         }
 
         internal async Task SendMessageAsync(DiscordEmbedBuilder embed)

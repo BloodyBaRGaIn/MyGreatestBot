@@ -145,7 +145,12 @@ namespace MyGreatestBot.Bot
                     {
                         if (!handler.IsManualDisconnect)
                         {
-                            handler.PlayerInstance.Stop(CommandActionSource.External);
+                            handler.SendMessage(new DiscordEmbedBuilder()
+                            {
+                                Color = DiscordColor.Red,
+                                Title = "Kicked from voice channel"
+                            });
+                            handler.PlayerInstance.Stop(CommandActionSource.Mute);
                         }
                         handler.IsManualDisconnect = false;
                     }

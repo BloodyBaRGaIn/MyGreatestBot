@@ -7,7 +7,7 @@ namespace MyGreatestBot.Player
         internal void Clear(CommandActionSource source = CommandActionSource.None)
         {
             _ = source;
-            lock (tracks_queue)
+            lock (this)
             {
                 tracks_queue.Clear();
                 IsPlaying = false;
