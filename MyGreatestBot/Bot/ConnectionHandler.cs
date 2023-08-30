@@ -245,12 +245,18 @@ namespace MyGreatestBot.Bot
 
         internal void SendMessage(DiscordEmbedBuilder embed)
         {
-            _ = SendMessageAsync(embed).Wait(SEND_MESSAGE_WAIT_MS);
+            if (SendMessageAsync(embed).Wait(SEND_MESSAGE_WAIT_MS))
+            {
+                Task.Delay(SEND_MESSAGE_WAIT_MS).Wait();
+            }
         }
 
         internal void SendMessage(string message)
         {
-            _ = SendMessageAsync(message).Wait(SEND_MESSAGE_WAIT_MS);
+            if (SendMessageAsync(message).Wait(SEND_MESSAGE_WAIT_MS))
+            {
+                Task.Delay(SEND_MESSAGE_WAIT_MS).Wait();
+            }
         }
 
         internal void SendSpeaking(bool speaking)
