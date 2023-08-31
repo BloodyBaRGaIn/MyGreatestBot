@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Exceptions;
 
 namespace MyGreatestBot.Player
 {
@@ -13,19 +14,18 @@ namespace MyGreatestBot.Player
                 {
                     if (!source.HasFlag(CommandActionSource.Mute))
                     {
-                        Handler.SendMessage(new DiscordEmbedBuilder()
-                        {
-                            Color = DiscordColor.Blue,
-                            Title = "Cannot skip"
-                        });
-                        return;
+                        throw new SkipException("Requested number exceeds the queue length");
                     }
+                    return;
                 }
                 for (int i = 0; i < add_count; i++)
                 {
                     _ = tracks_queue.Dequeue();
                 }
             }
+
+            currentTrack = null;
+            IsPlaying = false;
 
             if (!source.HasFlag(CommandActionSource.Mute))
             {
@@ -39,15 +39,9 @@ namespace MyGreatestBot.Player
                 }
                 else
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Nothing to skip"
-                    });
+                    throw new SkipException("Nothing to skip");
                 }
             }
-            currentTrack = null;
-            IsPlaying = false;
         }
     }
 }

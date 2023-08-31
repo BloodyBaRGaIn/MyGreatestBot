@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses.Music.Spotify;
+﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Music.Spotify;
 using MyGreatestBot.ApiClasses.Music.Vk;
 using MyGreatestBot.ApiClasses.Music.Yandex;
 using MyGreatestBot.ApiClasses.Music.Youtube;
@@ -318,7 +319,7 @@ namespace MyGreatestBot.ApiClasses
                         }
                         else
                         {
-                            throw new GenericApiException(receiver.desired);
+                            throw new ApiException(receiver.desired);
                         }
                     }
 

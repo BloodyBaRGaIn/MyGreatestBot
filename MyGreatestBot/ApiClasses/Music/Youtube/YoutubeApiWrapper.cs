@@ -2,6 +2,7 @@
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.IO;

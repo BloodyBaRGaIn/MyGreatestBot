@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Runtime.Versioning;
@@ -198,14 +199,17 @@ namespace MyGreatestBot.Bot
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
+            string extended_message = args.Exception.GetExtendedMessage();
+
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
             if (handler != null)
             {
                 await handler.LogErrorAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
                     $"Command errored{Environment.NewLine}" +
-                    $"{args.Exception.GetExtendedMessage()}");
+                    $"{extended_message}");
+
+                handler.SendMessage(args.Exception);
             }
-            _ = await args.Context.Channel.SendMessageAsync(args.Exception.GetExtendedMessage());
         }
     }
 }

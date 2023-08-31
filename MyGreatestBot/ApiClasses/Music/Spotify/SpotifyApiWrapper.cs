@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using SpotifyAPI.Web;
 using System.Collections.Generic;

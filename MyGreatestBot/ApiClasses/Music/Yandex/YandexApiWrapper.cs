@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -331,7 +332,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             YArtistBriefInfo info = Artist.GetAsync(storage, artist_id_str).GetAwaiter().GetResult().Result;
-            foreach (YAlbum? album in info.Albums.DistinctBy(t => t.Id).OrderByDescending(a => a.ReleaseDate))
+            foreach (YAlbum? album in info.Albums.Concat(info.AlsoAlbums).DistinctBy(t => t.Id).OrderByDescending(a => a.ReleaseDate))
             {
                 if (album != null)
                 {

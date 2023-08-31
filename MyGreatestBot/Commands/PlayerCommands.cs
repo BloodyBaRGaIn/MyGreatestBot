@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace MyGreatestBot.Commands
     [SupportedOSPlatform("windows")]
     internal class PlayerCommands : BaseCommandModule
     {
-        private static async Task<IEnumerable<ITrackInfo>> GenericPlay(CommandContext ctx, ConnectionHandler handler, string? query)
+        private static async Task<IEnumerable<ITrackInfo>> GetTracks(CommandContext ctx, ConnectionHandler handler, string? query)
         {
             handler.TextChannel = ctx.Channel;
             handler.VoiceConnection = handler.GetVoiceConnection();
@@ -45,7 +46,7 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
+            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
             await Task.Run(() => handler.PlayerInstance.Enqueue(tracks));
         }
@@ -64,7 +65,7 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
+            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
             await Task.Run(() => handler.PlayerInstance.Enqueue(tracks.Shuffle()));
         }
@@ -83,7 +84,7 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            IEnumerable<ITrackInfo> tracks = await GenericPlay(ctx, handler, query);
+            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
             await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.External));
         }
@@ -125,7 +126,7 @@ namespace MyGreatestBot.Commands
 
             if (time == TimeSpan.MinValue)
             {
-                throw new ArgumentException("Wrong format");
+                throw new SeekException("Wrong format");
             }
 
             await Task.Run(() => handler.PlayerInstance.RequestSeek(time));
@@ -281,11 +282,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            try
-            {
-                await Task.Run(() => handler.PlayerInstance.Stop());
-            }
-            catch { }
+            await Task.Run(() => handler.PlayerInstance.Stop());
 
             await Task.Delay(1);
         }
@@ -306,7 +303,7 @@ namespace MyGreatestBot.Commands
 
             if (number < 1)
             {
-                throw new ArgumentException("Number must be positive");
+                throw new SkipException("Number must be positive");
             }
 
             handler.TextChannel = ctx.Channel;

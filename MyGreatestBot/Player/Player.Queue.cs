@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using System;
 using System.Linq;
 
@@ -39,12 +40,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Count",
-                    Description = "Tracks queue is empty"
-                });
+                throw new QueueLengthException("Tracks queue is empty");
             }
         }
     }

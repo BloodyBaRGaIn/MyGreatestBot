@@ -1,9 +1,12 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -43,7 +46,19 @@ namespace MyGreatestBot.Player
         {
             Handler = handler;
             MainPlayerCancellationToken = MainPlayerCancellationTokenSource.Token;
-            MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
+            try
+            {
+                MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
+                if (!FFMPEG.CheckForExecutableExists())
+                {
+                    throw new FileNotFoundException($"ffmpeg executable file not found{Environment.NewLine}" +
+                        "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new PlayerException("Cannot start player", ex);
+            }
         }
 
         private static void Wait()
@@ -57,6 +72,11 @@ namespace MyGreatestBot.Player
             try
             {
                 Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
+            }
+            catch { }
+
+            try
+            {
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             }
             catch { }
@@ -96,25 +116,19 @@ namespace MyGreatestBot.Player
 
                     if (!tracks_queue.Any() && !StopRequested)
                     {
-                        await Handler.SendMessageAsync(new DiscordEmbedBuilder()
-                        {
-                            Color = DiscordColor.Red,
-                            Title = "Play",
-                            Description = "No more tracks"
-                        });
+                        Handler.SendMessage(new PlayerException("No more tracks"));
                     }
-
                     StopRequested = false;
                 }
-                catch (Exception ex) when (ex is TypeInitializationException)
+                catch (TaskCanceledException)
+                {
+                    return;
+                }
+                catch (TypeInitializationException ex)
                 {
                     Clear(Commands.CommandActionSource.Mute);
                     await Handler.LogErrorAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
-                    return;
-                }
-                catch (Exception ex) when (ex is TaskCanceledException)
-                {
                     return;
                 }
                 catch (Exception ex)
@@ -185,7 +199,7 @@ namespace MyGreatestBot.Player
                 {
                     if (already_restartd)
                     {
-                        throw new GenericApiException(currentTrack.TrackType, "Cannot reauth");
+                        throw new ApiException(currentTrack.TrackType);
                     }
                     currentTrack.Reload();
                     already_restartd = true;

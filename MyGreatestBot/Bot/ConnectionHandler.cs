@@ -2,7 +2,11 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
+using Google.Apis.YouTube.v3.Data;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,8 +20,13 @@ namespace MyGreatestBot.Bot
     {
         private const int SEND_MESSAGE_WAIT_MS = 1000;
 
+        private readonly Player.Player? _player = null;
+        private readonly PlayerException playerNotInitializedException = new();
+
+        internal Player.Player PlayerInstance => _player ?? throw playerNotInitializedException;
+        internal bool IsPlayerInitialized => _player != null;
+
         private readonly DiscordGuild Guild;
-        internal readonly Player.Player PlayerInstance;
 
         internal volatile bool IsManualDisconnect;
 
@@ -41,11 +50,9 @@ namespace MyGreatestBot.Bot
             {
                 return handler;
             }
-            if (!ConnectionDictionary.TryAdd(key, new(guild)))
-            {
-                throw new ApplicationException("Cannot initialize connection handler");
-            }
-            return ConnectionDictionary[key];
+            return ConnectionDictionary.TryAdd(key, new(guild))
+                ? ConnectionDictionary[key]
+                : throw new ApplicationException("Cannot initialize connection handler");
         }
 
         internal void Update(DiscordGuild guild)
@@ -56,12 +63,18 @@ namespace MyGreatestBot.Bot
         private ConnectionHandler(DiscordGuild guild)
         {
             Guild = guild;
-            PlayerInstance = new(this);
-        }
-
-        internal ConnectionHandler()
-        {
-            throw new NotImplementedException();
+            try
+            {
+                _player = new(this);
+            }
+            catch (PlayerException ex)
+            {
+                playerNotInitializedException = ex;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         private async Task GenericWriteLineAsync(TextWriter writer, string text)
@@ -158,11 +171,16 @@ namespace MyGreatestBot.Bot
             await Join(null, args.After?.Channel, false);
         }
 
-        internal async Task Join(DiscordChannel? text, DiscordChannel? channel, bool throw_exception = false)
+        private async Task Join(DiscordChannel? text, DiscordChannel? channel, bool throw_exception = false)
         {
             if (text != null)
             {
                 TextChannel = text;
+            }
+
+            if (!IsPlayerInitialized)
+            {
+                throw playerNotInitializedException;
             }
 
             VoiceConnection = GetVoiceConnection();
@@ -197,29 +215,58 @@ namespace MyGreatestBot.Bot
             await Task.Delay(1);
         }
 
-        internal static async Task Leave(CommandContext ctx)
+        internal async Task Leave(CommandContext ctx)
         {
-            ConnectionHandler? handler = GetConnectionHandler(ctx.Guild);
+            await Leave(ctx.Channel);
+        }
 
-            if (handler == null)
+        private async Task Leave(DiscordChannel? channel)
+        {
+            if (channel != null)
             {
-                return;
+                TextChannel = channel;
             }
 
-            handler.PlayerInstance.Stop(CommandActionSource.Mute);
+            PlayerInstance.Stop(CommandActionSource.Mute);
 
-            handler.TextChannel = ctx.Channel;
-            handler.VoiceConnection = handler.GetVoiceConnection();
+            VoiceConnection = GetVoiceConnection();
 
-            //if (VoiceConnection == null)
-            //{
-            //    throw new InvalidOperationException("Not connected in this guild.");
-            //}
+            Disconnect();
 
-            handler.Disconnect();
-            await handler.WaitForDisconnectionAsync();
+            await WaitForDisconnectionAsync();
 
             await Task.Delay(1);
+        }
+
+        internal static async Task Logout()
+        {
+            foreach (ConnectionHandler handler in ConnectionDictionary.Values)
+            {
+                _ = handler.SendMessageAsync(":wave:");
+                try
+                {
+                    await handler.Leave(default(DiscordChannel));
+                    handler.PlayerInstance.Terminate();
+                }
+                catch
+                {
+
+                }
+            }
+
+            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
+
+            if (bot_client != null)
+            {
+                await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
+
+                ApiManager.DeinitApis();
+
+                await bot_client.DisconnectAsync();
+                bot_client.Dispose();
+            }
+
+            Environment.Exit(0);
         }
 
         internal void UpdateSink()
@@ -249,6 +296,11 @@ namespace MyGreatestBot.Bot
             {
                 Task.Delay(SEND_MESSAGE_WAIT_MS).Wait();
             }
+        }
+
+        internal void SendMessage(Exception exception)
+        {
+            SendMessage(exception.GetDiscordEmbed());
         }
 
         internal void SendMessage(string message)

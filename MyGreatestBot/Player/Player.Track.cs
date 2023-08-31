@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Commands.Exceptions;
 
 namespace MyGreatestBot.Player
 {
@@ -22,12 +23,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Track",
-                    Description = "No tracks playing"
-                });
+                throw new TrackInfoException("No tracks playing");
             }
         }
 
@@ -45,12 +41,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Next track",
-                    Description = "Queue is empty"
-                });
+                throw new TrackInfoException("Tracks queue is empty");
             }
         }
     }

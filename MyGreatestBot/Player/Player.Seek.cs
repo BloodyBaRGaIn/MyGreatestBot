@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using System;
 using System.Threading.Tasks;
 
@@ -10,9 +11,7 @@ namespace MyGreatestBot.Player
         {
             if (IsPlaying && currentTrack != null)
             {
-                bool result = currentTrack.IsSeekPossible(span);
-
-                if (result)
+                if (currentTrack.IsSeekPossible(span))
                 {
                     lock (currentTrack)
                     {
@@ -32,26 +31,12 @@ namespace MyGreatestBot.Player
                 }
                 else
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Seek",
-                        Description = "Cannot seek"
-                    });
-
-                    return;
+                    throw new SeekException("Cannot seek");
                 }
             }
             else
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Yellow,
-                    Title = "Seek",
-                    Description = "Nothing to seek"
-                });
-
-                return;
+                throw new SeekException("Nothing to seek");
             }
         }
     }

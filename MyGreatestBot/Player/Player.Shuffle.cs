@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,12 +37,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Shuffle",
-                    Description = "Nothing to shuffle"
-                });
+                throw new ShuffleException("Nothing to shuffle");
             }
         }
     }

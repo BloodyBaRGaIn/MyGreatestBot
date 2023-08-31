@@ -1,7 +1,9 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Exceptions;
 using System;
 using System.Runtime.Versioning;
 
@@ -21,17 +23,20 @@ namespace MyGreatestBot.Player
             {
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Nothing to ignore"
-                    });
+                    throw new IgnoreException("Nothing to ignore");
                 }
 
                 return;
             }
 
-            SqlServerWrapper.AddIgnoredTrack(currentTrack);
+            try
+            {
+                SqlServerWrapper.AddIgnoredTrack(currentTrack);
+            }
+            catch (Exception ex)
+            {
+                throw new IgnoreException("Failed to ignore track", ex);
+            }
 
             Skip(0, CommandActionSource.Mute);
 
@@ -56,32 +61,32 @@ namespace MyGreatestBot.Player
             {
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Nothing to ignore"
-                    });
+                    throw new IgnoreException("Nothing to ignore");
                 }
 
                 return;
             }
 
-            if (currentTrack.ArtistArr.Length > 1)
+            if (index < 0)
             {
-                if (index < 0)
+                if (currentTrack.ArtistArr.Length > 1)
                 {
-                    throw new ArgumentException("Provide artist index");
+                    throw new IgnoreException("Provide artist index");
                 }
-            }
-            else
-            {
-                if (index < 0)
+                else
                 {
                     index = 0;
                 }
             }
 
-            SqlServerWrapper.AddIgnoredArtist(currentTrack, index);
+            try
+            {
+                SqlServerWrapper.AddIgnoredArtist(currentTrack, index);
+            }
+            catch (Exception ex)
+            {
+                throw new IgnoreException("Failed to ignore artist", ex);
+            }
 
             Skip(0, CommandActionSource.Mute);
 

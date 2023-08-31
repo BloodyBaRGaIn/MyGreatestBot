@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;

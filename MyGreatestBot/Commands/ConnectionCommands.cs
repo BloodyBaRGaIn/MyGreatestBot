@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
-using System;
+using MyGreatestBot.Commands.Exceptions;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
@@ -36,7 +36,11 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task LeaveCommand(CommandContext ctx)
         {
-            await ConnectionHandler.Leave(ctx);
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler != null)
+            {
+                await handler.Leave(ctx);
+            }
         }
 
         [Command("reload")]
@@ -44,22 +48,24 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task ReloadCommand(CommandContext ctx)
         {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Reload",
-                    Description = "No failed APIs to reload"
-                });
-                return;
+                throw new ReloadException("No failed APIs to reload");
             }
 
             ApiManager.ReloadFailedApis();
 
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+                handler.SendMessage(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Blue,
                     Title = "Reload",
@@ -68,19 +74,14 @@ namespace MyGreatestBot.Commands
             }
             else
             {
-                _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Reload",
-                    Description = "Reload failed"
-                });
+                throw new ReloadException("Reload failed");
             }
 
             await Task.Delay(1);
         }
 
         [Command("logout")]
-        [Aliases("bye", "bb", "b")]
+        [Aliases("exit", "quit", "bye", "bb", "b")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task LogoutCommand(CommandContext ctx)
@@ -91,23 +92,9 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            _ = await ctx.Channel.SendMessageAsync(":wave:");
-            await ConnectionHandler.Leave(ctx);
+            handler.TextChannel = ctx.Channel;
 
-            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
-
-            if (bot_client != null)
-            {
-                await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
-
-                handler.PlayerInstance.Terminate();
-                ApiManager.DeinitApis();
-
-                await bot_client.DisconnectAsync();
-                bot_client.Dispose();
-            }
-
-            Environment.Exit(0);
+            await ConnectionHandler.Logout();
         }
     }
 }

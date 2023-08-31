@@ -15,14 +15,9 @@ namespace MyGreatestBot.Player
             internal bool HasExited => Process?.HasExited ?? true;
             internal StreamReader? StandardOutput => Process?.StandardOutput;
 
-            static FFMPEG()
+            internal static bool CheckForExecutableExists()
             {
-                if (!File.Exists(FFMPEG_PATH))
-                {
-                    throw new FileNotFoundException($"ffmpeg executable file not found{Environment.NewLine}" +
-                        "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
-                        FFMPEG_PATH);
-                }
+                return File.Exists(FFMPEG_PATH);
             }
 
             internal void Start(ITrackInfo track)

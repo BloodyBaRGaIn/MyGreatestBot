@@ -13,6 +13,9 @@
         Spotify = 0x08,
         Sql = 0x10,
 
-        All = Youtube | Yandex | Vk | Spotify | Sql
+        Music = Youtube | Yandex | Vk | Spotify,
+        Services = Sql,
+
+        All = Music | Services
     }
 }
