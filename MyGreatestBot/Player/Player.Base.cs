@@ -125,7 +125,7 @@ namespace MyGreatestBot.Player
                 }
                 catch (TypeInitializationException ex)
                 {
-                    Clear(Commands.CommandActionSource.Mute);
+                    Stop(Commands.CommandActionSource.Mute);
                     await Handler.LogErrorAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;

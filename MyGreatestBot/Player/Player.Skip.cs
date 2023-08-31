@@ -22,24 +22,26 @@ namespace MyGreatestBot.Player
                 {
                     _ = tracks_queue.Dequeue();
                 }
-            }
 
-            currentTrack = null;
-            IsPlaying = false;
+                bool was_playing = IsPlaying;
 
-            if (!source.HasFlag(CommandActionSource.Mute))
-            {
-                if (IsPlaying)
+                currentTrack = null;
+                IsPlaying = false;
+
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    if (was_playing)
                     {
-                        Color = DiscordColor.Blue,
-                        Title = $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"
-                    });
-                }
-                else
-                {
-                    throw new SkipException("Nothing to skip");
+                        Handler.SendMessage(new DiscordEmbedBuilder()
+                        {
+                            Color = DiscordColor.Blue,
+                            Title = $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"
+                        });
+                    }
+                    else
+                    {
+                        Handler.SendMessage(new SkipException("Nothing to skip"));
+                    }
                 }
             }
         }

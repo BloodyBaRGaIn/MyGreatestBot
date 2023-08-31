@@ -6,9 +6,8 @@ namespace MyGreatestBot.Player
     {
         internal void Terminate(CommandActionSource source = CommandActionSource.None)
         {
-            StopRequested = true;
+            Stop(source);
             MainPlayerCancellationTokenSource.Cancel();
-            Clear(source);
         }
     }
 }

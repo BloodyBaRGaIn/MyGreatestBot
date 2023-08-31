@@ -7,6 +7,7 @@ using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
+using Yandex.Music.Client.Extensions;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
@@ -33,6 +34,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         public string AudioURL { get; private set; } = string.Empty;
         public string? CoverURL { get; }
 
+        private readonly YTrack origin;
+
         /// <summary>
         /// Yandex track info constructor
         /// </summary>
@@ -41,6 +44,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         /// <param name="transletters">Make transletters from cyrillic</param>
         internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null, bool transletters = false)
         {
+            origin = track;
+
             TrackName = new HyperLink(track.Title, $"{Base.Domain}track/{track.Id}").WithId(track.Id);
 
             ArtistArr = track.Artists.Select(a =>
@@ -74,7 +79,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         {
             try
             {
-                AudioURL = YandexApiWrapper.GetAudioURL(Base.Id);
+                AudioURL = origin.GetLink();
                 if (string.IsNullOrWhiteSpace(AudioURL))
                 {
                     throw new ArgumentNullException(nameof(AudioURL));

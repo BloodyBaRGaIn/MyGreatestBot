@@ -37,17 +37,17 @@ namespace MyGreatestBot.Player
                 }
 
                 count = tracks_queue.Count;
-            }
 
-            if (!source.HasFlag(CommandActionSource.Mute))
-            {
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    Color = DiscordColor.Purple,
-                    Title = "Play",
-                    Description = $"Added: {tracks.Count()}\n" +
-                                  $"Total: {count}"
-                });
+                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Purple,
+                        Title = "Play",
+                        Description = $"Added: {tracks.Count()}\n" +
+                                      $"Total: {count}"
+                    });
+                }
             }
         }
     }

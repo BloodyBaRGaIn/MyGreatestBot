@@ -8,40 +8,48 @@ namespace MyGreatestBot.Player
     {
         internal void GetCurrentTrackInfo()
         {
-            if (IsPlaying && currentTrack != null)
+            if (currentTrack != null)
             {
+                DiscordEmbedBuilder message = new()
+                {
+                    Color = DiscordColor.Purple,
+                    Title = "Track"
+                };
                 lock (currentTrack)
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Purple,
-                        Title = "Track",
-                        Description = currentTrack.GetMessage(),
-                        Thumbnail = currentTrack.GetThumbnail()
-                    });
+                    message.Description = currentTrack.GetMessage();
+                    message.Thumbnail = currentTrack.GetThumbnail();
                 }
+                Handler.SendMessage(message);
+            }
+            else if (!IsPlaying)
+            {
+                throw new TrackInfoException("No tracks playing");
             }
             else
             {
-                throw new TrackInfoException("No tracks playing");
+                throw new TrackInfoException("Illegal state detected");
             }
         }
 
         internal void GetNextTrackInfo()
         {
-            if (tracks_queue.TryPeek(out ITrackInfo? track))
+            lock (tracks_queue)
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                if (tracks_queue.TryPeek(out ITrackInfo? track))
                 {
-                    Color = DiscordColor.Purple,
-                    Title = "Next track",
-                    Description = track.GetMessage(),
-                    Thumbnail = track.GetThumbnail()
-                });
-            }
-            else
-            {
-                throw new TrackInfoException("Tracks queue is empty");
+                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Purple,
+                        Title = "Next track",
+                        Description = track.GetMessage(),
+                        Thumbnail = track.GetThumbnail()
+                    });
+                }
+                else
+                {
+                    throw new TrackInfoException("Tracks queue is empty");
+                }
             }
         }
     }

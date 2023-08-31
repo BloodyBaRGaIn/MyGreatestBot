@@ -12,7 +12,10 @@ namespace MyGreatestBot.Player
             {
                 StopRequested = true;
 
-                Clear(source);
+                Clear(CommandActionSource.Mute);
+
+                IsPlaying = false;
+                currentTrack = null;
 
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {

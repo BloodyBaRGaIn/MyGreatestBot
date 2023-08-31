@@ -31,31 +31,30 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
-            DiscordEmbedBuilder _embed = new DiscordEmbedBuilder().WithTitle("Name");
+            DiscordEmbedBuilder _embed = new()
+            {
+                Title = "Name"
+            };
 
             if (BotWrapper.Client == null)
             {
-                _embed = _embed
-                    .WithColor(DiscordColor.Red)
-                    .WithDescription("Cannot get my username");
+                _embed.Color = DiscordColor.Red;
+                _embed.Description = "Cannot get my username";
             }
             else
             {
-                _embed = _embed
-                    .WithColor(DiscordColor.White);
+                _embed.Color = DiscordColor.White;
 
                 DiscordUser current_user = BotWrapper.Client.CurrentUser;
 
                 try
                 {
                     DiscordMember member = ctx.Guild.GetMemberAsync(current_user.Id).GetAwaiter().GetResult();
-                    _embed = _embed
-                        .WithDescription($"My display name is {member.DisplayName}");
+                    _embed.Description = $"My display name is {member.DisplayName}";
                 }
                 catch
                 {
-                    _embed = _embed
-                        .WithDescription($"My user name is {current_user.Username}");
+                    _embed.Description = $"My user name is {current_user.Username}";
                 }
             }
 
@@ -81,7 +80,16 @@ namespace MyGreatestBot.Commands
                     ? new CustomHelpFormatter(ctx).WithCommand(cmd)
                     : throw new ArgumentException("Invalid command");
 
-            _ = await ctx.Channel.SendMessageAsync(custom.Build().Embed);
+            DiscordEmbed message = custom.Build().Embed ?? throw new ArgumentException("Cannot build message");
+
+            if (ctx.Member == null)
+            {
+                _ = await ctx.Channel.SendMessageAsync(message);
+            }
+            else
+            {
+                _ = await ctx.Member.SendMessageAsync(message);
+            }
         }
     }
 }

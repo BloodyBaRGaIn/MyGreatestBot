@@ -268,6 +268,25 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
+        [Command("clear")]
+        [Aliases("clr", "cl", "c")]
+        [Description("Clear the queue")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task ClearCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await Task.Run(() => handler.PlayerInstance.Clear());
+
+            await Task.Delay(1);
+        }
+
         [Command("stop")]
         [Aliases("st")]
         [Description("Stop")]

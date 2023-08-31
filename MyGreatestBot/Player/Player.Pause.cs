@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Exceptions;
 
 namespace MyGreatestBot.Player
 {
@@ -7,9 +8,11 @@ namespace MyGreatestBot.Player
     {
         internal void Pause(CommandActionSource source = CommandActionSource.None)
         {
+            IsPaused = true;
+
             if (!source.HasFlag(CommandActionSource.Mute))
             {
-                if (IsPlaying)
+                if (currentTrack != null)
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -17,7 +20,7 @@ namespace MyGreatestBot.Player
                         Title = "Paused"
                     });
                 }
-                else
+                else if (!IsPlaying)
                 {
                     Handler.SendMessage(new DiscordEmbedBuilder()
                     {
@@ -25,9 +28,11 @@ namespace MyGreatestBot.Player
                         Title = "Nothing to pause"
                     });
                 }
+                else
+                {
+                    throw new PlayerException("Illegal state detected");
+                }
             }
-
-            IsPaused = true;
         }
     }
 }

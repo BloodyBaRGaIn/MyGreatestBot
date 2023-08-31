@@ -1,4 +1,6 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
+using System;
 
 namespace MyGreatestBot.Player
 {
@@ -8,22 +10,18 @@ namespace MyGreatestBot.Player
         {
             if (currentTrack == null)
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = "Return",
-                    Description = "Nothing to return"
-                });
+                throw new ReturnException("Nothing to return");
             }
-            else
+
+            lock (tracks_queue)
             {
-                lock (tracks_queue)
+                lock (currentTrack)
                 {
-                    lock (currentTrack)
-                    {
-                        tracks_queue.Enqueue(currentTrack);
-                    }
+                    currentTrack.PerformSeek(TimeSpan.Zero);
+                    tracks_queue.Enqueue(currentTrack);
                 }
+
+                IsPlaying = false;
 
                 Handler.SendMessage(new DiscordEmbedBuilder()
                 {
@@ -32,8 +30,6 @@ namespace MyGreatestBot.Player
                     Description = "Returned to queue"
                 });
             }
-
-            IsPlaying = false;
         }
     }
 }

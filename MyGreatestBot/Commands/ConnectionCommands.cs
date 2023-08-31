@@ -5,6 +5,7 @@ using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Commands.Exceptions;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -90,6 +91,13 @@ namespace MyGreatestBot.Commands
             if (handler == null)
             {
                 return;
+            }
+
+            if (BotWrapper.BotInstance.Client != null
+                && !BotWrapper.BotInstance.Client.CurrentApplication.Owners
+                    .Select(x => x.Id).Contains(ctx.User.Id))
+            {
+                throw new CommandExecutionException("You are not allowed to execute this command");
             }
 
             handler.TextChannel = ctx.Channel;

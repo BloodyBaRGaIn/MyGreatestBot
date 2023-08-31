@@ -150,11 +150,6 @@ namespace MyGreatestBot.Bot
 
         internal void Disconnect()
         {
-            if (IsManualDisconnect)
-            {
-                // to be tested
-                ;
-            }
             IsManualDisconnect = true;
             try
             {
@@ -221,14 +216,24 @@ namespace MyGreatestBot.Bot
 
         internal async Task Leave(CommandContext ctx)
         {
-            await Leave(ctx.Channel);
+            await Leave(ctx.Channel, ctx.Member?.VoiceState?.Channel);
         }
 
-        private async Task Leave(DiscordChannel? channel)
+        private async Task Leave(DiscordChannel? text, DiscordChannel? channel)
         {
-            if (channel != null)
+            if (text != null)
             {
-                TextChannel = channel;
+                TextChannel = text;
+            }
+
+            if (VoiceChannel == null)
+            {
+                return;
+            }
+
+            if ((VoiceChannel != channel && Guild == channel?.Guild) || (channel == null && Guild == TextChannel?.Guild))
+            {
+                throw new InvalidOperationException("You need to be in the same voice channel");
             }
 
             PlayerInstance.Stop(CommandActionSource.Mute);
@@ -244,18 +249,26 @@ namespace MyGreatestBot.Bot
 
         internal static async Task Logout()
         {
-            foreach (ConnectionHandler handler in ConnectionDictionary.Values)
+            var result = Parallel.ForEach(ConnectionDictionary.Values, async (handler) =>
             {
-                _ = handler.SendMessageAsync(":wave:");
                 try
                 {
-                    await handler.Leave(default(DiscordChannel));
-                    handler.PlayerInstance.Terminate();
+                    handler.PlayerInstance.Terminate(CommandActionSource.Mute);
                 }
-                catch
-                {
+                catch { }
 
+                await handler.SendMessageAsync(":wave:");
+
+                try
+                {
+                    await handler.Leave(null, null);
                 }
+                catch { }
+            });
+
+            while (!result.IsCompleted)
+            {
+                await Task.Delay(1);
             }
 
             DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
