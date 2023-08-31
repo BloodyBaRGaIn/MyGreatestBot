@@ -2,7 +2,7 @@
 
 namespace MyGreatestBot.ApiClasses.Exceptions
 {
-    internal sealed class SpotifyApiException : ApiException
+    public sealed class SpotifyApiException : ApiException
     {
         public SpotifyApiException(string message, Exception? inner = null)
             : base(ApiIntents.Spotify, message, inner) { }

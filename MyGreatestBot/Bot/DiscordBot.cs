@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.Commands;
-using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Runtime.Versioning;

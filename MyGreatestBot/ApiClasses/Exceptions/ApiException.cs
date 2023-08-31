@@ -2,7 +2,7 @@
 
 namespace MyGreatestBot.ApiClasses.Exceptions
 {
-    internal class ApiException : Exception
+    public class ApiException : Exception
     {
         protected ApiException(ApiIntents intents, string? message = "", Exception? inner = null)
             : base($"{intents} failed. {message ?? ""}", inner)

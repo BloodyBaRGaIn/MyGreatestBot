@@ -9,84 +9,79 @@ namespace MyGreatestBot.ApiClasses
     /// Track information abstraction
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal interface ITrackInfo
+    public interface ITrackInfo
     {
-        /// <summary>
-        /// This instance
-        /// </summary>
-        protected ITrackInfo Base { get; }
-
         /// <summary>
         /// Base URL
         /// </summary>
-        protected string Domain { get; }
+        public virtual string Domain => string.Empty;
 
         /// <summary>
         /// Track type
         /// </summary>
-        internal ApiIntents TrackType { get; }
-
-        /// <summary>
-        /// Track ID
-        /// </summary>
-        internal string Id { get; }
+        public virtual ApiIntents TrackType => ApiIntents.None;
 
         /// <summary>
         /// Extended track name
         /// </summary>
-        internal HyperLink TrackName { get; }
+        public HyperLink TrackName { get; }
 
         /// <summary>
         /// Extended artists collection
         /// </summary>
-        internal HyperLink[] ArtistArr { get; }
+        public HyperLink[] ArtistArr { get; }
 
         /// <summary>
         /// Extended album name
         /// </summary>
-        internal HyperLink? AlbumName { get; }
+        public HyperLink? AlbumName { get; }
 
         /// <summary>
         /// Extended playlist name
         /// </summary>
-        internal HyperLink? PlaylistName { get; }
+        public HyperLink? PlaylistName { get; }
 
         /// <summary>
         /// Base track name
         /// </summary>
-        internal string Title { get; }
+        public string Title => TrackName.Title;
+
+        /// <summary>
+        /// Track ID
+        /// </summary>
+        public string Id => TrackName.InnerId;
 
         /// <summary>
         /// Current track duration
         /// </summary>
-        internal TimeSpan Duration { get; }
+        public TimeSpan Duration { get; }
 
         /// <summary>
         /// Current track time position
         /// </summary>
-        protected internal TimeSpan Seek { get; protected set; }
+        public TimeSpan Seek { get; protected set; }
 
         /// <summary>
         /// Thumbnails image URL
         /// </summary>
-        internal string? CoverURL { get; }
+        public string? CoverURL { get; }
 
         /// <summary>
         /// Audio URL for FFMPEG
         /// </summary>
-        internal string AudioURL { get; }
+        public string AudioURL { get; }
 
         /// <summary>
         /// Does the track have a duration
         /// </summary>
-        internal bool IsLiveStream { get; }
+        public bool IsLiveStream => Duration == TimeSpan.Zero;
 
         /// <summary>
         /// Check for seek operation possible
         /// </summary>
         /// <param name="span">Specified position</param>
         /// <returns>True if possible to seek</returns>
-        internal bool IsSeekPossible(TimeSpan span)
+        public bool IsSeekPossible(TimeSpan span)
         {
             return !(IsLiveStream || span > Duration);
         }
@@ -95,7 +90,7 @@ namespace MyGreatestBot.ApiClasses
         /// Performs seek operation with check
         /// </summary>
         /// <param name="span">Specified position</param>
-        internal void PerformSeek(TimeSpan span)
+        public void PerformSeek(TimeSpan span)
         {
             if (IsSeekPossible(span))
             {
@@ -107,7 +102,7 @@ namespace MyGreatestBot.ApiClasses
         /// Get Discord message content
         /// </summary>
         /// <returns>Content string</returns>
-        internal string GetMessage()
+        public string GetMessage()
         {
             string result = string.Empty;
             result += $"Playing: {TrackName}\n";
@@ -136,16 +131,16 @@ namespace MyGreatestBot.ApiClasses
             return result.Trim('\n');
         }
 
-        internal string GetShortMessage()
+        public string GetShortMessage()
         {
-            return $"Playing: {TrackName.Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
+            return $"Playing: {Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
         }
 
         /// <summary>
         /// Get Discord message thumbnail with track cover image
         /// </summary>
         /// <returns>Track cover image as thumbnail</returns>
-        internal DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail? GetThumbnail()
+        public DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail? GetThumbnail()
         {
             if (string.IsNullOrWhiteSpace(CoverURL))
             {
@@ -161,25 +156,28 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Retrieves the audio URL
         /// </summary>
-        internal abstract void ObtainAudioURL();
+        public void ObtainAudioURL();
 
         /// <summary>
         /// Reloads the corresponding API
         /// </summary>
-        internal abstract void Reload();
+        public void Reload()
+        {
+            ApiManager.ReloadApis(TrackType);
+        }
 
         /// <summary>
         /// Arguments string for FFMPEG
         /// </summary>
-        internal string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
-                                     $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
+        public string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
+                                   $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
         /// <summary>
         /// Tracks comparsion method
         /// </summary>
         /// <param name="other">Other track info instance</param>
         /// <returns>Zero if fully equals</returns>
-        internal int CompareTo(ITrackInfo? other)
+        public int CompareTo(ITrackInfo? other)
         {
             System.Numerics.BigInteger result = 0;
             if (this is null || other is null)

@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.Utils;
 using System;
 using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
@@ -13,11 +14,11 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     [SupportedOSPlatform("windows")]
     internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
-        public ITrackInfo Base => this;
+        private ITrackInfo Base => this;
 
-        public string Domain => "https://www.youtube.com/";
+        string ITrackInfo.Domain => "https://www.youtube.com/";
 
-        public ApiIntents TrackType => ApiIntents.Youtube;
+        ApiIntents ITrackInfo.TrackType => ApiIntents.Youtube;
 
         public string Id { get; }
 
@@ -26,14 +27,11 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         public HyperLink? AlbumName => null;
         public HyperLink? PlaylistName { get; }
 
-        public string Title => TrackName.Title;
-
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
         public string? CoverURL { get; }
         public string AudioURL { get; private set; }
-        public bool IsLiveStream => Duration == TimeSpan.Zero;
 
         /// <summary>
         /// Youtube track info constructor
@@ -66,7 +64,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             try
             {
-                AudioURL = IsLiveStream
+                AudioURL = Base.IsLiveStream
                     ? YoutubeApiWrapper.Streams
                         .GetHttpLiveStreamUrlAsync(Id)
                         .AsTask()
@@ -79,16 +77,16 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                         .GetResult()
                         .GetAudioOnlyStreams()
                         .GetWithHighestBitrate().Url;
+
+                if (string.IsNullOrWhiteSpace(AudioURL))
+                {
+                    throw new ArgumentNullException(nameof(AudioURL));
+                }
             }
             catch (Exception ex)
             {
                 throw new YoutubeApiException("Cannot get audio URL", ex);
             }
-        }
-
-        void ITrackInfo.Reload()
-        {
-            ApiManager.ReloadApis(TrackType);
         }
 
         public int CompareTo(ITrackInfo? other)

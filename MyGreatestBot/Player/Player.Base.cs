@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Commands.Exceptions;

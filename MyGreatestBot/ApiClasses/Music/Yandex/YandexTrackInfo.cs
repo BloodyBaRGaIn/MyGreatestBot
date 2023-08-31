@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.Extensions;
+﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
 using System;
 using System.Linq;
@@ -15,27 +16,22 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     [SupportedOSPlatform("windows")]
     internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
-        public ITrackInfo Base => this;
+        private ITrackInfo Base => this;
 
-        public string Domain => "https://music.yandex.ru/";
+        string ITrackInfo.Domain => "https://music.yandex.ru/";
 
-        public ApiIntents TrackType => ApiIntents.Yandex;
-
-        public string Id { get; }
+        ApiIntents ITrackInfo.TrackType => ApiIntents.Yandex;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
 
-        public string Title => TrackName.Title;
-
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
-        public string AudioURL { get; private set; }
+        public string AudioURL { get; private set; } = string.Empty;
         public string? CoverURL { get; }
-        public bool IsLiveStream => false;
 
         /// <summary>
         /// Yandex track info constructor
@@ -45,26 +41,17 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         /// <param name="transletters">Make transletters from cyrillic</param>
         internal YandexTrackInfo(YTrack track, YPlaylist? playlist = null, bool transletters = false)
         {
-            Id = track.Id;
-
-            TrackName = new(track.Title, $"{Domain}track/{Id}");
+            TrackName = new HyperLink(track.Title, $"{Base.Domain}track/{track.Id}").WithId(track.Id);
 
             ArtistArr = track.Artists.Select(a =>
-                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
+                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Base.Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
-
-            AudioURL = string.Empty;
-
-            if (!string.IsNullOrWhiteSpace(track.CoverUri))
-            {
-                CoverURL = $"https://{track.CoverUri.Replace("/%%", "/100x100")}";
-            }
 
             if (track.Albums != null && track.Albums.Any())
             {
                 YAlbum album = track.Albums.First();
-                AlbumName = new(album.Title, $"{Domain}album/{album.Id}");
+                AlbumName = new(album.Title, $"{Base.Domain}album/{album.Id}");
             }
 
             if (playlist != null)
@@ -74,35 +61,29 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     title = "Playlist";
                 }
-                PlaylistName = new(title, $"{Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
+                PlaylistName = new(title, $"{Base.Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(track.CoverUri))
+            {
+                CoverURL = $"https://{track.CoverUri.Replace("/%%", "/100x100")}";
             }
         }
 
         void ITrackInfo.ObtainAudioURL()
         {
-            int retries = 0;
-            while (true)
+            try
             {
-                if (retries > 2)
+                AudioURL = YandexApiWrapper.GetAudioURL(Base.Id);
+                if (string.IsNullOrWhiteSpace(AudioURL))
                 {
-                    throw new YandexApiException("Cannot get audio URL");
-                }
-                AudioURL = YandexApiWrapper.GetAudioURL(Id);
-                if (string.IsNullOrEmpty(AudioURL))
-                {
-                    Base.Reload();
-                    retries++;
-                }
-                else
-                {
-                    break;
+                    throw new ArgumentNullException(nameof(AudioURL));
                 }
             }
-        }
-
-        void ITrackInfo.Reload()
-        {
-            ApiManager.DeinitApis(TrackType);
+            catch (Exception ex)
+            {
+                throw new YandexApiException("Cannot get audio URL", ex);
+            }
         }
 
         public int CompareTo(ITrackInfo? other)

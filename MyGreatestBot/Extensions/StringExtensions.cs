@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MyGreatestBot.Extensions
+﻿namespace MyGreatestBot.Extensions
 {
     /// <summary>
     /// <see cref="string"/> extensions

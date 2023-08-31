@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
-using Google.Apis.YouTube.v3.Data;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Exceptions;
@@ -151,6 +150,11 @@ namespace MyGreatestBot.Bot
 
         internal void Disconnect()
         {
+            if (IsManualDisconnect)
+            {
+                // to be tested
+                ;
+            }
             IsManualDisconnect = true;
             try
             {

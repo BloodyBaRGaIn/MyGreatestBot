@@ -1,8 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands.Exceptions;
 using System;
-using System.Drawing;
-using VkNet.Model;
 
 namespace MyGreatestBot.Extensions
 {

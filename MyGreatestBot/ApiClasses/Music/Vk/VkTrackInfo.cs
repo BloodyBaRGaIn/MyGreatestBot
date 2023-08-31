@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,27 +14,22 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     [SupportedOSPlatform("windows")]
     internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
-        public ITrackInfo Base => this;
+        private ITrackInfo Base => this;
 
-        public string Domain => "https://www.vk.com/";
+        string ITrackInfo.Domain => "https://www.vk.com/";
 
-        public ApiIntents TrackType => ApiIntents.Vk;
-
-        public string Id { get; }
+        ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
         public HyperLink? AlbumName { get; }
         public HyperLink? PlaylistName { get; }
 
-        public string Title => TrackName.Title;
-
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
         public string? CoverURL { get; }
         public string AudioURL { get; private set; }
-        public bool IsLiveStream => false;
 
         private readonly Audio origin;
 
@@ -45,6 +41,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         internal VkTrackInfo(Audio audio, AudioPlaylist? playlist = null)
         {
             origin = audio;
+
+            string id_str = audio.Id?.ToString() ?? string.Empty;
+
+            TrackName = audio.OwnerId == null || string.IsNullOrEmpty(id_str)
+                ? new(audio.Title)
+                : new HyperLink(audio.Title, $"{Base.Domain}audio{audio.OwnerId}_{id_str}").WithId(id_str);
 
             IEnumerable<AudioArtist> main_artists = audio.MainArtists;
             IEnumerable<AudioArtist> feat_artists = audio.FeaturedArtists;
@@ -67,35 +69,22 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             ArtistArr = audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)
-                : new HyperLink(a.Name, $"{Domain}artist/{a.Id}").WithId(a.Id))
+                : new HyperLink(a.Name, $"{Base.Domain}artist/{a.Id}").WithId(a.Id))
                 .ToArray();
 
             AudioAlbum album = audio.Album;
 
-            TrackName = audio.OwnerId == null || audio.Id == null
-                ? new(audio.Title)
-                : new(audio.Title, $"{Domain}audio{audio.OwnerId}_{audio.Id}");
+            AlbumName = album == null
+                ? null
+                : new(album.Title, $"{Base.Domain}music/album/{album.OwnerId}_{album.Id}");
 
-            if (playlist != null)
-            {
-                PlaylistName = playlist.OwnerId == null || playlist.Id == null
+            PlaylistName = playlist == null
+                ? null
+                : playlist.OwnerId == null || playlist.Id == null
                     ? new(playlist.Title)
-                    : new(playlist.Title, $"{Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
-            }
+                    : new(playlist.Title, $"{Base.Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
 
-            if (album != null)
-            {
-                AlbumName = new(album.Title, $"{Domain}music/album/{album.OwnerId}_{album.Id}");
-
-                CoverURL = album.Thumb?.Photo135;
-            }
-            else
-            {
-                AlbumName = null;
-                CoverURL = null;
-            }
-
-            Id = audio.Id == null ? string.Empty : ((long)audio.Id).ToString();
+            CoverURL = album?.Thumb?.Photo135;
 
             Duration = TimeSpan.FromSeconds(audio.Duration);
 
@@ -104,17 +93,18 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         void ITrackInfo.ObtainAudioURL()
         {
-            string? url = origin.Url?.ToString();
-            if (string.IsNullOrWhiteSpace(url))
+            try
             {
-                throw new VkApiException("Cannot get audio URL");
+                AudioURL = origin.Url?.ToString() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(AudioURL))
+                {
+                    throw new ArgumentNullException(nameof(AudioURL));
+                }
             }
-            AudioURL = url;
-        }
-
-        void ITrackInfo.Reload()
-        {
-            ApiManager.ReloadApis(TrackType);
+            catch (Exception? ex)
+            {
+                throw new VkApiException("Cannot get audio URL", ex);
+            }
         }
 
         public int CompareTo(ITrackInfo? other)

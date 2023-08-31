@@ -5,32 +5,32 @@ namespace MyGreatestBot.Utils
     /// <summary>
     /// Hypertext string
     /// </summary>
-    internal sealed class HyperLink : IComparable<HyperLink>
+    public sealed class HyperLink : IComparable<HyperLink>
     {
         /// <summary>
         /// Displayed text
         /// </summary>
-        internal string Title { get; init; }
+        public string Title { get; init; }
 
         /// <summary>
         /// URL
         /// </summary>
         private string Url { get; init; }
 
-        internal string InnerId { get; private set; } = string.Empty;
+        public string InnerId { get; private set; } = string.Empty;
 
         /// <summary>
         /// Generic constructor
         /// </summary>
         /// <param name="title">Text</param>
         /// <param name="url">URL</param>
-        internal HyperLink(string title, string? url = null)
+        public HyperLink(string title, string? url = null)
         {
             Title = title;
             Url = url ?? string.Empty;
         }
 
-        internal HyperLink WithId(string id)
+        public HyperLink WithId(string id)
         {
             InnerId = id;
             return this;

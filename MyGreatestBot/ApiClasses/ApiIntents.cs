@@ -4,7 +4,7 @@
     /// API and services flags
     /// </summary>
     [System.Flags]
-    internal enum ApiIntents : int
+    public enum ApiIntents : int
     {
         None = 0x00,
         Youtube = 0x01,
