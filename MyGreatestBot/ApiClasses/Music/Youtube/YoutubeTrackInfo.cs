@@ -1,6 +1,7 @@
 ﻿using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Utils;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
@@ -12,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// Youtube track info implementation
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;
 
@@ -24,13 +25,16 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        public HyperLink? AlbumName => null;
-        public HyperLink? PlaylistName { get; }
+        [AllowNull]
+        public HyperLink AlbumName { get; } = null;
+        [AllowNull]
+        public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
-        public string? CoverURL { get; }
+        [AllowNull]
+        public string CoverURL { get; }
         public string AudioURL { get; private set; }
 
         /// <summary>
@@ -89,7 +93,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
         }
 
-        public int CompareTo(ITrackInfo? other)
+        public int CompareTo([AllowNull] ITrackInfo other)
         {
             return Base.CompareTo(other);
         }

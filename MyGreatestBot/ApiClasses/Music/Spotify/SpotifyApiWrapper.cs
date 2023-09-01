@@ -3,6 +3,7 @@ using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using SpotifyAPI.Web;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 //using SpotifyAPI.Web.Auth;
@@ -14,11 +15,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// Spotify API wrapper class
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal static class SpotifyApiWrapper
+    public static class SpotifyApiWrapper
     {
-        //private static EmbedIOAuthServer? server;
-        private static SpotifyClient? SpotifyClientInstance;
-
+        //[AllowNull]
+        //private static EmbedIOAuthServer server;
+        [AllowNull]
+        private static SpotifyClient SpotifyClientInstance;
         private static readonly SpotifyApiException GenericException = new();
 
         internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw GenericException;
@@ -58,7 +60,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        internal static void PerformAuth()
+        public static void PerformAuth()
         {
             SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
@@ -85,7 +87,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             SpotifyClientInstance = new(config);
         }
 
-        internal static void Logout()
+        public static void Logout()
         {
             SpotifyClientInstance = null;
         }
@@ -116,7 +118,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         //    SpotifyClientInstance = new(tokenResponse.AccessToken);
         //}
 
-        internal static IEnumerable<SpotifyTrackInfo> GetTracks(string? query)
+        public static IEnumerable<SpotifyTrackInfo> GetTracks(string? query)
         {
             List<SpotifyTrackInfo> tracks = new();
 

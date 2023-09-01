@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Clear(CommandActionSource source = CommandActionSource.None)
+        internal void Clear(CommandActionSource source)
         {
             lock (tracks_queue)
             {
@@ -17,7 +17,7 @@ namespace MyGreatestBot.Player
                 {
                     if (count > 0)
                     {
-                        Handler.SendMessage(new DiscordEmbedBuilder()
+                        Handler.Message.Send(new DiscordEmbedBuilder()
                         {
                             Color = DiscordColor.Aquamarine,
                             Title = "Clear",

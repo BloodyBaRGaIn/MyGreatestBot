@@ -2,6 +2,7 @@
 using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 using VkNet.Model;
@@ -12,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// Vk track info implementation
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;
 
@@ -22,13 +23,16 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        public HyperLink? AlbumName { get; }
-        public HyperLink? PlaylistName { get; }
+        [AllowNull]
+        public HyperLink AlbumName { get; }
+        [AllowNull]
+        public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
-        public string? CoverURL { get; }
+        [AllowNull]
+        public string CoverURL { get; }
         public string AudioURL { get; private set; }
 
         private readonly Audio origin;
@@ -107,7 +111,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        public int CompareTo(ITrackInfo? other)
+        public int CompareTo([AllowNull] ITrackInfo other)
         {
             return Base.CompareTo(other);
         }

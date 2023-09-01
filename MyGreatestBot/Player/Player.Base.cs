@@ -1,7 +1,8 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Exceptions;
-using MyGreatestBot.Bot;
+using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace MyGreatestBot.Player
 
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
 
-        internal int TransmitSinkDelay { get; private set; } = TRANSMIT_SINK_MS;
+        internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
         private volatile ITrackInfo? currentTrack;
 
@@ -93,16 +94,10 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
-                Handler.VoiceConnection = Handler.GetVoiceConnection();
-
-                if (Handler.VoiceConnection == null)
-                {
-                    Wait();
-                    continue;
-                }
-
                 try
                 {
+                    Task.Run(Handler.Voice.WaitForConnectionAsync, MainPlayerCancellationToken).Wait();
+
                     if (currentTrack == null)
                     {
                         Dequeue();
@@ -115,7 +110,7 @@ namespace MyGreatestBot.Player
 
                     if (!tracks_queue.Any() && !StopRequested)
                     {
-                        Handler.SendMessage(new PlayerException("No more tracks"));
+                        Handler.Message.Send(new PlayerException("No more tracks"));
                     }
                     StopRequested = false;
                 }
@@ -125,15 +120,15 @@ namespace MyGreatestBot.Player
                 }
                 catch (TypeInitializationException ex)
                 {
-                    Stop(Commands.CommandActionSource.Mute);
-                    await Handler.LogErrorAsync(ex.GetExtendedMessage());
+                    Stop(CommandActionSource.Mute);
+                    await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
                     return;
                 }
                 catch (Exception ex)
                 {
                     IsPlaying = false;
-                    await Handler.LogErrorAsync(ex.GetExtendedMessage());
+                    await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                 }
             }
         }
@@ -153,7 +148,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
-                Handler.SendMessage(ex.GetExtendedMessage());
+                Handler.Message.Send(ex.GetExtendedMessage());
                 return false;
             }
 
@@ -162,8 +157,8 @@ namespace MyGreatestBot.Player
 
         private void PlayBody()
         {
-            if (currentTrack is null
-                || Handler.VoiceConnection is null)
+            if (currentTrack == null
+                || Handler.VoiceConnection == null)
             {
                 return;
             }
@@ -173,11 +168,11 @@ namespace MyGreatestBot.Player
 
             try
             {
-                Handler.UpdateSink();
+                Handler.Voice.UpdateSink();
             }
             catch { }
 
-            Handler.Log(currentTrack.GetShortMessage());
+            Handler.Log.Send(currentTrack.GetShortMessage());
 
             IsPlaying = true;
 
@@ -192,7 +187,7 @@ namespace MyGreatestBot.Player
 
                 ffmpeg.Start(currentTrack);
 
-                Handler.Log("Start ffmpeg");
+                Handler.Log.Send("Start ffmpeg");
 
                 if (!ffmpeg.TryLoad(currentTrack.IsLiveStream ? 2000 : (int)(1000 * (currentTrack.Duration.TotalHours + 1))))
                 {
@@ -206,15 +201,15 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
-                Handler.SendSpeaking(true);
+                Handler.Voice.SendSpeaking(true);
 
                 LowPlayerResult low_result = LowPlayer();
 
-                Handler.SendSpeaking(false);
+                Handler.Voice.SendSpeaking(false);
 
                 if (low_result == LowPlayerResult.Restart)
                 {
-                    Handler.Log("Restart ffmpeg");
+                    Handler.Log.Send("Restart ffmpeg");
                     obtain_audio = false;
                     continue;
                 }
@@ -228,7 +223,7 @@ namespace MyGreatestBot.Player
 
             ffmpeg.Stop();
 
-            Handler.Log("Stop ffmpeg");
+            Handler.Log.Send("Stop ffmpeg");
 
             currentTrack = null;
         }
@@ -291,16 +286,10 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Success;
                 }
 
-                while (Handler.TransmitSink == null)
+                if (!Handler.Voice.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    Handler.UpdateSink();
-                    Wait();
-                }
-
-                if (!Handler.TransmitSink.WriteAsync(buff).Wait(TransmitSinkDelay * 100))
-                {
-                    Handler.WaitForConnectionAsync().Wait();
-                    Handler.UpdateSink();
+                    Handler.Voice.WaitForConnectionAsync().Wait();
+                    Handler.Voice.UpdateSink();
                 }
             }
         }

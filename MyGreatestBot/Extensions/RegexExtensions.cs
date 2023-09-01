@@ -5,14 +5,14 @@ namespace MyGreatestBot.Extensions
     /// <summary>
     /// <see cref="Regex"/> extensions
     /// </summary>
-    internal static class RegexExtensions
+    public static class RegexExtensions
     {
-        internal static string? GetMatchValue(this Regex regex, string query)
+        public static string? GetMatchValue(this Regex regex, string query)
         {
             return regex.GetMatchValue(query, 1)[0];
         }
 
-        internal static string?[] GetMatchValue(this Regex regex, string query, params int[] groups)
+        public static string?[] GetMatchValue(this Regex regex, string query, params int[] groups)
         {
             string?[] result = new string?[groups.Length];
 

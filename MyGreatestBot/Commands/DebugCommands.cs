@@ -2,7 +2,10 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
@@ -15,6 +18,7 @@ namespace MyGreatestBot.Commands
     {
         [Command("test")]
         [Description("Get \"Hello World\" response message")]
+        [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
         public async Task TestCommand(CommandContext ctx)
         {
@@ -28,6 +32,7 @@ namespace MyGreatestBot.Commands
 
         [Command("name")]
         [Description("Get origin bot name")]
+        [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
@@ -61,9 +66,24 @@ namespace MyGreatestBot.Commands
             _ = await ctx.Channel.SendMessageAsync(_embed);
         }
 
+        [Command("lasterror")]
+        [Aliases("error")]
+        [Description("Get last command exception message")]
+        [Category(CommandStrings.DebugCategoryName)]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task GetLastErrorCommand(CommandContext ctx)
+        {
+            string message = BotWrapper.LastError.GetExtendedMessage();
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                _ = await ctx.Channel.SendMessageAsync(message);
+            }
+        }
+
         [Command(CommandStrings.HelpCommandName)]
         [Aliases("h")]
         [Description("Get help")]
+        [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
         public async Task HelpCommand(
             CommandContext ctx,
@@ -74,21 +94,32 @@ namespace MyGreatestBot.Commands
                 throw new ArgumentNullException(nameof(BotWrapper.Commands), "Commands not initialized");
             }
 
-            CustomHelpFormatter custom = string.IsNullOrWhiteSpace(command)
-                ? new CustomHelpFormatter(ctx).WithAllCommands()
-                : BotWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd)
-                    ? new CustomHelpFormatter(ctx).WithCommand(cmd)
-                    : throw new ArgumentException("Invalid command");
-
-            DiscordEmbed message = custom.Build().Embed ?? throw new ArgumentException("Cannot build message");
-
-            if (ctx.Member == null)
+            List<CustomHelpFormatter> collection = new();
+            if (string.IsNullOrWhiteSpace(command))
             {
-                _ = await ctx.Channel.SendMessageAsync(message);
+                collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
+            }
+            else if (BotWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
+            {
+                collection.Add(new CustomHelpFormatter(ctx).WithCommand(cmd));
             }
             else
             {
-                _ = await ctx.Member.SendMessageAsync(message);
+                throw new ArgumentException("Invalid command");
+            }
+
+            foreach (CustomHelpFormatter formatter in collection)
+            {
+                DiscordEmbed message = formatter.Build().Embed ?? throw new ArgumentException("Cannot build message");
+
+                if (ctx.Member == null)
+                {
+                    _ = await ctx.Channel.SendMessageAsync(message);
+                }
+                else
+                {
+                    _ = await ctx.Member.SendMessageAsync(message);
+                }
             }
         }
     }

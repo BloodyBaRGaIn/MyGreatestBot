@@ -8,7 +8,7 @@ namespace MyGreatestBot.Player
     [SupportedOSPlatform("windows")]
     internal partial class Player
     {
-        internal void Dequeue()
+        private void Dequeue()
         {
             while (true)
             {
@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                Handler.Message.Send(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Purple,
                     Title = "Play",
@@ -28,7 +28,7 @@ namespace MyGreatestBot.Player
 
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Skipping track with ignored artist(s)"
@@ -38,7 +38,7 @@ namespace MyGreatestBot.Player
 
                 if (SqlServerWrapper.IsTrackIgnored(track))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Skipping ignored track"
@@ -48,7 +48,7 @@ namespace MyGreatestBot.Player
 
                 if (track.Duration >= MaxTrackDuration)
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Track is too long"
@@ -57,7 +57,6 @@ namespace MyGreatestBot.Player
                 }
 
                 currentTrack = track;
-
                 break;
             }
         }

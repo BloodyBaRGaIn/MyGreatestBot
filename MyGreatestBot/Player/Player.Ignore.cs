@@ -2,8 +2,8 @@
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Services.Sql;
-using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using System;
 using System.Runtime.Versioning;
 
@@ -12,8 +12,9 @@ namespace MyGreatestBot.Player
     [SupportedOSPlatform("windows")]
     internal partial class Player
     {
-        internal void IgnoreTrack(CommandActionSource source = CommandActionSource.None)
+        internal void IgnoreTrack(CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -21,11 +22,10 @@ namespace MyGreatestBot.Player
 
             if (!IsPlaying || currentTrack == null)
             {
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!mute)
                 {
                     throw new IgnoreException("Nothing to ignore");
                 }
-
                 return;
             }
 
@@ -38,11 +38,11 @@ namespace MyGreatestBot.Player
                 throw new IgnoreException("Failed to ignore track", ex);
             }
 
-            Skip(0, CommandActionSource.Mute);
+            Skip(0, source | CommandActionSource.Mute);
 
-            if (!source.HasFlag(CommandActionSource.Mute))
+            if (!mute)
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                Handler.Message.Send(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Track ignored"
@@ -50,8 +50,9 @@ namespace MyGreatestBot.Player
             }
         }
 
-        internal void IgnoreArtist(int index = -1, CommandActionSource source = CommandActionSource.None)
+        internal void IgnoreArtist(int index, CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -59,11 +60,10 @@ namespace MyGreatestBot.Player
 
             if (!IsPlaying || currentTrack == null)
             {
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!mute)
                 {
                     throw new IgnoreException("Nothing to ignore");
                 }
-
                 return;
             }
 
@@ -88,11 +88,11 @@ namespace MyGreatestBot.Player
                 throw new IgnoreException("Failed to ignore artist", ex);
             }
 
-            Skip(0, CommandActionSource.Mute);
+            Skip(0, source | CommandActionSource.Mute);
 
-            if (!source.HasFlag(CommandActionSource.Mute))
+            if (!mute)
             {
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                Handler.Message.Send(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Yellow,
                     Title = "Artist ignored"

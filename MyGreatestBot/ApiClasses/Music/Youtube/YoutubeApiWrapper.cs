@@ -5,6 +5,7 @@ using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -21,10 +22,10 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// Youtube API wrapper class
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal static class YoutubeApiWrapper
+    public static class YoutubeApiWrapper
     {
-        private static YoutubeClient? api;
-
+        [AllowNull]
+        private static YoutubeClient api;
         private static readonly YoutubeApiException GenericException = new();
 
         internal static VideoClient Videos => api?.Videos ?? throw GenericException;
@@ -49,7 +50,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
         }
 
-        internal static void PerformAuth()
+        public static void PerformAuth()
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
@@ -68,12 +69,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             api = new(GoogleService.HttpClient);
         }
 
-        internal static void Logout()
+        public static void Logout()
         {
             api = null;
         }
 
-        internal static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
+        public static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
         {
             if (api == null)
             {

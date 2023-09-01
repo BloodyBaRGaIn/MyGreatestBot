@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Skip(int add_count = 0, CommandActionSource source = CommandActionSource.None)
+        internal void Skip(int add_count, CommandActionSource source)
         {
             lock (tracks_queue)
             {
@@ -32,7 +32,7 @@ namespace MyGreatestBot.Player
                 {
                     if (was_playing)
                     {
-                        Handler.SendMessage(new DiscordEmbedBuilder()
+                        Handler.Message.Send(new DiscordEmbedBuilder()
                         {
                             Color = DiscordColor.Blue,
                             Title = $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"
@@ -40,7 +40,7 @@ namespace MyGreatestBot.Player
                     }
                     else
                     {
-                        Handler.SendMessage(new SkipException("Nothing to skip"));
+                        Handler.Message.Send(new SkipException("Nothing to skip"));
                     }
                 }
             }

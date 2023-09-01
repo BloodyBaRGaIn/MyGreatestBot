@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
-using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,20 +9,18 @@ namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Enqueue(IEnumerable<ITrackInfo> tracks, CommandActionSource source = CommandActionSource.None)
+        internal void Enqueue(IEnumerable<ITrackInfo> tracks, CommandActionSource source)
         {
-            int count;
+            int totalCount;
 
             lock (tracks_queue)
             {
-                if (!source.HasFlag(CommandActionSource.External))
+                if (source.HasFlag(CommandActionSource.PlayerShuffle))
                 {
-                    foreach (ITrackInfo track in tracks)
-                    {
-                        tracks_queue.Enqueue(track);
-                    }
+                    tracks = tracks.Shuffle();
                 }
-                else
+
+                if (source.HasFlag(CommandActionSource.PlayerToHead))
                 {
                     List<ITrackInfo> collection = new();
                     collection.AddRange(tracks);
@@ -35,19 +34,26 @@ namespace MyGreatestBot.Player
                         collection.RemoveAt(0);
                     }
                 }
-
-                count = tracks_queue.Count;
-
-                if (!source.HasFlag(CommandActionSource.Mute))
+                else
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    foreach (ITrackInfo track in tracks)
                     {
-                        Color = DiscordColor.Purple,
-                        Title = "Play",
-                        Description = $"Added: {tracks.Count()}\n" +
-                                      $"Total: {count}"
-                    });
+                        tracks_queue.Enqueue(track);
+                    }
                 }
+
+                totalCount = tracks_queue.Count;
+            }
+
+            if (!source.HasFlag(CommandActionSource.Mute))
+            {
+                Handler.Message.Send(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Purple,
+                    Title = "Play",
+                    Description = $"Added: {tracks.Count()}\n" +
+                                  $"Total: {totalCount}"
+                });
             }
         }
     }

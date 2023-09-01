@@ -1,4 +1,4 @@
-﻿namespace MyGreatestBot.Commands
+﻿namespace MyGreatestBot.Commands.Utils
 {
     /// <summary>
     /// Commands additional arguments
@@ -8,7 +8,10 @@
     {
         None = 0x00000000U,
         Command = 0x00000001U,
-        External = 0x00000002U,
+        Event = 0x00000002U,
+
+        PlayerToHead = 0x00000100U,
+        PlayerShuffle = 0x00000200U,
 
         Mute = 0x10000000U
     }

@@ -1,4 +1,4 @@
-﻿namespace MyGreatestBot.Commands
+﻿namespace MyGreatestBot.Commands.Utils
 {
     /// <summary>
     /// Commands categories

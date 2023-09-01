@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace MyGreatestBot.Commands
+namespace MyGreatestBot.Commands.Utils
 {
     /// <summary>
     /// Help formatter
@@ -44,13 +44,28 @@ namespace MyGreatestBot.Commands
             return this;
         }
 
-        public CustomHelpFormatter WithAllCommands()
+        private CustomHelpFormatter WithSubcommands(IEnumerable<Command> cmds, string categoryName)
+        {
+            if (!string.IsNullOrWhiteSpace(categoryName))
+            {
+                _embed.AddField(categoryName, string.Empty.PadLeft(categoryName.Length, '#'));
+            }
+
+            return WithSubcommands(cmds);
+        }
+
+        public static IEnumerable<CustomHelpFormatter> WithAllCommands(CommandContext ctx)
         {
             if (BotWrapper.Commands == null)
             {
-                return this;
+                yield break;
             }
-            return WithSubcommands(BotWrapper.Commands.RegisteredCommands.Values.DistinctBy(c => c.Name.ToLowerInvariant()));
+
+            foreach (IGrouping<string, Command> category in BotWrapper.Commands.RegisteredCommands.Values
+                .GroupBy(c => (c.Category ?? string.Empty).ToUpperInvariant()))
+            {
+                yield return new CustomHelpFormatter(ctx).WithSubcommands(category.DistinctBy(c => c.Name.ToLowerInvariant()), category.Key);
+            }
         }
 
         public override CommandHelpMessage Build()

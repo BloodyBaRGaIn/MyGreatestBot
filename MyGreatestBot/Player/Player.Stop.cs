@@ -1,13 +1,14 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Utils;
 using System.Linq;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Stop(CommandActionSource source = CommandActionSource.None)
+        internal void Stop(CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             if (IsPlaying || tracks_queue.Any())
             {
                 StopRequested = true;
@@ -17,9 +18,9 @@ namespace MyGreatestBot.Player
                 IsPlaying = false;
                 currentTrack = null;
 
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!mute)
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Blue,
                         Title = "Stopped"
@@ -28,9 +29,9 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                if (!source.HasFlag(CommandActionSource.Mute) && !source.HasFlag(CommandActionSource.External))
+                if (!mute && !source.HasFlag(CommandActionSource.Event))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Blue,
                         Title = "Nothing to stop"

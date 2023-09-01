@@ -3,6 +3,7 @@ using MyGreatestBot.ApiClasses.Music.Yandex;
 using MyGreatestBot.Utils;
 using SpotifyAPI.Web;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -22,14 +23,17 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        public HyperLink? AlbumName { get; }
-        public HyperLink? PlaylistName { get; }
+        [AllowNull]
+        public HyperLink AlbumName { get; }
+        [AllowNull]
+        public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; private set; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
         public string AudioURL { get; private set; }
-        public string? CoverURL { get; }
+        [AllowNull]
+        public string CoverURL { get; }
 
         /// <summary>
         /// Spotify track info constructor
@@ -108,7 +112,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             ApiManager.ReloadApis(Base.TrackType | ApiIntents.Yandex);
         }
 
-        public int CompareTo(ITrackInfo? other)
+        public int CompareTo([AllowNull] ITrackInfo other)
         {
             return Base.CompareTo(other);
         }

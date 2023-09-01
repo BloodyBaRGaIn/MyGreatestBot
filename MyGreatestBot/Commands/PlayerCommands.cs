@@ -1,8 +1,9 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses;
-using MyGreatestBot.Bot;
+using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -17,15 +18,15 @@ namespace MyGreatestBot.Commands
     [SupportedOSPlatform("windows")]
     internal class PlayerCommands : BaseCommandModule
     {
-        private static async Task<IEnumerable<ITrackInfo>> GetTracks(CommandContext ctx, ConnectionHandler handler, string? query)
+        private static async Task<IEnumerable<ITrackInfo>> GetTracks(CommandContext ctx, ConnectionHandler handler, string query)
         {
             handler.TextChannel = ctx.Channel;
-            handler.VoiceConnection = handler.GetVoiceConnection();
+            handler.Voice.UpdateVoiceConnection();
 
             if (handler.VoiceConnection == null)
             {
                 await handler.Join(ctx);
-                await handler.WaitForConnectionAsync();
+                await handler.Voice.WaitForConnectionAsync();
                 handler.Update(ctx.Guild);
             }
 
@@ -48,7 +49,7 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command));
         }
 
         [Command("playshuffled")]
@@ -67,7 +68,7 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks.Shuffle()));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command | CommandActionSource.PlayerShuffle));
         }
 
         [Command("tms")]
@@ -86,7 +87,7 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.External));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command | CommandActionSource.PlayerToHead));
         }
 
         [Command("seek")]
@@ -104,7 +105,7 @@ namespace MyGreatestBot.Commands
             }
 
             handler.TextChannel = ctx.Channel;
-            handler.VoiceConnection = handler.GetVoiceConnection();
+            handler.Voice.UpdateVoiceConnection();
 
             string[] formats = new[]
             {
@@ -129,7 +130,7 @@ namespace MyGreatestBot.Commands
                 throw new SeekException("Wrong format");
             }
 
-            await Task.Run(() => handler.PlayerInstance.RequestSeek(time));
+            await Task.Run(() => handler.PlayerInstance.RequestSeek(time, CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -147,9 +148,9 @@ namespace MyGreatestBot.Commands
             }
 
             handler.TextChannel = ctx.Channel;
-            handler.VoiceConnection = handler.GetVoiceConnection();
+            handler.Voice.UpdateVoiceConnection();
 
-            await Task.Run(handler.PlayerInstance.ReturnCurrentTrackToQueue);
+            await Task.Run(() => handler.PlayerInstance.ReturnCurrentTrackToQueue(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -168,7 +169,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(handler.PlayerInstance.ShuffleQueue);
+            await Task.Run(() => handler.PlayerInstance.ShuffleQueue(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -244,7 +245,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Pause());
+            await Task.Run(() => handler.PlayerInstance.Pause(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -263,7 +264,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Resume());
+            await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -282,7 +283,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Clear());
+            await Task.Run(() => handler.PlayerInstance.Clear(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -301,7 +302,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Stop());
+            await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -327,7 +328,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Skip(number - 1));
+            await Task.Run(() => handler.PlayerInstance.Skip(number - 1, CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -346,7 +347,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.IgnoreTrack());
+            await Task.Run(() => handler.PlayerInstance.IgnoreTrack(CommandActionSource.Command));
 
             await Task.Delay(1);
         }
@@ -367,7 +368,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index));
+            await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index, CommandActionSource.Command));
 
             await Task.Delay(1);
         }

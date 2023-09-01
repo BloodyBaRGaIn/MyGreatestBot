@@ -1,16 +1,22 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using System;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void ReturnCurrentTrackToQueue()
+        internal void ReturnCurrentTrackToQueue(CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             if (currentTrack == null)
             {
-                throw new ReturnException("Nothing to return");
+                if (!mute)
+                {
+                    throw new ReturnException("Nothing to return");
+                }
+                return;
             }
 
             lock (tracks_queue)
@@ -23,12 +29,15 @@ namespace MyGreatestBot.Player
 
                 IsPlaying = false;
 
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                if (!mute)
                 {
-                    Color = DiscordColor.Yellow,
-                    Title = "Return",
-                    Description = "Returned to queue"
-                });
+                    Handler.Message.Send(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Yellow,
+                        Title = "Return",
+                        Description = "Returned to queue"
+                    });
+                }
             }
         }
     }

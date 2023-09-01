@@ -7,24 +7,21 @@ namespace MyGreatestBot.Extensions
     /// <summary>
     /// <see cref="IEnumerable{T}"/> extensions
     /// </summary>
-    internal static class CollectionExtensions
+    public static class CollectionExtensions
     {
-        internal static IEnumerable<T> Shuffle<T>(this IEnumerable<T> origin_collection)
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> originCollection)
         {
-            if (origin_collection == null)
+            if (originCollection == null)
             {
-                throw new ArgumentNullException(nameof(origin_collection));
-            }
-
-            if (origin_collection.Count() < 2)
-            {
-                return origin_collection;
+                throw new ArgumentNullException(nameof(originCollection));
             }
 
             Random random = new();
-            List<T> result = new();
-            result.AddRange(origin_collection);
-            return result.OrderBy(x => random.Next());
+
+            foreach (var value in originCollection.OrderBy(x => random.Next()))
+            {
+                yield return value;
+            }
         }
     }
 }

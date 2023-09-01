@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.Utils;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -34,12 +35,14 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Extended album name
         /// </summary>
-        public HyperLink? AlbumName { get; }
+        [AllowNull]
+        public HyperLink AlbumName { get; }
 
         /// <summary>
         /// Extended playlist name
         /// </summary>
-        public HyperLink? PlaylistName { get; }
+        [AllowNull]
+        public HyperLink PlaylistName { get; }
 
         /// <summary>
         /// Base track name
@@ -64,7 +67,8 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Thumbnails image URL
         /// </summary>
-        public string? CoverURL { get; }
+        [AllowNull]
+        public string CoverURL { get; }
 
         /// <summary>
         /// Audio URL for FFMPEG
@@ -140,17 +144,15 @@ namespace MyGreatestBot.ApiClasses
         /// Get Discord message thumbnail with track cover image
         /// </summary>
         /// <returns>Track cover image as thumbnail</returns>
-        public DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail? GetThumbnail()
+        [return: MaybeNull]
+        public DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail GetThumbnail()
         {
-            if (string.IsNullOrWhiteSpace(CoverURL))
-            {
-                return null;
-            }
-
-            return new DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail()
-            {
-                Url = CoverURL
-            };
+            return string.IsNullOrWhiteSpace(CoverURL)
+                ? null
+                : new DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail()
+                {
+                    Url = CoverURL
+                };
         }
 
         /// <summary>
@@ -177,7 +179,7 @@ namespace MyGreatestBot.ApiClasses
         /// </summary>
         /// <param name="other">Other track info instance</param>
         /// <returns>Zero if fully equals</returns>
-        public int CompareTo(ITrackInfo? other)
+        public int CompareTo([AllowNull] ITrackInfo other)
         {
             System.Numerics.BigInteger result = 0;
             if (this is null || other is null)

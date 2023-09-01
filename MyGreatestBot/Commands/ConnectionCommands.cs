@@ -3,7 +3,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -66,7 +68,7 @@ namespace MyGreatestBot.Commands
 
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                handler.SendMessage(new DiscordEmbedBuilder()
+                handler.Message.Send(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Blue,
                     Title = "Reload",
@@ -93,8 +95,8 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            if (BotWrapper.BotInstance.Client != null
-                && !BotWrapper.BotInstance.Client.CurrentApplication.Owners
+            if (BotWrapper.Client != null
+                && !BotWrapper.Client.CurrentApplication.Owners
                     .Select(x => x.Id).Contains(ctx.User.Id))
             {
                 throw new CommandExecutionException("You are not allowed to execute this command");

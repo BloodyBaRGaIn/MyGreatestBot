@@ -31,7 +31,7 @@ namespace MyGreatestBot.Player
 
                 description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                Handler.Message.Send(new DiscordEmbedBuilder()
                 {
                     Color = DiscordColor.Purple,
                     Title = "Count",

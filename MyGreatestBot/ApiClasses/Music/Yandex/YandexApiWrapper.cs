@@ -3,12 +3,10 @@ using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
-using Yandex.Music.Api;
-using Yandex.Music.Api.API;
-using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
@@ -18,12 +16,18 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
+    /// <summary>
+    /// Yandex API wpapper class
+    /// </summary>
     [SupportedOSPlatform("windows")]
-    internal static class YandexApiWrapper
+    public static class YandexApiWrapper
     {
-        /// <summary>
-        /// Yandex API wpapper class
-        /// </summary>
+        [AllowNull]
+        private static YandexMusicClient _client;
+        private static readonly YandexApiException GenericException = new();
+
+        private static YandexMusicClient Api => _client ?? throw GenericException;
+
         private static class YandexQueryDecomposer
         {
 #pragma warning disable SYSLIB1045
@@ -55,13 +59,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        private static YandexMusicClient? _client;
-
-        private static YandexMusicClient Api => _client ?? throw GenericException;
-
-        private static readonly YandexApiException GenericException = new();
-
-        internal static void PerformAuth()
+        public static void PerformAuth()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
@@ -100,7 +98,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        internal static void Logout()
+        public static void Logout()
         {
             _client = null;
         }
@@ -110,7 +108,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         /// </summary>
         /// <param name="otherTrack">Track info from another API</param>
         /// <returns>Track info</returns>
-        internal static ITrackInfo? SearchTrack(ITrackInfo otherTrack)
+        public static ITrackInfo? SearchTrack(ITrackInfo otherTrack)
         {
             if (otherTrack.TrackType == ApiIntents.Yandex)
             {
@@ -175,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return first;
         }
 
-        internal static IEnumerable<YandexTrackInfo> GetTracks(string? query)
+        public static IEnumerable<YandexTrackInfo> GetTracks(string? query)
         {
             List<YandexTrackInfo> tracks_collection = new();
 

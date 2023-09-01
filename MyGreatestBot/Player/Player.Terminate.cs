@@ -1,12 +1,12 @@
-﻿using MyGreatestBot.Commands;
+﻿using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Terminate(CommandActionSource source = CommandActionSource.None)
+        internal void Terminate(CommandActionSource source)
         {
-            Stop(source);
+            Stop(source | CommandActionSource.Mute);
             MainPlayerCancellationTokenSource.Cancel();
         }
     }

@@ -2,6 +2,7 @@
 using MyGreatestBot.Extensions;
 using MyGreatestBot.Utils;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
@@ -15,7 +16,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// Yandex track info implementation
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;
 
@@ -25,14 +26,17 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        public HyperLink? AlbumName { get; }
-        public HyperLink? PlaylistName { get; }
+        [AllowNull]
+        public HyperLink AlbumName { get; }
+        [AllowNull]
+        public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.Seek { get; set; }
 
         public string AudioURL { get; private set; } = string.Empty;
-        public string? CoverURL { get; }
+        [AllowNull]
+        public string CoverURL { get; }
 
         private readonly YTrack origin;
 
@@ -91,7 +95,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        public int CompareTo(ITrackInfo? other)
+        public int CompareTo([AllowNull] ITrackInfo other)
         {
             return Base.CompareTo(other);
         }

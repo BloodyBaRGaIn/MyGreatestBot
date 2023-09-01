@@ -13,7 +13,7 @@ using System.Runtime.Versioning;
 namespace MyGreatestBot.ApiClasses.Services.Sql
 {
     [SupportedOSPlatform("windows")]
-    internal static class SqlServerWrapper
+    public static class SqlServerWrapper
     {
         private static readonly string ServerString;
         private static readonly string ConnectionString;
@@ -51,7 +51,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void Open()
+        public static void Open()
         {
             SqlServiceWrapper.Run();
 
@@ -89,7 +89,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void Close()
+        public static void Close()
         {
             _connection?.Close();
         }

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace MyGreatestBot.ApiClasses.Music.Youtube
+namespace MyGreatestBot.ApiClasses.Utils
 {
     /// <summary>
     /// Source code from YoutubeExplode

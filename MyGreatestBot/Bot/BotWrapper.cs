@@ -2,23 +2,29 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Bot
 {
     [SupportedOSPlatform("windows")]
-    internal static class BotWrapper
+    public static class BotWrapper
     {
-        internal static readonly DiscordBot BotInstance = new();
+        private static readonly DiscordBot BotInstance = new();
+        public static IServiceProvider ServiceProvider => BotInstance.ServiceProvider;
 
-        internal static DiscordClient? Client => BotInstance.Client;
-        internal static VoiceNextExtension? VoiceNext => BotInstance.Voice;
-        internal static CommandsNextExtension? Commands => BotInstance.Commands;
-        internal static IServiceProvider ServiceProvider => BotInstance.ServiceProvider;
+        [AllowNull]
+        public static DiscordClient Client => BotInstance.Client;
+        [AllowNull]
+        public static VoiceNextExtension VoiceNext => BotInstance.Voice;
+        [AllowNull]
+        public static CommandsNextExtension Commands => BotInstance.Commands;
+        [AllowNull]
+        public static Exception LastError { get; set; }
 
-        internal static void Run()
+        public static void Run(int connection_timeout)
         {
-            BotInstance.RunAsync().GetAwaiter().GetResult();
+            BotInstance.RunAsync(connection_timeout).GetAwaiter().GetResult();
         }
     }
 }

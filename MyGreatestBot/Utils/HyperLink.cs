@@ -15,7 +15,7 @@ namespace MyGreatestBot.Utils
         /// <summary>
         /// URL
         /// </summary>
-        private string Url { get; init; }
+        public string Url { get; init; }
 
         public string InnerId { get; private set; } = string.Empty;
 

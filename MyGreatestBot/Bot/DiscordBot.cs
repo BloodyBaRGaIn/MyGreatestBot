@@ -8,26 +8,31 @@ using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands;
+using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Bot
 {
     [SupportedOSPlatform("windows")]
-    internal sealed class DiscordBot
+    public sealed class DiscordBot
     {
-        private const int DiscordConnectionTimeout = 10000;
+        [AllowNull]
+        public DiscordClient Client { get; private set; }
+        [AllowNull]
+        public InteractivityExtension Interactivity { get; private set; }
+        [AllowNull]
+        public CommandsNextExtension Commands { get; private set; }
+        [AllowNull]
+        public VoiceNextExtension Voice { get; private set; }
+        public ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
-        internal DiscordClient? Client { get; private set; }
-        internal InteractivityExtension? Interactivity { get; private set; }
-        internal CommandsNextExtension? Commands { get; private set; }
-        internal VoiceNextExtension? Voice { get; private set; }
-        internal ServiceProvider ServiceProvider { get; private set; } = new ServiceCollection().BuildServiceProvider();
-
-        internal async Task RunAsync()
+        public async Task RunAsync(int connection_timeout)
         {
             try
             {
@@ -92,7 +97,7 @@ namespace MyGreatestBot.Bot
                 Commands.CommandErrored += Commands_CommandErrored;
                 Commands.CommandExecuted += Commands_CommandExecuted;
 
-                if (!Client.ConnectAsync().Wait(DiscordConnectionTimeout))
+                if (!Client.ConnectAsync().Wait(connection_timeout))
                 {
                     throw new ApplicationException("Cannot connect to Discord");
                 }
@@ -138,21 +143,21 @@ namespace MyGreatestBot.Bot
                     if (e.After?.Channel != null)
                     {
                         await handler.Join(e);
-                        await handler.WaitForConnectionAsync();
+                        await handler.Voice.WaitForConnectionAsync();
                         handler.Update(e.Guild);
                     }
                     else
                     {
-                        if (!handler.IsManualDisconnect)
+                        if (!handler.Voice.IsManualDisconnect)
                         {
-                            handler.SendMessage(new DiscordEmbedBuilder()
+                            handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
+                            handler.Message.Send(new DiscordEmbedBuilder()
                             {
                                 Color = DiscordColor.Red,
                                 Title = "Kicked from voice channel"
                             });
-                            handler.PlayerInstance.Stop(CommandActionSource.Mute);
                         }
-                        handler.IsManualDisconnect = false;
+                        handler.Voice.IsManualDisconnect = false;
                     }
 
                     handler.Update(e.Guild);
@@ -190,7 +195,7 @@ namespace MyGreatestBot.Bot
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
             if (handler != null)
             {
-                await handler.LogAsync(GetCommandInfo(args));
+                await handler.Log.SendAsync(GetCommandInfo(args));
             }
         }
 
@@ -198,16 +203,16 @@ namespace MyGreatestBot.Bot
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
-            string extended_message = args.Exception.GetExtendedMessage();
+            BotWrapper.LastError = args.Exception;
 
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
             if (handler != null)
             {
-                await handler.LogErrorAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
+                await handler.LogError.SendAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
                     $"Command errored{Environment.NewLine}" +
-                    $"{extended_message}");
+                    $"{BotWrapper.LastError.GetExtendedMessage()}");
 
-                handler.SendMessage(args.Exception);
+                handler.Message.Send(BotWrapper.LastError);
             }
         }
     }

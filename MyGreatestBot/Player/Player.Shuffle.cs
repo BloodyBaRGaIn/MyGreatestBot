@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,9 @@ namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void ShuffleQueue()
+        internal void ShuffleQueue(CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             if (tracks_queue.Any())
             {
                 lock (tracks_queue)
@@ -28,16 +30,23 @@ namespace MyGreatestBot.Player
                     }
                 }
 
-                Handler.SendMessage(new DiscordEmbedBuilder()
+                if (!mute)
                 {
-                    Color = DiscordColor.Orange,
-                    Title = "Shuffle",
-                    Description = "Queue shuffled"
-                });
+                    Handler.Message.Send(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Orange,
+                        Title = "Shuffle",
+                        Description = "Queue shuffled"
+                    });
+                }
             }
             else
             {
-                throw new ShuffleException("Nothing to shuffle");
+                if (!mute)
+                {
+                    throw new ShuffleException("Nothing to shuffle");
+                }
+                return;
             }
         }
     }

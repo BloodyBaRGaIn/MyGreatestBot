@@ -20,7 +20,7 @@ namespace MyGreatestBot.Player
                     message.Description = currentTrack.GetMessage();
                     message.Thumbnail = currentTrack.GetThumbnail();
                 }
-                Handler.SendMessage(message);
+                Handler.Message.Send(message);
             }
             else if (!IsPlaying)
             {
@@ -38,7 +38,7 @@ namespace MyGreatestBot.Player
             {
                 if (tracks_queue.TryPeek(out ITrackInfo? track))
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Purple,
                         Title = "Next track",

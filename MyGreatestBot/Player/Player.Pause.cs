@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
     internal partial class Player
     {
-        internal void Pause(CommandActionSource source = CommandActionSource.None)
+        internal void Pause(CommandActionSource source)
         {
             IsPaused = true;
 
@@ -14,7 +14,7 @@ namespace MyGreatestBot.Player
             {
                 if (currentTrack != null)
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Paused"
@@ -22,7 +22,7 @@ namespace MyGreatestBot.Player
                 }
                 else if (!IsPlaying)
                 {
-                    Handler.SendMessage(new DiscordEmbedBuilder()
+                    Handler.Message.Send(new DiscordEmbedBuilder()
                     {
                         Color = DiscordColor.Yellow,
                         Title = "Nothing to pause"

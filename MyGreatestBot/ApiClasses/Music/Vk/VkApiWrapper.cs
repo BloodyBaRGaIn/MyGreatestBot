@@ -4,6 +4,7 @@ using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -18,8 +19,14 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// Vk API wrapper class
     /// </summary>
     [SupportedOSPlatform("windows")]
-    internal static class VkApiWrapper
+    public static class VkApiWrapper
     {
+        [AllowNull]
+        private static IVkApi api;
+        private static readonly VkApiException GenericException = new();
+
+        private static IAudioCategory Audio => api?.Audio ?? throw GenericException;
+
         private static class VkQueryDecomposer
         {
 
@@ -47,13 +54,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        private static IVkApi? api;
-
-        private static readonly VkApiException GenericException = new();
-
-        private static IAudioCategory Audio => api?.Audio ?? throw GenericException;
-
-        internal static void PerformAuth()
+        public static void PerformAuth()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
@@ -82,12 +83,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        internal static void Logout()
+        public static void Logout()
         {
             api?.LogOut();
         }
 
-        internal static IEnumerable<VkTrackInfo> GetTracks(string? query)
+        public static IEnumerable<VkTrackInfo> GetTracks(string? query)
         {
             if (api == null || !api.IsAuthorized)
             {

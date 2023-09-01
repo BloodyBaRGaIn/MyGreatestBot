@@ -1,6 +1,7 @@
 ﻿using MyGreatestBot.ApiClasses;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace MyGreatestBot.Player
@@ -10,10 +11,14 @@ namespace MyGreatestBot.Player
         private class FFMPEG
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
-            private Process? Process;
+
+            [AllowNull]
+            private Process Process;
+
+            [AllowNull]
+            internal StreamReader? StandardOutput => Process?.StandardOutput;
 
             internal bool HasExited => Process?.HasExited ?? true;
-            internal StreamReader? StandardOutput => Process?.StandardOutput;
 
             internal static bool CheckForExecutableExists()
             {
