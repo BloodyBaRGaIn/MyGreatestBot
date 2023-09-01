@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
@@ -8,21 +7,17 @@ namespace MyGreatestBot.Player
     {
         internal void Clear(CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             lock (tracks_queue)
             {
                 int count = tracks_queue.Count;
                 tracks_queue.Clear();
 
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!mute)
                 {
                     if (count > 0)
                     {
-                        Handler.Message.Send(new DiscordEmbedBuilder()
-                        {
-                            Color = DiscordColor.Aquamarine,
-                            Title = "Clear",
-                            Description = "Queue cleared"
-                        });
+                        Handler.Message.Send(new ClearException("Queue cleared"), is_success: true);
                     }
                     else
                     {

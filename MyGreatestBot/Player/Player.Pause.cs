@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
@@ -14,19 +13,11 @@ namespace MyGreatestBot.Player
             {
                 if (currentTrack != null)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Paused"
-                    });
+                    Handler.Message.Send(new PauseException("Paused"), true);
                 }
                 else if (!IsPlaying)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Nothing to pause"
-                    });
+                    throw new PauseException("Nothing to pause");
                 }
                 else
                 {

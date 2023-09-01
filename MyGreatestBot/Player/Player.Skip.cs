@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
@@ -8,11 +7,12 @@ namespace MyGreatestBot.Player
     {
         internal void Skip(int add_count, CommandActionSource source)
         {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
             lock (tracks_queue)
             {
                 if (tracks_queue.Count < add_count)
                 {
-                    if (!source.HasFlag(CommandActionSource.Mute))
+                    if (!mute)
                     {
                         throw new SkipException("Requested number exceeds the queue length");
                     }
@@ -28,15 +28,11 @@ namespace MyGreatestBot.Player
                 currentTrack = null;
                 IsPlaying = false;
 
-                if (!source.HasFlag(CommandActionSource.Mute))
+                if (!mute)
                 {
                     if (was_playing)
                     {
-                        Handler.Message.Send(new DiscordEmbedBuilder()
-                        {
-                            Color = DiscordColor.Blue,
-                            Title = $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"
-                        });
+                        Handler.Message.Send(new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"), true);
                     }
                     else
                     {

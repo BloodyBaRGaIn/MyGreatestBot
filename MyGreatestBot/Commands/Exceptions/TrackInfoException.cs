@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class TrackInfoException : CommandExecutionException
+    public class TrackInfoException : CommandExecutionException
     {
-        internal override string Title => "Track info";
+        public override string Title => "Track info";
+        public override DiscordColor ExecutedColor => DiscordColor.Purple;
+
         public TrackInfoException() : base() { }
         public TrackInfoException(string message) : base(message) { }
         public TrackInfoException(string message, Exception innerException) : base(message, innerException) { }

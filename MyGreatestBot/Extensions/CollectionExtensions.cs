@@ -18,7 +18,7 @@ namespace MyGreatestBot.Extensions
 
             Random random = new();
 
-            foreach (var value in originCollection.OrderBy(x => random.Next()))
+            foreach (T? value in originCollection.OrderBy(x => random.Next()))
             {
                 yield return value;
             }

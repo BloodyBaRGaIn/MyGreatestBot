@@ -4,7 +4,6 @@ using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using System;
 using System.Linq;
 
@@ -31,12 +30,7 @@ namespace MyGreatestBot.Player
 
                 description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Count",
-                    Description = description
-                });
+                Handler.Message.Send(new QueueLengthException(description), true);
             }
             else
             {

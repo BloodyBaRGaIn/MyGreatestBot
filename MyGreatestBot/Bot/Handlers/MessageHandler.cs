@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -40,6 +41,11 @@ namespace MyGreatestBot.Bot.Handlers
             {
                 Task.Delay(MessageDelay).Wait();
             }
+        }
+
+        public void Send(CommandExecutionException exception, bool is_success = false)
+        {
+            Send(exception.GetDiscordEmbed(is_success));
         }
 
         public void Send(Exception exception)

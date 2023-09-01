@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System.Linq;
 
@@ -13,29 +13,21 @@ namespace MyGreatestBot.Player
             {
                 StopRequested = true;
 
-                Clear(CommandActionSource.Mute);
+                Clear(source | CommandActionSource.Mute);
 
                 IsPlaying = false;
                 currentTrack = null;
 
                 if (!mute)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Blue,
-                        Title = "Stopped"
-                    });
+                    Handler.Message.Send(new StopException("Stopped"), true);
                 }
             }
             else
             {
                 if (!mute && !source.HasFlag(CommandActionSource.Event))
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Blue,
-                        Title = "Nothing to stop"
-                    });
+                    throw new StopException("Nothing to stop");
                 }
             }
         }

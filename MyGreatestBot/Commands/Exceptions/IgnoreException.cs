@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class IgnoreException : CommandExecutionException
+    public class IgnoreException : CommandExecutionException
     {
-        internal override string Title => "Ignore";
+        public override string Title => "Ignore";
+        public override DiscordColor ExecutedColor => DiscordColor.Yellow;
+
         public IgnoreException() : base() { }
         public IgnoreException(string message) : base(message) { }
         public IgnoreException(string message, Exception innerException) : base(message, innerException) { }

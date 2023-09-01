@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class SeekException : CommandExecutionException
+    public class SeekException : CommandExecutionException
     {
-        internal override string Title => "Seek";
+        public override string Title => "Seek";
+        public override DiscordColor ExecutedColor => DiscordColor.Purple;
+
         public SeekException() : base() { }
         public SeekException(string message) : base(message) { }
         public SeekException(string message, Exception innerException) : base(message, innerException) { }

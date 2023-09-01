@@ -1,6 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Services.Sql;
+using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Extensions;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player
@@ -18,41 +20,26 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Play",
-                    Description = track.GetMessage(),
-                    Thumbnail = track.GetThumbnail()
-                });
+                DiscordEmbedBuilder message = new PlayerException(track.GetMessage("Playing")).GetDiscordEmbed(true);
+                message.Thumbnail = track.GetThumbnail();
+
+                Handler.Message.Send(message);
 
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Skipping track with ignored artist(s)"
-                    });
+                    Handler.Message.Send(new IgnoreException("Skipping track with ignored artist(s)"), true);
                     continue;
                 }
 
                 if (SqlServerWrapper.IsTrackIgnored(track))
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Skipping ignored track"
-                    });
+                    Handler.Message.Send(new IgnoreException("Skipping ignored track"), true);
                     continue;
                 }
 
                 if (track.Duration >= MaxTrackDuration)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Track is too long"
-                    });
+                    Handler.Message.Send(new IgnoreException("Track is too long"), true);
                     continue;
                 }
 

@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -23,13 +24,10 @@ namespace MyGreatestBot.Player
 
                     if (!mute)
                     {
-                        Handler.Message.Send(new DiscordEmbedBuilder()
-                        {
-                            Color = DiscordColor.Purple,
-                            Title = "Seek",
-                            Description = currentTrack.GetMessage(),
-                            Thumbnail = currentTrack.GetThumbnail()
-                        });
+                        DiscordEmbedBuilder message = new SeekException(currentTrack.GetMessage("Playing")).GetDiscordEmbed(true);
+                        message.Thumbnail = currentTrack.GetThumbnail();
+
+                        Handler.Message.Send(message);
                     }
 
                     Task.Yield().GetAwaiter().GetResult();

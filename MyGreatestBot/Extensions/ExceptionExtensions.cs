@@ -57,13 +57,22 @@ namespace MyGreatestBot.Extensions
 
         public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)
         {
-            DiscordEmbedBuilder builder = new();
-            builder = exception switch
+            return new DiscordEmbedBuilder()
             {
-                CommandExecutionException command => builder.WithColor(command.Color).WithTitle(command.Title),
-                _ => builder.WithColor(DiscordColor.Red).WithTitle(exception.GetType().Name),
+                Color = DiscordColor.Red,
+                Title = exception.GetType().Name,
+                Description = exception.Message
             };
-            return builder.WithDescription(exception.Message);
+        }
+
+        public static DiscordEmbedBuilder GetDiscordEmbed(this CommandExecutionException exception, bool is_executed_successfully)
+        {
+            return new DiscordEmbedBuilder()
+            {
+                Color = is_executed_successfully ? exception.ExecutedColor : exception.ErroredColor,
+                Title = exception.Title,
+                Description = exception.Message
+            };
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
@@ -42,11 +41,7 @@ namespace MyGreatestBot.Player
 
             if (!mute)
             {
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Yellow,
-                    Title = "Track ignored"
-                });
+                Handler.Message.Send(new IgnoreException("Track ignored"), true);
             }
         }
 
@@ -92,11 +87,7 @@ namespace MyGreatestBot.Player
 
             if (!mute)
             {
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Yellow,
-                    Title = "Artist ignored"
-                });
+                Handler.Message.Send(new IgnoreException("Artist ignored"), true);
             }
         }
     }

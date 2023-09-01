@@ -105,11 +105,12 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Get Discord message content
         /// </summary>
+        /// <param name="state">For example "Playing"</param>
         /// <returns>Content string</returns>
-        public string GetMessage()
+        public string GetMessage(string state)
         {
             string result = string.Empty;
-            result += $"Playing: {TrackName}\n";
+            result += $"{state}: {TrackName}\n";
             result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}\n";
 
             if (!IsLiveStream)

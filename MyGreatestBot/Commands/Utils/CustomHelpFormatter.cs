@@ -48,7 +48,7 @@ namespace MyGreatestBot.Commands.Utils
         {
             if (!string.IsNullOrWhiteSpace(categoryName))
             {
-                _embed.AddField(categoryName, string.Empty.PadLeft(categoryName.Length, '#'));
+                _ = _embed.AddField(categoryName, string.Empty.PadLeft(categoryName.Length, '#'));
             }
 
             return WithSubcommands(cmds);

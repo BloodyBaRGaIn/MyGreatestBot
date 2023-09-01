@@ -7,7 +7,7 @@ namespace MyGreatestBot.ApiClasses.Exceptions
     {
         public VkApiException(
             [DisallowNull] string message,
-            [AllowNull] Exception inner = null) 
+            [AllowNull] Exception inner = null)
             : base(ApiIntents.Vk, message, inner) { }
 
         public VkApiException() : this("Not initialized") { }

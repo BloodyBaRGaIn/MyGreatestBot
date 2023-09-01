@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
 
@@ -31,12 +30,7 @@ namespace MyGreatestBot.Player
 
                 if (!mute)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Yellow,
-                        Title = "Return",
-                        Description = "Returned to queue"
-                    });
+                    Handler.Message.Send(new ReturnException("Returned to queue"), true);
                 }
             }
         }

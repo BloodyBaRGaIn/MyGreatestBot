@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
@@ -15,19 +14,11 @@ namespace MyGreatestBot.Player
             }
             if (currentTrack == null)
             {
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Green,
-                    Title = "Nothing to resume"
-                });
+                throw new ResumeException("Nothing to resume");
             }
             else if (IsPlaying)
             {
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Green,
-                    Title = "Resumed"
-                });
+                Handler.Message.Send(new ResumeException("Resumed"), true);
             }
             else
             {

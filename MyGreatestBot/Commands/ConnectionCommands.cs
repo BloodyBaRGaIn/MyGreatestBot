@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Bot.Handlers;
@@ -68,12 +67,7 @@ namespace MyGreatestBot.Commands
 
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Blue,
-                    Title = "Reload",
-                    Description = "Reload success"
-                });
+                handler.Message.Send(new ReloadException("Reload success"), is_success: true);
             }
             else
             {

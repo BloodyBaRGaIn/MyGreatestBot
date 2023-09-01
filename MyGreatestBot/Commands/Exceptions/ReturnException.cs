@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class ReturnException : CommandExecutionException
+    public class ReturnException : CommandExecutionException
     {
-        internal override string Title => "Return";
+        public override string Title => "Return";
+        public override DiscordColor ExecutedColor => DiscordColor.Yellow;
+
         public ReturnException() : base() { }
         public ReturnException(string message) : base(message) { }
         public ReturnException(string message, Exception innerException) : base(message, innerException) { }

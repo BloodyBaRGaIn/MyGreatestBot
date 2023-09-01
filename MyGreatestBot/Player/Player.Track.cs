@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -10,17 +11,13 @@ namespace MyGreatestBot.Player
         {
             if (currentTrack != null)
             {
-                DiscordEmbedBuilder message = new()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Track"
-                };
                 lock (currentTrack)
                 {
-                    message.Description = currentTrack.GetMessage();
+                    DiscordEmbedBuilder message = new TrackInfoException(currentTrack.GetMessage("Current")).GetDiscordEmbed(true);
                     message.Thumbnail = currentTrack.GetThumbnail();
+
+                    Handler.Message.Send(message);
                 }
-                Handler.Message.Send(message);
             }
             else if (!IsPlaying)
             {
@@ -38,13 +35,10 @@ namespace MyGreatestBot.Player
             {
                 if (tracks_queue.TryPeek(out ITrackInfo? track))
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Purple,
-                        Title = "Next track",
-                        Description = track.GetMessage(),
-                        Thumbnail = track.GetThumbnail()
-                    });
+                    DiscordEmbedBuilder message = new TrackInfoException(track.GetMessage("Next")).GetDiscordEmbed(true);
+                    message.Thumbnail = track.GetThumbnail();
+
+                    Handler.Message.Send(message);
                 }
                 else
                 {

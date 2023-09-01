@@ -1,5 +1,5 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
@@ -47,13 +47,9 @@ namespace MyGreatestBot.Player
 
             if (!source.HasFlag(CommandActionSource.Mute))
             {
-                Handler.Message.Send(new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Purple,
-                    Title = "Play",
-                    Description = $"Added: {tracks.Count()}\n" +
-                                  $"Total: {totalCount}"
-                });
+                Handler.Message.Send(new PlayerException(
+                    $"Added: {tracks.Count()}\n" +
+                    $"Total: {totalCount}"), true);
             }
         }
     }

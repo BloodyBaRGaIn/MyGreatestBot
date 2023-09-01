@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class ClearException : CommandExecutionException
+    public class ClearException : CommandExecutionException
     {
-        internal override string Title => "Clear";
+        public override string Title => "Clear";
+        public override DiscordColor ExecutedColor => DiscordColor.Aquamarine;
+
         public ClearException() : base() { }
         public ClearException(string message) : base(message) { }
         public ClearException(string message, Exception innerException) : base(message, innerException) { }

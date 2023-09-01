@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class ShuffleException : CommandExecutionException
+    public class ShuffleException : CommandExecutionException
     {
-        internal override string Title => "Shuffle";
+        public override string Title => "Shuffle";
+        public override DiscordColor ExecutedColor => DiscordColor.Orange;
+
         public ShuffleException() : base() { }
         public ShuffleException(string message) : base(message) { }
         public ShuffleException(string message, Exception innerException) : base(message, innerException) { }

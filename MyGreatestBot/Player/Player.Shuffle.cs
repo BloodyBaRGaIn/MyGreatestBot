@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -32,12 +31,7 @@ namespace MyGreatestBot.Player
 
                 if (!mute)
                 {
-                    Handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Orange,
-                        Title = "Shuffle",
-                        Description = "Queue shuffled"
-                    });
+                    Handler.Message.Send(new ShuffleException("Queue shuffled"), true);
                 }
             }
             else

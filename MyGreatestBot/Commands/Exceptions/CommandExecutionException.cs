@@ -3,10 +3,11 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    internal class CommandExecutionException : Exception
+    public class CommandExecutionException : Exception
     {
-        internal virtual string Title => "Command error";
-        internal virtual DiscordColor Color => DiscordColor.Red;
+        public virtual string Title => "Command error";
+        public virtual DiscordColor ErroredColor => DiscordColor.Red;
+        public virtual DiscordColor ExecutedColor => DiscordColor.White;
 
         public CommandExecutionException() : base("Exception was thrown") { }
         public CommandExecutionException(string message) : base(message) { }
