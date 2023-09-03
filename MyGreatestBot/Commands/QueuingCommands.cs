@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
 {
-    [Category(CommandStrings.EnqueueCategoryName)]
+    [Category(CommandStrings.QueuingCategoryName)]
     [SupportedOSPlatform("windows")]
     internal class QueuingCommands : BaseCommandModule
     {

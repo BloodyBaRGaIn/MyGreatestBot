@@ -4,49 +4,49 @@ Commands are organized into categories for better readability
 
 ## Connection commands
 
-- <pre>join (j) - Join voice channel</pre>
-- <pre>leave (l) - Leave voice channel</pre>
-- <pre>reload - Reload failed APIs</pre>
-- <pre>logout (exit, quit, bye, bb, b) - Logout and exit</pre>
+- ```join (j) - Join voice channel<```
+- ```leave (l) - Leave voice channel<```
+- ```reload - Reload failed APIs<```
+- ```logout (exit, quit, bye, bb, b) - Logout and exit<```
 
-## Enqueue commands
+## Queuing commands
 
-- <pre>play (p) - Add tracks</pre>
+- ```play (p) - Add tracks<```
     Arguments:
-    - <pre>query (String) - URL</pre>
-- <pre>playshuffled (psh) - Add shuffled tracks</pre>
+    - ```query (String) - URL```
+- ```playshuffled (psh) - Add shuffled tracks<```
     Arguments:
-    - <pre>query (String) - URL</pre>
-- <pre>tms (t) - Place query result to the head</pre>
+    - ```query (String) - URL```
+- ```tms (t) - Place query result to the head<```
     Arguments:
-    - <pre>query (String) - URL</pre>
+    - ```query (String) - URL```
 
 ## Playback commands
 
-- <pre>pause (ps) - Pause</pre>
-- <pre>resume (rs) - Resume</pre>
-- <pre>stop (st) - Stop</pre>
-- <pre>skip (s) - Skip</pre>
+- ```pause (ps) - Pause<```
+- ```resume (rs) - Resume<```
+- ```stop (st) - Stop<```
+- ```skip (s) - Skip<```
     Arguments:
-    - <pre>number (Int32) - Number of tracks to skip (optional)</pre>
-- <pre>count (cnt, cn) - Get queue length</pre>
-- <pre>clear (clr, cl, c) - Clear the queue</pre>
-- <pre>shuffle (sh) - Shuffle queue</pre>
-- <pre>seek (sk) - Seek current track</pre>
+    - ```number (Int32) - Number of tracks to skip (optional)```
+- ```count (cnt, cn) - Get queue length<```
+- ```clear (clr, cl, c) - Clear the queue<```
+- ```shuffle (sh) - Shuffle queue<```
+- ```seek (sk) - Seek current track<```
     Arguments:
-    - <pre>timespan (String) - Timespan in format HH:MM:SS or MM:SS</pre>
-- <pre>return (rt) - Return track to queue</pre>
-- <pre>currenttrack (track, tr) - Get current track</pre>
-- <pre>nexttrack (next, ntr, nex) - Get next track</pre>
-- <pre>ignore (it, i) - Ignore current track</pre>
-- <pre>ignoreartist (ia) - Ignore current track artist</pre>
+    - ```timespan (String) - Timespan in format HH:MM:SS or MM:SS```
+- ```return (rt) - Return track to queue<```
+- ```currenttrack (track, tr) - Get current track<```
+- ```nexttrack (next, ntr, nex) - Get next track<```
+- ```ignore (it, i) - Ignore current track<```
+- ```ignoreartist (ia) - Ignore current track artist<```
     Arguments:
-    - <pre>artist_index (Int32) - Artist zero-based index (optional)</pre>
+    - ```artist_index (Int32) - Artist zero-based index (optional)```
 
 ## Debug commands
 
-- <pre>test - Get "Hello World" response message</pre>
-- <pre>name - Get origin bot name</pre>
-- <pre>help (h) - Get help</pre>
+- ```test - Get "Hello World" response message<```
+- ```name - Get origin bot name<```
+- ```help (h) - Get help<```
     Arguments:
-    - <pre>command (String) - Command name (optional)</pre>
+    - ```command (String) - Command name (optional)```

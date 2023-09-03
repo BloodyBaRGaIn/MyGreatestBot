@@ -36,7 +36,7 @@ namespace MyGreatestBot.Commands.Utils
 
                 foreach (var command in category)
                 {
-                    streamWriter.Write($"- <pre>{command.Name}");
+                    streamWriter.Write($"- ```{command.Name}");
                     if (command.Aliases.Any())
                     {
                         streamWriter.Write($" ({string.Join(", ", command.Aliases)})");
@@ -47,7 +47,7 @@ namespace MyGreatestBot.Commands.Utils
                         streamWriter.Write($" - {command.Description}");
                     }
 
-                    streamWriter.Write("</pre>\r\n");
+                    streamWriter.Write("<```\r\n");
 
                     CommandOverload overload = command.Overloads[0];
                     if (overload.Arguments.Any())
@@ -57,7 +57,7 @@ namespace MyGreatestBot.Commands.Utils
 
                     foreach (var argument in overload.Arguments)
                     {
-                        streamWriter.Write($"    - <pre>{argument.Name} ({argument.Type.Name})");
+                        streamWriter.Write($"    - ```{argument.Name} ({argument.Type.Name})");
                         if (!string.IsNullOrWhiteSpace(argument.Description))
                         {
                             streamWriter.Write($" - {argument.Description}");
@@ -66,7 +66,7 @@ namespace MyGreatestBot.Commands.Utils
                         {
                             streamWriter.Write(" (optional)");
                         }
-                        streamWriter.Write("</pre>\r\n");
+                        streamWriter.Write("```\r\n");
                     }
                 }
             }
