@@ -12,7 +12,7 @@ namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.EnqueueCategoryName)]
     [SupportedOSPlatform("windows")]
-    internal class EnqueueCommands : BaseCommandModule
+    internal class QueuingCommands : BaseCommandModule
     {
         private static async Task<IEnumerable<ITrackInfo>> GetTracks(CommandContext ctx, ConnectionHandler handler, string query)
         {

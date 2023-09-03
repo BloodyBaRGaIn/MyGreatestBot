@@ -92,12 +92,14 @@ namespace MyGreatestBot.Bot
 
                 Commands.SetHelpFormatter<CustomHelpFormatter>();
                 Commands.RegisterCommands<ConnectionCommands>();
-                Commands.RegisterCommands<EnqueueCommands>();
+                Commands.RegisterCommands<QueuingCommands>();
                 Commands.RegisterCommands<PlaybackCommands>();
                 Commands.RegisterCommands<DebugCommands>();
 
                 Commands.CommandErrored += Commands_CommandErrored;
                 Commands.CommandExecuted += Commands_CommandExecuted;
+
+                MarkdownWriter.GenerateFile();
 
                 if (!Client.ConnectAsync().Wait(connection_timeout))
                 {

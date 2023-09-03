@@ -16,5 +16,14 @@
             string result = NickBuhro.Translit.Transliteration.CyrillicToLatin(input);
             return has_quotes ? result : result.Replace("`", "");
         }
+
+        public static string FirstCharToUpper(this string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+            return $"{char.ToUpperInvariant(input[0])}{input[1..]}";
+        }
     }
 }

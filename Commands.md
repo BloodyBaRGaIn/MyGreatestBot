@@ -2,14 +2,14 @@
 
 Commands are organized into categories for better readability
 
-## Connection category
+## Connection commands
 
 - <pre>join (j) - Join voice channel</pre>
 - <pre>leave (l) - Leave voice channel</pre>
 - <pre>reload - Reload failed APIs</pre>
 - <pre>logout (exit, quit, bye, bb, b) - Logout and exit</pre>
 
-## Queuing commands
+## Enqueue commands
 
 - <pre>play (p) - Add tracks</pre>
     Arguments:
@@ -43,10 +43,10 @@ Commands are organized into categories for better readability
     Arguments:
     - <pre>artist_index (Int32) - Artist zero-based index (optional)</pre>
 
-## Debug category
+## Debug commands
 
 - <pre>test - Get "Hello World" response message</pre>
-- <pre>name - Get the bot client display name</pre>
+- <pre>name - Get origin bot name</pre>
 - <pre>help (h) - Get help</pre>
     Arguments:
     - <pre>command (String) - Command name (optional)</pre>

@@ -1,14 +1,11 @@
 ﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
+using MyGreatestBot.Extensions;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Commands.Utils
@@ -46,10 +43,11 @@ namespace MyGreatestBot.Commands.Utils
 
         private CustomHelpFormatter WithSubcommands(IEnumerable<Command> cmds, string categoryName)
         {
-            if (!string.IsNullOrWhiteSpace(categoryName))
+            if (string.IsNullOrWhiteSpace(categoryName))
             {
-                _ = _embed.AddField(categoryName, string.Empty.PadLeft(categoryName.Length, '#'));
+                categoryName = "Unnamed";
             }
+            _ = _embed.AddField(categoryName.FirstCharToUpper(), "Commands:");
 
             return WithSubcommands(cmds);
         }
@@ -62,7 +60,7 @@ namespace MyGreatestBot.Commands.Utils
             }
 
             foreach (IGrouping<string, Command> category in BotWrapper.Commands.RegisteredCommands.Values
-                .GroupBy(c => (c.Category ?? string.Empty).ToUpperInvariant()))
+                .GroupBy(c => c.Category ?? string.Empty))
             {
                 yield return new CustomHelpFormatter(ctx).WithSubcommands(category.DistinctBy(c => c.Name.ToLowerInvariant()), category.Key);
             }
@@ -73,63 +71,38 @@ namespace MyGreatestBot.Commands.Utils
             return new CommandHelpMessage(embed: _embed);
         }
 
-        private void AddField(Command cmd)
+        private void AddField(Command command)
         {
-            string title = cmd.Name;
-            List<string> arguments = new();
+            string title = command.Name;
+            string content = string.Empty;
 
-            if (cmd.Module != null)
+            if (command.Aliases.Any())
             {
-                IEnumerable<ParameterInfo> parameters = cmd.Module.GetInstance(BotWrapper.ServiceProvider)
-                    .GetType().GetMethods().FirstOrDefault(m =>
-                        m.CustomAttributes.FirstOrDefault(a =>
-                            a.AttributeType == typeof(CommandAttribute))?.ConstructorArguments?.Any(c =>
-                                c.Value?.ToString() == cmd.Name) ?? false)?.GetParameters()
-                    ?? Enumerable.Empty<ParameterInfo>();
+                title += $" ({string.Join(", ", command.Aliases)})";
+            }
 
-                int contextParameterCount = parameters.Count(p => p.ParameterType == typeof(CommandContext));
-                if (contextParameterCount == 1 && parameters.Count() - contextParameterCount > 0)
+            if (!string.IsNullOrWhiteSpace(command.Description))
+            {
+                content += $"{command.Description}";
+            }
+
+            CommandOverload overload = command.Overloads[0];
+            if (overload.Arguments.Any())
+            {
+                content += "\r\n**Arguments:**";
+            }
+
+            foreach (var argument in overload.Arguments)
+            {
+                content += $"\r\n{argument.Name} ({argument.Type.Name})";
+                if (!string.IsNullOrWhiteSpace(argument.Description))
                 {
-                    IEnumerable<ParameterInfo> argument_parameters = parameters
-                        .Where(p =>
-                            p != null
-                            && p.ParameterType != typeof(CommandContext)
-                            && !string.IsNullOrWhiteSpace(p.Name));
-
-                    foreach (ParameterInfo parameter in argument_parameters)
-                    {
-                        CustomAttributeData? descriptionAttribute = parameter.CustomAttributes
-                            .FirstOrDefault(a => a.AttributeType == typeof(DescriptionAttribute) && a.ConstructorArguments.Any());
-
-                        string? description = descriptionAttribute?.ConstructorArguments.FirstOrDefault().Value?.ToString();
-                        string fullParameter = $"{parameter.Name} ({parameter.ParameterType.Name})";
-
-                        if (!string.IsNullOrWhiteSpace(description))
-                        {
-                            fullParameter += $" - {description}";
-                        }
-
-                        if (parameter.CustomAttributes.Any(a => a.AttributeType == typeof(OptionalAttribute)
-                            || a.AttributeType == typeof(AllowNullAttribute)))
-                        {
-                            fullParameter += " (*optional*)";
-                        }
-
-                        arguments.Add(fullParameter);
-                    }
+                    content += $" - {argument.Description}";
                 }
-            }
-
-            if (cmd.Aliases != null && cmd.Aliases.Any())
-            {
-                title += $" ({string.Join(", ", cmd.Aliases)})";
-            }
-
-            string content = cmd.Description ?? string.Empty;
-
-            if (arguments.Any())
-            {
-                content += $"{(string.IsNullOrWhiteSpace(content) ? "**Arguments:**\n" : "\n**Arguments:**\n")}{string.Join("\n", arguments)}";
+                if (argument.IsOptional)
+                {
+                    content += " (*optional*)";
+                }
             }
 
             _ = _embed.AddField(title, content);
