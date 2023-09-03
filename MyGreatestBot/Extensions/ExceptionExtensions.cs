@@ -55,24 +55,21 @@ namespace MyGreatestBot.Extensions
             return $"({new System.IO.FileInfo(name).Name} : {line})";
         }
 
-        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)
+        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception, bool is_executed_successfully = false)
         {
-            return new DiscordEmbedBuilder()
-            {
-                Color = DiscordColor.Red,
-                Title = exception.GetType().Name,
-                Description = exception.Message
-            };
-        }
-
-        public static DiscordEmbedBuilder GetDiscordEmbed(this CommandExecutionException exception, bool is_executed_successfully)
-        {
-            return new DiscordEmbedBuilder()
-            {
-                Color = is_executed_successfully ? exception.ExecutedColor : exception.ErroredColor,
-                Title = exception.Title,
-                Description = exception.Message
-            };
+            return exception is CommandExecutionException cmd
+                ? new DiscordEmbedBuilder()
+                {
+                    Color = is_executed_successfully ? cmd.ExecutedColor : cmd.ErroredColor,
+                    Title = cmd.Title,
+                    Description = exception.Message
+                }
+                : new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.Red,
+                    Title = exception.GetType().Name,
+                    Description = exception.Message
+                };
         }
     }
 }

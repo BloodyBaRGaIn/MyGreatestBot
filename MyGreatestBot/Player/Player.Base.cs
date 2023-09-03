@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
-    internal partial class Player
+    internal sealed partial class Player
     {
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;

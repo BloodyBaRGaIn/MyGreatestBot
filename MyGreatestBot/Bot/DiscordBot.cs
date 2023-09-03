@@ -15,6 +15,7 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Bot
@@ -91,7 +92,8 @@ namespace MyGreatestBot.Bot
 
                 Commands.SetHelpFormatter<CustomHelpFormatter>();
                 Commands.RegisterCommands<ConnectionCommands>();
-                Commands.RegisterCommands<PlayerCommands>();
+                Commands.RegisterCommands<EnqueueCommands>();
+                Commands.RegisterCommands<PlaybackCommands>();
                 Commands.RegisterCommands<DebugCommands>();
 
                 Commands.CommandErrored += Commands_CommandErrored;
@@ -124,7 +126,7 @@ namespace MyGreatestBot.Bot
             {
                 try
                 {
-                    await Task.Delay(1);
+                    await Task.Delay(Timeout.Infinite);
                 }
                 catch
                 {
@@ -203,16 +205,14 @@ namespace MyGreatestBot.Bot
             CommandsNextExtension sender,
             CommandErrorEventArgs args)
         {
-            BotWrapper.LastError = args.Exception;
-
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
             if (handler != null)
             {
                 await handler.LogError.SendAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
                     $"Command errored{Environment.NewLine}" +
-                    $"{BotWrapper.LastError.GetExtendedMessage()}");
+                    $"{args.Exception.GetExtendedMessage()}");
 
-                handler.Message.Send(BotWrapper.LastError);
+                handler.Message.Send(args.Exception);
             }
         }
     }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void RequestSeek(TimeSpan span, CommandActionSource source)
         {
@@ -24,10 +24,7 @@ namespace MyGreatestBot.Player
 
                     if (!mute)
                     {
-                        DiscordEmbedBuilder message = new SeekException(currentTrack.GetMessage("Playing")).GetDiscordEmbed(true);
-                        message.Thumbnail = currentTrack.GetThumbnail();
-
-                        Handler.Message.Send(message);
+                        Handler.Message.Send(GetPlayingMessage<SeekException>(currentTrack, "Playing"));
                     }
 
                     Task.Yield().GetAwaiter().GetResult();

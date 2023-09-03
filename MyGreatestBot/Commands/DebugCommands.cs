@@ -3,7 +3,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -64,20 +63,6 @@ namespace MyGreatestBot.Commands
             }
 
             _ = await ctx.Channel.SendMessageAsync(_embed);
-        }
-
-        [Command("lasterror")]
-        [Aliases("error")]
-        [Description("Get last command exception message")]
-        [Category(CommandStrings.DebugCategoryName)]
-        [SuppressMessage("Performance", "CA1822")]
-        public async Task GetLastErrorCommand(CommandContext ctx)
-        {
-            string message = BotWrapper.LastError.GetExtendedMessage();
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                _ = await ctx.Channel.SendMessageAsync(message);
-            }
         }
 
         [Command(CommandStrings.HelpCommandName)]

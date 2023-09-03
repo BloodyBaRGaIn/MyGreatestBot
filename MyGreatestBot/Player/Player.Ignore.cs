@@ -9,7 +9,7 @@ using System.Runtime.Versioning;
 namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void IgnoreTrack(CommandActionSource source)
         {

@@ -3,7 +3,7 @@ using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void Pause(CommandActionSource source)
         {

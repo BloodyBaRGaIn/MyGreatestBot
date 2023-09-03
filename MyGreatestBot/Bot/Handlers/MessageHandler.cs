@@ -43,14 +43,9 @@ namespace MyGreatestBot.Bot.Handlers
             }
         }
 
-        public void Send(CommandExecutionException exception, bool is_success = false)
+        public void Send(Exception exception, bool is_success = false)
         {
             Send(exception.GetDiscordEmbed(is_success));
-        }
-
-        public void Send(Exception exception)
-        {
-            Send(exception.GetDiscordEmbed());
         }
 
         public void Send(string message)

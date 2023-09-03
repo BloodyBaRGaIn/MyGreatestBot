@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void Enqueue(IEnumerable<ITrackInfo> tracks, CommandActionSource source)
         {
@@ -33,6 +33,8 @@ namespace MyGreatestBot.Player
                         tracks_queue.Enqueue(collection[0]);
                         collection.RemoveAt(0);
                     }
+
+                    Skip(0, source | CommandActionSource.Mute);
                 }
                 else
                 {
@@ -43,13 +45,13 @@ namespace MyGreatestBot.Player
                 }
 
                 totalCount = tracks_queue.Count;
-            }
 
-            if (!source.HasFlag(CommandActionSource.Mute))
-            {
-                Handler.Message.Send(new PlayerException(
-                    $"Added: {tracks.Count()}\n" +
-                    $"Total: {totalCount}"), true);
+                if (!source.HasFlag(CommandActionSource.Mute))
+                {
+                    Handler.Message.Send(new PlayerException(
+                        $"Added: {tracks.Count()}\n" +
+                        $"Total: {totalCount}"), true);
+                }
             }
         }
     }

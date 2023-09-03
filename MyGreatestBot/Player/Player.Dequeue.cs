@@ -1,14 +1,12 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
-using MyGreatestBot.Extensions;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player
 {
     [SupportedOSPlatform("windows")]
-    internal partial class Player
+    internal sealed partial class Player
     {
         private void Dequeue()
         {
@@ -20,10 +18,7 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                DiscordEmbedBuilder message = new PlayerException(track.GetMessage("Playing")).GetDiscordEmbed(true);
-                message.Thumbnail = track.GetThumbnail();
-
-                Handler.Message.Send(message);
+                Handler.Message.Send(GetPlayingMessage<PlayerException>(track, "Playing"));
 
                 if (SqlServerWrapper.IsAnyArtistIgnored(track))
                 {

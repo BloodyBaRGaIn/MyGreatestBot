@@ -5,7 +5,7 @@ using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void GetCurrentTrackInfo()
         {
@@ -13,10 +13,7 @@ namespace MyGreatestBot.Player
             {
                 lock (currentTrack)
                 {
-                    DiscordEmbedBuilder message = new TrackInfoException(currentTrack.GetMessage("Current")).GetDiscordEmbed(true);
-                    message.Thumbnail = currentTrack.GetThumbnail();
-
-                    Handler.Message.Send(message);
+                    Handler.Message.Send(GetPlayingMessage<TrackInfoException>(currentTrack, "Current"));
                 }
             }
             else if (!IsPlaying)
@@ -35,10 +32,7 @@ namespace MyGreatestBot.Player
             {
                 if (tracks_queue.TryPeek(out ITrackInfo? track))
                 {
-                    DiscordEmbedBuilder message = new TrackInfoException(track.GetMessage("Next")).GetDiscordEmbed(true);
-                    message.Thumbnail = track.GetThumbnail();
-
-                    Handler.Message.Send(message);
+                    Handler.Message.Send(GetPlayingMessage<TrackInfoException>(track, "Next"));
                 }
                 else
                 {

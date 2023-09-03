@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
         internal void Stop(CommandActionSource source)
         {

@@ -6,9 +6,9 @@ using System.IO;
 
 namespace MyGreatestBot.Player
 {
-    internal partial class Player
+    internal sealed partial class Player
     {
-        private class FFMPEG
+        private sealed class FFMPEG
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
 

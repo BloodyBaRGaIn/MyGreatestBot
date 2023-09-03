@@ -19,8 +19,6 @@ namespace MyGreatestBot.Bot
         public static VoiceNextExtension VoiceNext => BotInstance.Voice;
         [AllowNull]
         public static CommandsNextExtension Commands => BotInstance.Commands;
-        [AllowNull]
-        public static Exception LastError { get; set; }
 
         public static void Run(int connection_timeout)
         {
