@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -89,12 +90,12 @@ namespace MyGreatestBot.Commands.Utils
             CommandOverload overload = command.Overloads[0];
             if (overload.Arguments.Any())
             {
-                content += "\r\n**Arguments:**";
+                content += $"{Environment.NewLine}**Arguments:**";
             }
 
             foreach (var argument in overload.Arguments)
             {
-                content += $"\r\n{argument.Name} ({argument.Type.Name})";
+                content += $"{Environment.NewLine}{argument.Name} ({argument.Type.Name})";
                 if (!string.IsNullOrWhiteSpace(argument.Description))
                 {
                     content += $" - {argument.Description}";

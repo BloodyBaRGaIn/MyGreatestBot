@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class SkipException : CommandExecutionException
+    public sealed class SkipException : CommandExecutionException
     {
         public override string Title => "Skip";
         public override DiscordColor ExecutedColor => DiscordColor.Blue;

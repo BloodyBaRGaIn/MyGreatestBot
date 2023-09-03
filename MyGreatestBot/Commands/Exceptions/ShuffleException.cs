@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class ShuffleException : CommandExecutionException
+    public sealed class ShuffleException : CommandExecutionException
     {
         public override string Title => "Shuffle";
         public override DiscordColor ExecutedColor => DiscordColor.Orange;

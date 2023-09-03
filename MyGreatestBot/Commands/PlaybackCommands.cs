@@ -17,7 +17,7 @@ namespace MyGreatestBot.Commands
     {
         [Command("pause")]
         [Aliases("ps")]
-        [Description("Pause")]
+        [Description("Pause playback")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task PauseCommand(CommandContext ctx)
         {
@@ -36,7 +36,7 @@ namespace MyGreatestBot.Commands
 
         [Command("resume")]
         [Aliases("rs")]
-        [Description("Resume")]
+        [Description("Resume playback")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task ResumeCommand(CommandContext ctx)
         {
@@ -55,7 +55,7 @@ namespace MyGreatestBot.Commands
 
         [Command("stop")]
         [Aliases("st")]
-        [Description("Stop")]
+        [Description("Stop playback")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task StopCommand(CommandContext ctx)
         {
@@ -74,7 +74,7 @@ namespace MyGreatestBot.Commands
 
         [Command("skip")]
         [Aliases("s")]
-        [Description("Skip")]
+        [Description("Skip current track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task SkipCommand(
             CommandContext ctx,
@@ -100,7 +100,7 @@ namespace MyGreatestBot.Commands
 
         [Command("count")]
         [Aliases("cnt", "cn")]
-        [Description("Get queue length")]
+        [Description("Get the number of tracks in the queue")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task CountCommand(CommandContext ctx)
         {
@@ -119,7 +119,7 @@ namespace MyGreatestBot.Commands
 
         [Command("clear")]
         [Aliases("clr", "cl", "c")]
-        [Description("Clear the queue")]
+        [Description("Clear track queue")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task ClearCommand(CommandContext ctx)
         {
@@ -157,7 +157,7 @@ namespace MyGreatestBot.Commands
 
         [Command("seek")]
         [Aliases("sk")]
-        [Description("Seek current track")]
+        [Description("Seek audio stream")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(
             CommandContext ctx,
@@ -202,7 +202,7 @@ namespace MyGreatestBot.Commands
 
         [Command("return")]
         [Aliases("rt")]
-        [Description("Return track to queue")]
+        [Description("Return the track to the queue")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task ReturnCommand(CommandContext ctx)
         {
@@ -222,7 +222,7 @@ namespace MyGreatestBot.Commands
 
         [Command("currenttrack")]
         [Aliases("track", "tr")]
-        [Description("Get current track")]
+        [Description("Get information about the current track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task TrackInfoCommand(CommandContext ctx)
         {
@@ -241,7 +241,7 @@ namespace MyGreatestBot.Commands
 
         [Command("nexttrack")]
         [Aliases("next", "ntr", "nex")]
-        [Description("Get next track")]
+        [Description("Get information about the next track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NextTrackInfoCommand(CommandContext ctx)
         {

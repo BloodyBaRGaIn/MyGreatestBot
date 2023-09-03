@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class TrackInfoException : CommandExecutionException
+    public sealed class TrackInfoException : CommandExecutionException
     {
         public override string Title => "Track info";
         public override DiscordColor ExecutedColor => DiscordColor.Purple;

@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using MyGreatestBot.Bot;
 using MyGreatestBot.Extensions;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -15,7 +16,8 @@ namespace MyGreatestBot.Commands.Utils
             using FileStream markdown = File.Open(FilePath, FileMode.Create, FileAccess.Write);
             using StreamWriter streamWriter = new(markdown);
 
-            streamWriter.Write("# Commands\r\n\r\nCommands are organized into categories for better readability\r\n");
+            streamWriter.Write($"# Commands{Environment.NewLine}{Environment.NewLine}");
+            streamWriter.Write($"Commands are organized into categories for better readability{Environment.NewLine}");
 
             if (BotWrapper.Commands == null)
             {
@@ -32,7 +34,7 @@ namespace MyGreatestBot.Commands.Utils
                     categoryName = "Unnamed";
                 }
                 categoryName = categoryName.FirstCharToUpper();
-                streamWriter.Write($"\r\n## {categoryName} commands\r\n\r\n");
+                streamWriter.Write($"{Environment.NewLine}## {categoryName} commands{Environment.NewLine}{Environment.NewLine}");
 
                 foreach (var command in category)
                 {
@@ -47,12 +49,12 @@ namespace MyGreatestBot.Commands.Utils
                         streamWriter.Write($" - {command.Description}");
                     }
 
-                    streamWriter.Write("<```\r\n");
+                    streamWriter.Write($"```{Environment.NewLine}");
 
                     CommandOverload overload = command.Overloads[0];
                     if (overload.Arguments.Any())
                     {
-                        streamWriter.Write("    Arguments:\r\n");
+                        streamWriter.Write($"    Arguments:{Environment.NewLine}");
                     }
 
                     foreach (var argument in overload.Arguments)
@@ -66,7 +68,7 @@ namespace MyGreatestBot.Commands.Utils
                         {
                             streamWriter.Write(" (optional)");
                         }
-                        streamWriter.Write("```\r\n");
+                        streamWriter.Write($"```{Environment.NewLine}");
                     }
                 }
             }

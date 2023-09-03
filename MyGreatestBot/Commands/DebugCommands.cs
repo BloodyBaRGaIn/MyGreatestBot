@@ -30,7 +30,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("name")]
-        [Description("Get origin bot name")]
+        [Description("Get the display name of the bot")]
         [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)

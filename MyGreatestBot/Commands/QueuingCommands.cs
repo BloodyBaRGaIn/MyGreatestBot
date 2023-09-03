@@ -31,7 +31,7 @@ namespace MyGreatestBot.Commands
 
         [Command("play")]
         [Aliases("p")]
-        [Description("Add tracks")]
+        [Description("Add tracks to the queue")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task PlayCommand(
             CommandContext ctx,
@@ -45,12 +45,13 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
+                CommandActionSource.Command));
         }
 
         [Command("playshuffled")]
         [Aliases("psh")]
-        [Description("Add shuffled tracks")]
+        [Description("Add shuffled tracks to the queue")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task PlayShuffledCommand(
             CommandContext ctx,
@@ -64,12 +65,13 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command | CommandActionSource.PlayerShuffle));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
+                CommandActionSource.Command | CommandActionSource.PlayerShuffle));
         }
 
         [Command("tms")]
         [Aliases("t")]
-        [Description("Place query result to the head")]
+        [Description("Play the track immediatly")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(
             CommandContext ctx,
@@ -83,7 +85,8 @@ namespace MyGreatestBot.Commands
 
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, CommandActionSource.Command | CommandActionSource.PlayerToHead));
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
+                CommandActionSource.Command | CommandActionSource.PlayerToHead));
         }
     }
 }

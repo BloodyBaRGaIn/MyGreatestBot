@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class IgnoreException : CommandExecutionException
+    public sealed class IgnoreException : CommandExecutionException
     {
         public override string Title => "Ignore";
         public override DiscordColor ExecutedColor => DiscordColor.Yellow;

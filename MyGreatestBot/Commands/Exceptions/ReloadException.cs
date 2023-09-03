@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class ReloadException : CommandExecutionException
+    public sealed class ReloadException : CommandExecutionException
     {
         public override string Title => "Reload";
         public override DiscordColor ExecutedColor => DiscordColor.Blue;

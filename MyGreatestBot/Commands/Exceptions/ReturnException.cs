@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class ReturnException : CommandExecutionException
+    public sealed class ReturnException : CommandExecutionException
     {
         public override string Title => "Return";
         public override DiscordColor ExecutedColor => DiscordColor.Yellow;

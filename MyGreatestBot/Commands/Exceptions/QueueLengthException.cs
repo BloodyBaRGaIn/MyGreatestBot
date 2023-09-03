@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class QueueLengthException : CommandExecutionException
+    public sealed class QueueLengthException : CommandExecutionException
     {
         public override string Title => "Count";
         public override DiscordColor ExecutedColor => DiscordColor.Purple;

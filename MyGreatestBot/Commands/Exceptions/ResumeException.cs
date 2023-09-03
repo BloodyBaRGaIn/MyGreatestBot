@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class ResumeException : CommandExecutionException
+    public sealed class ResumeException : CommandExecutionException
     {
         public override string Title => "Resume";
         public override DiscordColor ExecutedColor => DiscordColor.Green;

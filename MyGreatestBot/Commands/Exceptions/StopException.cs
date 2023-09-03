@@ -3,7 +3,7 @@ using System;
 
 namespace MyGreatestBot.Commands.Exceptions
 {
-    public class StopException : CommandExecutionException
+    public sealed class StopException : CommandExecutionException
     {
         public override string Title => "Stop";
         public override DiscordColor ExecutedColor => DiscordColor.Black;
