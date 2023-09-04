@@ -22,11 +22,7 @@ namespace MyGreatestBot.Player
                         collection.Add(tracks_queue.Dequeue());
                     }
                     collection = collection.Shuffle().ToList();
-                    while (collection.Any())
-                    {
-                        tracks_queue.Enqueue(collection[0]);
-                        collection.RemoveAt(0);
-                    }
+                    tracks_queue.EnqueueRange(collection);
                 }
 
                 if (!mute)

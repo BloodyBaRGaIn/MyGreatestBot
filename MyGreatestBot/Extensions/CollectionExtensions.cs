@@ -23,5 +23,30 @@ namespace MyGreatestBot.Extensions
                 yield return value;
             }
         }
+
+        public static void EnqueueRangeToHead<T>(this Queue<T> queue, IEnumerable<T> items)
+        {
+            List<T> head = new();
+            head.AddRange(items);
+            while (queue.Any())
+            {
+                head.Add(queue.Dequeue());
+            }
+
+            queue.EnqueueRange(head);
+        }
+
+        public static void EnqueueToHead<T>(this Queue<T> queue, T item)
+        {
+            queue.EnqueueRangeToHead(new[] { item });
+        }
+
+        public static void EnqueueRange<T>(this Queue<T> queue, IEnumerable<T> items)
+        {
+            foreach (T item in items)
+            {
+                queue.Enqueue(item);
+            }
+        }
     }
 }

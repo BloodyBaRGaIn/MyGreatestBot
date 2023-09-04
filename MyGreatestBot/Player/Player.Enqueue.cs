@@ -22,26 +22,12 @@ namespace MyGreatestBot.Player
 
                 if (source.HasFlag(CommandActionSource.PlayerToHead))
                 {
-                    List<ITrackInfo> collection = new();
-                    collection.AddRange(tracks);
-                    while (tracks_queue.Any())
-                    {
-                        collection.Add(tracks_queue.Dequeue());
-                    }
-                    while (collection.Any())
-                    {
-                        tracks_queue.Enqueue(collection[0]);
-                        collection.RemoveAt(0);
-                    }
-
-                    Skip(0, source | CommandActionSource.Mute);
+                    ReturnCurrentTrackToQueue(source | CommandActionSource.Mute);
+                    tracks_queue.EnqueueRangeToHead(tracks);
                 }
                 else
                 {
-                    foreach (ITrackInfo track in tracks)
-                    {
-                        tracks_queue.Enqueue(track);
-                    }
+                    tracks_queue.EnqueueRange(tracks);
                 }
 
                 totalCount = tracks_queue.Count;

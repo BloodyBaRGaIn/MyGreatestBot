@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
 
 namespace MyGreatestBot.Player
@@ -22,8 +23,15 @@ namespace MyGreatestBot.Player
             {
                 lock (currentTrack)
                 {
-                    currentTrack.PerformSeek(TimeSpan.Zero);
-                    tracks_queue.Enqueue(currentTrack);
+                    if (source.HasFlag(CommandActionSource.PlayerToHead))
+                    {
+                        tracks_queue.EnqueueToHead(currentTrack);
+                    }
+                    else
+                    {
+                        currentTrack.PerformSeek(TimeSpan.Zero);
+                        tracks_queue.Enqueue(currentTrack);
+                    }
                 }
 
                 IsPlaying = false;

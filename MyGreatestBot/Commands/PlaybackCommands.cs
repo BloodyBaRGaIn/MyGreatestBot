@@ -174,8 +174,8 @@ namespace MyGreatestBot.Commands
 
             string[] formats = new[]
             {
-                "HH:mm:ss",
-                "mm:ss"
+                "mm:ss",
+                "HH:mm:ss"
             };
 
             TimeSpan time = TimeSpan.MinValue;

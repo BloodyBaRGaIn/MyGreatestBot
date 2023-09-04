@@ -49,7 +49,7 @@ namespace MyGreatestBot.Commands.Utils
                         streamWriter.Write($" - {command.Description}");
                     }
 
-                    streamWriter.Write($"```{Environment.NewLine}");
+                    streamWriter.Write($"```  {Environment.NewLine}");
 
                     CommandOverload overload = command.Overloads[0];
                     if (overload.Arguments.Any())
@@ -68,7 +68,7 @@ namespace MyGreatestBot.Commands.Utils
                         {
                             streamWriter.Write(" (optional)");
                         }
-                        streamWriter.Write($"```{Environment.NewLine}");
+                        streamWriter.Write($"```  {Environment.NewLine}");
                     }
                 }
             }
