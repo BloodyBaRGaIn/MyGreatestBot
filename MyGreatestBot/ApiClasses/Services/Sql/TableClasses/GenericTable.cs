@@ -3,9 +3,9 @@ using System;
 
 namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
 {
-    internal class GenericIgnoredTable : BaseTableProvider
+    internal class GenericTable : BaseTableProvider
     {
-        internal GenericIgnoredTable(string name, string database) : base(name, database)
+        internal GenericTable(string name, string database) : base(name, database)
         {
 
         }
@@ -39,13 +39,33 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
             return createTableString;
         }
 
+        internal override SqlCommand GetSelectQuery(SqlConnection? connection = null)
+        {
+            SqlCommand command = new($"SELECT Type, ID FROM {Name}")
+            {
+                Connection = connection
+            };
+
+            return command;
+        }
+
+        internal override SqlCommand GetDeleteQuery(SqlConnection? connection = null)
+        {
+            SqlCommand command = new($"DELETE FROM {Name}")
+            {
+                Connection = connection
+            };
+
+            return command;
+        }
+
         /// <summary>
         /// Select where
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="params">Type, ID</param>
         /// <returns>Connamd to execute</returns>
-        internal override SqlCommand GetSelectQuery(SqlConnection? connection = null, params object[] @params)
+        internal override SqlCommand GetSelectWhereQuery(SqlConnection? connection = null, params object[] @params)
         {
             if (@params.Length != 2)
             {

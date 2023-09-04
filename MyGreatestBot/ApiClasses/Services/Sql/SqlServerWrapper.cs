@@ -20,6 +20,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         private static readonly IgnoredTracksTable IgnoredTracks;
         private static readonly IgnoredArtistsTable IgnoredArtists;
+        private static readonly TrackInfoTable TrackInfo;
 
         private static SqlDatabaseConfigJSON config;
 
@@ -44,6 +45,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
                 IgnoredTracks = new(config.DatabaseName);
                 IgnoredArtists = new(config.DatabaseName);
+                TrackInfo = new(config.DatabaseName);
             }
             catch (Exception ex)
             {
@@ -99,6 +101,32 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             return IsTrackIgnored((int)track.TrackType, track.Id);
         }
 
+        internal static bool IsAnyArtistIgnored(ITrackInfo track)
+        {
+            return IsAnyArtistIgnored((int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
+        }
+
+        internal static void AddIgnoredTrack(ITrackInfo track)
+        {
+            AddIgnoredTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
+        }
+
+        internal static void AddIgnoredArtist(ITrackInfo track, int index)
+        {
+            HyperLink artist = track.ArtistArr[index];
+            AddIgnoredArtist((int)track.TrackType, artist.InnerId, artist.ToString());
+        }
+
+        internal static void SaveTracks(IEnumerable<ITrackInfo> tracks)
+        {
+            foreach (ITrackInfo track in tracks)
+            {
+                AddSavedTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
+            }
+        }
+
+        internal static void RestoreTracks
+
         private static bool IsTrackIgnored(int type, string id)
         {
             if (_connection is null)
@@ -106,7 +134,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                 return false;
             }
 
-            SqlCommand command = IgnoredTracks.GetSelectQuery(_connection, type, id);
+            SqlCommand command = IgnoredTracks.GetSelectWhereQuery(_connection, type, id);
 
             while (true)
             {
@@ -140,11 +168,6 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     }
                 }
             }
-        }
-
-        internal static bool IsAnyArtistIgnored(ITrackInfo track)
-        {
-            return IsAnyArtistIgnored((int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
         }
 
         private static bool IsAnyArtistIgnored(int type, IEnumerable<string> ids)
@@ -173,7 +196,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
             while (true)
             {
-                SqlCommand command = IgnoredArtists.GetSelectQuery(_connection, type, id);
+                SqlCommand command = IgnoredArtists.GetSelectWhereQuery(_connection, type, id);
 
                 try
                 {
@@ -207,7 +230,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void AddIgnoredTrack(int type, string id, string hyper)
+        private static void AddGenericRecord(GenericTable table, int type, string id, string hyper)
         {
             if (_connection is null)
             {
@@ -216,7 +239,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
             while (true)
             {
-                SqlCommand command = IgnoredTracks.GetInsertQuery(_connection, type, id, hyper);
+                SqlCommand command = table.GetInsertQuery(_connection, type, id, hyper);
 
                 try
                 {
@@ -236,7 +259,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
                             break;
 
                         default:
@@ -247,56 +270,19 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void AddIgnoredTrack(ITrackInfo track)
+        private static void AddIgnoredTrack(int type, string id, string hyper)
         {
-            AddIgnoredTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
+            AddGenericRecord(IgnoredTracks, type, id, hyper);
         }
 
         private static void AddIgnoredArtist(int type, string id, string hyper)
         {
-            if (_connection is null)
-            {
-                throw new InvalidOperationException("DB connection not initialized");
-            }
-
-            while (true)
-            {
-                SqlCommand command = IgnoredArtists.GetInsertQuery(_connection, type, id, hyper);
-
-                try
-                {
-                    int count = command.ExecuteNonQuery();
-                    return;
-                }
-                catch (SqlException ex)
-                {
-                    switch (ex.Number)
-                    {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
-                            break;
-
-                        default:
-                            Console.WriteLine(ex.Number);
-                            throw;
-                    }
-                }
-            }
+            AddGenericRecord(IgnoredArtists, type, id, hyper);
         }
 
-        internal static void AddIgnoredArtist(ITrackInfo track, int index)
+        private static void AddSavedTrack(int type, string id, string hyper)
         {
-            HyperLink artist = track.ArtistArr[index];
-            AddIgnoredArtist((int)track.TrackType, artist.InnerId, artist.ToString());
+            AddGenericRecord(TrackInfo, type, id, hyper);
         }
     }
 }

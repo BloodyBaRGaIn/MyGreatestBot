@@ -271,5 +271,22 @@ namespace MyGreatestBot.Commands
 
             await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index, CommandActionSource.Command));
         }
+
+
+        [Command("save")]
+        [Description("Save tracks")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task SaveCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await Task.Run(() => handler.PlayerInstance.Save(CommandActionSource.Command));
+        }
     }
 }

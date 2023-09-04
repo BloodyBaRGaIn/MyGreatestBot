@@ -42,6 +42,7 @@ Commands are organized into categories for better readability
 - ```ignoreartist (ia) - Ignore current track artist```  
     Arguments:
     - ```artist_index (Int32) - Artist zero-based index (optional)```  
+- ```save - Save tracks```  
 
 ## Debug commands
 
