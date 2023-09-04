@@ -8,6 +8,7 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -178,6 +179,13 @@ namespace MyGreatestBot.Bot.Handlers
 
         public static async Task Logout()
         {
+            try
+            {
+                BotWrapper.Commands?.UnregisterCommands(
+                    BotWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
+            }
+            catch { }
+
             ParallelLoopResult result = Parallel.ForEach(ConnectionDictionary.Values, async (handler) =>
             {
                 try
@@ -186,13 +194,15 @@ namespace MyGreatestBot.Bot.Handlers
                 }
                 catch { }
 
-                await handler.Message.SendAsync(":wave:");
+                Task send_wave = handler.Message.SendAsync(":wave:");
 
                 try
                 {
                     await handler.Leave(null, null);
                 }
                 catch { }
+
+                send_wave.Wait();
             });
 
             while (!result.IsCompleted)

@@ -30,8 +30,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.Pause(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("resume")]
@@ -49,8 +47,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("stop")]
@@ -68,8 +64,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("skip")]
@@ -94,8 +88,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.Skip(number - 1, CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("count")]
@@ -113,8 +105,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(handler.PlayerInstance.GetQueueLength);
-
-            await Task.Delay(1);
         }
 
         [Command("clear")]
@@ -132,8 +122,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.Clear(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("shuffle")]
@@ -151,8 +139,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.ShuffleQueue(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("seek")]
@@ -196,8 +182,6 @@ namespace MyGreatestBot.Commands
             }
 
             await Task.Run(() => handler.PlayerInstance.RequestSeek(time, CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("return")]
@@ -216,8 +200,6 @@ namespace MyGreatestBot.Commands
             handler.Voice.UpdateVoiceConnection();
 
             await Task.Run(() => handler.PlayerInstance.ReturnCurrentTrackToQueue(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("currenttrack")]
@@ -235,8 +217,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(handler.PlayerInstance.GetCurrentTrackInfo);
-
-            await Task.Delay(1);
         }
 
         [Command("nexttrack")]
@@ -254,8 +234,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(handler.PlayerInstance.GetNextTrackInfo);
-
-            await Task.Delay(1);
         }
 
         [Command("ignore")]
@@ -273,8 +251,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.IgnoreTrack(CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
 
         [Command("ignoreartist")]
@@ -294,8 +270,6 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index, CommandActionSource.Command));
-
-            await Task.Delay(1);
         }
     }
 }

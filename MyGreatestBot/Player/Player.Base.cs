@@ -79,7 +79,14 @@ namespace MyGreatestBot.Player
             {
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             }
-            catch { }
+            catch
+            {
+                try
+                {
+                    Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+                }
+                catch { }
+            }
 
             while (true)
             {

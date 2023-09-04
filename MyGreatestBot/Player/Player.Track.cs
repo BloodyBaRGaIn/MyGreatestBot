@@ -1,7 +1,5 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
-using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {

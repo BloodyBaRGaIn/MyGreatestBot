@@ -1,7 +1,5 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 using System;
 using System.Threading.Tasks;
 

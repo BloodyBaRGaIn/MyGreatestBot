@@ -14,7 +14,10 @@ namespace MyGreatestBot.Commands
     [SupportedOSPlatform("windows")]
     internal class QueuingCommands : BaseCommandModule
     {
-        private static async Task<IEnumerable<ITrackInfo>> GetTracks(CommandContext ctx, ConnectionHandler handler, string query)
+        private static async Task<IEnumerable<ITrackInfo>> GetTracks(
+            CommandContext ctx,
+            ConnectionHandler handler,
+            string query)
         {
             handler.TextChannel = ctx.Channel;
             handler.Voice.UpdateVoiceConnection();

@@ -41,7 +41,7 @@ namespace MyGreatestBot.Commands.Utils
 
                 result += GetCategoryHeaderString(category.Key);
 
-                foreach (var command in category)
+                foreach (Command command in category)
                 {
                     result += GetCommandString(command);
                 }
@@ -85,7 +85,7 @@ namespace MyGreatestBot.Commands.Utils
 
             result += $"    Arguments:{Environment.NewLine}";
 
-            foreach (var argument in overload.Arguments)
+            foreach (CommandArgument argument in overload.Arguments)
             {
                 result += $"    - ```{argument.Name} ({argument.Type.Name})";
                 if (!string.IsNullOrWhiteSpace(argument.Description))

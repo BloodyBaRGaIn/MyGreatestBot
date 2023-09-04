@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
