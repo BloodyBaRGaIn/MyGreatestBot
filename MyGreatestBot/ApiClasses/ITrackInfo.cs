@@ -13,14 +13,14 @@ namespace MyGreatestBot.ApiClasses
     public interface ITrackInfo
     {
         /// <summary>
-        /// Base URL
-        /// </summary>
-        public virtual string Domain => string.Empty;
-
-        /// <summary>
         /// Track type
         /// </summary>
         public virtual ApiIntents TrackType => ApiIntents.None;
+
+        /// <summary>
+        /// Base URL
+        /// </summary>
+        public virtual string Domain => ApiManager.DoaminsDictionary[TrackType];
 
         /// <summary>
         /// Extended track name

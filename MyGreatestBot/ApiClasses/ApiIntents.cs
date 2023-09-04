@@ -16,6 +16,8 @@
         Music = Youtube | Yandex | Vk | Spotify,
         Services = Sql,
 
+        Discord = None,
+
         All = Music | Services
     }
 }

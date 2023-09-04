@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -19,6 +20,41 @@ namespace MyGreatestBot.ApiClasses
         public static ApiIntents InitIntents { get; private set; } = ApiIntents.None;
 
         public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
+
+        public static readonly Dictionary<ApiIntents, string> DoaminsDictionary = new()
+        {
+            [ApiIntents.Youtube] = "https://www.youtube.com/",
+            [ApiIntents.Yandex] = "https://music.yandex.ru/",
+            [ApiIntents.Vk] = "https://www.vk.com/",
+            [ApiIntents.Spotify] = "https://open.spotify.com/",
+            [ApiIntents.Discord] = "https://www.discord.com/"
+        };
+
+        public static void TryAcessDomain(ApiIntents api)
+        {
+            if (!DoaminsDictionary.TryGetValue(api, out string? domain))
+            {
+                return;
+            }
+
+            HttpClient client = new();
+            try
+            {
+                var message = client.Send(new HttpRequestMessage(HttpMethod.Get, domain));
+                if (!message.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Error status code {message.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"{api} is not available", ex);
+            }
+            finally
+            {
+                client.Dispose();
+            }
+        }
 
         private static AuthActions GetActions(ApiIntents desired)
         {
@@ -78,6 +114,7 @@ namespace MyGreatestBot.ApiClasses
         {
             try
             {
+                TryAcessDomain(desired);
                 actions.InitAction.Invoke();
                 Console.WriteLine($"{desired} SUCCESS");
                 FailedIntents &= ~desired;
@@ -86,7 +123,11 @@ namespace MyGreatestBot.ApiClasses
             {
                 Console.WriteLine($"{desired} FAILED");
                 Console.Error.WriteLine(ex.GetExtendedMessage());
-                actions.DeinitAction.Invoke();
+                try
+                {
+                    actions.DeinitAction.Invoke();
+                }
+                catch { }
                 FailedIntents |= desired;
             }
             finally

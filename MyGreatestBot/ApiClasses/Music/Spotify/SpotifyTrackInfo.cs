@@ -17,8 +17,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     {
         private ITrackInfo Base => this;
 
-        string ITrackInfo.Domain => "https://open.spotify.com/";
-
         ApiIntents ITrackInfo.TrackType => ApiIntents.Spotify;
 
         public HyperLink TrackName { get; }

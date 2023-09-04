@@ -17,8 +17,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     {
         private ITrackInfo Base => this;
 
-        string ITrackInfo.Domain => "https://www.vk.com/";
-
         ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
 
         public HyperLink TrackName { get; }

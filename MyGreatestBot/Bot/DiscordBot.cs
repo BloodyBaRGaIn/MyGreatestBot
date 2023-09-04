@@ -14,6 +14,7 @@ using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,6 +101,8 @@ namespace MyGreatestBot.Bot
                 Commands.CommandExecuted += Commands_CommandExecuted;
 
                 MarkdownWriter.GenerateFile();
+
+                ApiManager.TryAcessDomain(ApiIntents.Discord);
 
                 if (!Client.ConnectAsync().Wait(connection_timeout))
                 {

@@ -20,8 +20,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     {
         private ITrackInfo Base => this;
 
-        string ITrackInfo.Domain => "https://music.yandex.ru/";
-
         ApiIntents ITrackInfo.TrackType => ApiIntents.Yandex;
 
         public HyperLink TrackName { get; }
