@@ -95,7 +95,7 @@ namespace MyGreatestBot.Commands
 
             foreach (CustomHelpFormatter formatter in collection)
             {
-                DiscordEmbed message = formatter.Build().Embed ?? throw new ArgumentException("Cannot build message");
+                string message = formatter.Build().Content ?? throw new ArgumentException("Cannot build message");
 
                 if (ctx.Member == null)
                 {
