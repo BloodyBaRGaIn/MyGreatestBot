@@ -1,6 +1,8 @@
 ﻿using MyGreatestBot.Extensions;
+using MyGreatestBot.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Versioning;
@@ -21,39 +23,52 @@ namespace MyGreatestBot.ApiClasses
 
         public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
 
-        public static readonly Dictionary<ApiIntents, string> DoaminsDictionary = new()
+        public static readonly Dictionary<ApiIntents, DomainCollection> DoaminsDictionary = new()
         {
-            [ApiIntents.Youtube] = "https://www.youtube.com/",
-            [ApiIntents.Yandex] = "https://music.yandex.ru/",
-            [ApiIntents.Vk] = "https://www.vk.com/",
-            [ApiIntents.Spotify] = "https://open.spotify.com/",
-            [ApiIntents.Discord] = "https://www.discord.com/"
+            [ApiIntents.Youtube] = new DomainCollection("https://www.youtube.com/"),
+            [ApiIntents.Yandex] = new DomainCollection("https://music.yandex.ru/"),
+            [ApiIntents.Vk] = new DomainCollection("https://www.vk.com/"),
+            [ApiIntents.Spotify] = new DomainCollection("https://open.spotify.com/", string.Empty),
+            [ApiIntents.Discord] = new DomainCollection("https://www.discord.com/")
         };
 
         public static void TryAcessDomain(ApiIntents api)
         {
-            if (!DoaminsDictionary.TryGetValue(api, out string? domain))
+            if (!DoaminsDictionary.TryGetValue(api, out DomainCollection? domains)
+                || !domains.Any())
             {
                 return;
             }
 
-            HttpClient client = new();
-            try
+            foreach (string url in domains)
             {
-                HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, domain));
-                if (!message.IsSuccessStatusCode)
+                if (url == string.Empty)
                 {
-                    throw new Exception($"Error status code {message.StatusCode}");
+                    // bypass accessing check
+                    return;
+                }
+                HttpClient client = new();
+                try
+                {
+                    HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, domains));
+                    
+                    using StreamReader stream = new(message.Content.ReadAsStream());
+                    string content = stream.ReadToEnd();
+                    stream.Close();
+
+                    if (message.IsSuccessStatusCode)
+                    {
+                        return;
+                    }
+                }
+                catch { }
+                finally
+                {
+                    client.Dispose();
                 }
             }
-            catch (Exception ex)
-            {
-                throw new ApplicationException($"{api} is not available", ex);
-            }
-            finally
-            {
-                client.Dispose();
-            }
+
+            throw new ApplicationException($"{api} is not available");
         }
 
         private static AuthActions GetActions(ApiIntents desired)
