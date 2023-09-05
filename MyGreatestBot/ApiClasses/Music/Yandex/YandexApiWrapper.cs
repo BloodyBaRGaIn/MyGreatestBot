@@ -254,7 +254,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return tracks_collection;
         }
 
-        private static YandexTrackInfo? GetTrack(string? track_id_str)
+        public static YandexTrackInfo? GetTrack(string? track_id_str)
         {
             if (string.IsNullOrWhiteSpace(track_id_str))
             {

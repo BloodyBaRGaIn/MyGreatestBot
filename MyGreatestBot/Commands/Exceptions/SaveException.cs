@@ -12,4 +12,14 @@ namespace MyGreatestBot.Commands.Exceptions
         public SaveException(string message) : base(message) { }
         public SaveException(string message, Exception innerException) : base(message, innerException) { }
     }
+
+    public sealed class RestoreException : CommandExecutionException
+    {
+        public override string Title => "Restore";
+        public override DiscordColor ExecutedColor => DiscordColor.Blurple;
+
+        public RestoreException() : base() { }
+        public RestoreException(string message) : base(message) { }
+        public RestoreException(string message, Exception innerException) : base(message, innerException) { }
+    }
 }

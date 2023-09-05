@@ -116,18 +116,25 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             if (!string.IsNullOrWhiteSpace(video_id))
             {
-                Video video = Videos.GetAsync(video_id)
-                                  .AsTask()
-                                  .GetAwaiter()
-                                  .GetResult();
+                YoutubeTrackInfo? track = GetTrack(video_id);
 
-                if (video != null)
+                if (track != null)
                 {
-                    tracks.Add(new(video));
+                    tracks.Add(track);
                 }
             }
 
             return tracks;
+        }
+
+        public static YoutubeTrackInfo? GetTrack(string id)
+        {
+            Video video = Videos.GetAsync(id)
+                                  .AsTask()
+                                  .GetAwaiter()
+                                  .GetResult();
+
+            return video == null ? null : new YoutubeTrackInfo(video);
         }
     }
 }

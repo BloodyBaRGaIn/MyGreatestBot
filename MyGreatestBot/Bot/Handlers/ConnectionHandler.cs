@@ -26,6 +26,8 @@ namespace MyGreatestBot.Bot.Handlers
 
         private readonly DiscordGuild _guild;
 
+        public ulong GuildId => _guild.Id;
+
         public DiscordChannel? TextChannel
         {
             get => Message.Channel;

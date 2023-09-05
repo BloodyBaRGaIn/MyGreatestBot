@@ -28,13 +28,22 @@ namespace MyGreatestBot.Player
         {
             lock (tracks_queue)
             {
-                if (tracks_queue.TryPeek(out ITrackInfo? track))
+                while (true)
                 {
-                    Handler.Message.Send(GetPlayingMessage<TrackInfoException>(track, "Next"));
-                }
-                else
-                {
-                    throw new TrackInfoException("Tracks queue is empty");
+                    if (tracks_queue.TryPeek(out ITrackInfo? track))
+                    {
+                        if (track == null)
+                        {
+                            _ = tracks_queue.Dequeue();
+                            continue;
+                        }
+                        Handler.Message.Send(GetPlayingMessage<TrackInfoException>(track, "Next"));
+                        break;
+                    }
+                    else
+                    {
+                        throw new TrackInfoException("Tracks queue is empty");
+                    }
                 }
             }
         }

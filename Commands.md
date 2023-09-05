@@ -38,11 +38,15 @@ Commands are organized into categories for better readability
 - ```return (rt) - Return the track to the queue```  
 - ```currenttrack (track, tr) - Get information about the current track```  
 - ```nexttrack (next, ntr, nex) - Get information about the next track```  
-- ```ignore (it, i) - Ignore current track```  
+
+## Database commands
+
+- ```ignoretrack (it) - Ignore current track```  
 - ```ignoreartist (ia) - Ignore current track artist```  
     Arguments:
     - ```artist_index (Int32) - Artist zero-based index (optional)```  
 - ```save - Save tracks```  
+- ```restore - Restore saved tracks```  
 
 ## Debug commands
 

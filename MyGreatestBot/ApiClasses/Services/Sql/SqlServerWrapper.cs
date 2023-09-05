@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Sql
 {
@@ -27,6 +28,8 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
         private static readonly DatabaseScriptProvider scriptProvider;
 
         private static SqlConnection? _connection;
+
+        private static readonly object _lock = 0;
 
         static SqlServerWrapper()
         {
@@ -96,54 +99,64 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             _connection?.Close();
         }
 
-        internal static bool IsTrackIgnored(ITrackInfo track)
+        internal static bool IsTrackIgnored(ITrackInfo track, ulong guild)
         {
-            return IsTrackIgnored((int)track.TrackType, track.Id);
+            return IsTrackIgnored(guild, (int)track.TrackType, track.Id);
         }
 
-        internal static bool IsAnyArtistIgnored(ITrackInfo track)
+        internal static bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
-            return IsAnyArtistIgnored((int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
+            return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
         }
 
-        internal static void AddIgnoredTrack(ITrackInfo track)
+        internal static void AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
-            AddIgnoredTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
+            lock (_lock)
+            {
+                AddIgnoredTrack(guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
+            }
         }
 
-        internal static void AddIgnoredArtist(ITrackInfo track, int index)
+        internal static void AddIgnoredArtist(ITrackInfo track, int index, ulong guild)
         {
-            HyperLink artist = track.ArtistArr[index];
-            AddIgnoredArtist((int)track.TrackType, artist.InnerId, artist.ToString());
+            lock (_lock)
+            {
+                HyperLink artist = track.ArtistArr[index];
+                AddIgnoredArtist(guild, (int)track.TrackType, artist.InnerId, artist.ToString());
+            }
         }
 
-        internal static void SaveTracks(IEnumerable<ITrackInfo> tracks)
+        internal static void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
             foreach (ITrackInfo track in tracks)
             {
-                AddSavedTrack((int)track.TrackType, track.Id, track.TrackName.ToString());
+                lock (_lock)
+                {
+                    AddSavedTrack(guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
+                }
             }
         }
 
-        internal static void RestoreTracks
-
-        private static bool IsTrackIgnored(int type, string id)
+        internal static List<(ApiIntents, string)> RestoreTracks(ulong guild)
         {
-            if (_connection is null)
-            {
-                return false;
-            }
-
-            SqlCommand command = IgnoredTracks.GetSelectWhereQuery(_connection, type, id);
-
-            while (true)
+            List<(ApiIntents, string)> items = new();
+            lock (_lock)
             {
                 try
                 {
-                    using SqlDataReader reader = command.ExecuteReader();
-                    bool result = reader.HasRows;
-                    reader.Close();
-                    return result;
+                    Close();
+                    Open();
+                }
+                catch
+                {
+                    return items;
+                }
+
+                SqlCommand commandSelect = TrackInfo.GetSelectQuery(_connection, guild);
+                SqlDataReader? reader = null;
+                try
+                {
+                    reader = commandSelect.ExecuteReader();
                 }
                 catch (SqlException ex)
                 {
@@ -159,7 +172,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                         // Invalid object name
                         case 208:
                             Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredTracks.GetScript());
+                            _ = server.ConnectionContext.ExecuteNonQuery(TrackInfo.GetScript());
                             break;
 
                         default:
@@ -167,10 +180,55 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                             throw;
                     }
                 }
+                if (reader == null)
+                {
+                    return items;
+                }
+                while (reader.Read())
+                {
+                    _ = Task.Yield();
+                    string type = reader["Type"]?.ToString() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(type))
+                    {
+                        continue;
+                    }
+                    string id = reader["ID"]?.ToString() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(id))
+                    {
+                        continue;
+                    }
+                    id = id.TrimEnd();
+                    items.Add(((ApiIntents)Enum.ToObject(typeof(ApiIntents), int.Parse(type)), id));
+                }
+                reader.Close();
+                _ = Task.Delay(1);
+                return items;
             }
         }
 
-        private static bool IsAnyArtistIgnored(int type, IEnumerable<string> ids)
+        internal static void RemoveTracks(ulong guild)
+        {
+            lock (_lock)
+            {
+                DeleteGeneric(TrackInfo, guild);
+                try
+                {
+                    SqlCommand command = new($"DBCC CHECKIDENT ('[{TrackInfo.Name}]', RESEED, 0)", _connection);
+                    _ = command.ExecuteNonQuery();
+                }
+                catch
+                {
+                    ;
+                }
+            }
+        }
+
+        private static bool IsTrackIgnored(ulong guild, int type, string id)
+        {
+            return GenericHasRows(IgnoredTracks, guild, type, id);
+        }
+
+        private static bool IsAnyArtistIgnored(ulong guild, int type, IEnumerable<string> ids)
         {
             if (_connection is null || ids is null || !ids.Any())
             {
@@ -179,7 +237,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
             try
             {
-                return ids.Any(id => IsArtistIgnored(type, id));
+                return ids.Any(id => IsArtistIgnored(guild, type, id));
             }
             catch
             {
@@ -187,16 +245,24 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static bool IsArtistIgnored(int type, string id)
+        private static bool IsArtistIgnored(ulong guild, int type, string id)
+        {
+            return GenericHasRows(IgnoredArtists, guild, type, id);
+        }
+
+        private static bool GenericHasRows(GenericTable table, ulong guild, int type, string id)
         {
             if (_connection is null || string.IsNullOrWhiteSpace(id))
             {
                 return false;
             }
 
+            Close();
+            Open();
+
             while (true)
             {
-                SqlCommand command = IgnoredArtists.GetSelectWhereQuery(_connection, type, id);
+                SqlCommand command = table.GetSelectWhereQuery(_connection, guild, type, id);
 
                 try
                 {
@@ -204,46 +270,6 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     bool result = reader.HasRows;
                     reader.Close();
                     return result;
-                }
-                catch (SqlException ex)
-                {
-                    switch (ex.Number)
-                    {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(IgnoredArtists.GetScript());
-                            break;
-
-                        default:
-                            Console.WriteLine(ex.Number);
-                            throw;
-                    }
-                }
-            }
-        }
-
-        private static void AddGenericRecord(GenericTable table, int type, string id, string hyper)
-        {
-            if (_connection is null)
-            {
-                throw new InvalidOperationException("DB connection not initialized");
-            }
-
-            while (true)
-            {
-                SqlCommand command = table.GetInsertQuery(_connection, type, id, hyper);
-
-                try
-                {
-                    int count = command.ExecuteNonQuery();
                 }
                 catch (SqlException ex)
                 {
@@ -270,19 +296,107 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void AddIgnoredTrack(int type, string id, string hyper)
+        private static void DeleteGeneric(GenericTable table, ulong guild)
         {
-            AddGenericRecord(IgnoredTracks, type, id, hyper);
+            if (_connection is null)
+            {
+                throw new InvalidOperationException("DB connection not initialized");
+            }
+
+            Close();
+            Open();
+
+            while (true)
+            {
+                SqlCommand command = table.GetDeleteQuery(_connection, guild);
+
+                try
+                {
+                    int count = command.ExecuteNonQuery();
+                    return;
+                }
+                catch (SqlException ex)
+                {
+                    switch (ex.Number)
+                    {
+                        case -2:
+                        case -1:
+                        case 1:
+                        case 2:
+                            SqlServiceWrapper.Run();
+                            break;
+
+                        // Invalid object name
+                        case 208:
+                            Server server = new(new ServerConnection(_connection));
+                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
+                            break;
+
+                        default:
+                            Console.WriteLine(ex.Number);
+                            throw;
+                    }
+                }
+            }
         }
 
-        private static void AddIgnoredArtist(int type, string id, string hyper)
+        private static void AddGenericRecord(GenericTable table, ulong guild, int type, string id, string hyper)
         {
-            AddGenericRecord(IgnoredArtists, type, id, hyper);
+            if (_connection is null)
+            {
+                throw new InvalidOperationException("DB connection not initialized");
+            }
+
+            Close();
+            Open();
+
+            while (true)
+            {
+                SqlCommand command = table.GetInsertQuery(_connection, guild, type, id, hyper);
+
+                try
+                {
+                    int count = command.ExecuteNonQuery();
+                    return;
+                }
+                catch (SqlException ex)
+                {
+                    switch (ex.Number)
+                    {
+                        case -2:
+                        case -1:
+                        case 1:
+                        case 2:
+                            SqlServiceWrapper.Run();
+                            break;
+
+                        // Invalid object name
+                        case 208:
+                            Server server = new(new ServerConnection(_connection));
+                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
+                            break;
+
+                        default:
+                            Console.WriteLine(ex.Number);
+                            throw;
+                    }
+                }
+            }
         }
 
-        private static void AddSavedTrack(int type, string id, string hyper)
+        private static void AddIgnoredTrack(ulong guild, int type, string id, string hyper)
         {
-            AddGenericRecord(TrackInfo, type, id, hyper);
+            AddGenericRecord(IgnoredTracks, guild, type, id, hyper);
+        }
+
+        private static void AddIgnoredArtist(ulong guild, int type, string id, string hyper)
+        {
+            AddGenericRecord(IgnoredArtists, guild, type, id, hyper);
+        }
+
+        private static void AddSavedTrack(ulong guild, int type, string id, string hyper)
+        {
+            AddGenericRecord(TrackInfo, guild, type, id, hyper);
         }
     }
 }

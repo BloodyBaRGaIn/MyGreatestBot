@@ -34,7 +34,7 @@ namespace MyGreatestBot.Player
 
         private TimeSpan Seek;
 
-        private readonly Queue<ITrackInfo> tracks_queue = new();
+        private readonly Queue<ITrackInfo?> tracks_queue = new();
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly CancellationToken MainPlayerCancellationToken;
         private readonly Task MainPlayerTask;

@@ -13,12 +13,12 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
             throw new NotImplementedException();
         }
 
-        internal virtual SqlCommand GetSelectQuery(SqlConnection? connection = null)
+        internal virtual SqlCommand GetSelectQuery(SqlConnection? connection, ulong guild)
         {
             throw new NotImplementedException();
         }
 
-        internal virtual SqlCommand GetDeleteQuery(SqlConnection? connection = null)
+        internal virtual SqlCommand GetDeleteQuery(SqlConnection? connection, ulong guild)
         {
             throw new NotImplementedException();
         }

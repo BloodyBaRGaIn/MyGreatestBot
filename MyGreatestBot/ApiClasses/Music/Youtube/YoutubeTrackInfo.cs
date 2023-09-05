@@ -46,7 +46,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             Id = video.Id;
 
-            TrackName = new(video.Title, video.Url);
+            TrackName = new HyperLink(video.Title, video.Url).WithId(video.Id);
             ArtistArr = new HyperLink[1]
             {
                 new HyperLink(video.Author.ChannelTitle, video.Author.ChannelUrl)

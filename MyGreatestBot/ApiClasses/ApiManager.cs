@@ -40,7 +40,7 @@ namespace MyGreatestBot.ApiClasses
             HttpClient client = new();
             try
             {
-                var message = client.Send(new HttpRequestMessage(HttpMethod.Get, domain));
+                HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, domain));
                 if (!message.IsSuccessStatusCode)
                 {
                     throw new Exception($"Error status code {message.StatusCode}");

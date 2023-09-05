@@ -30,7 +30,7 @@ namespace MyGreatestBot.Player
 
             try
             {
-                SqlServerWrapper.AddIgnoredTrack(currentTrack);
+                SqlServerWrapper.AddIgnoredTrack(currentTrack, Handler.GuildId);
             }
             catch (Exception ex)
             {
@@ -76,7 +76,7 @@ namespace MyGreatestBot.Player
 
             try
             {
-                SqlServerWrapper.AddIgnoredArtist(currentTrack, index);
+                SqlServerWrapper.AddIgnoredArtist(currentTrack, index, Handler.GuildId);
             }
             catch (Exception ex)
             {

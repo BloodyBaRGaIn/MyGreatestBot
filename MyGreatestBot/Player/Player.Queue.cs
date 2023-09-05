@@ -17,8 +17,8 @@ namespace MyGreatestBot.Player
                 lock (tracks_queue)
                 {
                     count = tracks_queue.Count;
-                    live_streams_count = tracks_queue.Count(t => t.IsLiveStream || t.Duration == TimeSpan.Zero);
-                    total_duration = tracks_queue.Aggregate(TimeSpan.Zero, (sum, next) => sum + next.Duration);
+                    live_streams_count = tracks_queue.Count(t => t?.IsLiveStream ?? (false || t?.Duration == TimeSpan.Zero));
+                    total_duration = tracks_queue.Aggregate(TimeSpan.Zero, (sum, next) => sum + next?.Duration ?? TimeSpan.Zero);
                 }
 
                 string description = $"Enqueued tracks count: {count}\n";

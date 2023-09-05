@@ -1,10 +1,12 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Sql;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -23,12 +25,48 @@ namespace MyGreatestBot.Player
             }
             lock (tracks_queue)
             {
-                while (tracks_queue.Any())
+                SqlServerWrapper.RemoveTracks(Handler.GuildId);
+
+#pragma warning disable CS8620
+                List<ITrackInfo> tracks = new(tracks_queue.Where(t => t != null));
+#pragma warning restore CS8620
+
+                SqlServerWrapper.SaveTracks(tracks, Handler.GuildId);
+
+                Clear(source | CommandActionSource.Mute);
+
+                if (!mute)
                 {
-                    var track = tracks_queue.Peek();
-
-
+                    Handler.Message.Send(new SaveException("Saved"), true);
                 }
+            }
+        }
+
+        internal void Restore(CommandActionSource source)
+        {
+            bool mute = source.HasFlag(CommandActionSource.Mute);
+            try
+            {
+                List<(ApiIntents, string)> info = SqlServerWrapper.RestoreTracks(Handler.GuildId);
+                foreach ((ApiIntents api, string id) in info)
+                {
+                    tracks_queue.Enqueue(GenericTrackInfo.GetTrack(api, id));
+                    Handler.Log.Send("Track restored");
+                }
+                SqlServerWrapper.RemoveTracks(Handler.GuildId);
+                if (!mute)
+                {
+                    Handler.Message.Send(new RestoreException("Restore success"), true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.GetExtendedMessage());
+                if (!mute)
+                {
+                    throw new RestoreException("Restore failed", ex);
+                }
+                return;
             }
         }
     }

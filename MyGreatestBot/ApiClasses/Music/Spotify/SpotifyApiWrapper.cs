@@ -185,11 +185,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 string? track_id = SpotifyQueryDecomposer.TryGetTrackId(query);
                 if (!string.IsNullOrWhiteSpace(track_id))
                 {
-                    FullTrack? track = Tracks.Get(track_id).GetAwaiter().GetResult();
+                    SpotifyTrackInfo? track = GetTrack(track_id);
 
                     if (track != null)
                     {
-                        tracks.Add(new SpotifyTrackInfo(track));
+                        tracks.Add(track);
                     }
 
                     return tracks;
@@ -197,6 +197,13 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
 
             return tracks;
+        }
+
+        public static SpotifyTrackInfo? GetTrack(string id)
+        {
+            FullTrack? track = Tracks.Get(id).GetAwaiter().GetResult();
+
+            return track == null ? null : new SpotifyTrackInfo(track);
         }
 
         private static void FromAlbumId(string album_id, List<SpotifyTrackInfo> tracks)

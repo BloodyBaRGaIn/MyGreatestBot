@@ -115,6 +115,17 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return tracks;
         }
 
+        public static VkTrackInfo? GetTrack(string id)
+        {
+            if (!long.TryParse(id, out long trackId))
+            {
+                return null;
+            }
+            VkNet.Utils.VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = new[] { trackId }, Count = 1 });
+            Audio? audio = collection.FirstOrDefault();
+            return audio == null ? null : new VkTrackInfo(audio);
+        }
+
         private static bool TryAddAsCollection(string query, List<VkTrackInfo> tracks, bool is_playlist)
         {
             bool success = false;

@@ -14,7 +14,6 @@ using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
@@ -95,6 +94,7 @@ namespace MyGreatestBot.Bot
                 Commands.RegisterCommands<ConnectionCommands>();
                 Commands.RegisterCommands<QueuingCommands>();
                 Commands.RegisterCommands<PlaybackCommands>();
+                Commands.RegisterCommands<DatabaseCommands>();
                 Commands.RegisterCommands<DebugCommands>();
 
                 Commands.CommandErrored += Commands_CommandErrored;
