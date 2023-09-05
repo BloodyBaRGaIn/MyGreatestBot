@@ -45,19 +45,10 @@ namespace MyGreatestBot.Player
         internal void Restore(CommandActionSource source)
         {
             bool mute = source.HasFlag(CommandActionSource.Mute);
+            List<(ApiIntents, string)> info;
             try
             {
-                List<(ApiIntents, string)> info = SqlServerWrapper.RestoreTracks(Handler.GuildId);
-                foreach ((ApiIntents api, string id) in info)
-                {
-                    tracks_queue.Enqueue(GenericTrackInfo.GetTrack(api, id));
-                    Handler.Log.Send("Track restored");
-                }
-                SqlServerWrapper.RemoveTracks(Handler.GuildId);
-                if (!mute)
-                {
-                    Handler.Message.Send(new RestoreException("Restore success"), true);
-                }
+                info = SqlServerWrapper.RestoreTracks(Handler.GuildId);
             }
             catch (Exception ex)
             {
@@ -67,6 +58,24 @@ namespace MyGreatestBot.Player
                     throw new RestoreException("Restore failed", ex);
                 }
                 return;
+            }
+            if (info.Count == 0)
+            {
+                if (!mute)
+                {
+                    throw new RestoreException("Nothing to restore");
+                }
+                return;
+            }
+            foreach ((ApiIntents api, string id) in info)
+            {
+                tracks_queue.Enqueue(GenericTrackInfo.GetTrack(api, id));
+                Handler.Log.Send("Track restored");
+            }
+            SqlServerWrapper.RemoveTracks(Handler.GuildId);
+            if (!mute)
+            {
+                Handler.Message.Send(new RestoreException("Restore success"), true);
             }
         }
     }

@@ -80,14 +80,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            try
-            {
-                await Task.Run(() => handler.PlayerInstance.Restore(CommandActionSource.Command));
-            }
-            catch (Exception ex)
-            {
-                handler.LogError.Send(ex.GetExtendedMessage());
-            }
+            await Task.Run(() => handler.PlayerInstance.Restore(CommandActionSource.Command));
         }
     }
 }

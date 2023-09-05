@@ -273,7 +273,7 @@ namespace MyGreatestBot.Player
 
                 currentTrack.PerformSeek(Seek);
 
-                if (!PerformRead(buff))
+                if (!PerformRead(buff, out int cnt))
                 {
                     if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(5))
                     {
@@ -285,7 +285,7 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Restart;
                 }
 
-                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS);
+                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((cnt + 0.0f) / BUFFER_SIZE);
 
                 if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek <= TimeSpan.FromSeconds(1))
                 {
@@ -301,9 +301,10 @@ namespace MyGreatestBot.Player
             }
         }
 
-        private bool PerformRead(byte[] buff)
+        private bool PerformRead(byte[] buff, out int origin_cnt)
         {
             int bytesCount;
+            origin_cnt = 0;
             CancellationTokenSource cts = new();
             CancellationToken token = cts.Token;
             Task<int>? read_task = ffmpeg.StandardOutput?.BaseStream?.ReadAsync(buff, 0, buff.Length, token);
@@ -325,7 +326,7 @@ namespace MyGreatestBot.Player
             {
                 return false;
             }
-
+            origin_cnt = bytesCount;
             if (bytesCount < buff.Length)
             {
                 Task.Delay(100).Wait();

@@ -8,4 +8,4 @@ Supported APIs:
 - Vk
 - Spotify
 
-Also can use MSSQL local server for ignored tracks and artists storing.  
+Also can use MSSQL local server. See Database commands category.  

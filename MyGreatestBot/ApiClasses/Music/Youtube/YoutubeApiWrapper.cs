@@ -130,9 +130,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         public static YoutubeTrackInfo? GetTrack(string id)
         {
             Video video = Videos.GetAsync(id)
-                                  .AsTask()
-                                  .GetAwaiter()
-                                  .GetResult();
+                                .AsTask()
+                                .GetAwaiter()
+                                .GetResult();
 
             return video == null ? null : new YoutubeTrackInfo(video);
         }
