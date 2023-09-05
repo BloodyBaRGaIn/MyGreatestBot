@@ -25,7 +25,6 @@ namespace MyGreatestBot.Player
 
                 bool was_playing = IsPlaying;
 
-                currentTrack = null;
                 IsPlaying = false;
 
                 if (!mute)

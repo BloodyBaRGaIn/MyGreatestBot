@@ -16,7 +16,6 @@ namespace MyGreatestBot.Player
                 Clear(source | CommandActionSource.Mute);
 
                 IsPlaying = false;
-                currentTrack = null;
 
                 if (!mute)
                 {

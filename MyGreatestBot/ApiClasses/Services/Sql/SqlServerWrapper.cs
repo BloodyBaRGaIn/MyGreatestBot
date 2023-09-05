@@ -101,12 +101,18 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         internal static bool IsTrackIgnored(ITrackInfo track, ulong guild)
         {
-            return IsTrackIgnored(guild, (int)track.TrackType, track.Id);
+            lock (_lock)
+            {
+                return IsTrackIgnored(guild, (int)track.TrackType, track.Id);
+            }
         }
 
         internal static bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
-            return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
+            lock (_lock)
+            {
+                return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
+            }
         }
 
         internal static void AddIgnoredTrack(ITrackInfo track, ulong guild)

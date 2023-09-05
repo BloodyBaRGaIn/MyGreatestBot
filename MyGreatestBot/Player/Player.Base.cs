@@ -42,6 +42,8 @@ namespace MyGreatestBot.Player
 
         private readonly ConnectionHandler Handler;
 
+        private static readonly Semaphore _sqlSemaphore = new(1, 1);
+
         internal Player(ConnectionHandler handler)
         {
             Handler = handler;
