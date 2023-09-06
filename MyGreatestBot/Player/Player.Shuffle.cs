@@ -19,13 +19,11 @@ namespace MyGreatestBot.Player
                     List<ITrackInfo> collection = new();
                     while (tracks_queue.Any())
                     {
-                        ITrackInfo? track = tracks_queue.Peek();
-                        if (track == null)
+                        ITrackInfo? track = tracks_queue.Dequeue();
+                        if (track != null)
                         {
-                            _ = tracks_queue.Dequeue();
-                            continue;
+                            collection.Add(track);
                         }
-                        collection.Add(track);
                     }
                     collection = collection.Shuffle().ToList();
                     tracks_queue.EnqueueRange(collection);

@@ -17,6 +17,9 @@ Commands are organized into categories for better readability
 - ```playshuffled (psh) - Add shuffled tracks to the queue```  
     Arguments:
     - ```query (String) - URL```  
+- ```head (ff) - Add tracks to the head```  
+    Arguments:
+    - ```query (String) - URL```  
 - ```tms (t) - Play the track immediatly```  
     Arguments:
     - ```query (String) - URL```  

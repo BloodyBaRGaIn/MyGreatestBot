@@ -72,6 +72,26 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerShuffle));
         }
 
+        [Command("head")]
+        [Aliases("ff")]
+        [Description("Add tracks to the head")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task HeadCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
+
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
+                CommandActionSource.Command | CommandActionSource.PlayerToHead));
+        }
+
         [Command("tms")]
         [Aliases("t")]
         [Description("Play the track immediatly")]
@@ -89,7 +109,7 @@ namespace MyGreatestBot.Commands
             IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
 
             await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
-                CommandActionSource.Command | CommandActionSource.PlayerToHead));
+                CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent));
         }
     }
 }

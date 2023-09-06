@@ -23,8 +23,12 @@ namespace MyGreatestBot.Player
 
                 if (source.HasFlag(CommandActionSource.PlayerToHead))
                 {
-                    ReturnCurrentTrackToQueue(source | CommandActionSource.Mute);
                     tracks_queue.EnqueueRangeToHead(tracks);
+
+                    if (source.HasFlag(CommandActionSource.PlayerSkipCurrent))
+                    {
+                        Skip(0, source | CommandActionSource.Mute);
+                    }
                 }
                 else
                 {

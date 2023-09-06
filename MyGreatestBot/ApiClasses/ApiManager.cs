@@ -51,7 +51,7 @@ namespace MyGreatestBot.ApiClasses
                 try
                 {
                     HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, domains));
-                    
+
                     using StreamReader stream = new(message.Content.ReadAsStream());
                     string content = stream.ReadToEnd();
                     stream.Close();

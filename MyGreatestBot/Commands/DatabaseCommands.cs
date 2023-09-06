@@ -2,8 +2,6 @@
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.Bot.Handlers;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
