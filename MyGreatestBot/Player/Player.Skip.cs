@@ -35,7 +35,7 @@ namespace MyGreatestBot.Player
                     }
                     else
                     {
-                        Handler.Message.Send(new SkipException("Nothing to skip"));
+                        throw new SkipException("Nothing to skip");
                     }
                 }
             }

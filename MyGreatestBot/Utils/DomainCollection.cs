@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MyGreatestBot.Utils
 {
-    public sealed class DomainCollection : IEnumerable<string>
+    public sealed class DomainCollection : IEnumerable<string>, IEnumerable
     {
         private readonly List<string> collection;
 
@@ -12,11 +12,11 @@ namespace MyGreatestBot.Utils
         {
             if (domains == null)
             {
-                throw new ArgumentNullException(nameof(domains));
+                throw new ArgumentNullException(nameof(domains), "Input collection is null");
             }
             if (domains.Length == 0)
             {
-                throw new ArgumentException(nameof(domains));
+                throw new ArgumentException("Input collection is empty", nameof(domains));
             }
             collection = new(domains);
         }

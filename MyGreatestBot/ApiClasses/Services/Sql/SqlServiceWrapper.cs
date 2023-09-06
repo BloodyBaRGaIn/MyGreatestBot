@@ -24,6 +24,22 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             RunService(config.BrowserServiceName);
         }
 
+        internal static bool Run(int error)
+        {
+            switch (error)
+            {
+                case -2:
+                case -1:
+                case 1:
+                case 2:
+                    Run();
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         private static void RunService(string name, params string[] arguments)
         {
             try

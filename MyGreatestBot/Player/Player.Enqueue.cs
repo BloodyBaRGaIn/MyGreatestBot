@@ -2,6 +2,7 @@
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -35,7 +36,7 @@ namespace MyGreatestBot.Player
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.Message.Send(new PlayerException(
-                        $"Added: {tracks.Count()}\n" +
+                        $"Added: {tracks.Count()}{Environment.NewLine}" +
                         $"Total: {totalCount}"), true);
                 }
             }

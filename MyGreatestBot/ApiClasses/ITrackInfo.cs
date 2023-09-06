@@ -1,4 +1,8 @@
-﻿using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses.Music.Spotify;
+using MyGreatestBot.ApiClasses.Music.Vk;
+using MyGreatestBot.ApiClasses.Music.Yandex;
+using MyGreatestBot.ApiClasses.Music.Youtube;
+using MyGreatestBot.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -110,30 +114,30 @@ namespace MyGreatestBot.ApiClasses
         public string GetMessage(string state)
         {
             string result = string.Empty;
-            result += $"{state}: {TrackName}\n";
-            result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}\n";
+            result += $"{state}: {TrackName}{Environment.NewLine}";
+            result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}";
 
             if (!IsLiveStream)
             {
-                result += $"Duration: {Duration:hh\\:mm\\:ss}\n";
+                result += $"{Environment.NewLine}Duration: {Duration:hh\\:mm\\:ss}";
             }
 
             if (AlbumName != null && !string.IsNullOrWhiteSpace(AlbumName.Title))
             {
-                result += $"Album: {AlbumName}\n";
+                result += $"{Environment.NewLine}Album: {AlbumName}";
             }
 
             if (PlaylistName != null && !string.IsNullOrWhiteSpace(PlaylistName.Title))
             {
-                result += $"Playlist: {PlaylistName}\n";
+                result += $"{Environment.NewLine} Playlist: {PlaylistName}";
             }
 
             if (Seek != TimeSpan.Zero)
             {
-                result += $"Time: {Seek:hh\\:mm\\:ss}\n";
+                result += $"{Environment.NewLine} Time: {Seek:hh\\:mm\\:ss}";
             }
 
-            return result.Trim('\n');
+            return result;
         }
 
         public string GetShortMessage()
@@ -226,6 +230,18 @@ namespace MyGreatestBot.ApiClasses
             }
 
             return (int)result;
+        }
+
+        internal static ITrackInfo? GetTrack(ApiIntents api, string id)
+        {
+            return api switch
+            {
+                ApiIntents.Youtube => YoutubeApiWrapper.GetTrack(id),
+                ApiIntents.Yandex => YandexApiWrapper.GetTrack(id),
+                ApiIntents.Vk => VkApiWrapper.GetTrack(id),
+                ApiIntents.Spotify => SpotifyApiWrapper.GetTrack(id),
+                _ => null,
+            };
         }
     }
 }

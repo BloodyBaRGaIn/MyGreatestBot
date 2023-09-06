@@ -29,7 +29,8 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         private static SqlConnection? _connection;
 
-        private static readonly object _lock = 0;
+        private static readonly object _queryLock = 0;
+        private static readonly object _connectionLock = 0;
 
         static SqlServerWrapper()
         {
@@ -37,11 +38,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             {
                 config = ConfigManager.GetSqlDatabaseConfigJSON();
 
-                scriptProvider = new()
-                {
-                    LocalStoreDirectory = config.LocalDirectory,
-                    DatabaseName = config.DatabaseName
-                };
+                scriptProvider = new(config.LocalDirectory, config.DatabaseName);
 
                 ServerString = new ConnectionStringBuilder(config.ServerName).Build();
                 ConnectionString = new ConnectionStringBuilder(config.ServerName, config.DatabaseName).Build();
@@ -58,37 +55,37 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         public static void Open()
         {
-            SqlServiceWrapper.Run();
-
-            while (true)
+            lock (_connectionLock)
             {
-                _connection = new(ConnectionString);
-                try
+                SqlServiceWrapper.Run();
+
+                while (true)
                 {
-                    _connection.Open();
-                    break;
-                }
-                catch (SqlException ex)
-                {
-                    switch (ex.Number)
+                    _connection = new(ConnectionString);
+                    try
                     {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
+                        _connection.Open();
+                        break;
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (SqlServiceWrapper.Run(ex.Number))
+                        {
+                            continue;
+                        }
+                        switch (ex.Number)
+                        {
+                            // Cannot open database
+                            case 4060:
+                                _connection = new(ServerString);
+                                Server server = new(new ServerConnection(_connection));
+                                _ = server.ConnectionContext.ExecuteNonQuery(scriptProvider.GetDatabaseScript());
+                                break;
 
-                        // Cannot open database
-                        case 4060:
-                            _connection = new(ServerString);
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(scriptProvider.GetDatabaseScript());
-                            break;
-
-                        default:
-                            Console.WriteLine(ex.Number);
-                            throw;
+                            default:
+                                Console.WriteLine(ex.Number);
+                                throw;
+                        }
                     }
                 }
             }
@@ -96,20 +93,29 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         public static void Close()
         {
-            _connection?.Close();
+            lock (_connectionLock)
+            {
+                _connection?.Close();
+            }
+        }
+
+        private static void Reopen()
+        {
+            Close();
+            Open();
         }
 
         internal static bool IsTrackIgnored(ITrackInfo track, ulong guild)
         {
-            lock (_lock)
+            lock (_queryLock)
             {
-                return IsTrackIgnored(guild, (int)track.TrackType, track.Id);
+                return HasRowsGeneric(IgnoredTracks, guild, (int)track.TrackType, track.Id);
             }
         }
 
         internal static bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
-            lock (_lock)
+            lock (_queryLock)
             {
                 return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
             }
@@ -117,28 +123,28 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         internal static void AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
-            lock (_lock)
+            lock (_queryLock)
             {
-                AddIgnoredTrack(guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
+                InsertGeneric(IgnoredTracks, guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
             }
         }
 
         internal static void AddIgnoredArtist(ITrackInfo track, int index, ulong guild)
         {
-            lock (_lock)
+            HyperLink artist = track.ArtistArr[index];
+            lock (_queryLock)
             {
-                HyperLink artist = track.ArtistArr[index];
-                AddIgnoredArtist(guild, (int)track.TrackType, artist.InnerId, artist.ToString());
+                InsertGeneric(IgnoredArtists, guild, (int)track.TrackType, artist.InnerId, artist.ToString());
             }
         }
 
         internal static void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
-            foreach (ITrackInfo track in tracks)
+            lock (_queryLock)
             {
-                lock (_lock)
+                foreach (ITrackInfo track in tracks)
                 {
-                    AddSavedTrack(guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
+                    InsertGeneric(TrackInfo, guild, (int)track.TrackType, track.Id, track.TrackName.ToString());
                 }
             }
         }
@@ -146,50 +152,48 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
         internal static List<(ApiIntents, string)> RestoreTracks(ulong guild)
         {
             List<(ApiIntents, string)> items = new();
-            lock (_lock)
+            lock (_queryLock)
             {
                 try
                 {
-                    Close();
-                    Open();
+                    Reopen();
                 }
                 catch
                 {
                     return items;
                 }
 
-                SqlCommand commandSelect = TrackInfo.GetSelectQuery(_connection, guild);
                 SqlDataReader? reader = null;
-                try
+
+                while (true)
                 {
-                    reader = commandSelect.ExecuteReader();
-                }
-                catch (SqlException ex)
-                {
-                    switch (ex.Number)
+                    SqlCommand commandSelect = TrackInfo.GetSelectQuery(_connection, guild);
+                    try
                     {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(TrackInfo.GetScript());
-                            break;
-
-                        default:
-                            Console.WriteLine(ex.Number);
-                            throw;
+                        reader = commandSelect.ExecuteReader();
+                        break;
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (SqlServiceWrapper.Run(ex.Number)
+                            || EnsureTableCreated(TrackInfo, ex.Number))
+                        {
+                            continue;
+                        }
+                        switch (ex.Number)
+                        {
+                            default:
+                                Console.WriteLine(ex.Number);
+                                throw;
+                        }
                     }
                 }
+
                 if (reader == null)
                 {
                     return items;
                 }
+
                 while (reader.Read())
                 {
                     _ = Task.Yield();
@@ -214,11 +218,11 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         internal static void RemoveTracks(ulong guild)
         {
-            lock (_lock)
+            lock (_queryLock)
             {
-                DeleteGeneric(TrackInfo, guild);
                 try
                 {
+                    DeleteGeneric(TrackInfo, guild);
                     SqlCommand command = new($"DBCC CHECKIDENT ('[{TrackInfo.Name}]', RESEED, 0)", _connection);
                     _ = command.ExecuteNonQuery();
                 }
@@ -227,11 +231,6 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     ;
                 }
             }
-        }
-
-        private static bool IsTrackIgnored(ulong guild, int type, string id)
-        {
-            return GenericHasRows(IgnoredTracks, guild, type, id);
         }
 
         private static bool IsAnyArtistIgnored(ulong guild, int type, IEnumerable<string> ids)
@@ -243,7 +242,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
             try
             {
-                return ids.Any(id => IsArtistIgnored(guild, type, id));
+                return ids.Any(id => HasRowsGeneric(IgnoredArtists, guild, type, id));
             }
             catch
             {
@@ -251,20 +250,14 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static bool IsArtistIgnored(ulong guild, int type, string id)
-        {
-            return GenericHasRows(IgnoredArtists, guild, type, id);
-        }
-
-        private static bool GenericHasRows(GenericTable table, ulong guild, int type, string id)
+        private static bool HasRowsGeneric(GenericTable table, ulong guild, int type, string id)
         {
             if (_connection is null || string.IsNullOrWhiteSpace(id))
             {
                 return false;
             }
 
-            Close();
-            Open();
+            Reopen();
 
             while (true)
             {
@@ -279,21 +272,13 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                 }
                 catch (SqlException ex)
                 {
+                    if (SqlServiceWrapper.Run(ex.Number)
+                        || EnsureTableCreated(table, ex.Number))
+                    {
+                        continue;
+                    }
                     switch (ex.Number)
                     {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
-                            break;
-
                         default:
                             Console.WriteLine(ex.Number);
                             throw;
@@ -309,8 +294,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                 throw new InvalidOperationException("DB connection not initialized");
             }
 
-            Close();
-            Open();
+            Reopen();
 
             while (true)
             {
@@ -323,21 +307,13 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                 }
                 catch (SqlException ex)
                 {
+                    if (SqlServiceWrapper.Run(ex.Number)
+                        || EnsureTableCreated(table, ex.Number))
+                    {
+                        continue;
+                    }
                     switch (ex.Number)
                     {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
-                            break;
-
                         default:
                             Console.WriteLine(ex.Number);
                             throw;
@@ -346,15 +322,14 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void AddGenericRecord(GenericTable table, ulong guild, int type, string id, string hyper)
+        private static void InsertGeneric(GenericTable table, ulong guild, int type, string id, string hyper)
         {
             if (_connection is null)
             {
                 throw new InvalidOperationException("DB connection not initialized");
             }
 
-            Close();
-            Open();
+            Reopen();
 
             while (true)
             {
@@ -367,21 +342,13 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                 }
                 catch (SqlException ex)
                 {
+                    if (SqlServiceWrapper.Run(ex.Number)
+                        || EnsureTableCreated(table, ex.Number))
+                    {
+                        continue;
+                    }
                     switch (ex.Number)
                     {
-                        case -2:
-                        case -1:
-                        case 1:
-                        case 2:
-                            SqlServiceWrapper.Run();
-                            break;
-
-                        // Invalid object name
-                        case 208:
-                            Server server = new(new ServerConnection(_connection));
-                            _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
-                            break;
-
                         default:
                             Console.WriteLine(ex.Number);
                             throw;
@@ -390,19 +357,16 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void AddIgnoredTrack(ulong guild, int type, string id, string hyper)
+        private static bool EnsureTableCreated(GenericTable table, int error)
         {
-            AddGenericRecord(IgnoredTracks, guild, type, id, hyper);
-        }
-
-        private static void AddIgnoredArtist(ulong guild, int type, string id, string hyper)
-        {
-            AddGenericRecord(IgnoredArtists, guild, type, id, hyper);
-        }
-
-        private static void AddSavedTrack(ulong guild, int type, string id, string hyper)
-        {
-            AddGenericRecord(TrackInfo, guild, type, id, hyper);
+            // Invalid object name
+            if (error == 208)
+            {
+                Server server = new(new ServerConnection(_connection));
+                _ = server.ConnectionContext.ExecuteNonQuery(table.GetScript());
+                return true;
+            }
+            return false;
         }
     }
 }

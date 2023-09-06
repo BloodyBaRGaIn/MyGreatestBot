@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Data;
 
 namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
 {
@@ -44,24 +45,24 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
 
         internal override SqlCommand GetSelectQuery(SqlConnection? connection, ulong guild)
         {
-            SqlCommand command = new($"SELECT Type, ID FROM {Name} WHERE Guild=@guild ORDER BY Counter ASC");
+            SqlCommand command = new(
+                $"SELECT Type, ID FROM {Name} WHERE Guild=@guild ORDER BY Counter ASC",
+                connection);
 
             command.Parameters.Clear();
-            command.Parameters.Add("@guild", System.Data.SqlDbType.Decimal, 38).Value = Convert.ToDecimal(guild);
-
-            command.Connection = connection;
+            AddGuildParameter(command, "@guild", guild);
 
             return command;
         }
 
         internal override SqlCommand GetDeleteQuery(SqlConnection? connection, ulong guild)
         {
-            SqlCommand command = new($"DELETE FROM {Name} WHERE Guild=@guild");
+            SqlCommand command = new(
+                $"DELETE FROM {Name} WHERE Guild=@guild",
+                connection);
 
             command.Parameters.Clear();
-            command.Parameters.Add("@guild", System.Data.SqlDbType.Decimal, 38).Value = Convert.ToDecimal(guild);
-
-            command.Connection = connection;
+            AddGuildParameter(command, "@guild", guild);
 
             return command;
         }
@@ -72,7 +73,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
         /// <param name="connection"></param>
         /// <param name="params">Type, ID</param>
         /// <returns>Connamd to execute</returns>
-        internal override SqlCommand GetSelectWhereQuery(SqlConnection? connection = null, params object[] @params)
+        internal override SqlCommand GetSelectWhereQuery(SqlConnection? connection, params object[] @params)
         {
             if (@params.Length != 3)
             {
@@ -94,14 +95,14 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
                 throw new InvalidOperationException($"Cannot cast {@params[2]} to {typeof(string).Name}");
             }
 
-            SqlCommand command = new($"SELECT Type, ID FROM {Name} WHERE Guild=@guild AND Type=@type AND ID=@id");
+            SqlCommand command = new(
+                $"SELECT Type, ID FROM {Name} WHERE Guild=@guild AND Type=@type AND ID=@id",
+                connection);
 
             command.Parameters.Clear();
-            command.Parameters.Add("@guild", System.Data.SqlDbType.Decimal, 38).Value = Convert.ToDecimal(guild);
+            AddGuildParameter(command, "@guild", guild);
             _ = command.Parameters.AddWithValue("@type", type);
             _ = command.Parameters.AddWithValue("@id", id);
-
-            command.Connection = connection;
 
             return command;
         }
@@ -112,7 +113,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
         /// <param name="connection"></param>
         /// <param name="params">Type, ID, Hyper</param>
         /// <returns>Connamd to execute</returns>
-        internal override SqlCommand GetInsertQuery(SqlConnection? connection = null, params object[] @params)
+        internal override SqlCommand GetInsertQuery(SqlConnection? connection, params object[] @params)
         {
             if (@params.Length != 4)
             {
@@ -139,17 +140,22 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
                 throw new InvalidOperationException($"Cannot cast {@params[3]} to {typeof(string).Name}");
             }
 
-            SqlCommand command = new($"INSERT INTO {Name} (Guild, Type, ID, Hyper) VALUES (@guild, @type, @id, @hyper)");
+            SqlCommand command = new(
+                $"INSERT INTO {Name} (Guild, Type, ID, Hyper) VALUES (@guild, @type, @id, @hyper)",
+                connection);
 
             command.Parameters.Clear();
-            command.Parameters.Add("@guild", System.Data.SqlDbType.Decimal, 38).Value = Convert.ToDecimal(guild);
+            AddGuildParameter(command, "@guild", guild);
             _ = command.Parameters.AddWithValue("@type", type);
             _ = command.Parameters.AddWithValue("@id", id);
             _ = command.Parameters.AddWithValue("@hyper", hyper);
 
-            command.Connection = connection;
-
             return command;
+        }
+
+        private static void AddGuildParameter(SqlCommand command, string name, ulong value)
+        {
+            _ = command.Parameters.Add(name, SqlDbType.Decimal, 38).Value = Convert.ToDecimal(value);
         }
     }
 }

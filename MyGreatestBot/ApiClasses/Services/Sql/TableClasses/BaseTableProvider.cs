@@ -23,12 +23,12 @@ namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
             throw new NotImplementedException();
         }
 
-        internal virtual SqlCommand GetSelectWhereQuery(SqlConnection? connection = null, params object[] @params)
+        internal virtual SqlCommand GetSelectWhereQuery(SqlConnection? connection, params object[] @params)
         {
             throw new NotImplementedException();
         }
 
-        internal virtual SqlCommand GetInsertQuery(SqlConnection? connection = null, params object[] @params)
+        internal virtual SqlCommand GetInsertQuery(SqlConnection? connection, params object[] @params)
         {
             throw new NotImplementedException();
         }

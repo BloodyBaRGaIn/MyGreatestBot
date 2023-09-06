@@ -4,15 +4,10 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 {
     internal sealed class DatabaseScriptProvider
     {
-        internal string LocalStoreDirectory { get; init; } = Directory.GetCurrentDirectory();
-        internal string DatabaseName { get; init; } = string.Empty;
+        internal string LocalStoreDirectory { get; } = Directory.GetCurrentDirectory();
+        internal string DatabaseName { get; } = string.Empty;
 
-        internal DatabaseScriptProvider()
-        {
-
-        }
-
-        internal DatabaseScriptProvider(string localStoreDirectory, string databaseName) : this()
+        internal DatabaseScriptProvider(string localStoreDirectory, string databaseName)
         {
             LocalStoreDirectory = localStoreDirectory;
             DatabaseName = databaseName;
@@ -21,24 +16,27 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
         internal string GetDatabaseScript()
         {
             string trimmed_path = LocalStoreDirectory.Replace('/', '\\').TrimEnd('\\');
-
-            if (!Directory.Exists(trimmed_path))
-            {
-                _ = Directory.CreateDirectory(trimmed_path);
-            }
-
             string database_file_path = $"{trimmed_path}\\{DatabaseName}.mdf";
             string log_file_path = $"{trimmed_path}\\{DatabaseName}_log.ldf";
 
-            if (File.Exists(database_file_path))
+            try
             {
-                File.Delete(database_file_path);
-            }
+                if (!Directory.Exists(trimmed_path))
+                {
+                    _ = Directory.CreateDirectory(trimmed_path);
+                }
 
-            if (File.Exists(log_file_path))
-            {
-                File.Delete(log_file_path);
+                if (File.Exists(database_file_path))
+                {
+                    File.Delete(database_file_path);
+                }
+
+                if (File.Exists(log_file_path))
+                {
+                    File.Delete(log_file_path);
+                }
             }
+            catch { }
 
             string script = $"""
                 CREATE DATABASE [{DatabaseName}]

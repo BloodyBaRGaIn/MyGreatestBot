@@ -116,7 +116,7 @@ namespace MyGreatestBot.Player
                 }
                 foreach ((ApiIntents api, string id) in info)
                 {
-                    tracks_queue.Enqueue(GenericTrackInfo.GetTrack(api, id));
+                    tracks_queue.Enqueue(ITrackInfo.GetTrack(api, id));
                     Handler.Log.Send("Track restored");
                 }
                 SqlServerWrapper.RemoveTracks(Handler.GuildId);
