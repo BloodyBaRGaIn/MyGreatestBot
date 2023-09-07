@@ -36,6 +36,11 @@ namespace MyGreatestBot.ApiClasses.Utils
             return collection.GetEnumerator();
         }
 
+        public override string ToString()
+        {
+            return this;
+        }
+
         public static implicit operator string(DomainCollection domainCollection)
         {
             return domainCollection.GetPrimary();

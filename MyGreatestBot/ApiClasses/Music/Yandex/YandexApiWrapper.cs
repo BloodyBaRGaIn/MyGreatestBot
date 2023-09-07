@@ -66,7 +66,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
 
-        DomainCollection IAccessible.Domains { get; } = new("https://www.youtube.com/");
+        DomainCollection IAccessible.Domains { get; } = new("https://music.yandex.ru/");
 
         public void PerformAuth()
         {
