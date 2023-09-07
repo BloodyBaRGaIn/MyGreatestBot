@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses;
-using MyGreatestBot.Bot;
-using MyGreatestBot.Bot.Handlers;
+using MyGreatestBot.ApiClasses.Services.Discord;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System.Diagnostics.CodeAnalysis;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyGreatestBot.Utils
+namespace MyGreatestBot.ApiClasses.Utils
 {
     /// <summary>
     /// Hypertext string

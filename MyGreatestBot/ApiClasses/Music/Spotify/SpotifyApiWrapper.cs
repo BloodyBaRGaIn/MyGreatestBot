@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using SpotifyAPI.Web;
 using System.Collections.Generic;
@@ -15,20 +16,20 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// Spotify API wrapper class
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public static class SpotifyApiWrapper
+    public sealed class SpotifyApiWrapper : IMusicAPI
     {
         //[AllowNull]
         //private static EmbedIOAuthServer server;
         [AllowNull]
-        private static SpotifyClient SpotifyClientInstance;
-        private static readonly SpotifyApiException GenericException = new();
+        private SpotifyClient SpotifyClientInstance;
+        private readonly SpotifyApiException GenericException = new();
 
-        internal static IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw GenericException;
-        internal static IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw GenericException;
-        internal static IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw GenericException;
-        internal static ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw GenericException;
-        internal static IPlayerClient Player => SpotifyClientInstance?.Player ?? throw GenericException;
-        internal static ISearchClient Search => SpotifyClientInstance?.Search ?? throw GenericException;
+        private IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw GenericException;
+        private IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw GenericException;
+        private IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw GenericException;
+        private ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw GenericException;
+        //private IPlayerClient Player => SpotifyClientInstance?.Player ?? throw GenericException;
+        //private ISearchClient Search => SpotifyClientInstance?.Search ?? throw GenericException;
 
         private static class SpotifyQueryDecomposer
         {
@@ -60,7 +61,18 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        public static void PerformAuth()
+        private SpotifyApiWrapper()
+        {
+
+        }
+
+        public static IMusicAPI Instance { get; private set; } = new SpotifyApiWrapper();
+
+        ApiIntents IAPI.ApiType => ApiIntents.Spotify;
+
+        DomainCollection IAccessible.Domains { get; } = new("https://open.spotify.com/", string.Empty);
+
+        public void PerformAuth()
         {
             SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
@@ -87,7 +99,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             SpotifyClientInstance = new(config);
         }
 
-        public static void Logout()
+        public void Logout()
         {
             SpotifyClientInstance = null;
         }
@@ -118,9 +130,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         //    SpotifyClientInstance = new(tokenResponse.AccessToken);
         //}
 
-        public static IEnumerable<SpotifyTrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo> GetTracks(string? query)
         {
-            List<SpotifyTrackInfo> tracks = new();
+            List<ITrackInfo> tracks = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -185,7 +197,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 string? track_id = SpotifyQueryDecomposer.TryGetTrackId(query);
                 if (!string.IsNullOrWhiteSpace(track_id))
                 {
-                    SpotifyTrackInfo? track = GetTrack(track_id);
+                    ITrackInfo? track = GetTrack(track_id);
 
                     if (track != null)
                     {
@@ -199,14 +211,14 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return tracks;
         }
 
-        public static SpotifyTrackInfo? GetTrack(string id)
+        public ITrackInfo? GetTrack(string id)
         {
             FullTrack? track = Tracks.Get(id).GetAwaiter().GetResult();
 
             return track == null ? null : new SpotifyTrackInfo(track);
         }
 
-        private static void FromAlbumId(string album_id, List<SpotifyTrackInfo> tracks)
+        private void FromAlbumId(string album_id, List<ITrackInfo> tracks)
         {
             FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();
             if (album == null)

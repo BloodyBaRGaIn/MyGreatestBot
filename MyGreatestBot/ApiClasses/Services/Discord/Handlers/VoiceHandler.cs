@@ -3,7 +3,7 @@ using DSharpPlus.VoiceNext;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace MyGreatestBot.Bot.Handlers
+namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     public sealed class VoiceHandler
     {

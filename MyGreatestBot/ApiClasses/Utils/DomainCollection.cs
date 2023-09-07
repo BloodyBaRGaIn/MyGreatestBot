@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace MyGreatestBot.Utils
+namespace MyGreatestBot.ApiClasses.Utils
 {
     public sealed class DomainCollection : IEnumerable<string>, IEnumerable
     {

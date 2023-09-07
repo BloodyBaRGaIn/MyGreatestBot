@@ -1,5 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
-using MyGreatestBot.Bot;
+using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;

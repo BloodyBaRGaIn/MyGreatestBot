@@ -1,6 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
-using MyGreatestBot.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;

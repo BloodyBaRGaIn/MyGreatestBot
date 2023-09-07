@@ -6,9 +6,10 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
-using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.ConfigStructs;
-using MyGreatestBot.Bot.Handlers;
+using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -18,10 +19,10 @@ using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MyGreatestBot.Bot
+namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     [SupportedOSPlatform("windows")]
-    public sealed class DiscordBot
+    public sealed class DiscordBot : IAPI, IAccessible
     {
         [AllowNull]
         public DiscordClient Client { get; private set; }
@@ -33,80 +34,90 @@ namespace MyGreatestBot.Bot
         public VoiceNextExtension Voice { get; private set; }
         public ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
+        ApiIntents IAPI.ApiType => ApiIntents.Discord;
+
+        DomainCollection IAccessible.Domains { get; } = new("http://www.discord.com/");
+
+        public void PerformAuth()
+        {
+            DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
+
+            DiscordConfiguration discordConfig = new()
+            {
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Error,
+                Intents = DiscordIntents.All,
+                Token = config_js.Token,
+                TokenType = TokenType.Bot,
+                AutoReconnect = true
+            };
+
+            Client = new DiscordClient(discordConfig);
+
+            Client.Ready += async (sender, args) =>
+            {
+                await sender.UpdateStatusAsync(new()
+                {
+                    ActivityType = ActivityType.ListeningTo,
+                    Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
+                }, UserStatus.Online);
+
+                Console.WriteLine("Discord ONLINE");
+            };
+
+            Client.ClientErrored += async (sender, args) =>
+            {
+                await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+            };
+
+            Client.SocketErrored += async (sender, args) =>
+            {
+                await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+            };
+
+            Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+
+            Interactivity = Client.UseInteractivity(new()
+            {
+                Timeout = TimeSpan.FromMinutes(20)
+            });
+
+            CommandsNextConfiguration commandsConfig = new()
+            {
+                StringPrefixes = new string[] { config_js.Prefix },
+                CaseSensitive = false,
+                EnableMentionPrefix = true,
+                EnableDms = true,
+                EnableDefaultHelp = false,
+                Services = ServiceProvider,
+            };
+
+            Commands = Client.UseCommandsNext(commandsConfig);
+
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
+            Commands.RegisterCommands<ConnectionCommands>();
+            Commands.RegisterCommands<QueuingCommands>();
+            Commands.RegisterCommands<PlaybackCommands>();
+            Commands.RegisterCommands<DatabaseCommands>();
+            Commands.RegisterCommands<DebugCommands>();
+
+            Commands.CommandErrored += Commands_CommandErrored;
+            Commands.CommandExecuted += Commands_CommandExecuted;
+
+            MarkdownWriter.GenerateFile();
+        }
+
         public async Task RunAsync(int connection_timeout)
         {
+            if (Client == null)
+            {
+                throw new DiscordApiException();
+            }
+
             try
             {
-                DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
-
-                DiscordConfiguration discordConfig = new()
-                {
-                    MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Error,
-                    Intents = DiscordIntents.All,
-                    Token = config_js.Token,
-                    TokenType = TokenType.Bot,
-                    AutoReconnect = true
-                };
-
-                Client = new DiscordClient(discordConfig);
-
-                Client.Ready += async (sender, args) =>
-                {
-                    await sender.UpdateStatusAsync(new()
-                    {
-                        ActivityType = ActivityType.ListeningTo,
-                        Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
-                    }, UserStatus.Online);
-
-                    Console.WriteLine("Discord SUCCESS");
-                };
-
-                Client.ClientErrored += async (sender, args) =>
-                {
-                    await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
-                };
-
-                Client.SocketErrored += async (sender, args) =>
-                {
-                    await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
-                };
-
-                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-
-                Interactivity = Client.UseInteractivity(new()
-                {
-                    Timeout = TimeSpan.FromMinutes(20)
-                });
-
-                CommandsNextConfiguration commandsConfig = new()
-                {
-                    StringPrefixes = new string[] { config_js.Prefix },
-                    CaseSensitive = false,
-                    EnableMentionPrefix = true,
-                    EnableDms = true,
-                    EnableDefaultHelp = false,
-                    Services = ServiceProvider,
-                };
-
-                Commands = Client.UseCommandsNext(commandsConfig);
-
-                Commands.SetHelpFormatter<CustomHelpFormatter>();
-                Commands.RegisterCommands<ConnectionCommands>();
-                Commands.RegisterCommands<QueuingCommands>();
-                Commands.RegisterCommands<PlaybackCommands>();
-                Commands.RegisterCommands<DatabaseCommands>();
-                Commands.RegisterCommands<DebugCommands>();
-
-                Commands.CommandErrored += Commands_CommandErrored;
-                Commands.CommandExecuted += Commands_CommandExecuted;
-
-                MarkdownWriter.GenerateFile();
-
-                ApiManager.TryAcessDomain(ApiIntents.Discord);
-
                 if (!Client.ConnectAsync().Wait(connection_timeout))
                 {
-                    throw new ApplicationException("Cannot connect to Discord");
+                    throw new DiscordApiException("Cannot connect to Discord");
                 }
                 Voice = Client.UseVoiceNext();
             }

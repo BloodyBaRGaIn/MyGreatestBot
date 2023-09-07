@@ -56,10 +56,10 @@ namespace MyGreatestBot.ApiClasses.Music
 
             private static readonly TracksReceiver[] collection = new TracksReceiver[]
             {
-                new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.GetTracks),
-                new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.GetTracks),
-                new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.GetTracks),
-                new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.GetTracks),
+                new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.Instance.GetTracks),
+                new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.Instance.GetTracks),
+                new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.Instance.GetTracks),
+                new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.Instance.GetTracks),
             };
         }
     }

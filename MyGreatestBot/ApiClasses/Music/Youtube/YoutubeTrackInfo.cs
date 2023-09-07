@@ -1,5 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Exceptions;
-using MyGreatestBot.Utils;
+using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
@@ -68,13 +68,15 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             try
             {
+                YoutubeApiWrapper _api_instance = YoutubeApiWrapper.Instance as YoutubeApiWrapper ?? throw new ArgumentNullException(nameof(YoutubeApiWrapper));
+
                 AudioURL = Base.IsLiveStream
-                    ? YoutubeApiWrapper.Streams
+                    ? _api_instance.Streams
                         .GetHttpLiveStreamUrlAsync(Id)
                         .AsTask()
                         .GetAwaiter()
                         .GetResult()
-                    : YoutubeApiWrapper.Streams
+                    : _api_instance.Streams
                         .GetManifestAsync(Id)
                         .AsTask()
                         .GetAwaiter()

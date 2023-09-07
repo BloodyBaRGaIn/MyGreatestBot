@@ -1,14 +1,10 @@
-﻿using MyGreatestBot.ApiClasses.Music.Spotify;
-using MyGreatestBot.ApiClasses.Music.Vk;
-using MyGreatestBot.ApiClasses.Music.Yandex;
-using MyGreatestBot.ApiClasses.Music.Youtube;
-using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 
-namespace MyGreatestBot.ApiClasses
+namespace MyGreatestBot.ApiClasses.Music
 {
     /// <summary>
     /// Track information abstraction
@@ -24,7 +20,7 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Base URL
         /// </summary>
-        public virtual string Domain => ApiManager.DoaminsDictionary[TrackType];
+        public virtual string Domain => ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
 
         /// <summary>
         /// Extended track name
@@ -232,14 +228,20 @@ namespace MyGreatestBot.ApiClasses
             return (int)result;
         }
 
+        /// <summary>
+        /// Get track from search result by its id
+        /// </summary>
+        /// <param name="api">API flag </param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         internal static ITrackInfo? GetTrack(ApiIntents api, string id)
         {
             return api switch
             {
-                ApiIntents.Youtube => YoutubeApiWrapper.GetTrack(id),
-                ApiIntents.Yandex => YandexApiWrapper.GetTrack(id),
-                ApiIntents.Vk => VkApiWrapper.GetTrack(id),
-                ApiIntents.Spotify => SpotifyApiWrapper.GetTrack(id),
+                ApiIntents.Youtube => Youtube.YoutubeApiWrapper.Instance.GetTrack(id),
+                ApiIntents.Yandex => Yandex.YandexApiWrapper.Instance.GetTrack(id),
+                ApiIntents.Vk => Vk.VkApiWrapper.Instance.GetTrack(id),
+                ApiIntents.Spotify => Spotify.SpotifyApiWrapper.Instance.GetTrack(id),
                 _ => null,
             };
         }

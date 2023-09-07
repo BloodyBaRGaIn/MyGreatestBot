@@ -5,12 +5,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 
-namespace MyGreatestBot.Bot
+namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     [SupportedOSPlatform("windows")]
     public static class BotWrapper
     {
-        private static readonly DiscordBot BotInstance = new();
+        public static readonly DiscordBot BotInstance = new();
         public static IServiceProvider ServiceProvider => BotInstance.ServiceProvider;
 
         [AllowNull]

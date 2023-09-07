@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// Vk API wrapper class
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public static class VkApiWrapper
+    public sealed class VkApiWrapper : IMusicAPI
     {
         [AllowNull]
-        private static IVkApi api;
-        private static readonly VkApiException GenericException = new();
+        private IVkApi api;
+        private readonly VkApiException GenericException = new();
 
-        private static IAudioCategory Audio => api?.Audio ?? throw GenericException;
+        private IAudioCategory Audio => api?.Audio ?? throw GenericException;
 
         private static class VkQueryDecomposer
         {
@@ -54,7 +55,18 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        public static void PerformAuth()
+        private VkApiWrapper()
+        {
+
+        }
+
+        public static IMusicAPI Instance { get; private set; } = new VkApiWrapper();
+
+        ApiIntents IAPI.ApiType => ApiIntents.Vk;
+
+        DomainCollection IAccessible.Domains { get; } = new("https://www.vk.com/");
+
+        public void PerformAuth()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
@@ -83,19 +95,19 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        public static void Logout()
+        public void Logout()
         {
             api?.LogOut();
         }
 
-        public static IEnumerable<VkTrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo> GetTracks(string? query)
         {
             if (api == null || !api.IsAuthorized)
             {
                 throw GenericException;
             }
 
-            List<VkTrackInfo> tracks = new();
+            List<ITrackInfo> tracks = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -115,7 +127,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return tracks;
         }
 
-        public static VkTrackInfo? GetTrack(string id)
+        public ITrackInfo? GetTrack(string id)
         {
             if (!long.TryParse(id, out long trackId))
             {
@@ -126,7 +138,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return audio == null ? null : new VkTrackInfo(audio);
         }
 
-        private static bool TryAddAsCollection(string query, List<VkTrackInfo> tracks, bool is_playlist)
+        private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)
         {
             bool success = false;
 
@@ -157,7 +169,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             foreach (Audio t in vk_tracks)
             {
-                tracks.Add(new(t, playlist));
+                tracks.Add(new VkTrackInfo(t, playlist));
             }
 
             return success;

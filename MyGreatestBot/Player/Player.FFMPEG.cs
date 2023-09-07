@@ -1,4 +1,4 @@
-﻿using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses.Music;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;

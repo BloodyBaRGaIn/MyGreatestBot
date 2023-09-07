@@ -13,10 +13,10 @@
         Spotify = 0x08,
         Sql = 0x10,
 
-        Music = Youtube | Yandex | Vk | Spotify,
-        Services = Sql,
+        Discord = 0x10000000,
 
-        Discord = None,
+        Music = Youtube | Yandex | Vk | Spotify,
+        Services = Sql | Discord,
 
         All = Music | Services
     }

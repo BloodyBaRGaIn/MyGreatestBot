@@ -3,11 +3,11 @@ using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using System.Threading;
 using YoutubeExplode;
@@ -18,19 +18,17 @@ using YoutubeExplode.Videos.Streams;
 
 namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
-    /// <summary>
-    /// Youtube API wrapper class
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public static class YoutubeApiWrapper
+    public sealed class YoutubeApiWrapper : IMusicAPI
     {
-        [AllowNull]
-        private static YoutubeClient api;
-        private static readonly YoutubeApiException GenericException = new();
+        private IMusicAPI Base => this;
 
-        internal static VideoClient Videos => api?.Videos ?? throw GenericException;
-        internal static StreamClient Streams => api?.Videos.Streams ?? throw GenericException;
-        internal static PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
+        [AllowNull]
+        private YoutubeClient api;
+        private readonly YoutubeApiException GenericException = new();
+
+        private VideoClient Videos => api?.Videos ?? throw GenericException;
+        public StreamClient Streams => api?.Videos.Streams ?? throw GenericException;
+        private PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
 
         private static class YoutubeQueryDecomposer
         {
@@ -50,7 +48,18 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
         }
 
-        public static void PerformAuth()
+        private YoutubeApiWrapper()
+        {
+
+        }
+
+        public static IMusicAPI Instance { get; private set; } = new YoutubeApiWrapper();
+
+        ApiIntents IAPI.ApiType => ApiIntents.Youtube;
+
+        DomainCollection IAccessible.Domains { get; } = new("https://music.yandex.ru/");
+
+        public void PerformAuth()
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
@@ -63,76 +72,80 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             YouTubeService GoogleService = new(new BaseClientService.Initializer()
             {
                 ApiKey = user.Key,
-                ApplicationName = typeof(YoutubeApiWrapper).ToString()
+                ApplicationName = typeof(YoutubeApiWrapper).Name
             });
 
             api = new(GoogleService.HttpClient);
         }
 
-        public static void Logout()
+        public void Logout()
         {
             api = null;
         }
 
-        public static IEnumerable<YoutubeTrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo> GetTracks(string query)
         {
             if (api == null)
             {
                 throw GenericException;
             }
 
-            List<YoutubeTrackInfo> tracks = new();
+            List<ITrackInfo> tracks = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
                 return tracks;
             }
 
-            string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(query);
-
-            if (!string.IsNullOrWhiteSpace(playlist_id))
             {
-                Playlist pl_instance = Playlists.GetAsync(playlist_id)
-                                                .AsTask()
-                                                .GetAwaiter()
-                                                .GetResult();
+                string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(query);
 
-                if (pl_instance != null)
+                if (!string.IsNullOrWhiteSpace(playlist_id))
                 {
-                    IReadOnlyList<PlaylistVideo> playlist_videos = Playlists.GetVideosAsync(pl_instance.Id)
-                                                                            .GetAwaiter()
-                                                                            .GetResult();
+                    Playlist pl_instance = Playlists.GetAsync(playlist_id)
+                                                    .AsTask()
+                                                    .GetAwaiter()
+                                                    .GetResult();
 
-                    foreach (PlaylistVideo pl_video in playlist_videos)
+                    if (pl_instance != null)
                     {
-                        tracks.Add(new(pl_video, pl_instance));
-                    }
-                }
+                        IReadOnlyList<PlaylistVideo> playlist_videos = Playlists.GetVideosAsync(pl_instance.Id)
+                                                                                .GetAwaiter()
+                                                                                .GetResult();
 
-                return tracks;
+                        foreach (PlaylistVideo pl_video in playlist_videos)
+                        {
+                            tracks.Add(new YoutubeTrackInfo(pl_video, pl_instance));
+                        }
+                    }
+
+                    return tracks;
+                }
             }
 
-            string? video_id = YoutubeQueryDecomposer.TryGetVideoId(query);
-
-            if (!string.IsNullOrWhiteSpace(video_id))
             {
-                YoutubeTrackInfo? track = GetTrack(video_id);
+                string? video_id = YoutubeQueryDecomposer.TryGetVideoId(query);
 
-                if (track != null)
+                if (!string.IsNullOrWhiteSpace(video_id))
                 {
-                    tracks.Add(track);
+                    ITrackInfo? track = Base.GetTrack(video_id);
+
+                    if (track != null)
+                    {
+                        tracks.Add(track);
+                    }
                 }
             }
 
             return tracks;
         }
 
-        public static YoutubeTrackInfo? GetTrack(string id)
+        public ITrackInfo? GetTrack(string id)
         {
             Video video = Videos.GetAsync(id)
-                                .AsTask()
-                                .GetAwaiter()
-                                .GetResult();
+                    .AsTask()
+                    .GetAwaiter()
+                    .GetResult();
 
             return video == null ? null : new YoutubeTrackInfo(video);
         }

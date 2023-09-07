@@ -1,4 +1,4 @@
-﻿using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using System.Runtime.Versioning;
@@ -25,13 +25,13 @@ namespace MyGreatestBot.Player
 
                 Handler.Message.Send(GetPlayingMessage<PlayerException>(track, "Playing"));
 
-                if (SqlServerWrapper.IsAnyArtistIgnored(track, Handler.GuildId))
+                if (SqlServerWrapper.Instance.IsAnyArtistIgnored(track, Handler.GuildId))
                 {
                     Handler.Message.Send(new IgnoreException("Skipping track with ignored artist(s)"), true);
                     continue;
                 }
 
-                if (SqlServerWrapper.IsTrackIgnored(track, Handler.GuildId))
+                if (SqlServerWrapper.Instance.IsTrackIgnored(track, Handler.GuildId))
                 {
                     Handler.Message.Send(new IgnoreException("Skipping ignored track"), true);
                     continue;

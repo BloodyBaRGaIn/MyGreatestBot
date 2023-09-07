@@ -1,11 +1,11 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -16,17 +16,15 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    /// <summary>
-    /// Yandex API wpapper class
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public static class YandexApiWrapper
+    public sealed class YandexApiWrapper : IMusicAPI
     {
-        [AllowNull]
-        private static YandexMusicClient _client;
-        private static readonly YandexApiException GenericException = new();
+        private IMusicAPI Base => this;
 
-        private static YandexMusicClient Api => _client ?? throw GenericException;
+        [AllowNull]
+        private YandexMusicClient _client;
+        private readonly YandexApiException GenericException = new();
+
+        private YandexMusicClient Api => _client ?? throw GenericException;
 
         private static class YandexQueryDecomposer
         {
@@ -59,7 +57,18 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        public static void PerformAuth()
+        private YandexApiWrapper()
+        {
+
+        }
+
+        public static IMusicAPI Instance { get; private set; } = new YandexApiWrapper();
+
+        ApiIntents IAPI.ApiType => ApiIntents.Yandex;
+
+        DomainCollection IAccessible.Domains { get; } = new("https://www.youtube.com/");
+
+        public void PerformAuth()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
@@ -98,7 +107,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        public static void Logout()
+        public void Logout()
         {
             _client = null;
         }
@@ -108,7 +117,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         /// </summary>
         /// <param name="otherTrack">Track info from another API</param>
         /// <returns>Track info</returns>
-        public static ITrackInfo? SearchTrack(ITrackInfo otherTrack)
+        public ITrackInfo? SearchTrack(ITrackInfo otherTrack)
         {
             if (otherTrack.TrackType == ApiIntents.Yandex)
             {
@@ -173,9 +182,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return first;
         }
 
-        public static IEnumerable<YandexTrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo> GetTracks(string? query)
         {
-            List<YandexTrackInfo> tracks_collection = new();
+            List<ITrackInfo> tracks_collection = new();
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -186,7 +195,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 string? track_id_str = YandexQueryDecomposer.TryGetTrackId(query);
                 if (!string.IsNullOrWhiteSpace(track_id_str))
                 {
-                    YandexTrackInfo? track = GetTrack(track_id_str);
+                    ITrackInfo? track = Base.GetTrack(track_id_str);
                     if (track != null)
                     {
                         tracks_collection.Add(track);
@@ -254,7 +263,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return tracks_collection;
         }
 
-        public static YandexTrackInfo? GetTrack(string? track_id_str)
+        public ITrackInfo? GetTrack(string? track_id_str)
         {
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
@@ -262,15 +271,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             YTrack track = Api.GetTrack(track_id_str);
-            if (track == null)
-            {
-                return null;
-            }
 
-            return new(track);
+            return track == null ? null : new YandexTrackInfo(track);
         }
 
-        private static List<YandexTrackInfo?> GetAlbum(string? album_id_str)
+        private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
@@ -297,7 +302,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return tracks_collection;
         }
 
-        private static List<YandexTrackInfo?> GetArtist(string? artist_id_str)
+        private List<YandexTrackInfo?> GetArtist(string? artist_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = new();
 
@@ -325,7 +330,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return tracks_collection;
         }
 
-        private static List<YandexTrackInfo?> GetPlaylist(string playlist_user_str, string playlist_id_str)
+        private List<YandexTrackInfo?> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = new();
 

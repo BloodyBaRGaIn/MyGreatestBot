@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
@@ -41,7 +42,7 @@ namespace MyGreatestBot.Player
                 }
                 lock (tracks_queue)
                 {
-                    SqlServerWrapper.RemoveTracks(Handler.GuildId);
+                    SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
 
                     List<ITrackInfo> tracks = new();
                     if (currentTrack != null)
@@ -52,7 +53,7 @@ namespace MyGreatestBot.Player
                     tracks.AddRange(tracks_queue.Where(t => t != null));
 #pragma warning restore CS8620
 
-                    SqlServerWrapper.SaveTracks(tracks, Handler.GuildId);
+                    SqlServerWrapper.Instance.SaveTracks(tracks, Handler.GuildId);
 
                     Stop(source | CommandActionSource.Mute);
 
@@ -94,7 +95,7 @@ namespace MyGreatestBot.Player
                 List<(ApiIntents, string)> info;
                 try
                 {
-                    info = SqlServerWrapper.RestoreTracks(Handler.GuildId);
+                    info = SqlServerWrapper.Instance.RestoreTracks(Handler.GuildId);
                 }
                 catch (Exception ex)
                 {
@@ -118,7 +119,7 @@ namespace MyGreatestBot.Player
                     tracks_queue.Enqueue(ITrackInfo.GetTrack(api, id));
                     Handler.Log.Send("Track restored");
                 }
-                SqlServerWrapper.RemoveTracks(Handler.GuildId);
+                SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
                 if (!mute)
                 {
                     Handler.Message.Send(new RestoreException("Restore success"), true);

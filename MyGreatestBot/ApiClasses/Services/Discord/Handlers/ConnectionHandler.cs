@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
-using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
@@ -12,7 +11,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace MyGreatestBot.Bot.Handlers
+namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     [SupportedOSPlatform("windows")]
     public sealed class ConnectionHandler

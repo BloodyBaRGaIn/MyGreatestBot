@@ -1,10 +1,9 @@
-﻿using MyGreatestBot.Extensions;
-using MyGreatestBot.Utils;
+﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
@@ -23,69 +22,29 @@ namespace MyGreatestBot.ApiClasses
 
         public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
 
-        public static readonly Dictionary<ApiIntents, DomainCollection> DoaminsDictionary = new()
+        private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = new();
+
+        public static void Add([DisallowNull] IAPI api)
         {
-            [ApiIntents.Youtube] = new DomainCollection("https://www.youtube.com/"),
-            [ApiIntents.Yandex] = new DomainCollection("https://music.yandex.ru/"),
-            [ApiIntents.Vk] = new DomainCollection("https://www.vk.com/"),
-            [ApiIntents.Spotify] = new DomainCollection("https://open.spotify.com/", string.Empty),
-            [ApiIntents.Discord] = new DomainCollection("https://www.discord.com/")
-        };
-
-        public static void TryAcessDomain(ApiIntents api)
-        {
-            if (!DoaminsDictionary.TryGetValue(api, out DomainCollection? domains)
-                || !domains.Any())
-            {
-                return;
-            }
-
-            foreach (string url in domains)
-            {
-                if (url == string.Empty)
-                {
-                    // bypass accessing check
-                    return;
-                }
-                HttpClient client = new();
-                try
-                {
-                    HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, domains));
-
-                    using StreamReader stream = new(message.Content.ReadAsStream());
-                    string content = stream.ReadToEnd();
-                    stream.Close();
-
-                    if (message.IsSuccessStatusCode)
-                    {
-                        return;
-                    }
-                }
-                catch { }
-                finally
-                {
-                    client.Dispose();
-                }
-            }
-
-            throw new ApplicationException($"{api} is not available");
+            ApiCollection.Add(api.ApiType, api);
         }
 
-        private static AuthActions GetActions(ApiIntents desired)
+        public static T? Get<T>(ApiIntents intents) where T : IAPI
         {
-            if (!AuthActions.TryGetValue(desired, out AuthActions? actions))
-            {
-                throw new ArgumentException($"{desired} auth actions not provided");
-            }
-            return actions;
+            return (T?)ApiCollection[intents];
         }
 
-        /// <summary>
-        /// <para>Performs auth for APIs</para>
-        /// <para>Throws an exception if API auth process failed</para>
-        /// </summary>
-        /// <param name="intents">APIs intents for initialization</param>
-        /// <exception cref="ApplicationException"></exception>
+        public static void TryAcessDomain(ApiIntents intents)
+        {
+            if (ApiCollection.TryGetValue(intents, out IAPI? api))
+            {
+                if (api is IAccessible accessible)
+                {
+                    accessible.TryAcess();
+                }
+            }
+        }
+
         public static void InitApis(ApiIntents intents = ApiIntents.All)
         {
             InitIntents = intents;
@@ -102,48 +61,48 @@ namespace MyGreatestBot.ApiClasses
                 Utils.YoutubeExplodeBypass.Bypass();
             }
 
-            foreach (ApiIntents api in AuthActions.ApiOrder)
+            foreach (IAPI? api in ApiCollection.Values)
             {
-                Init(api);
+                if (api != null)
+                {
+                    Init(api);
+                }
             }
         }
 
-        /// <summary>
-        /// Ititializes desired API
-        /// </summary>
-        /// <param name="desired">API flag</param>
-        /// <param name="init_action">Init action</param>
-        /// <param name="delay">Sleep after invocation</param>
-        /// <exception cref="ApplicationException">Throws if failed</exception>
-        private static void Init(ApiIntents desired, int delay = 500)
+        private static void Init(IAPI desired, int delay = 500)
         {
-            if (!InitIntents.HasFlag(desired))
+            if (!InitIntents.HasFlag(desired.ApiType))
             {
                 return;
             }
 
-            InitBody(desired, GetActions(desired), delay);
+            InitBody(desired, delay);
         }
 
-        private static void InitBody(ApiIntents desired, AuthActions actions, int delay)
+        private static void InitBody(IAPI desired, int delay)
         {
             try
             {
-                TryAcessDomain(desired);
-                actions.InitAction.Invoke();
-                Console.WriteLine($"{desired} SUCCESS");
-                FailedIntents &= ~desired;
+                if (desired is IAccessible accessible)
+                {
+                    accessible.TryAcess();
+                }
+
+                desired.PerformAuth();
+                Console.WriteLine($"{desired.ApiType} SUCCESS");
+                FailedIntents &= ~desired.ApiType;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{desired} FAILED");
+                Console.WriteLine($"{desired.ApiType} FAILED");
                 Console.Error.WriteLine(ex.GetExtendedMessage());
                 try
                 {
-                    actions.DeinitAction.Invoke();
+                    desired.Logout();
                 }
                 catch { }
-                FailedIntents |= desired;
+                FailedIntents |= desired.ApiType;
             }
             finally
             {
@@ -151,67 +110,50 @@ namespace MyGreatestBot.ApiClasses
             }
         }
 
-        /// <summary>
-        /// <para>Performs logout</para>
-        /// <para>Throws an exception if API logout process failed</para>
-        /// </summary>
-        /// <param name="intents">APIs intents for logout</param>
         public static void DeinitApis(ApiIntents intents = ApiIntents.All)
         {
             intents &= InitIntents;
 
-            foreach (ApiIntents api in AuthActions.ApiOrder)
+            foreach (IAPI? api in ApiCollection.Values)
             {
-                Deinit(intents, api);
+                if (api != null)
+                {
+                    Deinit(intents, api);
+                }
             }
         }
 
-        /// <summary>
-        /// Deinit API
-        /// </summary>
-        /// <param name="allowed">Alowed APIs</param>
-        /// <param name="desired">API flag</param>
-        /// <param name="deinit_action">Deinit action</param>
-        /// <param name="delay">Delay after invocation</param>
-        private static void Deinit(ApiIntents allowed, ApiIntents desired, int delay = 500)
+        private static void Deinit(ApiIntents allowed, IAPI desired, int delay = 500)
         {
-            if (!allowed.HasFlag(desired))
+            if (allowed.HasFlag(desired.ApiType))
             {
-                return;
+                DeinitBody(desired, delay);
             }
-
-            DeinitBody(desired, GetActions(desired), delay);
         }
 
-        private static void DeinitBody(ApiIntents desired, AuthActions actions, int delay)
+        private static void DeinitBody(IAPI desired, int delay)
         {
             try
             {
-                actions.DeinitAction.Invoke();
+                desired.Logout();
             }
-            catch
-            {
-                _ = desired;
-            }
+            catch { }
             finally
             {
                 Task.Delay(delay).Wait();
             }
         }
 
-        /// <summary>
-        /// <para>Performs re-auth for APIs</para>
-        /// <para>Throws an exception if API re-auth process failed</para>
-        /// </summary>
-        /// <param name="intents">APIs intents for reinitialization</param>
-        /// <exception cref="ApplicationException"></exception>
         public static void ReloadApis(ApiIntents intents = ApiIntents.All)
         {
             intents &= InitIntents;
 
-            foreach (ApiIntents api in AuthActions.ApiOrder)
+            foreach (IAPI? api in ApiCollection.Values)
             {
-                Reload(intents, api);
+                if (api != null)
+                {
+                    Reload(intents, api);
+                }
             }
         }
 
@@ -220,25 +162,15 @@ namespace MyGreatestBot.ApiClasses
             ReloadApis(FailedIntents);
         }
 
-        /// <summary>
-        /// Reloads API
-        /// </summary>
-        /// <param name="allowed">Allowed APIs</param>
-        /// <param name="desired">API flag</param>
-        /// <param name="init_action">Init action</param>
-        /// <param name="deinit_action">Deinit action</param>
-        /// <param name="delay">Delay after invocation</param>
-        private static void Reload(ApiIntents allowed, ApiIntents desired, int delay = 500)
+        private static void Reload(ApiIntents allowed, IAPI desired, int delay = 500)
         {
-            if (!allowed.HasFlag(desired))
+            if (!allowed.HasFlag(desired.ApiType))
             {
                 return;
             }
 
-            AuthActions actions = GetActions(desired);
-
-            DeinitBody(desired, actions, delay);
-            InitBody(desired, actions, delay);
+            DeinitBody(desired, delay);
+            InitBody(desired, delay);
         }
 
         /// <summary>
@@ -259,7 +191,7 @@ namespace MyGreatestBot.ApiClasses
 
             try
             {
-                tracks = Music.QueryIdentifier.Execute(query);
+                tracks = QueryIdentifier.Execute(query);
             }
             catch (Exception ex)
             {

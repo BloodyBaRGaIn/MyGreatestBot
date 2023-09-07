@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using MyGreatestBot.Bot.Handlers;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Utils;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;

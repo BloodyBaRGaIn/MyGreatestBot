@@ -3,8 +3,9 @@ using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql.TableClasses;
-using MyGreatestBot.Utils;
+using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,25 +15,25 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.ApiClasses.Services.Sql
 {
     [SupportedOSPlatform("windows")]
-    public static class SqlServerWrapper
+    public sealed class SqlServerWrapper : IAPI
     {
-        private static readonly string ServerString;
-        private static readonly string ConnectionString;
+        private readonly string ServerString;
+        private readonly string ConnectionString;
 
-        private static readonly IgnoredTracksTable IgnoredTracks;
-        private static readonly IgnoredArtistsTable IgnoredArtists;
-        private static readonly TrackInfoTable TrackInfo;
+        private readonly IgnoredTracksTable IgnoredTracks;
+        private readonly IgnoredArtistsTable IgnoredArtists;
+        private readonly TrackInfoTable TrackInfo;
 
-        private static SqlDatabaseConfigJSON config;
+        private SqlDatabaseConfigJSON config;
 
-        private static readonly DatabaseScriptProvider scriptProvider;
+        private readonly DatabaseScriptProvider scriptProvider;
 
-        private static SqlConnection? _connection;
+        private SqlConnection? _connection;
 
-        private static readonly object _queryLock = 0;
-        private static readonly object _connectionLock = 0;
+        private readonly object _queryLock = 0;
+        private readonly object _connectionLock = 0;
 
-        static SqlServerWrapper()
+        private SqlServerWrapper()
         {
             try
             {
@@ -53,7 +54,11 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        public static void Open()
+        public static SqlServerWrapper Instance { get; private set; } = new();
+
+        ApiIntents IAPI.ApiType => ApiIntents.Sql;
+
+        public void PerformAuth()
         {
             lock (_connectionLock)
             {
@@ -91,7 +96,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        public static void Close()
+        public void Logout()
         {
             lock (_connectionLock)
             {
@@ -99,13 +104,13 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void Reopen()
+        private void Reopen()
         {
-            Close();
-            Open();
+            Logout();
+            PerformAuth();
         }
 
-        internal static bool IsTrackIgnored(ITrackInfo track, ulong guild)
+        internal bool IsTrackIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -113,7 +118,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
+        internal bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -121,7 +126,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void AddIgnoredTrack(ITrackInfo track, ulong guild)
+        internal void AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -129,7 +134,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void AddIgnoredArtist(ITrackInfo track, int index, ulong guild)
+        internal void AddIgnoredArtist(ITrackInfo track, int index, ulong guild)
         {
             HyperLink artist = track.ArtistArr[index];
             lock (_queryLock)
@@ -138,7 +143,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
+        internal void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
             lock (_queryLock)
             {
@@ -149,7 +154,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static List<(ApiIntents, string)> RestoreTracks(ulong guild)
+        internal List<(ApiIntents, string)> RestoreTracks(ulong guild)
         {
             List<(ApiIntents, string)> items = new();
             lock (_queryLock)
@@ -216,7 +221,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal static void RemoveTracks(ulong guild)
+        internal void RemoveTracks(ulong guild)
         {
             lock (_queryLock)
             {
@@ -233,7 +238,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static bool IsAnyArtistIgnored(ulong guild, int type, IEnumerable<string> ids)
+        private bool IsAnyArtistIgnored(ulong guild, int type, IEnumerable<string> ids)
         {
             if (_connection is null || ids is null || !ids.Any())
             {
@@ -250,7 +255,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static bool HasRowsGeneric(GenericTable table, ulong guild, int type, string id)
+        private bool HasRowsGeneric(GenericTable table, ulong guild, int type, string id)
         {
             if (_connection is null || string.IsNullOrWhiteSpace(id))
             {
@@ -287,7 +292,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void DeleteGeneric(GenericTable table, ulong guild)
+        private void DeleteGeneric(GenericTable table, ulong guild)
         {
             if (_connection is null)
             {
@@ -322,7 +327,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static void InsertGeneric(GenericTable table, ulong guild, int type, string id, string hyper)
+        private void InsertGeneric(GenericTable table, ulong guild, int type, string id, string hyper)
         {
             if (_connection is null)
             {
@@ -357,7 +362,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        private static bool EnsureTableCreated(GenericTable table, int error)
+        private bool EnsureTableCreated(GenericTable table, int error)
         {
             // Invalid object name
             if (error == 208)

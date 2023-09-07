@@ -1,6 +1,6 @@
-﻿using MyGreatestBot.ApiClasses;
-using MyGreatestBot.ApiClasses.Exceptions;
-using MyGreatestBot.Bot.Handlers;
+﻿using MyGreatestBot.ApiClasses.Exceptions;
+using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;

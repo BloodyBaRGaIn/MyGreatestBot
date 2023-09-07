@@ -3,8 +3,8 @@ using MyGreatestBot.ApiClasses.Music.Spotify;
 using MyGreatestBot.ApiClasses.Music.Vk;
 using MyGreatestBot.ApiClasses.Music.Yandex;
 using MyGreatestBot.ApiClasses.Music.Youtube;
+using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Services.Sql;
-using MyGreatestBot.Bot;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
@@ -34,32 +34,12 @@ namespace MyGreatestBot
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            AuthActions.SetApiOrder(
-                ApiIntents.Sql,
-                ApiIntents.Youtube,
-                ApiIntents.Yandex,
-                ApiIntents.Vk,
-                ApiIntents.Spotify);
-
-            AuthActions.AddOrReplace(
-                ApiIntents.Sql,
-                SqlServerWrapper.Open, SqlServerWrapper.Close);
-
-            AuthActions.AddOrReplace(
-                ApiIntents.Youtube,
-                YoutubeApiWrapper.PerformAuth, YoutubeApiWrapper.Logout);
-
-            AuthActions.AddOrReplace(
-                ApiIntents.Yandex,
-                YandexApiWrapper.PerformAuth, YandexApiWrapper.Logout);
-
-            AuthActions.AddOrReplace(
-                ApiIntents.Vk,
-                VkApiWrapper.PerformAuth, VkApiWrapper.Logout);
-
-            AuthActions.AddOrReplace(
-                ApiIntents.Spotify,
-                SpotifyApiWrapper.PerformAuth, SpotifyApiWrapper.Logout);
+            ApiManager.Add(SqlServerWrapper.Instance);
+            ApiManager.Add(YoutubeApiWrapper.Instance);
+            ApiManager.Add(YandexApiWrapper.Instance);
+            ApiManager.Add(VkApiWrapper.Instance);
+            ApiManager.Add(SpotifyApiWrapper.Instance);
+            ApiManager.Add(BotWrapper.BotInstance);
 
             ApiManager.InitApis();
 

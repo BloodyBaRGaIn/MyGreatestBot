@@ -1,6 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Music.Yandex;
-using MyGreatestBot.Utils;
+using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -67,7 +67,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         {
             try
             {
-                ITrackInfo? result = YandexApiWrapper.SearchTrack(this);
+                YandexApiWrapper _api_instance = YandexApiWrapper.Instance as YandexApiWrapper ?? throw new ArgumentNullException(nameof(YandexApiWrapper));
+
+                ITrackInfo? result = _api_instance.SearchTrack(this);
                 if (result != null)
                 {
                     AudioURL = result.AudioURL;
