@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Yandex.Music.Api.Common.Debug;
+using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Playlist;
@@ -72,7 +74,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
-            _client = new();
+            IDebugWriter writer = new DefaultDebugWriter("responses", "log.txt");
+
+            _client = new(new DebugSettings(writer)
+            {
+                ClearDirectory = true,
+                SaveResponse = true
+            });
 
             try
             {
