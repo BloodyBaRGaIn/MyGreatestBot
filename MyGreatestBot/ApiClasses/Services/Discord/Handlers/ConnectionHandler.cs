@@ -182,8 +182,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                BotWrapper.Commands?.UnregisterCommands(
-                    BotWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
+                DoscordWrapper.Commands?.UnregisterCommands(
+                    DoscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
             }
             catch { }
 
@@ -211,7 +211,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 await Task.Delay(1);
             }
 
-            DSharpPlus.DiscordClient? bot_client = BotWrapper.Client;
+            DSharpPlus.DiscordClient? bot_client = DoscordWrapper.Client;
 
             if (bot_client != null)
             {

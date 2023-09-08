@@ -40,7 +40,7 @@ namespace MyGreatestBot.Commands
                 Title = "Name"
             };
 
-            if (BotWrapper.Client == null)
+            if (DoscordWrapper.Client == null)
             {
                 _embed.Color = DiscordColor.Red;
                 _embed.Description = "Cannot get my username";
@@ -49,7 +49,7 @@ namespace MyGreatestBot.Commands
             {
                 _embed.Color = DiscordColor.White;
 
-                DiscordUser current_user = BotWrapper.Client.CurrentUser;
+                DiscordUser current_user = DoscordWrapper.Client.CurrentUser;
 
                 try
                 {
@@ -74,9 +74,9 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
-            if (BotWrapper.Commands == null)
+            if (DoscordWrapper.Commands == null)
             {
-                throw new ArgumentNullException(nameof(BotWrapper.Commands), "Commands not initialized");
+                throw new ArgumentNullException(nameof(DoscordWrapper.Commands), "Commands not initialized");
             }
 
             List<CustomHelpFormatter> collection = new();
@@ -84,7 +84,7 @@ namespace MyGreatestBot.Commands
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
             }
-            else if (BotWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
+            else if (DoscordWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
             {
                 collection.Add(new CustomHelpFormatter(ctx).WithCommand(cmd));
             }

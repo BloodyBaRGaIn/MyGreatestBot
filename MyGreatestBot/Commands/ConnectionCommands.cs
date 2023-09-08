@@ -89,8 +89,8 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            if (BotWrapper.Client != null
-                && !BotWrapper.Client.CurrentApplication.Owners
+            if (DoscordWrapper.Client != null
+                && !DoscordWrapper.Client.CurrentApplication.Owners
                     .Select(x => x.Id).Contains(ctx.User.Id))
             {
                 throw new CommandExecutionException("You are not allowed to execute this command");

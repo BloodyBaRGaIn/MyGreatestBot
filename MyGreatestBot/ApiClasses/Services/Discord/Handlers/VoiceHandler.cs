@@ -8,9 +8,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     public sealed class VoiceHandler
     {
         [AllowNull]
-        private static VoiceNextExtension VoiceNext => BotWrapper.VoiceNext;
+        private static VoiceNextExtension VoiceNext => DoscordWrapper.VoiceNext;
         [AllowNull]
-        public VoiceNextConnection Connection { get; set; }
+        public VoiceNextConnection Connection { get; private set; }
         [AllowNull]
         public DiscordChannel Channel { get; private set; }
         [AllowNull]

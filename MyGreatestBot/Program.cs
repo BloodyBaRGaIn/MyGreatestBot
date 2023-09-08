@@ -22,9 +22,9 @@ namespace MyGreatestBot
     internal class Program
     {
         /// <summary>
-        /// Main entry point
+        /// Process initialization
         /// </summary>
-        private static void Main()
+        static Program()
         {
             try
             {
@@ -33,17 +33,23 @@ namespace MyGreatestBot
             catch { }
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
 
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        private static void Main()
+        {
             ApiManager.Add(SqlServerWrapper.Instance);
             ApiManager.Add(YoutubeApiWrapper.Instance);
             ApiManager.Add(YandexApiWrapper.Instance);
             ApiManager.Add(VkApiWrapper.Instance);
             ApiManager.Add(SpotifyApiWrapper.Instance);
-            ApiManager.Add(BotWrapper.BotInstance);
+            ApiManager.Add(DoscordWrapper.Instance);
 
             ApiManager.InitApis();
 
-            BotWrapper.Run(connection_timeout: 10000);
+            DoscordWrapper.Run(connection_timeout: 10000);
 
             ApiManager.DeinitApis();
         }
