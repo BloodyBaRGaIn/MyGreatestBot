@@ -42,7 +42,7 @@ namespace MyGreatestBot.Player
                 }
                 lock (tracks_queue)
                 {
-                    SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
+                    //SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
 
                     List<ITrackInfo> tracks = new();
                     if (currentTrack != null)
