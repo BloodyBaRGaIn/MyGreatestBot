@@ -11,7 +11,9 @@ using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
+using Yandex.Music.Api.Models.Common;
 using Yandex.Music.Api.Models.Playlist;
+using Yandex.Music.Api.Models.Search;
 using Yandex.Music.Api.Models.Search.Track;
 using Yandex.Music.Api.Models.Track;
 using Yandex.Music.Client;
@@ -20,8 +22,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
     public sealed class YandexApiWrapper : IMusicAPI
     {
-        private IMusicAPI Base => this;
-
         [AllowNull]
         private YandexMusicClient _client;
         private readonly YandexApiException GenericException = new();
@@ -132,13 +132,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return otherTrack;
             }
 
-            global::Yandex.Music.Api.Models.Search.YSearch? response = null;
+            YSearch? response = null;
             string last_request = string.Empty;
 
             if (otherTrack.AlbumName != null)
             {
                 last_request = $"{otherTrack.Title} - {otherTrack.AlbumName.Title}";
-                response = Api.Search(last_request, global::Yandex.Music.Api.Models.Common.YSearchType.Track);
+                response = Api.Search(last_request, YSearchType.Track);
             }
 
             if (response == null)
@@ -148,7 +148,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             if (response.Tracks == null)
             {
                 last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Api.Search(last_request, global::Yandex.Music.Api.Models.Common.YSearchType.Track);
+                response = Api.Search(last_request, YSearchType.Track);
             }
 
             if (response == null || response.Tracks == null)
@@ -165,7 +165,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             if (!tracks.Any())
             {
                 last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Api.Search(last_request, global::Yandex.Music.Api.Models.Common.YSearchType.Track);
+                response = Api.Search(last_request, YSearchType.Track);
                 if (response == null || response.Tracks == null)
                 {
                     return null;
@@ -203,7 +203,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 string? track_id_str = YandexQueryDecomposer.TryGetTrackId(query);
                 if (!string.IsNullOrWhiteSpace(track_id_str))
                 {
-                    ITrackInfo? track = Base.GetTrack(track_id_str);
+                    ITrackInfo? track = GetTrack(track_id_str);
                     if (track != null)
                     {
                         tracks_collection.Add(track);

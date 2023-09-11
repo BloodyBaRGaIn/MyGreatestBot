@@ -2,7 +2,6 @@
 using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -12,7 +11,6 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube track info implementation
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;

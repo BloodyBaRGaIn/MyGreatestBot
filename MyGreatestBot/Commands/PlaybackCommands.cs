@@ -6,13 +6,11 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.PlaybackCategoryName)]
-    [SupportedOSPlatform("windows")]
     internal class PlaybackCommands : BaseCommandModule
     {
         [Command("pause")]

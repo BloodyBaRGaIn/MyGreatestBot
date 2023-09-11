@@ -6,7 +6,6 @@ using SpotifyAPI.Web;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 //using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
@@ -15,7 +14,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify API wrapper class
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class SpotifyApiWrapper : IMusicAPI
     {
         //[AllowNull]

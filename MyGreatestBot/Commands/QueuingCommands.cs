@@ -6,13 +6,11 @@ using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Utils;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.QueuingCategoryName)]
-    [SupportedOSPlatform("windows")]
     internal class QueuingCommands : BaseCommandModule
     {
         private static async Task<IEnumerable<ITrackInfo>> GetTracks(

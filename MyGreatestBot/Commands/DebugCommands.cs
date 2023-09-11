@@ -6,13 +6,11 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]
-    [SupportedOSPlatform("windows")]
     internal class DebugCommands : BaseCommandModule
     {
         [Command("test")]
@@ -40,7 +38,7 @@ namespace MyGreatestBot.Commands
                 Title = "Name"
             };
 
-            if (DoscordWrapper.Client == null)
+            if (DiscordWrapper.Client == null)
             {
                 _embed.Color = DiscordColor.Red;
                 _embed.Description = "Cannot get my username";
@@ -49,7 +47,7 @@ namespace MyGreatestBot.Commands
             {
                 _embed.Color = DiscordColor.White;
 
-                DiscordUser current_user = DoscordWrapper.Client.CurrentUser;
+                DiscordUser current_user = DiscordWrapper.Client.CurrentUser;
 
                 try
                 {
@@ -74,9 +72,9 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
-            if (DoscordWrapper.Commands == null)
+            if (DiscordWrapper.Commands == null)
             {
-                throw new ArgumentNullException(nameof(DoscordWrapper.Commands), "Commands not initialized");
+                throw new ArgumentNullException(nameof(DiscordWrapper.Commands), "Commands not initialized");
             }
 
             List<CustomHelpFormatter> collection = new();
@@ -84,7 +82,7 @@ namespace MyGreatestBot.Commands
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
             }
-            else if (DoscordWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
+            else if (DiscordWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
             {
                 collection.Add(new CustomHelpFormatter(ctx).WithCommand(cmd));
             }

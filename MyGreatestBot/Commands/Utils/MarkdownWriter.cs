@@ -20,7 +20,7 @@ namespace MyGreatestBot.Commands.Utils
             streamWriter.Write($"# Commands{Environment.NewLine}{Environment.NewLine}");
             streamWriter.Write($"Commands are organized into categories for better readability{Environment.NewLine}");
 
-            if (DoscordWrapper.Commands == null)
+            if (DiscordWrapper.Commands == null)
             {
                 return;
             }
@@ -33,7 +33,7 @@ namespace MyGreatestBot.Commands.Utils
 
         public static IEnumerable<string> GetFullCommandsString()
         {
-            foreach (IGrouping<string, Command> category in DoscordWrapper.Commands.RegisteredCommands.Values
+            foreach (IGrouping<string, Command> category in DiscordWrapper.Commands.RegisteredCommands.Values
                 .DistinctBy(c => c.Name)
                 .GroupBy(c => c.Category ?? string.Empty))
             {

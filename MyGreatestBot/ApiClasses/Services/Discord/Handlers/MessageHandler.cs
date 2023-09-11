@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
+    /// <summary>
+    /// Discord messages handler class
+    /// </summary>
     public sealed class MessageHandler
     {
         [AllowNull]

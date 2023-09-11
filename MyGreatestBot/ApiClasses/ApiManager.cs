@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses
@@ -12,7 +11,6 @@ namespace MyGreatestBot.ApiClasses
     /// <summary>
     /// API configuration
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public static class ApiManager
     {
         /// <summary>

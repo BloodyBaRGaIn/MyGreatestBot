@@ -45,11 +45,11 @@ namespace MyGreatestBot
             ApiManager.Add(YandexApiWrapper.Instance);
             ApiManager.Add(VkApiWrapper.Instance);
             ApiManager.Add(SpotifyApiWrapper.Instance);
-            ApiManager.Add(DoscordWrapper.Instance);
+            ApiManager.Add(DiscordWrapper.Instance);
 
             ApiManager.InitApis();
 
-            DoscordWrapper.Run(connection_timeout: 10000);
+            DiscordWrapper.Run(connection_timeout: 10000);
 
             ApiManager.DeinitApis();
         }

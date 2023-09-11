@@ -8,13 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
-    [SupportedOSPlatform("windows")]
     internal sealed partial class Player
     {
         private const int TRANSMIT_SINK_MS = 10;

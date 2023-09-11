@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
+    /// <summary>
+    /// Voice connection handler class
+    /// </summary>
     public sealed class VoiceHandler
     {
         [AllowNull]
-        private static VoiceNextExtension VoiceNext => DoscordWrapper.VoiceNext;
+        private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
         [AllowNull]
         public VoiceNextConnection Connection { get; private set; }
         [AllowNull]

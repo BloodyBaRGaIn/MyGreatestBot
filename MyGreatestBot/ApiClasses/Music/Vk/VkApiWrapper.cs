@@ -7,19 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using VkNet;
 using VkNet.Abstractions;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Model;
+using VkNet.Utils;
 
 namespace MyGreatestBot.ApiClasses.Music.Vk
 {
     /// <summary>
     /// Vk API wrapper class
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class VkApiWrapper : IMusicAPI
     {
         [AllowNull]
@@ -133,7 +132,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             {
                 return null;
             }
-            VkNet.Utils.VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = new[] { trackId }, Count = 1 });
+            VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = new[] { trackId }, Count = 1 });
             Audio? audio = collection.FirstOrDefault();
             return audio == null ? null : new VkTrackInfo(audio);
         }
@@ -160,7 +159,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 ? Audio.GetPlaylistById(user_l, id_l)
                 : null;
 
-            VkNet.Utils.VkCollection<Audio>? vk_tracks = Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
+            VkCollection<Audio>? vk_tracks = Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
 
             if (vk_tracks == null || !vk_tracks.Any())
             {

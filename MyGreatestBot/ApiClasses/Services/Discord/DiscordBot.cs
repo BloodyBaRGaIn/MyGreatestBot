@@ -15,13 +15,11 @@ using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
-    [SupportedOSPlatform("windows")]
     public sealed class DiscordBot : IAPI, IAccessible
     {
         [AllowNull]

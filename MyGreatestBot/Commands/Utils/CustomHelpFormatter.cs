@@ -2,14 +2,12 @@
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using System.Collections.Generic;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Commands.Utils
 {
     /// <summary>
     /// Help formatter
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public class CustomHelpFormatter : BaseHelpFormatter
     {
         protected string _content;

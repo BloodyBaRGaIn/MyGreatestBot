@@ -4,7 +4,6 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
@@ -15,7 +14,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// <summary>
     /// Yandex track info implementation
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;

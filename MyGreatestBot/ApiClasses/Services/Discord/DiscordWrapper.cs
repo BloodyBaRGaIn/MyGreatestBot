@@ -3,12 +3,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
-    [SupportedOSPlatform("windows")]
-    public static class DoscordWrapper
+    public static class DiscordWrapper
     {
         public static readonly DiscordBot Instance = new();
         public static IServiceProvider ServiceProvider => Instance.ServiceProvider;

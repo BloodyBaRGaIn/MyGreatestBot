@@ -2,14 +2,12 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.ApiClasses.Music
 {
     /// <summary>
     /// Track information abstraction
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public interface ITrackInfo
     {
         /// <summary>

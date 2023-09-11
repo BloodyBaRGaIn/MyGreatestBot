@@ -7,7 +7,6 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
@@ -16,7 +15,6 @@ namespace MyGreatestBot.Commands
     /// Connection commands
     /// </summary>
     [Category(CommandStrings.ConnectionCategoryName)]
-    [SupportedOSPlatform("windows")]
     internal class ConnectionCommands : BaseCommandModule
     {
         [Command("join")]
@@ -89,8 +87,8 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            if (DoscordWrapper.Client != null
-                && !DoscordWrapper.Client.CurrentApplication.Owners
+            if (DiscordWrapper.Client != null
+                && !DiscordWrapper.Client.CurrentApplication.Owners
                     .Select(x => x.Id).Contains(ctx.User.Id))
             {
                 throw new CommandExecutionException("You are not allowed to execute this command");

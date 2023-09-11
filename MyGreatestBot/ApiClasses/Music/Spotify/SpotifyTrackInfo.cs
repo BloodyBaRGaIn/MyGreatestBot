@@ -5,14 +5,12 @@ using SpotifyAPI.Web;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.ApiClasses.Music.Spotify
 {
     /// <summary>
     /// Spotify track info implementation
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;

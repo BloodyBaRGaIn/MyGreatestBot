@@ -8,12 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
-    [SupportedOSPlatform("windows")]
+    /// <summary>
+    /// Connection handler class
+    /// </summary>
     public sealed class ConnectionHandler
     {
         [AllowNull]
@@ -182,8 +183,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                DoscordWrapper.Commands?.UnregisterCommands(
-                    DoscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
+                DiscordWrapper.Commands?.UnregisterCommands(
+                    DiscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
             }
             catch { }
 
@@ -211,7 +212,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 await Task.Delay(1);
             }
 
-            DSharpPlus.DiscordClient? bot_client = DoscordWrapper.Client;
+            DSharpPlus.DiscordClient? bot_client = DiscordWrapper.Client;
 
             if (bot_client != null)
             {

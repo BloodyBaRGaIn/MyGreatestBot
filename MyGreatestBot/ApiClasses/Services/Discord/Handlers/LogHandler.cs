@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
+    /// <summary>
+    /// Console logging class
+    /// </summary>
     public sealed class LogHandler
     {
         private readonly TextWriter _writer;

@@ -20,8 +20,6 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
     public sealed class YoutubeApiWrapper : IMusicAPI
     {
-        private IMusicAPI Base => this;
-
         [AllowNull]
         private YoutubeClient api;
         private readonly YoutubeApiException GenericException = new();
@@ -128,7 +126,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
                 if (!string.IsNullOrWhiteSpace(video_id))
                 {
-                    ITrackInfo? track = Base.GetTrack(video_id);
+                    ITrackInfo? track = GetTrack(video_id);
 
                     if (track != null)
                     {

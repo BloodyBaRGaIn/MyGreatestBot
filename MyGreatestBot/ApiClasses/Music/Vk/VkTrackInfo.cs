@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Versioning;
 using VkNet.Model;
 
 namespace MyGreatestBot.ApiClasses.Music.Vk
@@ -12,7 +11,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk track info implementation
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
         private ITrackInfo Base => this;
