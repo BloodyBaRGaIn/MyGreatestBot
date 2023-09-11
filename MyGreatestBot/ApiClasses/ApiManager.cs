@@ -49,8 +49,9 @@ namespace MyGreatestBot.ApiClasses
 
             if (InitIntents.HasFlag(ApiIntents.Spotify))
             {
-                // init Yandex API for searching tracks from Spotify
+                // init Yandex and Youtube API for searching tracks from Spotify
                 InitIntents |= ApiIntents.Yandex;
+                InitIntents |= ApiIntents.Youtube;
             }
 
             if (InitIntents.HasFlag(ApiIntents.Youtube))

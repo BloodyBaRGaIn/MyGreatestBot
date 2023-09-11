@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Music.Yandex;
+using MyGreatestBot.ApiClasses.Music.Youtube;
 using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;
 using System;
@@ -31,6 +32,8 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         [AllowNull]
         public string CoverURL { get; }
 
+        private ApiIntents AudioFrom = ApiIntents.None;
+
         /// <summary>
         /// Spotify track info constructor
         /// </summary>
@@ -61,22 +64,68 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             AudioURL = track.PreviewUrl;
         }
 
+        private bool TrySearchYandex()
+        {
+            ISearchable _api_instance = YandexApiWrapper.Instance as ISearchable
+                ?? throw new ArgumentNullException(nameof(YandexApiWrapper));
+
+            ITrackInfo? result = _api_instance.SearchTrack(this);
+            if (result == null)
+            {
+                return false;
+            }
+
+            AudioFrom = ApiIntents.Yandex;
+            AudioURL = result.AudioURL;
+            Duration = result.Duration;
+            return true;
+        }
+
+        private bool TrySearchYoutube()
+        {
+            ISearchable _api_instance = YoutubeApiWrapper.Instance as ISearchable
+                        ?? throw new ArgumentNullException(nameof(YoutubeApiWrapper));
+
+            ITrackInfo? result = _api_instance.SearchTrack(this);
+            if (result == null)
+            {
+                return false;
+            }
+
+            AudioFrom = ApiIntents.Youtube;
+            AudioURL = result.AudioURL;
+            Duration = result.Duration;
+            return true;
+        }
+
         void ITrackInfo.ObtainAudioURL()
         {
             try
             {
-                YandexApiWrapper _api_instance = YandexApiWrapper.Instance as YandexApiWrapper ?? throw new ArgumentNullException(nameof(YandexApiWrapper));
+                switch (AudioFrom)
+                {
+                    case ApiIntents.Yandex:
+                        _ = TrySearchYandex();
+                        return;
 
-                ITrackInfo? result = _api_instance.SearchTrack(this);
-                if (result != null)
-                {
-                    AudioURL = result.AudioURL;
-                    Duration = result.Duration;
+                    case ApiIntents.Youtube:
+                        _ = TrySearchYoutube();
+                        return;
+
+                    default:
+                        if (TrySearchYandex())
+                        {
+                            return;
+                        }
+                        if (TrySearchYoutube())
+                        {
+                            return;
+                        }
+                        break;
                 }
-                else
-                {
-                    Duration = TimeSpan.FromSeconds(29);
-                }
+
+                Duration = TimeSpan.FromSeconds(29);
+
                 if (string.IsNullOrWhiteSpace(AudioURL))
                 {
                     throw new ArgumentNullException(nameof(AudioURL));
@@ -107,7 +156,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         void ITrackInfo.Reload()
         {
-            ApiManager.ReloadApis(Base.TrackType | ApiIntents.Yandex);
+            ApiManager.ReloadApis(Base.TrackType | AudioFrom);
         }
 
         public int CompareTo([AllowNull] ITrackInfo other)

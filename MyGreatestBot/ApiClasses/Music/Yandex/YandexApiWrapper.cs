@@ -20,7 +20,7 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    public sealed class YandexApiWrapper : IMusicAPI
+    public sealed class YandexApiWrapper : IMusicAPI, ISearchable
     {
         [AllowNull]
         private YandexMusicClient _client;
@@ -120,66 +120,24 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             _client = null;
         }
 
-        /// <summary>
-        /// Search similar track on Yandex
-        /// </summary>
-        /// <param name="otherTrack">Track info from another API</param>
-        /// <returns>Track info</returns>
-        public ITrackInfo? SearchTrack(ITrackInfo otherTrack)
+        public ITrackInfo? SearchTrack(ITrackInfo other)
         {
-            if (otherTrack.TrackType == ApiIntents.Yandex)
+            if (other.TrackType == ApiIntents.Yandex)
             {
-                return otherTrack;
+                return other;
             }
 
-            YSearch? response = null;
-            string last_request = string.Empty;
-
-            if (otherTrack.AlbumName != null)
-            {
-                last_request = $"{otherTrack.Title} - {otherTrack.AlbumName.Title}";
-                response = Api.Search(last_request, YSearchType.Track);
-            }
-
-            if (response == null)
-            {
-                return null;
-            }
-            if (response.Tracks == null)
-            {
-                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Api.Search(last_request, YSearchType.Track);
-            }
+            string last_request = $"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+            YSearch? response = Api.Search(last_request, YSearchType.Track);
 
             if (response == null || response.Tracks == null)
             {
                 return null;
             }
 
-            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t is not null
-                && otherTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
-                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
-
-            if (!tracks.Any())
-            {
-                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Api.Search(last_request, YSearchType.Track);
-                if (response == null || response.Tracks == null)
-                {
-                    return null;
-                }
-                tracks = response.Tracks.Results.Where(t => t is not null
-                && otherTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
-                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
-                if (!tracks.Any())
-                {
-                    return null;
-                }
-            }
+            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t != null
+                && t.Artists.FirstOrDefault()?.Name.ToTransletters().ToUpperInvariant()
+                    == other.ArtistArr.FirstOrDefault()?.Title.ToTransletters().ToUpperInvariant());
 
             YSearchTrackModel t = tracks.First();
             YTrack y = t;
