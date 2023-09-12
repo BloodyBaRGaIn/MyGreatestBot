@@ -72,7 +72,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 return false;
             }
 
-            AudioFrom = instance.ApiType;
+            AudioFrom = ApiIntents.Yandex;
             AudioURL = result.AudioURL;
             Duration = result.Duration;
             return true;
