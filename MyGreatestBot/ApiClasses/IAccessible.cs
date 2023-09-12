@@ -19,7 +19,7 @@ namespace MyGreatestBot.ApiClasses
         /// Try HTTP request to domain URLs
         /// </summary>
         /// <exception cref="ApplicationException"></exception>
-        public void TryAcess()
+        public void TryAccess()
         {
             if (Domains == null)
             {

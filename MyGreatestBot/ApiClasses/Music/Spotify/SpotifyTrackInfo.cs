@@ -72,6 +72,8 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 return false;
             }
 
+            result.ObtainAudioURL();
+
             AudioFrom = instance.ApiType;
             AudioURL = result.AudioURL;
             Duration = result.Duration;
@@ -94,19 +96,19 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             {
                 switch (AudioFrom)
                 {
-                    case ApiIntents.Yandex:
-                        _ = TrySearchYandex();
-                        return;
+                    //case ApiIntents.Yandex:
+                    //    _ = TrySearchYandex();
+                    //    return;
 
                     case ApiIntents.Youtube:
                         _ = TrySearchYoutube();
                         return;
 
                     default:
-                        if (TrySearchYandex())
-                        {
-                            return;
-                        }
+                        //if (TrySearchYandex())
+                        //{
+                        //    return;
+                        //}
                         if (TrySearchYoutube())
                         {
                             return;

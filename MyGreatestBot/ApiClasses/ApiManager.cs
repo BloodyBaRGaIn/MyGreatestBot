@@ -38,7 +38,7 @@ namespace MyGreatestBot.ApiClasses
             {
                 if (api is IAccessible accessible)
                 {
-                    accessible.TryAcess();
+                    accessible.TryAccess();
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace MyGreatestBot.ApiClasses
             {
                 if (desired is IAccessible accessible)
                 {
-                    accessible.TryAcess();
+                    accessible.TryAccess();
                 }
 
                 desired.PerformAuth();
