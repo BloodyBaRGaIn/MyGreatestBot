@@ -32,7 +32,20 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 #pragma warning disable SYSLIB1045
             private static readonly Regex VIDEO_RE = new("/watch\\?v=([^&]+)");
             private static readonly Regex PLAYLIST_RE = new("[&?]list=([^&]+)");
+            private static readonly Regex QUERY_RE = new("youtube\\.([\\w])+");
 #pragma warning restore SYSLIB1045
+
+            internal static string GetInvariantQuery(string query)
+            {
+                try
+                {
+                    return QUERY_RE.Replace(query, "youtube.com");
+                }
+                catch
+                {
+                    return query;
+                }
+            }
 
             internal static string? TryGetPlaylistId(string query)
             {
@@ -93,6 +106,8 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             {
                 return tracks;
             }
+
+            query = YoutubeQueryDecomposer.GetInvariantQuery(query);
 
             {
                 string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(query);
