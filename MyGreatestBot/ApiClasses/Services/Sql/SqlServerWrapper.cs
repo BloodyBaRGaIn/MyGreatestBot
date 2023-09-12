@@ -2,7 +2,6 @@
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using MyGreatestBot.ApiClasses.ConfigStructs;
-using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql.TableClasses;
 using MyGreatestBot.ApiClasses.Utils;

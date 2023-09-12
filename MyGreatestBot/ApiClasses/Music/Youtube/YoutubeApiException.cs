@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace MyGreatestBot.ApiClasses.Exceptions
+namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
     public sealed class YoutubeApiException : ApiException
     {

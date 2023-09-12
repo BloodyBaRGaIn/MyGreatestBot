@@ -1,5 +1,4 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
-using MyGreatestBot.ApiClasses.Exceptions;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
@@ -20,7 +19,7 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    public sealed class YandexApiWrapper : IMusicAPI, ISearchable
+    public sealed class YandexApiWrapper : IMusicAPI
     {
         [AllowNull]
         private YandexMusicClient _client;
@@ -120,24 +119,66 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             _client = null;
         }
 
-        public ITrackInfo? SearchTrack(ITrackInfo other)
+        /// <summary>
+        /// Search similar track on Yandex
+        /// </summary>
+        /// <param name="otherTrack">Track info from another API</param>
+        /// <returns>Track info</returns>
+        public ITrackInfo? SearchTrack(ITrackInfo otherTrack)
         {
-            if (other.TrackType == ApiIntents.Yandex)
+            if (otherTrack.TrackType == ApiIntents.Yandex)
             {
-                return other;
+                return otherTrack;
             }
 
-            string last_request = $"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-            YSearch? response = Api.Search(last_request, YSearchType.Track);
+            YSearch? response = null;
+            string last_request = string.Empty;
+
+            if (otherTrack.AlbumName != null)
+            {
+                last_request = $"{otherTrack.Title} - {otherTrack.AlbumName.Title}";
+                response = Api.Search(last_request, YSearchType.Track);
+            }
+
+            if (response == null)
+            {
+                return null;
+            }
+            if (response.Tracks == null)
+            {
+                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+                response = Api.Search(last_request, YSearchType.Track);
+            }
 
             if (response == null || response.Tracks == null)
             {
                 return null;
             }
 
-            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t != null
-                && t.Artists.FirstOrDefault()?.Name.ToTransletters().ToUpperInvariant()
-                    == other.ArtistArr.FirstOrDefault()?.Title.ToTransletters().ToUpperInvariant());
+            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t is not null
+                && otherTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
+                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
+                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+
+            if (!tracks.Any())
+            {
+                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
+                response = Api.Search(last_request, YSearchType.Track);
+                if (response == null || response.Tracks == null)
+                {
+                    return null;
+                }
+                tracks = response.Tracks.Results.Where(t => t is not null
+                && otherTrack.AlbumName != null
+                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
+                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
+                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+                if (!tracks.Any())
+                {
+                    return null;
+                }
+            }
 
             YSearchTrackModel t = tracks.First();
             YTrack y = t;

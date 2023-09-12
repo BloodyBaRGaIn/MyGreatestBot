@@ -1,5 +1,4 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
-using MyGreatestBot.ApiClasses.Exceptions;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;

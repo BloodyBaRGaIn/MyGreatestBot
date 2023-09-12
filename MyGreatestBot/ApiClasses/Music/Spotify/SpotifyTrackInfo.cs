@@ -1,5 +1,4 @@
-﻿using MyGreatestBot.ApiClasses.Exceptions;
-using MyGreatestBot.ApiClasses.Music.Yandex;
+﻿using MyGreatestBot.ApiClasses.Music.Yandex;
 using MyGreatestBot.ApiClasses.Music.Youtube;
 using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;

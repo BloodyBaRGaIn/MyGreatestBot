@@ -1,5 +1,4 @@
-﻿using MyGreatestBot.ApiClasses.Exceptions;
-using MyGreatestBot.ApiClasses.Utils;
+﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using YoutubeExplode.Playlists;

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace MyGreatestBot.ApiClasses.Exceptions
+namespace MyGreatestBot.ApiClasses.Services.Sql
 {
-    public sealed class DiscordApiException : ApiException
+    public sealed class SqlApiException : ApiException
     {
-        public DiscordApiException(
+        public SqlApiException(
             [DisallowNull] string message,
             [AllowNull] Exception inner = null)
             : base(ApiIntents.Sql, message, inner) { }
 
-        public DiscordApiException() : this("Not initialized") { }
+        public SqlApiException() : this("Not initialized") { }
     }
 }

@@ -47,7 +47,7 @@ namespace MyGreatestBot.ApiClasses.Music
                     }
                     else
                     {
-                        throw new Exceptions.ApiException(receiver.desired);
+                        throw new ApiException(receiver.desired);
                     }
                 }
 

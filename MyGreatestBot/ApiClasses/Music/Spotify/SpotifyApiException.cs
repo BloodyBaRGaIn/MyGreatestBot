@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace MyGreatestBot.ApiClasses.Exceptions
+namespace MyGreatestBot.ApiClasses.Music.Spotify
 {
     public sealed class SpotifyApiException : ApiException
     {
