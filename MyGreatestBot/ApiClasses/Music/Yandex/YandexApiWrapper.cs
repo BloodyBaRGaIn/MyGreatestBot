@@ -19,7 +19,7 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    public sealed class YandexApiWrapper : IMusicAPI
+    public sealed class YandexApiWrapper : IMusicAPI, ISearchable
     {
         [AllowNull]
         private YandexMusicClient _client;

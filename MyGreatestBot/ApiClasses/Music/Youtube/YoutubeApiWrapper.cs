@@ -7,17 +7,21 @@ using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using Yandex.Music.Api.Models.Search;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Playlists;
+using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
 namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
-    public sealed class YoutubeApiWrapper : IMusicAPI
+    public sealed class YoutubeApiWrapper : IMusicAPI, ISearchable
     {
         [AllowNull]
         private YoutubeClient api;
@@ -26,6 +30,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         private VideoClient Videos => api?.Videos ?? throw GenericException;
         public StreamClient Streams => api?.Videos.Streams ?? throw GenericException;
         private PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
+        private SearchClient Search => api?.Search ?? throw GenericException;
 
         private static class YoutubeQueryDecomposer
         {
@@ -160,6 +165,38 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                     .GetResult();
 
             return video == null ? null : new YoutubeTrackInfo(video);
+        }
+
+        public ITrackInfo? SearchTrack(ITrackInfo other)
+        {
+            if (other.TrackType == ApiIntents.Youtube)
+            {
+                return other;
+            }
+
+            var search = Search.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}");
+            if (search == null)
+            {
+                return null;
+            }
+
+            VideoSearchResult? result = null;
+
+            Task.Run(async () =>
+            {
+                await foreach (VideoSearchResult track in search)
+                {
+                    result = track;
+                    return;
+                }
+            }).Wait();
+
+            if (result == null)
+            {
+                return null;
+            }
+
+            return new YoutubeTrackInfo(result);
         }
     }
 }
