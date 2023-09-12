@@ -63,38 +63,29 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             AudioURL = track.PreviewUrl;
         }
 
-        private bool TrySearchYandex()
+        private bool TrySearchGeneric(IMusicAPI instance)
         {
-            ISearchable _api_instance = YandexApiWrapper.Instance as ISearchable
-                ?? throw new ArgumentNullException(nameof(YandexApiWrapper));
-
-            ITrackInfo? result = _api_instance.SearchTrack(this);
+            ISearchable searchable = instance as ISearchable ?? throw new ApiException(instance.ApiType);
+            ITrackInfo? result = searchable?.SearchTrack(this);
             if (result == null)
             {
                 return false;
             }
 
-            AudioFrom = ApiIntents.Yandex;
+            AudioFrom = instance.ApiType;
             AudioURL = result.AudioURL;
             Duration = result.Duration;
             return true;
         }
 
+        private bool TrySearchYandex()
+        {
+            return TrySearchGeneric(YandexApiWrapper.Instance);
+        }
+
         private bool TrySearchYoutube()
         {
-            ISearchable _api_instance = YoutubeApiWrapper.Instance as ISearchable
-                        ?? throw new ArgumentNullException(nameof(YoutubeApiWrapper));
-
-            ITrackInfo? result = _api_instance.SearchTrack(this);
-            if (result == null)
-            {
-                return false;
-            }
-
-            AudioFrom = ApiIntents.Youtube;
-            AudioURL = result.AudioURL;
-            Duration = result.Duration;
-            return true;
+            return TrySearchGeneric(YoutubeApiWrapper.Instance);
         }
 
         void ITrackInfo.ObtainAudioURL()
@@ -123,6 +114,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                         break;
                 }
 
+                // default Spotify preview track duration
                 Duration = TimeSpan.FromSeconds(29);
 
                 if (string.IsNullOrWhiteSpace(AudioURL))
