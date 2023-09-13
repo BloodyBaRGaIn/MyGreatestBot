@@ -18,15 +18,15 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         //[AllowNull]
         //private static EmbedIOAuthServer server;
         [AllowNull]
-        private SpotifyClient SpotifyClientInstance;
+        private SpotifyClient _api;
         private readonly SpotifyApiException GenericException = new();
 
-        private IPlaylistsClient Playlists => SpotifyClientInstance?.Playlists ?? throw GenericException;
-        private IAlbumsClient Albums => SpotifyClientInstance?.Albums ?? throw GenericException;
-        private IArtistsClient Artists => SpotifyClientInstance?.Artists ?? throw GenericException;
-        private ITracksClient Tracks => SpotifyClientInstance?.Tracks ?? throw GenericException;
-        //private IPlayerClient Player => SpotifyClientInstance?.Player ?? throw GenericException;
-        //private ISearchClient Search => SpotifyClientInstance?.Search ?? throw GenericException;
+        private IPlaylistsClient Playlists => _api?.Playlists ?? throw GenericException;
+        private IAlbumsClient Albums => _api?.Albums ?? throw GenericException;
+        private IArtistsClient Artists => _api?.Artists ?? throw GenericException;
+        private ITracksClient Tracks => _api?.Tracks ?? throw GenericException;
+        //private IPlayerClient Player => _api?.Player ?? throw GenericException;
+        //private ISearchClient Search => _api?.Search ?? throw GenericException;
 
         private static class SpotifyQueryDecomposer
         {
@@ -93,12 +93,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                         )
                     );
 
-            SpotifyClientInstance = new(config);
+            _api = new(config);
         }
 
         public void Logout()
         {
-            SpotifyClientInstance = null;
+            _api = null;
         }
 
         //private static Task Server_ErrorReceived(object arg1, string arg2, string? arg3)
@@ -124,7 +124,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         //      )
         //    );
 
-        //    SpotifyClientInstance = new(tokenResponse.AccessToken);
+        //    _api = new(tokenResponse.AccessToken);
         //}
 
         public IEnumerable<ITrackInfo> GetTracks(string? query)
@@ -136,7 +136,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 return tracks;
             }
 
-            if (SpotifyClientInstance == null)
+            if (_api == null)
             {
                 throw GenericException;
             }

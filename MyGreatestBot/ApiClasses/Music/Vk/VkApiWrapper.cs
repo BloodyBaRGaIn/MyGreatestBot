@@ -21,10 +21,10 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     public sealed class VkApiWrapper : IMusicAPI
     {
         [AllowNull]
-        private IVkApi api;
+        private IVkApi _api;
         private readonly VkApiException GenericException = new();
 
-        private IAudioCategory Audio => api?.Audio ?? throw GenericException;
+        private IAudioCategory Audio => _api?.Audio ?? throw GenericException;
 
         private static class VkQueryDecomposer
         {
@@ -70,13 +70,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             ServiceCollection serviceCollection = new();
             _ = serviceCollection.AddAudioBypass();
-            api = new VkApi(serviceCollection);
+            _api = new VkApi(serviceCollection);
 
             try
             {
                 Logout();
 
-                api.Authorize(new ApiAuthParams()
+                _api.Authorize(new ApiAuthParams()
                 {
                     Login = credentials.Username,
                     Password = credentials.Password
@@ -87,7 +87,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 throw new VkApiException("Cannot authorize", ex);
             }
 
-            if (!api.IsAuthorized)
+            if (!_api.IsAuthorized)
             {
                 throw new VkApiException("Cannot authorize");
             }
@@ -95,12 +95,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         public void Logout()
         {
-            api?.LogOut();
+            _api?.LogOut();
         }
 
         public IEnumerable<ITrackInfo> GetTracks(string? query)
         {
-            if (api == null || !api.IsAuthorized)
+            if (_api == null || !_api.IsAuthorized)
             {
                 throw GenericException;
             }
