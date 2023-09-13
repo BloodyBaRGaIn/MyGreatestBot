@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
+using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -20,7 +21,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         public static void Run(int connection_timeout)
         {
-            Instance.RunAsync(connection_timeout).GetAwaiter().GetResult();
+            try
+            {
+                Instance.RunAsync(connection_timeout).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.GetExtendedMessage());
+            }
         }
     }
 }

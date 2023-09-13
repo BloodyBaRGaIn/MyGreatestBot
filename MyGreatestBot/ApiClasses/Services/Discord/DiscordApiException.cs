@@ -8,7 +8,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         public DiscordApiException(
             [DisallowNull] string message,
             [AllowNull] Exception inner = null)
-            : base(ApiIntents.Sql, message, inner) { }
+            : base(ApiIntents.Discord, message, inner) { }
 
         public DiscordApiException() : this("Not initialized") { }
     }

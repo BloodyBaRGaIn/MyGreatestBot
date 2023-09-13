@@ -105,13 +105,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         public async Task RunAsync(int connection_timeout)
         {
-            if (Client == null)
-            {
-                throw new DiscordApiException();
-            }
-
             try
             {
+                if (Client == null)
+                {
+                    throw new DiscordApiException();
+                }
+
                 if (!Client.ConnectAsync().Wait(connection_timeout))
                 {
                     throw new DiscordApiException("Cannot connect to Discord");
