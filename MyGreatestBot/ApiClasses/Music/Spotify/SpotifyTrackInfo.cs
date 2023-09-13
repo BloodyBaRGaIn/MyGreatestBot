@@ -65,19 +65,26 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         private bool TrySearchGeneric(IMusicAPI instance)
         {
-            ISearchable searchable = instance as ISearchable ?? throw new ApiException(instance.ApiType);
-            ITrackInfo? result = searchable?.SearchTrack(this);
-            if (result == null)
+            try
+            {
+                ISearchable searchable = instance as ISearchable ?? throw new ApiException(instance.ApiType);
+                ITrackInfo? result = searchable?.SearchTrack(this);
+                if (result == null)
+                {
+                    return false;
+                }
+
+                result.ObtainAudioURL();
+
+                AudioFrom = instance.ApiType;
+                AudioURL = result.AudioURL;
+                Duration = result.Duration;
+                return true;
+            }
+            catch
             {
                 return false;
             }
-
-            result.ObtainAudioURL();
-
-            AudioFrom = instance.ApiType;
-            AudioURL = result.AudioURL;
-            Duration = result.Duration;
-            return true;
         }
 
         private bool TrySearchYandex()
@@ -96,23 +103,24 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             {
                 switch (AudioFrom)
                 {
-                    //case ApiIntents.Yandex:
-                    //    _ = TrySearchYandex();
-                    //    return;
-
                     case ApiIntents.Youtube:
                         _ = TrySearchYoutube();
                         return;
 
+                    case ApiIntents.Yandex:
+                        _ = TrySearchYandex();
+                        return;
+
                     default:
-                        //if (TrySearchYandex())
-                        //{
-                        //    return;
-                        //}
                         if (TrySearchYoutube())
                         {
                             return;
                         }
+                        if (TrySearchYandex())
+                        {
+                            return;
+                        }
+
                         break;
                 }
 
