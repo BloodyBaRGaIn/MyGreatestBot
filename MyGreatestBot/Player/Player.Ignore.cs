@@ -61,32 +61,46 @@ namespace MyGreatestBot.Player
                 return;
             }
 
-            if (index < 0)
-            {
-                if (currentTrack.ArtistArr.Length > 1)
-                {
-                    throw new IgnoreException("Provide artist index");
-                }
-                else
-                {
-                    index = 0;
-                }
-            }
-
-            try
-            {
-                SqlServerWrapper.Instance.AddIgnoredArtist(currentTrack, index, Handler.GuildId);
-            }
-            catch (Exception ex)
-            {
-                throw new IgnoreException("Failed to ignore artist", ex);
-            }
+            AddIgnoredArtistBody(index);
 
             Skip(0, source | CommandActionSource.Mute);
 
             if (!mute)
             {
                 Handler.Message.Send(new IgnoreException("Artist ignored"), true);
+            }
+        }
+
+        private void AddIgnoredArtistBody(int index)
+        {
+            if (currentTrack == null)
+            {
+                return;
+            }
+
+            int start, max;
+
+            if (index < 0)
+            { 
+                start = 0;
+                max = currentTrack.ArtistArr.Length;
+            }
+            else
+            {
+                start = index;
+                max = index;
+            }
+
+            for (int i = start; i < max; i++)
+            {
+                try
+                {
+                    SqlServerWrapper.Instance.AddIgnoredArtist(currentTrack, i, Handler.GuildId);
+                }
+                catch (Exception ex)
+                {
+                    throw new IgnoreException("Failed to ignore artist", ex);
+                }
             }
         }
     }
