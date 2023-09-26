@@ -33,7 +33,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             private static readonly Regex TRACK_RE = new("/track/(\\d+)$");
             private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
             private static readonly Regex ARTIST_RE = new("/artist/(\\d+)$");
-            private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/(\\d+)$");
+            private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/([^?]+)");
 #pragma warning restore SYSLIB1045
 
             internal static string? TryGetTrackId(string query)
