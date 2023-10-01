@@ -42,6 +42,8 @@ namespace MyGreatestBot.Player
 
         private static readonly Semaphore _sqlSemaphore = new(1, 1);
 
+        private static readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
+
         internal Player(ConnectionHandler handler)
         {
             Handler = handler;
@@ -249,8 +251,6 @@ namespace MyGreatestBot.Player
                 return LowPlayerResult.TrackNull;
             }
 
-            byte[] buff = new byte[BUFFER_SIZE];
-
             while (true)
             {
                 while (IsPaused && IsPlaying && !SeekRequested)
@@ -273,7 +273,7 @@ namespace MyGreatestBot.Player
 
                 currentTrack.PerformSeek(Seek);
 
-                if (!PerformRead(buff, out int cnt))
+                if (!PerformRead(PlayerByteBuffer, out int cnt))
                 {
                     if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(5))
                     {
@@ -293,7 +293,7 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Success;
                 }
 
-                if (!Handler.Voice.WriteAsync(buff).Wait(TRANSMIT_SINK_MS * 100))
+                if (!Handler.Voice.WriteAsync(PlayerByteBuffer).Wait(TRANSMIT_SINK_MS * 100))
                 {
                     Handler.Voice.WaitForConnectionAsync().Wait();
                     Handler.Voice.UpdateSink();

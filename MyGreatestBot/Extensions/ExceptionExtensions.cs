@@ -31,7 +31,7 @@ namespace MyGreatestBot.Extensions
 
         public static string GetStackFrame(this Exception? exception)
         {
-            // Full stack trace available in Debug build configuration
+#if DEBUG
             if (exception == null)
             {
                 return string.Empty;
@@ -53,6 +53,10 @@ namespace MyGreatestBot.Extensions
             }
             int line = frame.GetFileLineNumber();
             return $"({new System.IO.FileInfo(name).Name} : {line})";
+#else
+            // Full stack trace available in Debug build configuration
+            return string.Empty;
+#endif
         }
 
         public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception, bool is_executed_successfully = false)
