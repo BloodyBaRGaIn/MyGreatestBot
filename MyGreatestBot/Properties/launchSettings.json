@@ -2,8 +2,7 @@
   "profiles": {
     "MyGreatestBot": {
       "commandName": "Project",
-      "environmentVariables": {
-      }
+      "remoteDebugEnabled": false
     }
   }
 }

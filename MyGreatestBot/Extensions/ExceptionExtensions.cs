@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands.Exceptions;
 using System;
-using System.Diagnostics;
 
 namespace MyGreatestBot.Extensions
 {
@@ -36,12 +35,12 @@ namespace MyGreatestBot.Extensions
             {
                 return string.Empty;
             }
-            StackTrace st = new(exception, true);
+            System.Diagnostics.StackTrace st = new(exception, true);
             if (st == null)
             {
                 return string.Empty;
             }
-            StackFrame? frame = st.GetFrame(0);
+            System.Diagnostics.StackFrame? frame = st.GetFrame(0);
             if (frame == null)
             {
                 return string.Empty;
