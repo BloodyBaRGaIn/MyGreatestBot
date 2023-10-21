@@ -277,7 +277,7 @@ namespace MyGreatestBot.Player
 
                 if (!PerformRead(PlayerByteBuffer, out int cnt))
                 {
-                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(5))
+                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(1))
                     {
                         // track almost ended
                         return LowPlayerResult.Success;
@@ -289,7 +289,7 @@ namespace MyGreatestBot.Player
 
                 Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((cnt + 0.0f) / BUFFER_SIZE);
 
-                if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek <= TimeSpan.FromSeconds(1))
+                if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS))
                 {
                     // track should be ended
                     return LowPlayerResult.Success;
