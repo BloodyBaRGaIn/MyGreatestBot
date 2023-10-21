@@ -34,7 +34,9 @@ namespace MyGreatestBot.Player
                     FileName = FFMPEG_PATH,
                     Arguments = track.Arguments,
                     RedirectStandardOutput = true,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    LoadUserProfile = true,
+                    WorkingDirectory = "ffmpeg_binaries"
                 }) ?? throw new InvalidOperationException("ffmpeg not started");
 
                 try

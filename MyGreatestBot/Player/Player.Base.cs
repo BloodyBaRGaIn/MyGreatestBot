@@ -114,7 +114,9 @@ namespace MyGreatestBot.Player
 
                     if (currentTrack != null)
                     {
+                        Thread.BeginCriticalRegion();
                         PlayBody();
+                        Thread.EndCriticalRegion();
                     }
 
                     if (!tracks_queue.Any() && !StopRequested)
@@ -172,7 +174,7 @@ namespace MyGreatestBot.Player
                 return;
             }
 
-            bool already_restartd = false;
+            bool already_restarted = false;
             bool obtain_audio = true;
 
             try
@@ -200,12 +202,12 @@ namespace MyGreatestBot.Player
 
                 if (!ffmpeg.TryLoad(currentTrack.IsLiveStream ? 2000 : (int)(1000 * (currentTrack.Duration.TotalHours + 1))))
                 {
-                    if (already_restartd)
+                    if (already_restarted)
                     {
                         throw new ApiException(currentTrack.TrackType);
                     }
                     currentTrack.Reload();
-                    already_restartd = true;
+                    already_restarted = true;
                     obtain_audio = true;
                     continue;
                 }
