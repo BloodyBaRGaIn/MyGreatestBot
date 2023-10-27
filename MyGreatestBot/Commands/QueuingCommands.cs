@@ -13,11 +13,14 @@ namespace MyGreatestBot.Commands
     [Category(CommandStrings.QueuingCategoryName)]
     internal class QueuingCommands : BaseCommandModule
     {
-        private static async Task<IEnumerable<ITrackInfo>> GetTracks(
-            CommandContext ctx,
-            ConnectionHandler handler,
-            string query)
+        private static async Task PlayCommandGeneric(CommandContext ctx, string query, CommandActionSource source)
         {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
             handler.TextChannel = ctx.Channel;
             handler.Voice.UpdateVoiceConnection();
 
@@ -28,7 +31,9 @@ namespace MyGreatestBot.Commands
                 handler.Update(ctx.Guild);
             }
 
-            return ApiManager.GetAll(query);
+            IEnumerable<ITrackInfo> tracks = ApiManager.GetAll(query);
+
+            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, source));
         }
 
         [Command("play")]
@@ -39,16 +44,8 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
         {
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
-            if (handler == null)
-            {
-                return;
-            }
-
-            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
-
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
-                CommandActionSource.Command));
+            await PlayCommandGeneric(ctx, query,
+                CommandActionSource.Command);
         }
 
         [Command("playshuffled")]
@@ -59,16 +56,8 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
         {
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
-            if (handler == null)
-            {
-                return;
-            }
-
-            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
-
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
-                CommandActionSource.Command | CommandActionSource.PlayerShuffle));
+            await PlayCommandGeneric(ctx, query,
+                CommandActionSource.Command | CommandActionSource.PlayerShuffle);
         }
 
         [Command("head")]
@@ -79,16 +68,8 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
         {
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
-            if (handler == null)
-            {
-                return;
-            }
-
-            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
-
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
-                CommandActionSource.Command | CommandActionSource.PlayerToHead));
+            await PlayCommandGeneric(ctx, query,
+               CommandActionSource.Command | CommandActionSource.PlayerToHead);
         }
 
         [Command("tms")]
@@ -99,16 +80,8 @@ namespace MyGreatestBot.Commands
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
         {
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
-            if (handler == null)
-            {
-                return;
-            }
-
-            IEnumerable<ITrackInfo> tracks = await GetTracks(ctx, handler, query);
-
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks,
-                CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent));
+            await PlayCommandGeneric(ctx, query,
+              CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent);
         }
     }
 }
