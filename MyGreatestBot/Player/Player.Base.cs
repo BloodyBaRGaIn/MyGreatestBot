@@ -277,7 +277,7 @@ namespace MyGreatestBot.Player
 
                 if (!PerformRead(PlayerByteBuffer, out int cnt))
                 {
-                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(1))
+                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(2))
                     {
                         // track almost ended
                         return LowPlayerResult.Success;

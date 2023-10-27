@@ -6,7 +6,7 @@ namespace MyGreatestBot.Commands.Exceptions
     public sealed class QueueLengthException : CommandExecutionException
     {
         public override string Title => "Count";
-        public override DiscordColor ExecutedColor => DiscordColor.Purple;
+        public override DiscordColor ExecutedColor => GenericColor;
 
         public QueueLengthException() : base() { }
         public QueueLengthException(string message) : base(message) { }
