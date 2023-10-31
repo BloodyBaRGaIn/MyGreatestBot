@@ -123,6 +123,7 @@ namespace MyGreatestBot.Player
                     {
                         Handler.Message.Send(new PlayerException("No more tracks"));
                     }
+
                     StopRequested = false;
                 }
                 catch (TaskCanceledException)
@@ -314,7 +315,7 @@ namespace MyGreatestBot.Player
             {
                 return false;
             }
-            if (!read_task.Wait(100))
+            if (!read_task.Wait(5000))
             {
                 cts.Cancel();
                 bytesCount = 0;

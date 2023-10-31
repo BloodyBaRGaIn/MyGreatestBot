@@ -25,13 +25,13 @@ namespace MyGreatestBot.Commands.Utils
                 return;
             }
 
-            foreach (string item in GetFullCommandsString())
+            foreach (string item in GetFullCommandsString(MarkdownType.Github))
             {
                 streamWriter.Write(item);
             }
         }
 
-        public static IEnumerable<string> GetFullCommandsString()
+        public static IEnumerable<string> GetFullCommandsString(MarkdownType mdType)
         {
             foreach (IGrouping<string, Command> category in DiscordWrapper.Commands.RegisteredCommands.Values
                 .DistinctBy(c => c.Name)
@@ -43,7 +43,7 @@ namespace MyGreatestBot.Commands.Utils
 
                 foreach (Command command in category)
                 {
-                    result += GetCommandString(command);
+                    result += GetCommandString(command, mdType);
                 }
 
                 yield return result;
@@ -60,7 +60,12 @@ namespace MyGreatestBot.Commands.Utils
             return $"{Environment.NewLine}## {categoryName} commands{Environment.NewLine}{Environment.NewLine}";
         }
 
-        public static string GetCommandString(Command command)
+        public static string GetListPad(int depth, MarkdownType mdType)
+        {
+            return string.Empty.PadLeft((int)mdType * depth, ' ');
+        }
+
+        public static string GetCommandString(Command command, MarkdownType mdType)
         {
             string result = string.Empty;
 
@@ -85,12 +90,25 @@ namespace MyGreatestBot.Commands.Utils
 
             result += $"    Arguments:{Environment.NewLine}";
 
+            string pad = GetListPad(1, mdType);
+
             foreach (CommandArgument argument in overload.Arguments)
             {
-                result += $"    - ```{argument.Name} ({argument.Type.Name})";
+                result += $"{pad}- ```{argument.Name} ({argument.Type.Name})";
                 if (!string.IsNullOrWhiteSpace(argument.Description))
                 {
-                    result += $" - {argument.Description}";
+                    string[] split = argument.Description.Split(Environment.NewLine);
+
+                    result += " - ";
+
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        result += split[i].Replace("\t", pad);
+                        if (i < split.Length - 1)
+                        {
+                            result += Environment.NewLine;
+                        }
+                    }
                 }
                 if (argument.IsOptional)
                 {

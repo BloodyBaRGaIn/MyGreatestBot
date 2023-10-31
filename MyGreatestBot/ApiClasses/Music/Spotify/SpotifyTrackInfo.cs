@@ -31,6 +31,8 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         [AllowNull]
         public string CoverURL { get; }
 
+        bool ITrackInfo.BypassCheck { get; set; } = false;
+
         private ApiIntents AudioFrom = ApiIntents.None;
 
         /// <summary>

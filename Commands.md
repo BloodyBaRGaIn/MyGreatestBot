@@ -14,6 +14,11 @@ Commands are organized into categories for better readability
 - ```play (p) - Add tracks to the queue```  
     Arguments:
     - ```query (String) - URL```  
+    - ```args (String) - Additional queuing paramtetrs (optional)```
+        - ```SH - shuffle```
+        - ```FF - enqueue to the head```
+        - ```T - play immediatly```
+        - ```B - bypass SQL check```  
 - ```playshuffled (psh) - Add shuffled tracks to the queue```  
     Arguments:
     - ```query (String) - URL```  
@@ -21,6 +26,9 @@ Commands are organized into categories for better readability
     Arguments:
     - ```query (String) - URL```  
 - ```tms (t) - Play the track immediatly```  
+    Arguments:
+    - ```query (String) - URL```  
+- ```playbypass (pb) - Play the track without check```  
     Arguments:
     - ```query (String) - URL```  
 

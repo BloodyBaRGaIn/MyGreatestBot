@@ -16,6 +16,14 @@ namespace MyGreatestBot.Player
 
             lock (tracks_queue)
             {
+                if (source.HasFlag(CommandActionSource.PlayerNoBlacklist))
+                {
+                    foreach (var track in tracks)
+                    {
+                        track.BypassCheck = true;
+                    }
+                }
+
                 if (source.HasFlag(CommandActionSource.PlayerShuffle))
                 {
                     tracks = tracks.Shuffle();

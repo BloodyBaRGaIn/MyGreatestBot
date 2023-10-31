@@ -36,7 +36,7 @@ namespace MyGreatestBot.Commands.Utils
 
         public static IEnumerable<CustomHelpFormatter> WithAllCommands(CommandContext ctx)
         {
-            foreach (string item in MarkdownWriter.GetFullCommandsString())
+            foreach (string item in MarkdownWriter.GetFullCommandsString(MarkdownType.Discord))
             {
                 yield return new CustomHelpFormatter(ctx) { _content = item };
             }
@@ -49,7 +49,7 @@ namespace MyGreatestBot.Commands.Utils
 
         private void AddField(Command command)
         {
-            _content += MarkdownWriter.GetCommandString(command);
+            _content += MarkdownWriter.GetCommandString(command, MarkdownType.Discord);
         }
     }
 }

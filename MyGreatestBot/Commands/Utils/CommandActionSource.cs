@@ -13,6 +13,7 @@
         PlayerToHead = 0x00000100U,
         PlayerShuffle = 0x00000200U,
         PlayerSkipCurrent = 0x00000400U,
+        PlayerNoBlacklist = 0x00000800U,
 
         Mute = 0x10000000U
     }

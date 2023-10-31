@@ -25,16 +25,19 @@ namespace MyGreatestBot.Player
 
                 Handler.Message.Send(GetPlayingMessage<PlayerException>(track, "Playing"));
 
-                if (SqlServerWrapper.Instance.IsAnyArtistIgnored(track, Handler.GuildId))
+                if (!track.BypassCheck)
                 {
-                    Handler.Message.Send(new IgnoreException("Skipping track with ignored artist(s)"), true);
-                    continue;
-                }
+                    if (SqlServerWrapper.Instance.IsAnyArtistIgnored(track, Handler.GuildId))
+                    {
+                        Handler.Message.Send(new IgnoreException("Skipping track with ignored artist(s)"), true);
+                        continue;
+                    }
 
-                if (SqlServerWrapper.Instance.IsTrackIgnored(track, Handler.GuildId))
-                {
-                    Handler.Message.Send(new IgnoreException("Skipping ignored track"), true);
-                    continue;
+                    if (SqlServerWrapper.Instance.IsTrackIgnored(track, Handler.GuildId))
+                    {
+                        Handler.Message.Send(new IgnoreException("Skipping ignored track"), true);
+                        continue;
+                    }
                 }
 
                 if (track.Duration >= MaxTrackDuration)

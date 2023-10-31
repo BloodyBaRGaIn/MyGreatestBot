@@ -42,10 +42,52 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task PlayCommand(
             CommandContext ctx,
-            [RemainingText, Description("URL")] string query)
+            [Description("URL")] string query,
+            [AllowNull,
+            Description(
+            "Additional queuing paramtetrs (optional)```\r\n" +
+            "\t\t- ```SH - shuffle```\r\n" +
+            "\t\t- ```FF - enqueue to the head```\r\n" +
+            "\t\t- ```T - play immediatly```\r\n" +
+            "\t\t- ```B - bypass SQL check")] params string[] args)
         {
-            await PlayCommandGeneric(ctx, query,
-                CommandActionSource.Command);
+            CommandActionSource source = CommandActionSource.Command;
+            if (args != null)
+            {
+                foreach (string arg in args)
+                {
+                    if (string.IsNullOrWhiteSpace(arg))
+                    {
+                        continue;
+                    }
+
+                    string u_arg = arg.ToUpperInvariant();
+                    switch (u_arg)
+                    {
+                        case "SH":
+                        case "SHUFFLE":
+                            source |= CommandActionSource.PlayerShuffle;
+                            break;
+                        case "FF":
+                        case "HEAD":
+                            source |= CommandActionSource.PlayerToHead;
+                            break;
+                        case "T":
+                            source |= CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent;
+                            break;
+
+                        case "B":
+                            source |= CommandActionSource.PlayerNoBlacklist;
+                            break;
+
+                        default:
+                            // skip unknown arguments
+                            break;
+                    }
+                }
+            }
+
+            await PlayCommandGeneric(ctx, query, source);
         }
 
         [Command("playshuffled")]
@@ -69,7 +111,7 @@ namespace MyGreatestBot.Commands
             [RemainingText, Description("URL")] string query)
         {
             await PlayCommandGeneric(ctx, query,
-               CommandActionSource.Command | CommandActionSource.PlayerToHead);
+                CommandActionSource.Command | CommandActionSource.PlayerToHead);
         }
 
         [Command("tms")]
@@ -81,7 +123,19 @@ namespace MyGreatestBot.Commands
             [RemainingText, Description("URL")] string query)
         {
             await PlayCommandGeneric(ctx, query,
-              CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent);
+                CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent);
+        }
+
+        [Command("playbypass")]
+        [Aliases("pb")]
+        [Description("Play the track without check")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task PlayBypassCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
+        {
+            await PlayCommandGeneric(ctx, query,
+                CommandActionSource.Command | CommandActionSource.PlayerNoBlacklist);
         }
     }
 }

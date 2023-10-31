@@ -73,6 +73,8 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         public string AudioURL { get; }
 
+        public bool BypassCheck { get; set; }
+
         /// <summary>
         /// Does the track have a duration
         /// </summary>
