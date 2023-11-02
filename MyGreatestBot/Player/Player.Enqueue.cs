@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
             {
                 if (source.HasFlag(CommandActionSource.PlayerNoBlacklist))
                 {
-                    foreach (var track in tracks)
+                    foreach (ITrackInfo track in tracks)
                     {
                         track.BypassCheck = true;
                     }

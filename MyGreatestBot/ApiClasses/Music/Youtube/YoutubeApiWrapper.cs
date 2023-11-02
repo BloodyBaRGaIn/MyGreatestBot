@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Yandex.Music.Api.Models.Search;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Playlists;
@@ -174,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return other;
             }
 
-            var search = Search.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}");
+            IAsyncEnumerable<VideoSearchResult> search = Search.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}");
             if (search == null)
             {
                 return null;

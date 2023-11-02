@@ -240,7 +240,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 Uri = album.Uri,
             };
             List<SimpleTrack>? tracks_list = album.Tracks?.Items ?? null;
-            if (tracks_list == null || tracks_list.Any())
+            if (tracks_list == null || !tracks_list.Any())
             {
                 return;
             }

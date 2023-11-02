@@ -81,7 +81,7 @@ namespace MyGreatestBot.Player
             int start, max;
 
             if (index < 0)
-            { 
+            {
                 start = 0;
                 max = currentTrack.ArtistArr.Length;
             }
