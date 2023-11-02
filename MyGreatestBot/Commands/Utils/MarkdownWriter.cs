@@ -8,10 +8,16 @@ using System.Linq;
 
 namespace MyGreatestBot.Commands.Utils
 {
+    /// <summary>
+    /// Markdown syntax workaround
+    /// </summary>
     public static class MarkdownWriter
     {
         private const string FilePath = "../../../Commands.md";
 
+        /// <summary>
+        /// Creates a Github markdown file that contains all registered commands
+        /// </summary>
         public static void GenerateFile()
         {
             using FileStream markdown = File.Open(FilePath, FileMode.Create, FileAccess.Write);
@@ -31,6 +37,12 @@ namespace MyGreatestBot.Commands.Utils
             }
         }
 
+        /// <summary>
+        /// Get all registered commands descriptions with
+        /// specified markdown type for correct presentation
+        /// </summary>
+        /// <param name="mdType">Desired markdown type</param>
+        /// <returns></returns>
         public static IEnumerable<string> GetFullCommandsString(MarkdownType mdType)
         {
             foreach (IGrouping<string, Command> category in DiscordWrapper.Commands.RegisteredCommands.Values
@@ -50,21 +62,13 @@ namespace MyGreatestBot.Commands.Utils
             }
         }
 
-        public static string GetCategoryHeaderString(string categoryName)
-        {
-            if (string.IsNullOrWhiteSpace(categoryName))
-            {
-                categoryName = "Unnamed";
-            }
-            categoryName = categoryName.FirstCharToUpper();
-            return $"{Environment.NewLine}## {categoryName} commands{Environment.NewLine}{Environment.NewLine}";
-        }
-
-        public static string GetListPad(int depth, MarkdownType mdType)
-        {
-            return string.Empty.PadLeft((int)mdType * depth, ' ');
-        }
-
+        /// <summary>
+        /// Get command description with
+        /// specified markdown type for correct presentation
+        /// </summary>
+        /// <param name="command">Desired command instance</param>
+        /// <param name="mdType">Desired markdown type</param>
+        /// <returns></returns>
         public static string GetCommandString(Command command, MarkdownType mdType)
         {
             string result = string.Empty;
@@ -118,6 +122,33 @@ namespace MyGreatestBot.Commands.Utils
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get command category as markdown header
+        /// </summary>
+        /// <param name="categoryName">Category name</param>
+        /// <returns></returns>
+        private static string GetCategoryHeaderString(string categoryName)
+        {
+            if (string.IsNullOrWhiteSpace(categoryName))
+            {
+                categoryName = "Unnamed";
+            }
+            categoryName = categoryName.FirstCharToUpper();
+            return $"{Environment.NewLine}## {categoryName} commands{Environment.NewLine}{Environment.NewLine}";
+        }
+
+        /// <summary>
+        /// Get padding string for the list
+        /// </summary>
+        /// <param name="depth">The list depth</param>
+        /// <param name="mdType">Desired markdown type</param>
+        /// <returns></returns>
+        private static string GetListPad(int depth, MarkdownType mdType)
+        {
+            if (depth < 0) depth = 0;
+            return string.Empty.PadLeft((int)mdType * depth, ' ');
         }
     }
 }

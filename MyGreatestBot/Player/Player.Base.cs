@@ -315,7 +315,7 @@ namespace MyGreatestBot.Player
             {
                 return false;
             }
-            if (!read_task.Wait(5000))
+            if (!read_task.Wait(TRANSMIT_SINK_MS * 100))
             {
                 cts.Cancel();
                 bytesCount = 0;
@@ -332,7 +332,7 @@ namespace MyGreatestBot.Player
             origin_cnt = bytesCount;
             if (bytesCount < buff.Length)
             {
-                Task.Delay(100).Wait();
+                Task.Delay(TRANSMIT_SINK_MS).Wait();
                 while (bytesCount < buff.Length)
                 {
                     buff[bytesCount++] = 0;
