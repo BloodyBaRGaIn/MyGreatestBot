@@ -80,7 +80,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
                 AudioFrom = instance.ApiType;
                 AudioURL = result.AudioURL;
-                Duration = result.Duration;
+                //Duration = result.Duration;
                 return true;
             }
             catch

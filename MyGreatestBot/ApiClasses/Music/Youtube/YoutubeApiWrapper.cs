@@ -4,6 +4,7 @@ using Google.Apis.YouTube.v3;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -173,7 +174,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return other;
             }
 
-            IAsyncEnumerable<VideoSearchResult> search = Search.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}");
+            IAsyncEnumerable<VideoSearchResult> search =
+                Search.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}");
+
             if (search == null)
             {
                 return null;
@@ -185,6 +188,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             {
                 await foreach (VideoSearchResult track in search)
                 {
+                    TimeSpan found_duration = track.Duration.GetValueOrDefault();
+                    TimeSpan diff = found_duration - other.Duration;
+                    if (Math.Abs(diff.Ticks) > TimeSpan.FromSeconds(2).Ticks)
+                    {
+                        continue;
+                    }
                     result = track;
                     return;
                 }
