@@ -159,7 +159,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     {
                         await handler.Join(e);
                         await handler.Voice.WaitForConnectionAsync();
-                        handler.Update(e.Guild);
                     }
                     else
                     {

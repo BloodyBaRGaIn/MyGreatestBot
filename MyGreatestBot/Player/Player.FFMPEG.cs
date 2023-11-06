@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -17,6 +19,9 @@ namespace MyGreatestBot.Player
 
             [AllowNull]
             internal StreamReader? StandardOutput => Process?.StandardOutput;
+
+            [AllowNull]
+            internal StreamReader? StandardError => Process?.StandardError;
 
             internal bool HasExited => Process?.HasExited ?? true;
 
@@ -34,6 +39,7 @@ namespace MyGreatestBot.Player
                     FileName = FFMPEG_PATH,
                     Arguments = track.Arguments,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     UseShellExecute = false,
                     LoadUserProfile = true,
                     WorkingDirectory = "ffmpeg_binaries"
@@ -61,6 +67,17 @@ namespace MyGreatestBot.Player
                 }
                 bool exit = WaitForExit(milliseconds);
                 if (HasExited || exit || StandardOutput.EndOfStream)
+                {
+                    return false;
+                }
+
+                CancellationTokenSource cancellation = new();
+                Task<bool> task = Task.Run(() => StandardError?.EndOfStream ?? true, cancellation.Token);
+                if (!task.Wait(100))
+                {
+                    cancellation.Cancel();
+                }
+                else if (!task.Result)
                 {
                     return false;
                 }

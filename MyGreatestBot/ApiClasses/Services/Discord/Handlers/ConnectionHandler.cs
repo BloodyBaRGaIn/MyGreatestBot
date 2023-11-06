@@ -122,11 +122,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.Disconnect();
                 Voice.WaitForDisconnectionAsync().Wait();
                 await Task.Yield();
-                if (channel != null)
-                {
-                    await Join(text, channel, throw_exception);
-                }
-                return;
+                //if (channel != null)
+                //{
+                //    await Join(text, channel, throw_exception);
+                //}
+                //return;
             }
 
             if (channel != null)

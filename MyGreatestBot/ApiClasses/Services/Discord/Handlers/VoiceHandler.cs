@@ -59,15 +59,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Connect(DiscordChannel channel)
         {
-            Channel = channel;
-
             try
             {
                 if (VoiceNext != null
-                    && Channel != null
-                    && Connection?.TargetChannel != Channel)
+                    && channel != null
+                    && Connection?.TargetChannel != channel)
                 {
-                    _ = (VoiceNext?.ConnectAsync(Channel).Wait(1000));
+                    _ = (VoiceNext?.ConnectAsync(channel).Wait(1000));
+                    Channel = channel;
                 }
             }
             catch { }

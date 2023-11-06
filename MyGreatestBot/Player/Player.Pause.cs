@@ -5,6 +5,11 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
+        internal bool GetPausedState()
+        {
+            return IsPaused;
+        }
+
         internal void Pause(CommandActionSource source)
         {
             IsPaused = true;
