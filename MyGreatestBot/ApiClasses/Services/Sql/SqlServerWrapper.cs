@@ -21,7 +21,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         private readonly IgnoredTracksTable IgnoredTracks;
         private readonly IgnoredArtistsTable IgnoredArtists;
-        private readonly TrackInfoTable TrackInfo;
+        private readonly SavedTracksTable TrackInfo;
 
         private SqlDatabaseConfigJSON config;
 
