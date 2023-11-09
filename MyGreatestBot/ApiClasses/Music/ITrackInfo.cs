@@ -125,20 +125,20 @@ namespace MyGreatestBot.ApiClasses.Music
 
             if (PlaylistName != null && !string.IsNullOrWhiteSpace(PlaylistName.Title))
             {
-                result += $"{Environment.NewLine} Playlist: {PlaylistName}";
+                result += $"{Environment.NewLine}Playlist: {PlaylistName}";
             }
 
             if (Seek != TimeSpan.Zero)
             {
-                result += $"{Environment.NewLine} Time: {Seek:hh\\:mm\\:ss}";
+                result += $"{Environment.NewLine}Time: {Seek:hh\\:mm\\:ss}";
             }
 
             return result;
         }
 
-        public string GetShortMessage()
+        public string GetShortMessage(string prefix)
         {
-            return $"Playing: {Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
+            return $"{prefix}{Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
         }
 
         /// <summary>

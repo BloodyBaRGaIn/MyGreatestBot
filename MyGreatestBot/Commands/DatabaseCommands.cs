@@ -62,7 +62,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Save(CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.SqlSave(CommandActionSource.Command));
         }
 
         [Command("restore")]
@@ -78,7 +78,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.Restore(CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.SqlRestore(CommandActionSource.Command));
         }
     }
 }

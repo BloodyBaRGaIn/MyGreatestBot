@@ -184,7 +184,7 @@ namespace MyGreatestBot.Player
             }
             catch { }
 
-            Handler.Log.Send(currentTrack.GetShortMessage());
+            Handler.Log.Send(currentTrack.GetShortMessage("Playing: "));
 
             IsPlaying = true;
 
