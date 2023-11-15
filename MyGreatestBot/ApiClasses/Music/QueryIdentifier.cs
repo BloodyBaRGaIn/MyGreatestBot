@@ -11,6 +11,7 @@ namespace MyGreatestBot.ApiClasses.Music
         private static readonly Regex YANDEX_RE = new("^((http([s])?://)?music\\.yandex\\.([\\w])+/)");
         private static readonly Regex VK_RE = new("^((http([s])?://)?((www|m)\\.)?vk\\.com/)");
         private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
+        private static readonly Regex GENERIC_RE = new("((\\s)|(\\S))+");
 #pragma warning restore SYSLIB1045
 
         public static IEnumerable<ITrackInfo> Execute(string query)
@@ -60,6 +61,7 @@ namespace MyGreatestBot.ApiClasses.Music
                 new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.Instance.GetTracks),
+                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.Instance.GetTracksSearch)
             };
         }
     }

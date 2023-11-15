@@ -12,12 +12,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using VkNet.Model;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
+using Video = YoutubeExplode.Videos.Video;
 
 namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
@@ -205,6 +207,35 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
 
             return new YoutubeTrackInfo(result);
+        }
+
+        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        {
+            List<ITrackInfo> tracks = new();
+            IAsyncEnumerable<VideoSearchResult> search =
+            Search.GetVideosAsync(query);
+            if (search == null)
+            {
+                return tracks;
+            }
+
+            VideoSearchResult? result = null;
+
+            Task.Run(async () =>
+            {
+                await foreach (VideoSearchResult track in search)
+                {
+                    result = track;
+                    return;
+                }
+            }).Wait();
+
+            if (result != null)
+            {
+                tracks.Add(new YoutubeTrackInfo(result));
+            }
+
+            return tracks;
         }
     }
 }

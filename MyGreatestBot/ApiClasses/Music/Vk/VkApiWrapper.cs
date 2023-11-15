@@ -136,6 +136,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return audio == null ? null : new VkTrackInfo(audio);
         }
 
+        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        {
+            return GetTracks(query);
+        }
+
         private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)
         {
             bool success = false;

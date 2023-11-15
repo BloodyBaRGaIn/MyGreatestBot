@@ -282,6 +282,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track == null ? null : new YandexTrackInfo(track);
         }
 
+        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        {
+            return GetTracks(query);
+        }
+
         private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = new();

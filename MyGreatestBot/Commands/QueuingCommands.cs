@@ -46,14 +46,15 @@ namespace MyGreatestBot.Commands
             [AllowNull,
             Description(
             "Additional queuing paramtetrs (optional)```\r\n" +
-            "\t\t- ```SH - shuffle```\r\n" +
-            "\t\t- ```FF - enqueue to the head```\r\n" +
-            "\t\t- ```T - play immediatly```\r\n" +
-            "\t\t- ```B - bypass SQL check")] params string[] args)
+            "\t\t- ```\\SH - shuffle```\r\n" +
+            "\t\t- ```\\FF - enqueue to the head```\r\n" +
+            "\t\t- ```\\T - play immediatly```\r\n" +
+            "\t\t- ```\\B - bypass SQL check")] params string[] args)
         {
             CommandActionSource source = CommandActionSource.Command;
             if (args != null)
             {
+                bool start_args = false;
                 foreach (string arg in args)
                 {
                     if (string.IsNullOrWhiteSpace(arg))
@@ -61,28 +62,41 @@ namespace MyGreatestBot.Commands
                         continue;
                     }
 
-                    string u_arg = arg.ToUpperInvariant();
-                    switch (u_arg)
+                    if (start_args)
                     {
-                        case "SH":
-                        case "SHUFFLE":
-                            source |= CommandActionSource.PlayerShuffle;
-                            break;
-                        case "FF":
-                        case "HEAD":
-                            source |= CommandActionSource.PlayerToHead;
-                            break;
-                        case "T":
-                            source |= CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent;
-                            break;
+                        string u_arg = arg.ToUpperInvariant();
+                        switch (u_arg)
+                        {
+                            case "\\SH":
+                            case "\\SHUFFLE":
+                                source |= CommandActionSource.PlayerShuffle;
+                                break;
+                            case "\\FF":
+                            case "\\HEAD":
+                                source |= CommandActionSource.PlayerToHead;
+                                break;
+                            case "\\T":
+                                source |= CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent;
+                                break;
 
-                        case "B":
-                            source |= CommandActionSource.PlayerNoBlacklist;
-                            break;
+                            case "\\B":
+                                source |= CommandActionSource.PlayerNoBlacklist;
+                                break;
 
-                        default:
-                            // skip unknown arguments
-                            break;
+                            default:
+                                // skip unknown arguments
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        if (arg.StartsWith("\\"))
+                        {
+                            start_args = true;
+                            continue;
+                        }
+
+                        query = string.Join(' ', query, arg);
                     }
                 }
             }

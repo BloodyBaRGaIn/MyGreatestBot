@@ -215,6 +215,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return track == null ? null : new SpotifyTrackInfo(track);
         }
 
+        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        {
+            return GetTracks(query);
+        }
+
         private void FromAlbumId(string album_id, List<ITrackInfo> tracks)
         {
             FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();
