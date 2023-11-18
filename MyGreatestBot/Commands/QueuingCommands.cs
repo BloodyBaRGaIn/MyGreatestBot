@@ -116,8 +116,8 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerShuffle);
         }
 
-        [Command("head")]
-        [Aliases("ff")]
+        [Command("playhead")]
+        [Aliases("pf", "ff", "f")]
         [Description("Add tracks to the head")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task HeadCommand(
@@ -128,7 +128,7 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerToHead);
         }
 
-        [Command("tms")]
+        [Command("playimmediatly")]
         [Aliases("t")]
         [Description("Play the track immediatly")]
         [SuppressMessage("Performance", "CA1822")]
