@@ -117,9 +117,7 @@ namespace MyGreatestBot.Player
 
                     if (currentTrack != null)
                     {
-                        Thread.BeginCriticalRegion();
                         PlayBody();
-                        Thread.EndCriticalRegion();
                     }
 
                     if (!tracks_queue.Any() && !StopRequested)
@@ -193,6 +191,8 @@ namespace MyGreatestBot.Player
 
             while (true)
             {
+                Task.Yield().GetAwaiter().GetResult();
+
                 if (obtain_audio && !TryObtainAudio())
                 {
                     break;

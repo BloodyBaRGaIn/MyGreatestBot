@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -13,6 +14,10 @@ namespace MyGreatestBot.Player
         private sealed class FFMPEG
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
+
+            private static ulong ErrorCount;
+
+            private static readonly Queue<string> ErrorQueue = new();
 
             [AllowNull]
             private Process Process;
@@ -67,22 +72,21 @@ namespace MyGreatestBot.Player
                 }
 
                 CancellationTokenSource cts = new();
-                Task<string> task = Task.Run(() =>
+                Task task = Task.Factory.StartNew(() =>
                 {
+                    Thread.CurrentThread.Name = $"{nameof(GetErrorMessage)}{++ErrorCount}";
                     if (StandardError != null && !StandardError.EndOfStream)
                     {
-                        return StandardError.ReadToEnd();
+                        ErrorQueue.Enqueue(StandardError.ReadToEnd());
                     }
-                    return string.Empty;
                 }, cts.Token);
 
-                if (!task.Wait(100))
+                if (ErrorQueue.TryDequeue(out string? result) && !string.IsNullOrWhiteSpace(result))
                 {
-                    cts.Cancel();
-                    return string.Empty;
+                    return result;
                 }
 
-                return task.Result;
+                return string.Empty;
             }
 
             internal bool TryLoad(int milliseconds)
