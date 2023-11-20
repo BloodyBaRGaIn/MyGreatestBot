@@ -5,6 +5,7 @@ using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,6 +42,66 @@ namespace MyGreatestBot.Commands
             {
                 await handler.Leave(ctx);
             }
+        }
+
+        [Command("status")]
+        [Description("Get APIs status")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task StatusCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            string result = string.Empty;
+
+            foreach (object? obj in Enum.GetValues(typeof(ApiIntents)))
+            {
+                ApiIntents value;
+                if (obj is null)
+                {
+                    continue;
+                }
+                value = (ApiIntents)obj;
+
+                if (value is ApiIntents.None
+                    or ApiIntents.Discord
+                    or ApiIntents.Music
+                    or ApiIntents.Services
+                    or ApiIntents.All)
+                {
+                    continue;
+                }
+
+                if (ApiManager.InitIntents.HasFlag(value))
+                {
+                    result += $"{value} ";
+                    if (ApiManager.FailedIntents.HasFlag(value))
+                    {
+                        result += "FAILED";
+                    }
+                    else
+                    {
+                        result += "SUCCESS";
+                    }
+                    result += Environment.NewLine;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                handler.Message.Send(new StatusException(result.TrimEnd(Environment.NewLine.ToCharArray())), true);
+            }
+            else
+            {
+                handler.Message.Send(new StatusException("No APIs initialized"));
+            }
+
+            await Task.Delay(1);
         }
 
         [Command("reload")]

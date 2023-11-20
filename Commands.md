@@ -6,6 +6,7 @@ Commands are organized into categories for better readability
 
 - ```join (j) - Join voice channel```  
 - ```leave (l) - Leave voice channel```  
+- ```status - Get APIs status```  
 - ```reload - Reload failed APIs```  
 - ```logout (exit, quit, bye, bb, b) - Logout and exit```  
 

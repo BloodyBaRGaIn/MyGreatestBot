@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses;
+﻿using Microsoft.IdentityModel.Tokens;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
@@ -18,8 +19,8 @@ namespace MyGreatestBot.Player
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
-
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
+        private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(3);
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
@@ -31,6 +32,8 @@ namespace MyGreatestBot.Player
         private volatile bool StopRequested;
 
         private TimeSpan Seek;
+
+        private TimeSpan TimeRemaining => (currentTrack == null ? Seek : currentTrack.Duration) - Seek;
 
         private readonly Queue<ITrackInfo?> tracks_queue = new();
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
@@ -203,6 +206,10 @@ namespace MyGreatestBot.Player
 
                 if (!ffmpeg.TryLoad(currentTrack.IsLiveStream ? 2000 : (int)(1000 * (currentTrack.Duration.TotalHours + 1))))
                 {
+                    if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
+                    {
+                        break;
+                    }
                     if (already_restarted)
                     {
                         throw new ApiException(currentTrack.TrackType);
@@ -222,6 +229,21 @@ namespace MyGreatestBot.Player
                 if (low_result == LowPlayerResult.Restart)
                 {
                     Handler.Log.Send("Restart ffmpeg");
+
+                    string errorMessage = ffmpeg.GetErrorMessage();
+
+                    if (string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        Handler.Log.Send("Unexpected process exit");
+                    }
+                    else
+                    {
+                        Handler.Log.Send(Environment.NewLine +
+                            $"Error message begin{Environment.NewLine}" +
+                            $"{errorMessage}{Environment.NewLine}" +
+                            "Error message end");
+                    }
+
                     obtain_audio = false;
                     continue;
                 }
@@ -278,7 +300,7 @@ namespace MyGreatestBot.Player
 
                 if (!PerformRead(PlayerByteBuffer, out int cnt))
                 {
-                    if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromSeconds(2))
+                    if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
                     {
                         // track almost ended
                         return LowPlayerResult.Success;
@@ -288,9 +310,9 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Restart;
                 }
 
-                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((cnt + 0.0f) / BUFFER_SIZE);
+                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((double)cnt / BUFFER_SIZE);
 
-                if (!currentTrack.IsLiveStream && currentTrack.Duration - Seek < TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS))
+                if (!currentTrack.IsLiveStream && TimeRemaining < TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS))
                 {
                     // track should be ended
                     return LowPlayerResult.Success;

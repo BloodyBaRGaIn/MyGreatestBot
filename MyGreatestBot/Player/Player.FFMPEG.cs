@@ -59,6 +59,32 @@ namespace MyGreatestBot.Player
                 return Process == null || Process.WaitForExit(milliseconds);
             }
 
+            internal string GetErrorMessage()
+            {
+                if (Process == null)
+                {
+                    return string.Empty;
+                }
+
+                CancellationTokenSource cts = new();
+                Task<string> task = Task.Run(() =>
+                {
+                    if (StandardError != null && !StandardError.EndOfStream)
+                    {
+                        return StandardError.ReadToEnd();
+                    }
+                    return string.Empty;
+                }, cts.Token);
+
+                if (!task.Wait(100))
+                {
+                    cts.Cancel();
+                    return string.Empty;
+                }
+
+                return task.Result;
+            }
+
             internal bool TryLoad(int milliseconds)
             {
                 if (Process == null || StandardOutput == null)
@@ -66,23 +92,14 @@ namespace MyGreatestBot.Player
                     return false;
                 }
                 bool exit = WaitForExit(milliseconds);
-                if (HasExited || exit || StandardOutput.EndOfStream)
+                if ((HasExited || exit) && StandardOutput.EndOfStream)
                 {
                     return false;
                 }
 
-                CancellationTokenSource cancellation = new();
-                Task<bool> task = Task.Run(() => StandardError?.EndOfStream ?? true, cancellation.Token);
-                if (!task.Wait(100))
-                {
-                    cancellation.Cancel();
-                }
-                else if (!task.Result)
-                {
-                    return false;
-                }
+                string errorMessage = GetErrorMessage();
 
-                return true;
+                return string.IsNullOrWhiteSpace(errorMessage);
             }
 
             internal void Stop()

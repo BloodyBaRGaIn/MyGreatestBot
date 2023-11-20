@@ -46,6 +46,12 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
+                if (!track.IsLiveStream && track.Duration <= MinTrackDuration)
+                {
+                    Handler.Message.Send(new IgnoreException("Track is too short"), true);
+                    continue;
+                }
+
                 currentTrack = track;
                 break;
             }

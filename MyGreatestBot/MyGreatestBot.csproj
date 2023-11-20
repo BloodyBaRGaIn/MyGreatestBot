@@ -52,13 +52,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.4.2" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.2" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.2" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.2" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.4.2" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.63.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.63.0.3205" />
+    <PackageReference Include="DSharpPlus" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.3" />
+    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.4.3" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.64.0" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.64.0.3205" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.5.0" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.5.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
@@ -67,10 +67,10 @@
     <PackageReference Include="NickBuhro.Translit" Version="1.4.5" />
     <PackageReference Include="SpotifyAPI.Web" Version="7.0.2" />
     <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.0.2" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
     <PackageReference Include="VkNet" Version="1.76.0" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.3.6" />
+    <PackageReference Include="YoutubeExplode" Version="6.3.7" />
   </ItemGroup>
 
   <ItemGroup>

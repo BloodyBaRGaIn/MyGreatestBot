@@ -172,7 +172,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Arguments string for FFMPEG
         /// </summary>
-        public string Arguments => $"-loglevel fatal {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
+        public string Arguments => $"-loglevel error {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
                                    $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
         /// <summary>
