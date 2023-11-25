@@ -1,6 +1,6 @@
-﻿using MyGreatestBot.ApiClasses.Music;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql;
-using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;

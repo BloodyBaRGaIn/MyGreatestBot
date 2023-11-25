@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
@@ -30,6 +31,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         [AllowNull]
         public VoiceNextExtension Voice { get; private set; }
         public ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
+
+        private string[]? StringPrefixes;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
 
@@ -78,9 +81,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Timeout = TimeSpan.FromMinutes(20)
             });
 
+            StringPrefixes = new string[] { config_js.Prefix };
+
             CommandsNextConfiguration commandsConfig = new()
             {
-                StringPrefixes = new string[] { config_js.Prefix },
+                StringPrefixes = StringPrefixes,
                 CaseSensitive = false,
                 EnableMentionPrefix = true,
                 EnableDms = true,
@@ -103,7 +108,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             MarkdownWriter.GenerateFile();
         }
 
-        public async Task RunAsync(int connection_timeout)
+        public async Task RunAsync(int connectionTimeout)
         {
             try
             {
@@ -112,7 +117,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     throw new DiscordApiException();
                 }
 
-                if (!Client.ConnectAsync().Wait(connection_timeout))
+                if (!Client.ConnectAsync().Wait(connectionTimeout))
                 {
                     throw new DiscordApiException("Cannot connect to Discord");
                 }
@@ -218,14 +223,64 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             CommandErrorEventArgs args)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(args.Context.Guild);
-            if (handler != null)
+            if (handler == null)
             {
-                await handler.LogError.SendAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
-                    $"Command errored{Environment.NewLine}" +
-                    $"{args.Exception.GetExtendedMessage()}");
-
-                handler.Message.Send(args.Exception);
+                return;
             }
+
+            switch (args.Exception)
+            {
+                case CommandNotFoundException:
+                    // try search command without ending '\'
+                    if (args.Command != null)
+                    {
+                        break;
+                    }
+
+                    if (StringPrefixes == null || StringPrefixes.Length == 0)
+                    {
+                        return;
+                    }
+
+                    string badCommandText = args.Context.Message.Content;
+                    foreach (string prefix in StringPrefixes)
+                    {
+                        if (badCommandText.StartsWith(prefix))
+                        {
+                            badCommandText = badCommandText[prefix.Length..];
+                            break;
+                        }
+                    }
+
+                    int firstSpaceIndex = badCommandText.IndexOf(' ');
+
+                    if (firstSpaceIndex != -1)
+                    {
+                        badCommandText = badCommandText[..firstSpaceIndex];
+                    }
+
+                    badCommandText = badCommandText.TrimEnd('\\');
+
+                    Command? findCommand = Commands.FindCommand(badCommandText, out _);
+
+                    if (findCommand != null)
+                    {
+                        try
+                        {
+                            await Commands.ExecuteCommandAsync(
+                                Commands.CreateContext(args.Context.Message, StringPrefixes[0], findCommand));
+                        }
+                        catch { }
+                        return;
+                    }
+                    break;
+            }
+
+            await handler.LogError.SendAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
+                $"Command errored{Environment.NewLine}" +
+                $"{args.Exception.GetExtendedMessage()}");
+
+            handler.Message.Send(args.Exception);
         }
     }
 }

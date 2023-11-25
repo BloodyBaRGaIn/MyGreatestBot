@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
@@ -193,9 +192,25 @@ namespace MyGreatestBot.Player
             {
                 Task.Yield().GetAwaiter().GetResult();
 
-                if (obtain_audio && !TryObtainAudio())
+                Task.Delay(1000).Wait();
+
+                if (obtain_audio)
                 {
-                    break;
+                    if (TryObtainAudio())
+                    {
+                        if (!IAccessible.IsUrlSuccess(currentTrack.AudioURL, false))
+                        {
+                            Handler.LogError.Send("Audio URL is not available");
+                            currentTrack.Reload();
+                            already_restarted = true;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Handler.LogError.Send("Cannot obtain audio URL");
+                        break;
+                    }
                 }
 
                 currentTrack.PerformSeek(Seek);
@@ -204,7 +219,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Start ffmpeg");
 
-                if (!ffmpeg.TryLoad(currentTrack.IsLiveStream ? 2000 : (int)(1000 * (currentTrack.Duration.TotalHours + 1))))
+                if (!ffmpeg.TryLoad(2000 + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))))
                 {
                     if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
                     {

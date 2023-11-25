@@ -68,7 +68,7 @@ namespace MyGreatestBot
         {
             try
             {
-                ConnectionHandler.Logout().Wait();
+                ConnectionHandler.Logout(false).Wait();
             }
             catch { }
         }

@@ -81,12 +81,7 @@ namespace MyGreatestBot.Player
                     }
                 }, cts.Token);
 
-                if (ErrorQueue.TryDequeue(out string? result) && !string.IsNullOrWhiteSpace(result))
-                {
-                    return result;
-                }
-
-                return string.Empty;
+                return ErrorQueue.TryDequeue(out string? result) && !string.IsNullOrWhiteSpace(result) ? result : string.Empty;
             }
 
             internal bool TryLoad(int milliseconds)
@@ -95,8 +90,9 @@ namespace MyGreatestBot.Player
                 {
                     return false;
                 }
+
                 bool exit = WaitForExit(milliseconds);
-                if ((HasExited || exit) && StandardOutput.EndOfStream)
+                if (HasExited && exit && StandardOutput.EndOfStream)
                 {
                     return false;
                 }

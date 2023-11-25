@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
-using System.IO;
 using System.Net.Http;
 
 namespace MyGreatestBot.ApiClasses
@@ -28,33 +27,35 @@ namespace MyGreatestBot.ApiClasses
 
             foreach (string url in Domains)
             {
-                if (url == string.Empty)
+                if (IsUrlSuccess(url))
                 {
-                    // bypass accessing check
                     return;
-                }
-                HttpClient client = new();
-                try
-                {
-                    HttpResponseMessage message = client.Send(new HttpRequestMessage(HttpMethod.Get, url));
-
-                    using StreamReader stream = new(message.Content.ReadAsStream());
-                    string content = stream.ReadToEnd();
-                    stream.Close();
-
-                    if (message.IsSuccessStatusCode)
-                    {
-                        return;
-                    }
-                }
-                catch { }
-                finally
-                {
-                    client.Dispose();
                 }
             }
 
             throw new ApplicationException($"{ApiType} is not available");
+        }
+
+        public static bool IsUrlSuccess(string url, bool is_api = true)
+        {
+            if (url == string.Empty)
+            {
+                // bypass accessing check
+                return true;
+            }
+            using HttpClient client = new();
+            try
+            {
+                using HttpResponseMessage message = client.Send(new HttpRequestMessage(is_api ? HttpMethod.Get : HttpMethod.Head, url));
+
+                if (message.IsSuccessStatusCode || message.StatusCode == (System.Net.HttpStatusCode)418)
+                {
+                    return true;
+                }
+            }
+            catch { }
+
+            return false;
         }
     }
 }

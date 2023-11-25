@@ -8,9 +8,9 @@ namespace MyGreatestBot.Commands.Utils
     /// <summary>
     /// Help formatter
     /// </summary>
-    public class CustomHelpFormatter : BaseHelpFormatter
+    public sealed class CustomHelpFormatter : BaseHelpFormatter
     {
-        protected string _content;
+        private string _content;
 
         public CustomHelpFormatter(CommandContext ctx) : base(ctx)
         {

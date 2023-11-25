@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Models.Album;
@@ -83,7 +84,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
+                Task.Delay(500).Wait();
                 _ = Api.CreateAuthSession(yandexCredStruct.Username);
+                //global::Yandex.Music.Api.Models.Account.YAuthCaptcha capthca = Api.GetCaptcha();
+                Task.Delay(500).Wait();
                 _ = Api.AuthorizeByAppPassword(yandexCredStruct.Password);
             }
             catch (Exception ex)
@@ -169,11 +173,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     return null;
                 }
+
                 tracks = response.Tracks.Results.Where(t => t is not null
-                && otherTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
-                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+                    && otherTrack.AlbumName != null
+                    && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
+                    && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
+                               .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
+
                 if (!tracks.Any())
                 {
                     return null;

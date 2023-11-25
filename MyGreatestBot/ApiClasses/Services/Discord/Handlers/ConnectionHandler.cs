@@ -179,7 +179,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             await Task.Delay(1);
         }
 
-        public static async Task Logout()
+        public static async Task Logout(bool wave = true)
         {
             try
             {
@@ -196,15 +196,16 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 }
                 catch { }
 
-                Task send_wave = handler.Message.SendAsync(":wave:");
-
                 try
                 {
                     await handler.Leave(null, null);
                 }
                 catch { }
 
-                send_wave.Wait();
+                if (wave)
+                {
+                    await handler.Message.SendAsync(":wave:");
+                }
             });
 
             while (!result.IsCompleted)
