@@ -65,9 +65,10 @@ namespace MyGreatestBot.Player
             }
         }
 
-        private static void Wait()
+        private static void Wait(int ms = 1)
         {
-            Task.Delay(1).Wait();
+            Task.Yield().GetAwaiter().GetResult();
+            Task.Delay(ms).Wait();
             Task.Yield().GetAwaiter().GetResult();
         }
 
@@ -190,9 +191,7 @@ namespace MyGreatestBot.Player
 
             while (true)
             {
-                Task.Yield().GetAwaiter().GetResult();
-
-                Task.Delay(1000).Wait();
+                Wait(100);
 
                 if (obtain_audio)
                 {
@@ -219,8 +218,10 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Start ffmpeg");
 
-                if (!ffmpeg.TryLoad(2000 + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))))
+                if (!ffmpeg.TryLoad(3000 + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))))
                 {
+                    Wait(100);
+
                     if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
                     {
                         break;
@@ -361,11 +362,11 @@ namespace MyGreatestBot.Player
             {
                 bytesCount = read_task.Result;
             }
-
             if (bytesCount == 0)
             {
                 return false;
             }
+
             origin_cnt = bytesCount;
             if (bytesCount < buff.Length)
             {
@@ -375,6 +376,7 @@ namespace MyGreatestBot.Player
                     buff[bytesCount++] = 0;
                 }
             }
+
             return true;
         }
     }

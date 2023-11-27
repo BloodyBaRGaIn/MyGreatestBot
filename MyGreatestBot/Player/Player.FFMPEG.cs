@@ -92,6 +92,9 @@ namespace MyGreatestBot.Player
                 }
 
                 bool exit = WaitForExit(milliseconds);
+
+                Task.Yield().GetAwaiter().GetResult();
+
                 if (HasExited && exit && StandardOutput.EndOfStream)
                 {
                     return false;
