@@ -40,6 +40,7 @@ namespace MyGreatestBot
             catch { }
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Console.OutputEncoding = Encoding.Unicode;
         }
 
         /// <summary>

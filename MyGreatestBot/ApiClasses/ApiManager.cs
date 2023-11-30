@@ -113,12 +113,17 @@ namespace MyGreatestBot.ApiClasses
         {
             intents &= InitIntents;
 
-            foreach (IAPI? api in ApiCollection.Values)
+            ParallelLoopResult loopResult = Parallel.ForEach(ApiCollection.Values, api =>
             {
                 if (api != null)
                 {
-                    Deinit(intents, api);
+                    Deinit(intents, api, 1);
                 }
+            });
+
+            while (!loopResult.IsCompleted)
+            {
+                Task.Delay(1).Wait();
             }
         }
 

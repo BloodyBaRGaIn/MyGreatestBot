@@ -218,7 +218,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Start ffmpeg");
 
-                if (!ffmpeg.TryLoad(3000 + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))))
+                if (!ffmpeg.TryLoad(2000/* + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))*/))
                 {
                     Wait(100);
 

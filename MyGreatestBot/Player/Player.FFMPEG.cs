@@ -91,13 +91,23 @@ namespace MyGreatestBot.Player
                     return false;
                 }
 
-                bool exit = WaitForExit(milliseconds);
-
-                Task.Yield().GetAwaiter().GetResult();
+                bool exit = WaitForExit(1);
 
                 if (HasExited && exit && StandardOutput.EndOfStream)
                 {
                     return false;
+                }
+
+                int ticks = 0;
+
+                while (StandardOutput.EndOfStream)
+                {
+                    Task.Delay(TRANSMIT_SINK_MS).Wait();
+                    ticks += TRANSMIT_SINK_MS;
+                    if (ticks > milliseconds)
+                    {
+                        return false;
+                    }
                 }
 
                 string errorMessage = GetErrorMessage();

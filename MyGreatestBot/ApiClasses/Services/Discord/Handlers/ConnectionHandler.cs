@@ -215,15 +215,21 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             DSharpPlus.DiscordClient? bot_client = DiscordWrapper.Client;
 
-            if (bot_client != null)
+            // NullReferenceException could be thrown
+            try
             {
-                await bot_client.UpdateStatusAsync(null, UserStatus.Offline);
-
-                ApiManager.DeinitApis();
-
-                await bot_client.DisconnectAsync();
-                bot_client.Dispose();
+                if (bot_client != null)
+                {
+                    lock (bot_client)
+                    {
+                        Task.WaitAll(bot_client.DisconnectAsync(), bot_client.UpdateStatusAsync(null, UserStatus.Offline));
+                    }
+                    bot_client.Dispose();
+                }
             }
+            catch { }
+
+            ApiManager.DeinitApis();
 
             Environment.Exit(0);
         }
