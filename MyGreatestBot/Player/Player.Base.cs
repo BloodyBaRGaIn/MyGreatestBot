@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
-        private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(20);
+        private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(101);
         private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(3);
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
@@ -218,7 +218,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Start ffmpeg");
 
-                if (!ffmpeg.TryLoad(2000/* + (currentTrack.IsLiveStream ? 0 : (int)(1000 * currentTrack.Duration.TotalHours))*/))
+                if (!ffmpeg.TryLoad(3000))
                 {
                     Wait(100);
 

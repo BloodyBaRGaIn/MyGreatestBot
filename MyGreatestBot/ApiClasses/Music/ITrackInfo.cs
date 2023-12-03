@@ -115,7 +115,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
             if (!IsLiveStream)
             {
-                result += $"{Environment.NewLine}Duration: {Duration:hh\\:mm\\:ss}";
+                result += $"{Environment.NewLine}Duration: {GetCustomTime(Duration)}";
             }
 
             if (AlbumName != null && !string.IsNullOrWhiteSpace(AlbumName.Title))
@@ -130,10 +130,16 @@ namespace MyGreatestBot.ApiClasses.Music
 
             if (Seek != TimeSpan.Zero)
             {
-                result += $"{Environment.NewLine}Time: {Seek:hh\\:mm\\:ss}";
+                result += $"{Environment.NewLine}Time: {GetCustomTime(Seek)}";
             }
 
             return result;
+        }
+
+        private static string GetCustomTime(TimeSpan time)
+        {
+            static string GetPaddedValue(double x) => Math.Floor(x).ToString().PadRight(2, '0');
+            return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}";
         }
 
         public string GetShortMessage(string prefix)

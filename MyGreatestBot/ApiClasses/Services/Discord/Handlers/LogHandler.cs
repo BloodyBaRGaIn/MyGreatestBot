@@ -13,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private readonly TextWriter _writer;
         private readonly string _guildName;
 
-        private static Semaphore writerSemaphore = new(1, 1);
+        private static readonly Semaphore writerSemaphore = new(1, 1);
 
         public LogHandler(TextWriter writer, string guildName)
         {
