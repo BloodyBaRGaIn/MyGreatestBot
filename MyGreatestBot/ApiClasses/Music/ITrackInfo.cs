@@ -138,7 +138,11 @@ namespace MyGreatestBot.ApiClasses.Music
 
         private static string GetCustomTime(TimeSpan time)
         {
-            static string GetPaddedValue(double x) => Math.Floor(x).ToString().PadRight(2, '0');
+            static string GetPaddedValue(double x)
+            {
+                return $"{(int)x}".PadLeft(2, '0');
+            }
+
             return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}";
         }
 
