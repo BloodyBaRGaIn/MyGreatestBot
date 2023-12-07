@@ -222,7 +222,23 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 {
                     lock (bot_client)
                     {
-                        Task.WaitAll(bot_client.DisconnectAsync(), bot_client.UpdateStatusAsync(null, UserStatus.Offline));
+                        Task disconnectTask = Task.Run(() =>
+                        {
+                            try
+                            {
+                                bot_client.DisconnectAsync();
+                            }
+                            catch { }
+                        });
+                        Task offlineTask = Task.Run(() =>
+                        {
+                            try
+                            {
+                                bot_client.UpdateStatusAsync(null, UserStatus.Offline);
+                            }
+                            catch { }
+                        });
+                        Task.WaitAll(disconnectTask, offlineTask);
                     }
                     bot_client.Dispose();
                 }

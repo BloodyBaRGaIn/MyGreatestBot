@@ -199,7 +199,7 @@ namespace MyGreatestBot.ApiClasses
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Query execution failed", ex);
+                throw new InvalidOperationException($"Query execution failed{Environment.NewLine}{ex.Message}", ex);
             }
 
             if (!tracks.Any())
