@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.Commands.Utils;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -7,7 +8,9 @@ namespace MyGreatestBot.Player
         internal void Terminate(CommandActionSource source)
         {
             Stop(source | CommandActionSource.Mute);
+            Task.Yield().GetAwaiter().GetResult();
             MainPlayerCancellationTokenSource.Cancel();
+            Task.Yield().GetAwaiter().GetResult();
         }
     }
 }
