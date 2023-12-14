@@ -55,8 +55,9 @@ namespace MyGreatestBot.Commands
             if (args != null)
             {
                 bool start_args = false;
-                foreach (string arg in args)
+                for (int i = 0; i < args.Length;)
                 {
+                    string arg = args[i];
                     if (string.IsNullOrWhiteSpace(arg))
                     {
                         continue;
@@ -98,6 +99,8 @@ namespace MyGreatestBot.Commands
 
                         query = string.Join(' ', query, arg);
                     }
+
+                    i++;
                 }
             }
 

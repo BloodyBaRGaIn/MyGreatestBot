@@ -334,10 +334,19 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Success;
                 }
 
-                if (!Handler.Voice.WriteAsync(PlayerByteBuffer).Wait(TRANSMIT_SINK_MS * 100))
+                while (!Handler.Voice.WriteAsync(PlayerByteBuffer).Wait(TRANSMIT_SINK_MS * 100))
                 {
-                    Handler.Voice.WaitForConnectionAsync().Wait();
-                    Handler.Voice.UpdateSink();
+                    Task updateConnectionTask = Task.Run(Handler.Voice.UpdateVoiceConnection);
+                    Task updateSinkTask = Task.Run(Handler.Voice.UpdateSink);
+                    if (!updateConnectionTask.Wait(2000) || !updateSinkTask.Wait(5000))
+                    {
+                        var channel = Handler.Voice.Channel;
+                        Handler.Voice.Disconnect();
+                        Handler.Voice.WaitForDisconnectionAsync().Wait();
+                        Handler.Voice.Connect(channel);
+                        Handler.Voice.WaitForConnectionAsync().Wait();
+                    }
+                    Wait();
                 }
             }
         }
