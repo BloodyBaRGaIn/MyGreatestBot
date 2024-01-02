@@ -1,5 +1,4 @@
 ﻿using MyGreatestBot.Commands.Utils;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -7,10 +6,11 @@ namespace MyGreatestBot.Player
     {
         internal void Terminate(CommandActionSource source)
         {
+            // player still restarts sometimes while closing app
             Stop(source | CommandActionSource.Mute);
-            Task.Yield().GetAwaiter().GetResult();
+            Wait(10);
             MainPlayerCancellationTokenSource.Cancel();
-            Task.Yield().GetAwaiter().GetResult();
+            Wait(10);
         }
     }
 }
