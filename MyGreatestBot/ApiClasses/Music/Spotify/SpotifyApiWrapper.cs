@@ -127,7 +127,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         //    _api = new(tokenResponse.AccessToken);
         //}
 
-        public IEnumerable<ITrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo>? GetTracks(string? query)
         {
             List<ITrackInfo> tracks = new();
 
@@ -168,6 +168,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 if (!string.IsNullOrWhiteSpace(album_id))
                 {
                     FromAlbumId(album_id, tracks);
+                    return tracks;
                 }
             }
 
@@ -205,7 +206,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 }
             }
 
-            return tracks;
+            return null;
         }
 
         public ITrackInfo? GetTrack(string id)
@@ -215,7 +216,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return track == null ? null : new SpotifyTrackInfo(track);
         }
 
-        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
         {
             return GetTracks(query);
         }

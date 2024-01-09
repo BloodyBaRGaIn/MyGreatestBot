@@ -132,7 +132,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("playimmediatly")]
-        [Aliases("t")]
+        [Aliases("pi", "t", "r")]
         [Description("Play the track immediatly")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task TmsCommand(
@@ -144,7 +144,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("playbypass")]
-        [Aliases("pb")]
+        [Aliases("pb", "b")]
         [Description("Play the track without check")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task PlayBypassCommand(

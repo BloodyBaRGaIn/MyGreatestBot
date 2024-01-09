@@ -98,7 +98,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             _api?.LogOut();
         }
 
-        public IEnumerable<ITrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo>? GetTracks(string? query)
         {
             if (_api == null || !_api.IsAuthorized)
             {
@@ -122,7 +122,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 return tracks;
             }
 
-            return tracks;
+            return null;
         }
 
         public ITrackInfo? GetTrack(string id)
@@ -136,7 +136,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return audio == null ? null : new VkTrackInfo(audio);
         }
 
-        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
         {
             return GetTracks(query);
         }

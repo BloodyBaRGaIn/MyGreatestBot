@@ -186,7 +186,7 @@ namespace MyGreatestBot.ApiClasses
         /// <exception cref="InvalidOperationException">Throws if no results found</exception>
         public static IEnumerable<ITrackInfo> GetAll(string query)
         {
-            IEnumerable<ITrackInfo> tracks;
+            IEnumerable<ITrackInfo>? tracks;
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -200,6 +200,11 @@ namespace MyGreatestBot.ApiClasses
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Query execution failed{Environment.NewLine}{ex.Message}", ex);
+            }
+
+            if (tracks is null)
+            {
+                throw new InvalidOperationException("Invalid query");
             }
 
             if (!tracks.Any())

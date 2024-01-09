@@ -195,7 +195,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return first;
         }
 
-        public IEnumerable<ITrackInfo> GetTracks(string? query)
+        public IEnumerable<ITrackInfo>? GetTracks(string? query)
         {
             List<ITrackInfo> tracks_collection = new();
 
@@ -273,7 +273,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 }
             }
 
-            return tracks_collection;
+            return null;
         }
 
         public ITrackInfo? GetTrack(string? track_id_str)
@@ -288,7 +288,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track == null ? null : new YandexTrackInfo(track);
         }
 
-        public IEnumerable<ITrackInfo> GetTracksSearch(string query)
+        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
         {
             return GetTracks(query);
         }

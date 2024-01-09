@@ -14,14 +14,14 @@ namespace MyGreatestBot.ApiClasses.Music
         private static readonly Regex GENERIC_RE = new("((\\s)|(\\S))+");
 #pragma warning restore SYSLIB1045
 
-        public static IEnumerable<ITrackInfo> Execute(string query)
+        public static IEnumerable<ITrackInfo>? Execute(string query)
         {
             return TracksReceiver.Execute(query);
         }
 
         private sealed class TracksReceiver
         {
-            private delegate IEnumerable<ITrackInfo> GetTracks(string query);
+            private delegate IEnumerable<ITrackInfo>? GetTracks(string query);
 
             private readonly Regex pattern;
             private readonly GetTracks get_tracks;
@@ -34,7 +34,7 @@ namespace MyGreatestBot.ApiClasses.Music
                 this.get_tracks = get_tracks;
             }
 
-            internal static IEnumerable<ITrackInfo> Execute(string query)
+            internal static IEnumerable<ITrackInfo>? Execute(string query)
             {
                 foreach (TracksReceiver receiver in collection)
                 {
@@ -52,7 +52,7 @@ namespace MyGreatestBot.ApiClasses.Music
                     }
                 }
 
-                throw new InvalidOperationException("Unknown query type");
+                throw new InvalidOperationException("Unknown music format");
             }
 
             private static readonly TracksReceiver[] collection = new TracksReceiver[]

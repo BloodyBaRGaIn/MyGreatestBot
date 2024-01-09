@@ -8,7 +8,7 @@ Commands are organized into categories for better readability
 - ```leave (l) - Leave voice channel```  
 - ```status - Get APIs status```  
 - ```reload - Reload failed APIs```  
-- ```logout (exit, quit, bye, bb, b) - Logout and exit```  
+- ```logout (exit, quit, bye, bb) - Logout and exit```  
 
 ## Queuing commands
 
@@ -26,10 +26,10 @@ Commands are organized into categories for better readability
 - ```playhead (pf, ff, f) - Add tracks to the head```  
     Arguments:
     - ```query (String) - URL```  
-- ```playimmediatly (t) - Play the track immediatly```  
+- ```playimmediatly (pi, t, r) - Play the track immediatly```  
     Arguments:
     - ```query (String) - URL```  
-- ```playbypass (pb) - Play the track without check```  
+- ```playbypass (pb, b) - Play the track without check```  
     Arguments:
     - ```query (String) - URL```  
 

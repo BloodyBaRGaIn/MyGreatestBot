@@ -99,7 +99,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             api = null;
         }
 
-        public IEnumerable<ITrackInfo> GetTracks(string query)
+        public IEnumerable<ITrackInfo>? GetTracks(string query)
         {
             if (api == null)
             {
@@ -152,10 +152,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                     {
                         tracks.Add(track);
                     }
+
+                    return tracks;
                 }
             }
 
-            return tracks;
+            return null;
         }
 
         public ITrackInfo? GetTrack(string id)

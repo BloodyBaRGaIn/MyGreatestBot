@@ -137,7 +137,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("logout")]
-        [Aliases("exit", "quit", "bye", "bb", "b")]
+        [Aliases("exit", "quit", "bye", "bb")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task LogoutCommand(CommandContext ctx)
