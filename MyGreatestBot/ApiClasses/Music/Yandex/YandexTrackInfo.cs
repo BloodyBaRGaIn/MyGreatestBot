@@ -1,6 +1,7 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Yandex.Music.Api.Models.Album;
@@ -70,9 +71,32 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 PlaylistName = new(title, $"{Base.Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
             }
 
-            if (!string.IsNullOrWhiteSpace(track.CoverUri))
+            List<string?> cover_uris = new()
             {
-                CoverURL = $"https://{track.CoverUri.Replace("/%%", "/100x100")}";
+                track.CoverUri
+            };
+
+            if (track.Albums != null && track.Albums.Any())
+            {
+                cover_uris.AddRange(track.Albums.Select(a => a.CoverUri));
+            }
+
+            if (track.Artists.Any())
+            {
+                cover_uris.AddRange(track.Artists.Select(a => a.OgImage));
+            }
+
+            foreach (string? cover in cover_uris)
+            {
+                if (!string.IsNullOrWhiteSpace(cover))
+                {
+                    string temp = $"https://{cover.Replace("/%%", "/100x100")}";
+                    if (IAccessible.IsUrlSuccess(temp, false))
+                    {
+                        CoverURL = temp;
+                        break;
+                    }
+                }
             }
         }
 

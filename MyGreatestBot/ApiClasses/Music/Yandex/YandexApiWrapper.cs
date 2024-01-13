@@ -35,7 +35,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
             private static readonly Regex ARTIST_RE = new("/artist/(\\d+)$");
             private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/([^?]+)");
+            private static readonly Regex PODCAST_RE = new("/track/([^?]+)");
 #pragma warning restore SYSLIB1045
+
+            internal static string? TryGetPodcastId(string query)
+            {
+                return PODCAST_RE.GetMatchValue(query);
+            }
 
             internal static string? TryGetTrackId(string query)
             {
@@ -209,6 +215,19 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 if (!string.IsNullOrWhiteSpace(track_id_str))
                 {
                     ITrackInfo? track = GetTrack(track_id_str);
+                    if (track != null)
+                    {
+                        tracks_collection.Add(track);
+                    }
+                    return tracks_collection;
+                }
+            }
+
+            {
+                string? podcast_id_str = YandexQueryDecomposer.TryGetPodcastId(query);
+                if (!string.IsNullOrWhiteSpace(podcast_id_str))
+                {
+                    ITrackInfo? track = GetTrack(podcast_id_str);
                     if (track != null)
                     {
                         tracks_collection.Add(track);

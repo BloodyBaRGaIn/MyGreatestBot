@@ -6,6 +6,7 @@ using MyGreatestBot.ApiClasses.Music.Youtube;
 using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.ApiClasses.Services.Sql;
+using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
 using System.Runtime.Versioning;
@@ -80,7 +81,7 @@ namespace MyGreatestBot
             {
                 CurrentDomainLogErrorHandler.Send(
                     $"Unhandled exception was thrown{Environment.NewLine}" +
-                    $"{(e.ExceptionObject as Exception)?.Message ?? string.Empty}");
+                    $"{(e.ExceptionObject as Exception)?.GetExtendedMessage() ?? string.Empty}");
             }
             catch { }
         }

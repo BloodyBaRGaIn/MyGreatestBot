@@ -36,7 +36,7 @@ namespace MyGreatestBot.ApiClasses
             throw new ApplicationException($"{ApiType} is not available");
         }
 
-        public static bool IsUrlSuccess(string url, bool is_api = true)
+        public static bool IsUrlSuccess(string url, bool isApi = true)
         {
             if (url == string.Empty)
             {
@@ -46,7 +46,7 @@ namespace MyGreatestBot.ApiClasses
             using HttpClient client = new();
             try
             {
-                using HttpResponseMessage message = client.Send(new HttpRequestMessage(is_api ? HttpMethod.Get : HttpMethod.Head, url));
+                using HttpResponseMessage message = client.Send(new HttpRequestMessage(isApi ? HttpMethod.Get : HttpMethod.Head, url));
 
                 if (message.IsSuccessStatusCode || message.StatusCode == (System.Net.HttpStatusCode)418)
                 {
