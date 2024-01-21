@@ -42,12 +42,10 @@ namespace MyGreatestBot.ApiClasses.Utils
         /// <returns>Hypertext string</returns>
         public override string ToString()
         {
-            if (string.IsNullOrWhiteSpace(Url))
-            {
-                return Title;
-            }
+            // broken names
+            string temp_title = Title.Replace("://", " ");
 
-            return $"[{Title}]({Url})";
+            return string.IsNullOrWhiteSpace(Url) ? temp_title : $"[{temp_title}]({Url})";
         }
 
         /// <summary>
