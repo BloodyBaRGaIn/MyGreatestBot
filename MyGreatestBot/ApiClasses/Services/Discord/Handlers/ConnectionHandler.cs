@@ -226,7 +226,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                         {
                             try
                             {
-                                bot_client.DisconnectAsync();
+                                _ = bot_client.DisconnectAsync();
                             }
                             catch { }
                         });
@@ -234,7 +234,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                         {
                             try
                             {
-                                bot_client.UpdateStatusAsync(null, UserStatus.Offline);
+                                _ = bot_client.UpdateStatusAsync(null, UserStatus.Offline);
                             }
                             catch { }
                         });

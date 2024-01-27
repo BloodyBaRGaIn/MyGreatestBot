@@ -38,20 +38,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 #pragma warning disable SYSLIB1045
             private static readonly Regex VIDEO_RE = new("/watch\\?v=([^&]+)");
             private static readonly Regex PLAYLIST_RE = new("[&?]list=([^&]+)");
-            private static readonly Regex QUERY_RE = new("youtube\\.([\\w])+");
+            private static readonly Regex REDUCED_RE = new("youtu\\.be/([^\\?]+)");
+            private static readonly Regex TIMING_RE = new("[&?]t=([\\d]+)");
 #pragma warning restore SYSLIB1045
-
-            internal static string GetInvariantQuery(string query)
-            {
-                try
-                {
-                    return QUERY_RE.Replace(query, "youtube.com");
-                }
-                catch
-                {
-                    return query;
-                }
-            }
 
             internal static string? TryGetPlaylistId(string query)
             {
@@ -61,6 +50,16 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             internal static string? TryGetVideoId(string query)
             {
                 return VIDEO_RE.GetMatchValue(query);
+            }
+
+            internal static string? TryGetReducedId(string query)
+            {
+                return REDUCED_RE.GetMatchValue(query);
+            }
+
+            internal static string? GetTiming(string query)
+            {
+                return TIMING_RE.GetMatchValue(query);
             }
         }
 
@@ -113,8 +112,6 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return tracks;
             }
 
-            query = YoutubeQueryDecomposer.GetInvariantQuery(query);
-
             {
                 string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(query);
 
@@ -144,9 +141,24 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             {
                 string? video_id = YoutubeQueryDecomposer.TryGetVideoId(query);
 
+                if (string.IsNullOrWhiteSpace(video_id))
+                {
+                    video_id = YoutubeQueryDecomposer.TryGetReducedId(query);
+                }
+
                 if (!string.IsNullOrWhiteSpace(video_id))
                 {
-                    ITrackInfo? track = GetTrack(video_id);
+                    string? timing = YoutubeQueryDecomposer.GetTiming(query);
+                    int time = 0;
+                    if (!string.IsNullOrWhiteSpace(timing))
+                    {
+                        if (!int.TryParse(timing, out time))
+                        {
+                            time = 0;
+                        }
+                    }
+
+                    ITrackInfo? track = GetTrack(video_id, time);
 
                     if (track != null)
                     {
@@ -160,14 +172,26 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return null;
         }
 
-        public ITrackInfo? GetTrack(string id)
+        public ITrackInfo? GetTrack(string id, int time = 0)
         {
             Video video = Videos.GetAsync(id)
                     .AsTask()
                     .GetAwaiter()
                     .GetResult();
 
-            return video == null ? null : new YoutubeTrackInfo(video);
+            if (video == null)
+            {
+                return null;
+            }
+
+            ITrackInfo track = new YoutubeTrackInfo(video);
+
+            if (time > 0)
+            {
+                track.PerformSeek(TimeSpan.FromSeconds(time));
+            }
+
+            return track;
         }
 
         public ITrackInfo? SearchTrack(ITrackInfo other)

@@ -52,8 +52,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 return ARTIST_RE.GetMatchValue(query);
             }
 
-            internal static string? TryGetTrackId(string query)
+            internal static string? TryGetTrackId(string query, int time = 0)
             {
+                _ = time;
                 return TRACK_RE.GetMatchValue(query);
             }
         }
@@ -209,8 +210,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return null;
         }
 
-        public ITrackInfo? GetTrack(string id)
+        public ITrackInfo? GetTrack(string id, int time = 0)
         {
+            _ = time;
             FullTrack? track = Tracks.Get(id).GetAwaiter().GetResult();
 
             return track == null ? null : new SpotifyTrackInfo(track);

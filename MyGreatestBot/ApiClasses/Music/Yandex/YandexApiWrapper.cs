@@ -295,8 +295,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return null;
         }
 
-        public ITrackInfo? GetTrack(string? track_id_str)
+        public ITrackInfo? GetTrack(string? track_id_str, int time = 0)
         {
+            _ = time;
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
                 return null;
