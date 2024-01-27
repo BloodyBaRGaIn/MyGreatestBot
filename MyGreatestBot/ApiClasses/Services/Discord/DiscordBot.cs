@@ -157,6 +157,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         {
             if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
             {
+                Thread.BeginCriticalRegion();
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 if (handler != null)
                 {
@@ -181,6 +182,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     handler.Update(e.Guild);
                 }
+                Thread.EndCriticalRegion();
             }
 
             await Task.Delay(1);

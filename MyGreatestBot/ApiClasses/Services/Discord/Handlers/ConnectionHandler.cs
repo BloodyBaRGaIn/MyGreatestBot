@@ -238,7 +238,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                             }
                             catch { }
                         });
-                        Task.WaitAll(disconnectTask, offlineTask);
+                        try
+                        {
+                            Task.WaitAll(disconnectTask, offlineTask);
+                        }
+                        catch { }
                     }
                     bot_client.Dispose();
                 }
