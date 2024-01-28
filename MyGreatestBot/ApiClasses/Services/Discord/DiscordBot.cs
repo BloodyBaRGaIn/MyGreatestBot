@@ -155,7 +155,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
-            if (e.User.Id == client.CurrentUser.Id && e.User.IsBot && e.After?.Channel != e.Before?.Channel)
+            if (e.User.Id != client.CurrentUser.Id || !e.User.IsBot || (e.After?.Channel) == (e.Before?.Channel))
+            {
+                return;
+            }
+            try
             {
                 Thread.BeginCriticalRegion();
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
@@ -184,8 +188,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 }
                 Thread.EndCriticalRegion();
             }
-
-            await Task.Delay(1);
+            catch { }
+            finally
+            {
+                await Task.Delay(1);
+            }
         }
 
         private static string GetCommandInfo(CommandEventArgs args)
