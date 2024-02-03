@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using System.Linq;
 
 namespace MyGreatestBot.Player
 {
@@ -9,7 +8,7 @@ namespace MyGreatestBot.Player
         internal void Stop(CommandActionSource source)
         {
             bool mute = source.HasFlag(CommandActionSource.Mute);
-            if (IsPlaying || tracks_queue.Any())
+            if (IsPlaying || tracks_queue.Count != 0)
             {
                 StopRequested = true;
 

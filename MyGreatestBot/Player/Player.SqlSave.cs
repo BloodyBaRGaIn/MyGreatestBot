@@ -29,7 +29,7 @@ namespace MyGreatestBot.Player
 
             try
             {
-                if (!tracks_queue.Any())
+                if (tracks_queue.Count == 0)
                 {
                     if (!mute)
                     {
@@ -41,11 +41,7 @@ namespace MyGreatestBot.Player
                 {
                     //SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
 
-                    List<ITrackInfo> tracks = new();
-                    if (currentTrack != null)
-                    {
-                        tracks.Add(currentTrack);
-                    }
+                    List<ITrackInfo> tracks = currentTrack != null ? [currentTrack] : [];
 
 #pragma warning disable CS8620
                     tracks.AddRange(tracks_queue.Where(t => t != null));

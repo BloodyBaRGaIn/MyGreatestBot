@@ -21,7 +21,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     public sealed class VkApiWrapper : IMusicAPI
     {
         [AllowNull]
-        private IVkApi _api;
+        private VkApi _api;
         private readonly VkApiException GenericException = new();
 
         private IAudioCategory Audio => _api?.Audio ?? throw GenericException;
@@ -105,24 +105,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 throw GenericException;
             }
 
-            List<ITrackInfo> tracks = new();
+            List<ITrackInfo> tracks = [];
 
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return tracks;
-            }
-
-            if (TryAddAsCollection(query, tracks, is_playlist: true))
-            {
-                return tracks;
-            }
-
-            if (TryAddAsCollection(query, tracks, is_playlist: false))
-            {
-                return tracks;
-            }
-
-            return null;
+            return string.IsNullOrWhiteSpace(query)
+                ? tracks
+                : TryAddAsCollection(query, tracks, is_playlist: true)
+                ? tracks
+                : TryAddAsCollection(query, tracks, is_playlist: false) ? tracks : (IEnumerable<ITrackInfo>?)null;
         }
 
         public ITrackInfo? GetTrack(string id, int time = 0)

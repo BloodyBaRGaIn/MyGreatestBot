@@ -1,11 +1,13 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -148,11 +150,13 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
-            if (DiscordWrapper.Client != null
-                && !DiscordWrapper.Client.CurrentApplication.Owners
-                    .Select(x => x.Id).Contains(ctx.User.Id))
+            if (DiscordWrapper.Client != null)
             {
-                throw new CommandExecutionException("You are not allowed to execute this command");
+                IEnumerable<DiscordUser>? owners = DiscordWrapper.Client.CurrentApplication.Owners;
+                if (owners != null && !owners.Select(x => x.Id).Contains(ctx.User.Id))
+                {
+                    throw new CommandExecutionException("You are not allowed to execute this command");
+                }
             }
 
             handler.TextChannel = ctx.Channel;

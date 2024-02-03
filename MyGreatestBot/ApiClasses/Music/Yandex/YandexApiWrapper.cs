@@ -203,7 +203,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         public IEnumerable<ITrackInfo>? GetTracks(string? query)
         {
-            List<ITrackInfo> tracks_collection = new();
+            List<ITrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -248,7 +248,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                     break;
                 }
                 List<YandexTrackInfo?> tracks = GetAlbum(album_id_str);
-                if (tracks == null || !tracks.Any())
+                if (tracks == null || tracks.Count == 0)
                 {
                     return tracks_collection;
                 }
@@ -270,7 +270,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                     break;
                 }
                 List<YandexTrackInfo?> tracks = GetArtist(artist_id_str);
-                if (tracks == null || !tracks.Any())
+                if (tracks == null || tracks.Count == 0)
                 {
                     return tracks_collection;
                 }
@@ -292,7 +292,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                     break;
                 }
                 List<YandexTrackInfo?> tracks = GetPlaylist(playlist_user_str, playlist_id_str);
-                if (tracks == null || !tracks.Any())
+                if (tracks == null || tracks.Count == 0)
                 {
                     return tracks_collection;
                 }
@@ -329,7 +329,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = new();
+            List<YandexTrackInfo?> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(album_id_str))
             {
@@ -356,7 +356,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo?> GetArtist(string? artist_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = new();
+            List<YandexTrackInfo?> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(artist_id_str))
             {
@@ -384,7 +384,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo?> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = new();
+            List<YandexTrackInfo?> tracks_collection = [];
 
             YPlaylist playlist = Api.GetPlaylist(playlist_user_str, playlist_id_str);
 

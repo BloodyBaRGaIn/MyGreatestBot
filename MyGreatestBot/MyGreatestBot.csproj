@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -52,11 +52,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.4.6" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.4.6" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.6" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.6" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.4.6" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-pr-1741-00122" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-pr-1741-00122" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-pr-1741-00122" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-pr-1741-00122" />
+    <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-pr-1741-00122" />
     <PackageReference Include="Google.Apis.Auth" Version="1.66.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.66.0.3309" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.7.1" />

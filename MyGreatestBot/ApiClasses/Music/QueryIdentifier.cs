@@ -46,28 +46,23 @@ namespace MyGreatestBot.ApiClasses.Music
                     {
                         continue;
                     }
-                    if (ApiManager.InitIntents.HasFlag(receiver.desired))
-                    {
-                        return receiver.get_tracks.Invoke(query);
-                    }
-                    else
-                    {
-                        throw new ApiException(receiver.desired);
-                    }
+                    return ApiManager.InitIntents.HasFlag(receiver.desired)
+                        ? receiver.get_tracks.Invoke(query)
+                        : throw new ApiException(receiver.desired);
                 }
 
                 throw new InvalidOperationException("Unknown music format");
             }
 
-            private static readonly TracksReceiver[] collection = new TracksReceiver[]
-            {
+            private static readonly TracksReceiver[] collection =
+            [
                 new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Youtube, YOUTUBE_SHORT_RE, Youtube.YoutubeApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.Instance.GetTracks),
                 new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.Instance.GetTracksSearch)
-            };
+            ];
         }
     }
 }

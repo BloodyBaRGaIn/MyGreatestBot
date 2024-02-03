@@ -199,15 +199,7 @@ namespace MyGreatestBot.ApiClasses.Music
             }
 
             int name = other.TrackName.CompareTo(TrackName);
-            int album;
-            if (other.AlbumName is null)
-            {
-                album = int.MaxValue;
-            }
-            else
-            {
-                album = other.AlbumName.CompareTo(AlbumName);
-            }
+            int album = other.AlbumName is null ? int.MaxValue : other.AlbumName.CompareTo(AlbumName);
             int artist = 0;
             if (other.ArtistArr.Length != ArtistArr.Length)
             {
@@ -225,17 +217,7 @@ namespace MyGreatestBot.ApiClasses.Music
             result += album;
             result += artist;
 
-            if (result > int.MaxValue)
-            {
-                return int.MaxValue;
-            }
-
-            if (result < int.MinValue)
-            {
-                return int.MinValue;
-            }
-
-            return (int)result;
+            return result > int.MaxValue ? int.MaxValue : result < int.MinValue ? int.MinValue : (int)result;
         }
 
         /// <summary>

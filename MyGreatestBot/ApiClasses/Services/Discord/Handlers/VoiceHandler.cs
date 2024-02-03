@@ -8,7 +8,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// <summary>
     /// Voice connection handler class
     /// </summary>
-    public sealed class VoiceHandler
+    public sealed class VoiceHandler(DiscordGuild guild)
     {
         [AllowNull]
         private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
@@ -19,20 +19,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         [AllowNull]
         private VoiceTransmitSink TransmitSink { get; set; }
 
-        private readonly DiscordGuild _guild;
-
         internal volatile bool IsManualDisconnect;
-
-        public VoiceHandler(DiscordGuild guild)
-        {
-            _guild = guild;
-        }
 
         public void UpdateVoiceConnection()
         {
             try
             {
-                Connection = VoiceNext?.GetConnection(_guild);
+                Connection = VoiceNext?.GetConnection(guild);
             }
             catch { }
         }
@@ -62,7 +55,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             try
             {
                 if (VoiceNext != null
-                    && channel != null
+                    && channel is not null
                     && Connection?.TargetChannel != channel)
                 {
                     _ = (VoiceNext?.ConnectAsync(channel).Wait(1000));

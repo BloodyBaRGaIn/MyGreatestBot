@@ -9,21 +9,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// <summary>
     /// Discord messages handler class
     /// </summary>
-    public sealed class MessageHandler
+    public sealed class MessageHandler(int messageDelay)
     {
         [AllowNull]
         public DiscordChannel Channel { get; set; }
 
-        private readonly int MessageDelay;
-
-        public MessageHandler(int messageDelay)
-        {
-            MessageDelay = messageDelay;
-        }
-
         public async Task SendAsync(DiscordEmbedBuilder embed)
         {
-            if (Channel != null)
+            if (Channel is not null)
             {
                 DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().AddEmbed(embed).SuppressNotifications();
                 _ = await Channel.SendMessageAsync(messageBuilder);
@@ -32,7 +25,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task SendAsync(string message)
         {
-            if (Channel != null)
+            if (Channel is not null)
             {
                 DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().WithContent(message).SuppressNotifications();
                 _ = await Channel.SendMessageAsync(messageBuilder);
@@ -41,9 +34,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Send(DiscordEmbedBuilder embed)
         {
-            if (SendAsync(embed).Wait(MessageDelay))
+            if (SendAsync(embed).Wait(messageDelay))
             {
-                Task.Delay(MessageDelay).Wait();
+                Task.Delay(messageDelay).Wait();
             }
         }
 
@@ -54,9 +47,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Send(string message)
         {
-            if (SendAsync(message).Wait(MessageDelay))
+            if (SendAsync(message).Wait(messageDelay))
             {
-                Task.Delay(MessageDelay).Wait();
+                Task.Delay(messageDelay).Wait();
             }
         }
     }

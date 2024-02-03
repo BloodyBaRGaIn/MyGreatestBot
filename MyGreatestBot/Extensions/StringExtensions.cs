@@ -19,11 +19,7 @@
 
         public static string FirstCharToUpper(this string input)
         {
-            if (string.IsNullOrEmpty(input))
-            {
-                return string.Empty;
-            }
-            return $"{char.ToUpperInvariant(input[0])}{input[1..]}";
+            return string.IsNullOrEmpty(input) ? string.Empty : $"{char.ToUpperInvariant(input[0])}{input[1..]}";
         }
     }
 }

@@ -42,12 +42,7 @@ namespace MyGreatestBot.ApiClasses.Utils
 
             uint size = 1024u;
             StringBuilder buffer = new((int)size);
-            if (RegQueryValueEx(keyHandle, entry, 0, out _, buffer, ref size) != 0)
-            {
-                return null;
-            }
-
-            return buffer.ToString();
+            return RegQueryValueEx(keyHandle, entry, 0, out _, buffer, ref size) != 0 ? null : buffer.ToString();
         }
 
         internal static void Bypass()

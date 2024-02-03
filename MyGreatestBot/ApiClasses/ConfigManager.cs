@@ -64,16 +64,9 @@ namespace MyGreatestBot.ApiClasses
         /// <exception cref="FileNotFoundException"></exception>
         private static FileStream GetFileStream(string filepath)
         {
-            if (!Directory.Exists(CONFIG_DIR))
-            {
-                throw new DirectoryNotFoundException($"Config directory not found: {CONFIG_DIR}");
-            }
-            if (!File.Exists(filepath))
-            {
-                throw new FileNotFoundException("Config file not found", filepath);
-            }
-
-            return File.OpenRead(filepath);
+            return !Directory.Exists(CONFIG_DIR)
+                ? throw new DirectoryNotFoundException($"Config directory not found: {CONFIG_DIR}")
+                : !File.Exists(filepath) ? throw new FileNotFoundException("Config file not found", filepath) : File.OpenRead(filepath);
         }
 
         /// <summary>

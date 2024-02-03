@@ -147,7 +147,11 @@ namespace MyGreatestBot.Commands.Utils
         /// <returns></returns>
         private static string GetListPad(int depth, MarkdownType mdType)
         {
-            if (depth < 0) depth = 0;
+            if (depth < 0)
+            {
+                depth = 0;
+            }
+
             return string.Empty.PadLeft((int)mdType * depth, ' ');
         }
     }

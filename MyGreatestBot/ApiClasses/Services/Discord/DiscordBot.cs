@@ -53,7 +53,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             Client = new DiscordClient(discordConfig);
 
-            Client.Ready += async (sender, args) =>
+            Client.SessionCreated += async (sender, args) =>
             {
                 await sender.UpdateStatusAsync(new()
                 {
@@ -81,7 +81,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Timeout = TimeSpan.FromMinutes(20)
             });
 
-            StringPrefixes = new string[] { config_js.Prefix };
+            StringPrefixes = [config_js.Prefix];
 
             CommandsNextConfiguration commandsConfig = new()
             {
@@ -165,7 +165,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 if (handler != null)
                 {
-                    if (e.After?.Channel != null)
+                    if (e.After?.Channel is not null)
                     {
                         await handler.Join(e);
                         await handler.Voice.WaitForConnectionAsync();
@@ -198,7 +198,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private static string GetCommandInfo(CommandEventArgs args)
         {
             string result = string.Empty;
-            if (args.Context.Member != null)
+            if (args.Context.Member is not null)
             {
                 result += $"{args.Context.Member.DisplayName} : ";
             }
@@ -251,7 +251,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         return;
                     }
 
-                    string badCommandText = args.Context.Message.Content;
+                    string? badCommandText = args.Context.Message.Content;
+
+                    if (badCommandText == null)
+                    {
+                        return;
+                    }
+
                     foreach (string prefix in StringPrefixes)
                     {
                         if (badCommandText.StartsWith(prefix))

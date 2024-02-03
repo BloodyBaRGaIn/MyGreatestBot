@@ -3,13 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
-    public sealed class YoutubeApiException : ApiException
+    public sealed class YoutubeApiException(
+        [DisallowNull] string message,
+        [AllowNull] Exception inner = null) : ApiException(ApiIntents.Youtube, message, inner)
     {
-        public YoutubeApiException(
-            [DisallowNull] string message,
-            [AllowNull] Exception inner = null)
-            : base(ApiIntents.Youtube, message, inner) { }
-
         public YoutubeApiException() : this("Not initialized") { }
     }
 }

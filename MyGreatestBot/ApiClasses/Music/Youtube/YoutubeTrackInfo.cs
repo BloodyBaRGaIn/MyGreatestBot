@@ -12,7 +12,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// </summary>
     public sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         string ITrackInfo.Domain => "https://www.youtube.com/";
 
@@ -46,11 +48,11 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             Id = video.Id;
 
             TrackName = new HyperLink(video.Title, video.Url).WithId(video.Id);
-            ArtistArr = new HyperLink[1]
-            {
+            ArtistArr =
+            [
                 new HyperLink(video.Author.ChannelTitle, video.Author.ChannelUrl)
                     .WithId(video.Author.ChannelId.Value)
-            };
+            ];
 
             Duration = video.Duration ?? TimeSpan.Zero;
 

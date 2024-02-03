@@ -16,7 +16,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// </summary>
     public sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Yandex;
 
@@ -55,7 +57,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
-            if (track.Albums != null && track.Albums.Any())
+            if (track.Albums != null && track.Albums.Count != 0)
             {
                 YAlbum album = track.Albums.First();
                 AlbumName = new(album.Title, $"{Base.Domain}album/{album.Id}");
@@ -71,17 +73,14 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 PlaylistName = new(title, $"{Base.Domain}users/{playlist.Owner.Login}/playlists/{playlist.Kind}");
             }
 
-            List<string?> cover_uris = new()
-            {
-                track.CoverUri
-            };
+            List<string?> cover_uris = [track.CoverUri];
 
-            if (track.Albums != null && track.Albums.Any())
+            if (track.Albums != null && track.Albums.Count != 0)
             {
                 cover_uris.AddRange(track.Albums.Select(a => a.CoverUri));
             }
 
-            if (track.Artists.Any())
+            if (track.Artists.Count != 0)
             {
                 cover_uris.AddRange(track.Artists.Select(a => a.OgImage));
             }

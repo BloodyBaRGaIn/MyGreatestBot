@@ -8,7 +8,7 @@ namespace MyGreatestBot.Player
     {
         internal void GetQueueLength()
         {
-            if (tracks_queue.Any())
+            if (tracks_queue.Count != 0)
             {
                 int count;
                 int live_streams_count;

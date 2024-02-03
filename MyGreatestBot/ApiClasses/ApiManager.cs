@@ -20,7 +20,7 @@ namespace MyGreatestBot.ApiClasses
 
         public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
 
-        private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = new();
+        private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = [];
 
         public static void Add([DisallowNull] IAPI api)
         {
@@ -202,17 +202,9 @@ namespace MyGreatestBot.ApiClasses
                 throw new InvalidOperationException($"Query execution failed{Environment.NewLine}{ex.Message}", ex);
             }
 
-            if (tracks is null)
-            {
-                throw new InvalidOperationException("Invalid query");
-            }
-
-            if (!tracks.Any())
-            {
-                throw new InvalidOperationException("No results");
-            }
-
-            return tracks;
+            return tracks is null
+                ? throw new InvalidOperationException("Invalid query")
+                : !tracks.Any() ? throw new InvalidOperationException("No results") : tracks;
         }
     }
 }

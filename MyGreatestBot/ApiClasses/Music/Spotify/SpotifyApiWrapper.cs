@@ -130,7 +130,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         public IEnumerable<ITrackInfo>? GetTracks(string? query)
         {
-            List<ITrackInfo> tracks = new();
+            List<ITrackInfo> tracks = [];
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -195,7 +195,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 }
 
                 Paging<SimpleAlbum> albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
-                if (albums == null || albums.Items == null || !albums.Items.Any())
+                if (albums == null || albums.Items == null || albums.Items.Count == 0)
                 {
                     return tracks;
                 }
@@ -268,7 +268,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 Uri = album.Uri,
             };
             List<SimpleTrack>? tracks_list = album.Tracks?.Items ?? null;
-            if (tracks_list == null || !tracks_list.Any())
+            if (tracks_list == null || tracks_list.Count == 0)
             {
                 return;
             }

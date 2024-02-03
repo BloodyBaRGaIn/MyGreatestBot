@@ -7,7 +7,6 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -100,7 +99,7 @@ namespace MyGreatestBot.Player
                     return;
                 }
 
-                if (!tracks_queue.Any())
+                if (tracks_queue.Count == 0)
                 {
                     Wait();
                     continue;
@@ -120,7 +119,7 @@ namespace MyGreatestBot.Player
                         PlayBody();
                     }
 
-                    if (!tracks_queue.Any() && !StopRequested)
+                    if (tracks_queue.Count == 0 && !StopRequested)
                     {
                         Handler.Message.Send(new PlayerException("No more tracks"));
                     }

@@ -142,7 +142,6 @@ namespace MyGreatestBot.Commands
         [Command("seek")]
         [Aliases("sk")]
         [Description("Seek audio stream")]
-        [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(
             CommandContext ctx,
             [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)
@@ -156,11 +155,11 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
             handler.Voice.UpdateVoiceConnection();
 
-            string[] formats = new[]
-            {
+            string[] formats =
+            [
                 "mm:ss",
                 "HH:mm:ss"
-            };
+            ];
 
             TimeSpan time = TimeSpan.MinValue;
 

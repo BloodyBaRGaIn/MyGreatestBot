@@ -5,30 +5,24 @@ namespace MyGreatestBot.ApiClasses.Utils
     /// <summary>
     /// Hypertext string
     /// </summary>
-    public sealed class HyperLink : IComparable<HyperLink>
+    /// <remarks>
+    /// Generic constructor
+    /// </remarks>
+    /// <param name="title">Text</param>
+    /// <param name="url">URL</param>
+    public sealed class HyperLink(string title, string? url = null) : IComparable<HyperLink>
     {
         /// <summary>
         /// Displayed text
         /// </summary>
-        public string Title { get; init; }
+        public string Title { get; init; } = title;
 
         /// <summary>
         /// URL
         /// </summary>
-        public string Url { get; init; }
+        public string Url { get; init; } = url ?? string.Empty;
 
         public string InnerId { get; private set; } = string.Empty;
-
-        /// <summary>
-        /// Generic constructor
-        /// </summary>
-        /// <param name="title">Text</param>
-        /// <param name="url">URL</param>
-        public HyperLink(string title, string? url = null)
-        {
-            Title = title;
-            Url = url ?? string.Empty;
-        }
 
         public HyperLink WithId(string id)
         {
@@ -55,11 +49,7 @@ namespace MyGreatestBot.ApiClasses.Utils
         /// <returns>Zero if equals</returns>
         public int CompareTo(HyperLink? other)
         {
-            if (this is null || other is null)
-            {
-                return int.MaxValue;
-            }
-            return other.Title.CompareTo(Title);
+            return this is null || other is null ? int.MaxValue : other.Title.CompareTo(Title);
         }
     }
 }

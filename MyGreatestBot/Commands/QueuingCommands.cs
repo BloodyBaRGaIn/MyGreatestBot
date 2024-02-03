@@ -91,7 +91,7 @@ namespace MyGreatestBot.Commands
                     }
                     else
                     {
-                        if (arg.StartsWith("\\"))
+                        if (arg.StartsWith('\\'))
                         {
                             start_args = true;
                             continue;

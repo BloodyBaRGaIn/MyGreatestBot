@@ -11,10 +11,7 @@ namespace MyGreatestBot.Extensions
     {
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> originCollection)
         {
-            if (originCollection == null)
-            {
-                throw new ArgumentNullException(nameof(originCollection));
-            }
+            ArgumentNullException.ThrowIfNull(originCollection);
 
             Random random = new();
 
@@ -26,9 +23,8 @@ namespace MyGreatestBot.Extensions
 
         public static void EnqueueRangeToHead<T>(this Queue<T> queue, IEnumerable<T> items)
         {
-            List<T> head = new();
-            head.AddRange(items);
-            while (queue.Any())
+            List<T> head = [.. items];
+            while (queue.Count != 0)
             {
                 head.Add(queue.Dequeue());
             }

@@ -105,7 +105,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 throw GenericException;
             }
 
-            List<ITrackInfo> tracks = new();
+            List<ITrackInfo> tracks = [];
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -189,7 +189,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return null;
             }
 
+#pragma warning disable CA1859
             ITrackInfo track = new YoutubeTrackInfo(video);
+#pragma warning restore CA1859
 
             if (time > 0)
             {
@@ -231,17 +233,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 }
             }).Wait();
 
-            if (result == null)
-            {
-                return null;
-            }
-
-            return new YoutubeTrackInfo(result);
+            return result == null ? null : (ITrackInfo)new YoutubeTrackInfo(result);
         }
 
         public IEnumerable<ITrackInfo> GetTracksSearch(string query)
         {
-            List<ITrackInfo> tracks = new();
+            List<ITrackInfo> tracks = [];
             IAsyncEnumerable<VideoSearchResult> search =
             Search.GetVideosAsync(query);
             if (search == null)

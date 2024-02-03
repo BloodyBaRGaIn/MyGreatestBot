@@ -12,7 +12,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// </summary>
     public sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
 
@@ -52,21 +54,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             IEnumerable<AudioArtist> main_artists = audio.MainArtists;
             IEnumerable<AudioArtist> feat_artists = audio.FeaturedArtists;
 
-            IEnumerable<AudioArtist> audioArtists;
-
-            if (main_artists != null && main_artists.Any())
-            {
-                audioArtists = main_artists;
-            }
-            else if (feat_artists != null && feat_artists.Any())
-            {
-                audioArtists = feat_artists;
-            }
-            else
-            {
-                audioArtists = new[] { new AudioArtist() { Name = audio.Artist } };
-            }
-
+            IEnumerable<AudioArtist> audioArtists = main_artists != null && main_artists.Any()
+                ? main_artists
+                : feat_artists != null && feat_artists.Any() ? feat_artists : (new[] { new AudioArtist() { Name = audio.Artist } });
             ArtistArr = audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)

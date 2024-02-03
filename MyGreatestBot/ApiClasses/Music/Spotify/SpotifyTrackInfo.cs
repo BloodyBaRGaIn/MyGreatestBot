@@ -13,7 +13,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// </summary>
     public sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Spotify;
 

@@ -8,14 +8,9 @@ namespace MyGreatestBot.Commands.Utils
     /// <summary>
     /// Help formatter
     /// </summary>
-    public sealed class CustomHelpFormatter : BaseHelpFormatter
+    public sealed class CustomHelpFormatter(CommandContext ctx) : BaseHelpFormatter(ctx)
     {
-        private string _content;
-
-        public CustomHelpFormatter(CommandContext ctx) : base(ctx)
-        {
-            _content = string.Empty;
-        }
+        private string _content = string.Empty;
 
         public override CustomHelpFormatter WithCommand(Command command)
         {

@@ -12,12 +12,12 @@ namespace MyGreatestBot.Player
         internal void ShuffleQueue(CommandActionSource source)
         {
             bool mute = source.HasFlag(CommandActionSource.Mute);
-            if (tracks_queue.Any())
+            if (tracks_queue.Count != 0)
             {
                 lock (tracks_queue)
                 {
-                    List<ITrackInfo> collection = new();
-                    while (tracks_queue.Any())
+                    List<ITrackInfo> collection = [];
+                    while (tracks_queue.Count != 0)
                     {
                         ITrackInfo? track = tracks_queue.Dequeue();
                         if (track != null)

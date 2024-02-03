@@ -103,17 +103,13 @@ namespace MyGreatestBot.Commands
         [Aliases("h")]
         [Description("Get help")]
         [Category(CommandStrings.DebugCategoryName)]
-        [SuppressMessage("Performance", "CA1822")]
         public async Task HelpCommand(
             CommandContext ctx,
             [AllowNull, RemainingText, Description("Command name")] string command = null)
         {
-            if (DiscordWrapper.Commands == null)
-            {
-                throw new ArgumentNullException(nameof(DiscordWrapper.Commands), "Commands not initialized");
-            }
+            ArgumentNullException.ThrowIfNull(DiscordWrapper.Commands, nameof(DiscordWrapper.Commands));
 
-            List<CustomHelpFormatter> collection = new();
+            List<CustomHelpFormatter> collection = [];
             if (string.IsNullOrWhiteSpace(command))
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
@@ -131,14 +127,7 @@ namespace MyGreatestBot.Commands
             {
                 string message = formatter.Build().Content ?? throw new ArgumentException("Cannot build message");
 
-                if (ctx.Member == null)
-                {
-                    _ = await ctx.Channel.SendMessageAsync(message);
-                }
-                else
-                {
-                    _ = await ctx.Member.SendMessageAsync(message);
-                }
+                _ = ctx.Member is null ? await ctx.Channel.SendMessageAsync(message) : await ctx.Member.SendMessageAsync(message);
             }
         }
     }

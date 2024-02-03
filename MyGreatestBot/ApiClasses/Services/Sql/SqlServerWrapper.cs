@@ -155,7 +155,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
 
         internal List<(ApiIntents, string)> RestoreTracks(ulong guild)
         {
-            List<(ApiIntents, string)> items = new();
+            List<(ApiIntents, string)> items = [];
             lock (_queryLock)
             {
                 try

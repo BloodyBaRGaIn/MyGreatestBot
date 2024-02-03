@@ -44,7 +44,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         public MessageHandler Message { get; }
         public VoiceHandler Voice { get; }
 
-        private static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = new();
+        private static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = [];
 
         private ConnectionHandler(DiscordGuild guild)
         {
@@ -70,7 +70,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public static ConnectionHandler? GetConnectionHandler(DiscordGuild guild)
         {
-            if (guild == null)
+            if (guild is null)
             {
                 return null;
             }
@@ -101,7 +101,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             [AllowNull] DiscordChannel text,
             [AllowNull] DiscordChannel channel, bool throw_exception = false)
         {
-            if (text != null)
+            if (text is not null)
             {
                 TextChannel = text;
             }
@@ -129,7 +129,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 //return;
             }
 
-            if (channel != null)
+            if (channel is not null)
             {
                 Voice.Connect(channel);
                 Voice.WaitForConnectionAsync().Wait();
@@ -153,18 +153,18 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             [AllowNull] DiscordChannel text,
             [AllowNull] DiscordChannel channel)
         {
-            if (text != null)
+            if (text is not null)
             {
                 TextChannel = text;
             }
 
-            if (VoiceChannel == null)
+            if (VoiceChannel is null)
             {
                 return;
             }
 
             if ((VoiceChannel != channel && _guild == channel?.Guild)
-                || (channel == null && _guild == TextChannel?.Guild))
+                || (channel is null && _guild == TextChannel?.Guild))
             {
                 throw new InvalidOperationException("You need to be in the same voice channel");
             }
@@ -184,7 +184,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             try
             {
                 DiscordWrapper.Commands?.UnregisterCommands(
-                    DiscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? Array.Empty<Command>());
+                    DiscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? []);
             }
             catch { }
 
@@ -234,7 +234,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                         {
                             try
                             {
-                                _ = bot_client.UpdateStatusAsync(null, UserStatus.Offline);
+                                _ = bot_client.UpdateStatusAsync(new DiscordActivity("Offline"), UserStatus.Offline);
                             }
                             catch { }
                         });
