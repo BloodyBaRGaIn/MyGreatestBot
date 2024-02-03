@@ -142,69 +142,89 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 throw GenericException;
             }
 
+            while (true)
             {
                 string? playlist_id = SpotifyQueryDecomposer.TryGetPlaylistId(query);
-                if (!string.IsNullOrWhiteSpace(playlist_id))
-                {
-                    FullPlaylist? playlist = Playlists.Get(playlist_id).GetAwaiter().GetResult();
-                    List<PlaylistTrack<IPlayableItem>>? tracks_list = playlist.Tracks?.Items ?? null;
-                    if (tracks_list != null)
-                    {
-                        IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(t => t.Track);
-                        foreach (IPlayableItem? item in tracks_collection)
-                        {
-                            if (item is not null and FullTrack track)
-                            {
-                                tracks.Add(new SpotifyTrackInfo(track, playlist));
-                            }
-                        }
-                    }
 
+                if (string.IsNullOrWhiteSpace(playlist_id))
+                {
+                    break;
+                }
+
+                FullPlaylist? playlist = Playlists.Get(playlist_id).GetAwaiter().GetResult();
+                List<PlaylistTrack<IPlayableItem>>? tracks_list = playlist.Tracks?.Items ?? null;
+
+                if (tracks_list == null)
+                {
                     return tracks;
                 }
+
+                IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(t => t.Track);
+
+                foreach (IPlayableItem? item in tracks_collection)
+                {
+                    if (item is not null and FullTrack track)
+                    {
+                        tracks.Add(new SpotifyTrackInfo(track, playlist));
+                    }
+                }
+
+                return tracks;
             }
 
+            while (true)
             {
                 string? album_id = SpotifyQueryDecomposer.TryGetAlbumId(query);
-                if (!string.IsNullOrWhiteSpace(album_id))
+
+                if (string.IsNullOrWhiteSpace(album_id))
                 {
-                    FromAlbumId(album_id, tracks);
-                    return tracks;
+                    break;
                 }
+
+                FromAlbumId(album_id, tracks);
+                return tracks;
             }
 
+            while (true)
             {
                 string? artist_id = SpotifyQueryDecomposer.TryGetArtistId(query);
-                if (!string.IsNullOrWhiteSpace(artist_id))
+
+                if (string.IsNullOrWhiteSpace(artist_id))
                 {
-                    Paging<SimpleAlbum> albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
-                    if (albums == null || albums.Items == null || !albums.Items.Any())
-                    {
-                        return tracks;
-                    }
+                    break;
+                }
 
-                    foreach (SimpleAlbum album in albums.Items)
-                    {
-                        FromAlbumId(album.Id, tracks);
-                    }
-
+                Paging<SimpleAlbum> albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
+                if (albums == null || albums.Items == null || !albums.Items.Any())
+                {
                     return tracks;
                 }
+
+                foreach (SimpleAlbum album in albums.Items)
+                {
+                    FromAlbumId(album.Id, tracks);
+                }
+
+                return tracks;
             }
 
+            while (true)
             {
                 string? track_id = SpotifyQueryDecomposer.TryGetTrackId(query);
-                if (!string.IsNullOrWhiteSpace(track_id))
+
+                if (string.IsNullOrWhiteSpace(track_id))
                 {
-                    ITrackInfo? track = GetTrack(track_id);
-
-                    if (track != null)
-                    {
-                        tracks.Add(track);
-                    }
-
-                    return tracks;
+                    break;
                 }
+
+                ITrackInfo? track = GetTrack(track_id);
+
+                if (track != null)
+                {
+                    tracks.Add(track);
+                }
+
+                return tracks;
             }
 
             return null;

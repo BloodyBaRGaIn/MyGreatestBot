@@ -210,86 +210,100 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
+            while (true)
             {
                 string? track_id_str = YandexQueryDecomposer.TryGetTrackId(query);
-                if (!string.IsNullOrWhiteSpace(track_id_str))
+                if (string.IsNullOrWhiteSpace(track_id_str))
                 {
-                    ITrackInfo? track = GetTrack(track_id_str);
-                    if (track != null)
-                    {
-                        tracks_collection.Add(track);
-                    }
-                    return tracks_collection;
+                    break;
                 }
+                ITrackInfo? track = GetTrack(track_id_str);
+                if (track != null)
+                {
+                    tracks_collection.Add(track);
+                }
+                return tracks_collection;
             }
 
+            while (true)
             {
                 string? podcast_id_str = YandexQueryDecomposer.TryGetPodcastId(query);
-                if (!string.IsNullOrWhiteSpace(podcast_id_str))
+                if (string.IsNullOrWhiteSpace(podcast_id_str))
                 {
-                    ITrackInfo? track = GetTrack(podcast_id_str);
+                    break;
+                }
+                ITrackInfo? track = GetTrack(podcast_id_str);
+                if (track != null)
+                {
+                    tracks_collection.Add(track);
+                }
+                return tracks_collection;
+            }
+
+            while (true)
+            {
+                string? album_id_str = YandexQueryDecomposer.TryGetAlbumId(query);
+                if (string.IsNullOrWhiteSpace(album_id_str))
+                {
+                    break;
+                }
+                List<YandexTrackInfo?> tracks = GetAlbum(album_id_str);
+                if (tracks == null || !tracks.Any())
+                {
+                    return tracks_collection;
+                }
+                foreach (YandexTrackInfo? track in tracks)
+                {
                     if (track != null)
                     {
                         tracks_collection.Add(track);
                     }
-                    return tracks_collection;
                 }
+                return tracks_collection;
             }
 
-            {
-                string? album_id_str = YandexQueryDecomposer.TryGetAlbumId(query);
-                if (!string.IsNullOrWhiteSpace(album_id_str))
-                {
-                    List<YandexTrackInfo?> tracks = GetAlbum(album_id_str);
-                    if (tracks != null && tracks.Any())
-                    {
-                        foreach (YandexTrackInfo? track in tracks)
-                        {
-                            if (track != null)
-                            {
-                                tracks_collection.Add(track);
-                            }
-                        }
-                    }
-                    return tracks_collection;
-                }
-            }
-
+            while (true)
             {
                 string? artist_id_str = YandexQueryDecomposer.TryGetArtistId(query);
-                if (!string.IsNullOrWhiteSpace(artist_id_str))
+                if (string.IsNullOrWhiteSpace(artist_id_str))
                 {
-                    List<YandexTrackInfo?> tracks = GetArtist(artist_id_str);
-                    if (tracks != null && tracks.Any())
-                    {
-                        foreach (YandexTrackInfo? track in tracks)
-                        {
-                            if (track != null)
-                            {
-                                tracks_collection.Add(track);
-                            }
-                        }
-                    }
+                    break;
+                }
+                List<YandexTrackInfo?> tracks = GetArtist(artist_id_str);
+                if (tracks == null || !tracks.Any())
+                {
                     return tracks_collection;
                 }
+                foreach (YandexTrackInfo? track in tracks)
+                {
+                    if (track != null)
+                    {
+                        tracks_collection.Add(track);
+                    }
+                }
+                return tracks_collection;
             }
+
+            while (true)
             {
                 (string? playlist_user_str, string? playlist_id_str) = YandexQueryDecomposer.TryGetPlaylistId(query);
-                if (!string.IsNullOrWhiteSpace(playlist_user_str) && !string.IsNullOrWhiteSpace(playlist_id_str))
+                if (string.IsNullOrWhiteSpace(playlist_user_str) || string.IsNullOrWhiteSpace(playlist_id_str))
                 {
-                    List<YandexTrackInfo?> tracks = GetPlaylist(playlist_user_str, playlist_id_str);
-                    if (tracks != null && tracks.Any())
-                    {
-                        foreach (YandexTrackInfo? track in tracks)
-                        {
-                            if (track != null)
-                            {
-                                tracks_collection.Add(track);
-                            }
-                        }
-                    }
+                    break;
+                }
+                List<YandexTrackInfo?> tracks = GetPlaylist(playlist_user_str, playlist_id_str);
+                if (tracks == null || !tracks.Any())
+                {
                     return tracks_collection;
                 }
+                foreach (YandexTrackInfo? track in tracks)
+                {
+                    if (track != null)
+                    {
+                        tracks_collection.Add(track);
+                    }
+                }
+                return tracks_collection;
             }
 
             return null;
