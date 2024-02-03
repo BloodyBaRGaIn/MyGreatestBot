@@ -58,12 +58,12 @@ namespace MyGreatestBot.Extensions
 #endif
         }
 
-        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception, bool is_executed_successfully = false)
+        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception, bool isExecutedSuccessfully = false)
         {
             return exception is CommandExecutionException cmd
                 ? new DiscordEmbedBuilder()
                 {
-                    Color = is_executed_successfully ? cmd.ExecutedColor : cmd.ErroredColor,
+                    Color = isExecutedSuccessfully ? cmd.ExecutedColor : cmd.ErroredColor,
                     Title = cmd.Title,
                     Description = exception.Message
                 }

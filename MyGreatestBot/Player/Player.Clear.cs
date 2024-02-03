@@ -17,7 +17,7 @@ namespace MyGreatestBot.Player
                 {
                     if (count > 0)
                     {
-                        Handler.Message.Send(new ClearException("Queue cleared"), is_success: true);
+                        Handler.Message.Send(new ClearException("Queue cleared"), isSuccess: true);
                     }
                     else
                     {

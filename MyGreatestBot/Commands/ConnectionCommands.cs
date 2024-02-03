@@ -126,7 +126,7 @@ namespace MyGreatestBot.Commands
 
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                handler.Message.Send(new ReloadException("Reload success"), is_success: true);
+                handler.Message.Send(new ReloadException("Reload success"), isSuccess: true);
             }
             else
             {

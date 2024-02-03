@@ -161,7 +161,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
-                Handler.Message.Send(ex.GetExtendedMessage());
+                Handler.LogError.Send(ex.GetExtendedMessage());
                 return false;
             }
 

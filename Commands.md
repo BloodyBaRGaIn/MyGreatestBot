@@ -64,6 +64,9 @@ Commands are organized into categories for better readability
 
 - ```test - Get "Hello World" response message```  
 - ```name - Get the display name of the bot```  
+- ```echo - Echo the message```  
+    Arguments:
+    - ```text (String) - Text```  
 - ```help (h) - Get help```  
     Arguments:
     - ```command (String) - Command name (optional)```  

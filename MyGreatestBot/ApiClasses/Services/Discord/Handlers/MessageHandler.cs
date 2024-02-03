@@ -25,7 +25,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             if (Channel != null)
             {
-                _ = await Channel.SendMessageAsync(embed);
+                DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().AddEmbed(embed).SuppressNotifications();
+                _ = await Channel.SendMessageAsync(messageBuilder);
             }
         }
 
@@ -33,7 +34,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             if (Channel != null)
             {
-                _ = await Channel.SendMessageAsync(message);
+                DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().WithContent(message).SuppressNotifications();
+                _ = await Channel.SendMessageAsync(messageBuilder);
             }
         }
 
@@ -45,9 +47,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
         }
 
-        public void Send(Exception exception, bool is_success = false)
+        public void Send(Exception exception, bool isSuccess = false)
         {
-            Send(exception.GetDiscordEmbed(is_success));
+            Send(exception.GetDiscordEmbed(isSuccess));
         }
 
         public void Send(string message)

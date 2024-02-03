@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses.Services.Discord;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,15 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task TestCommand(CommandContext ctx)
         {
-            _ = await ctx.Channel.SendMessageAsync(new DiscordEmbedBuilder()
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await handler.Message.SendAsync(new DiscordEmbedBuilder()
             {
                 Color = DiscordColor.White,
                 Title = "Test",
@@ -33,6 +42,14 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task NameCommand(CommandContext ctx)
         {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
             DiscordEmbedBuilder _embed = new()
             {
                 Title = "Name"
@@ -60,7 +77,26 @@ namespace MyGreatestBot.Commands
                 }
             }
 
-            _ = await ctx.Channel.SendMessageAsync(_embed);
+            await handler.Message.SendAsync(_embed);
+        }
+
+        [Command("echo")]
+        [Description("Echo the message")]
+        [Category(CommandStrings.DebugCategoryName)]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task EchoCommand(
+            CommandContext ctx,
+            [RemainingText, Description("Text")] string text)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await handler.Message.SendAsync(text);
         }
 
         [Command(CommandStrings.HelpCommandName)]
