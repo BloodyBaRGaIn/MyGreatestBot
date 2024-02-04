@@ -155,7 +155,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
-            if (e.User.Id != client.CurrentUser.Id || !e.User.IsBot || (e.After?.Channel) == (e.Before?.Channel))
+#pragma warning disable CS8604
+            bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
+#pragma warning restore CS8604
+
+            if (e.User != client.CurrentUser || !e.User.IsBot || !channel_changed)
             {
                 return;
             }

@@ -115,9 +115,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             await Task.Yield();
 
+#pragma warning disable CS8604
+            bool channel_changed = VoiceChannel != channel;
+#pragma warning restore CS8604
+
             if (VoiceConnection != null
-                && (VoiceChannel != channel
-                    || VoiceConnection.TargetChannel != channel))
+                && (channel_changed || VoiceConnection.TargetChannel != channel))
             {
                 Voice.Disconnect();
                 Voice.WaitForDisconnectionAsync().Wait();
@@ -163,8 +166,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
+#pragma warning disable CS8604
             if ((VoiceChannel != channel && _guild == channel?.Guild)
                 || (channel is null && _guild == TextChannel?.Guild))
+#pragma warning restore CS8604
             {
                 throw new InvalidOperationException("You need to be in the same voice channel");
             }

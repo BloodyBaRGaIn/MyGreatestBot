@@ -54,9 +54,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
+#pragma warning disable CS8604
+                bool channel_changed = Connection?.TargetChannel != channel;
+#pragma warning restore CS8604
+
                 if (VoiceNext != null
                     && channel is not null
-                    && Connection?.TargetChannel != channel)
+                    && channel_changed)
                 {
                     _ = (VoiceNext?.ConnectAsync(channel).Wait(1000));
                     Channel = channel;
