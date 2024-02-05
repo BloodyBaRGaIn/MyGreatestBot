@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
@@ -37,7 +38,7 @@ namespace MyGreatestBot.Player
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex.GetExtendedMessage());
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
                     if (!mute)
                     {
                         throw new SqlRestoreException("Restore failed", ex);

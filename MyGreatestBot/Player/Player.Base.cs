@@ -217,7 +217,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Start ffmpeg");
 
-                if (!ffmpeg.TryLoad(3000))
+                if (!ffmpeg.TryLoad(5000))
                 {
                     Wait(100);
 

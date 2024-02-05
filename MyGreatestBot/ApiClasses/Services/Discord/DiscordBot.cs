@@ -61,17 +61,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
                 }, UserStatus.Online);
 
-                Console.WriteLine("Discord ONLINE");
+                DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
             };
 
             Client.ClientErrored += async (sender, args) =>
             {
-                await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(args.Exception.GetExtendedMessage());
             };
 
             Client.SocketErrored += async (sender, args) =>
             {
-                await Console.Error.WriteLineAsync(args.Exception.GetExtendedMessage());
+                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(args.Exception.GetExtendedMessage());
             };
 
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
@@ -134,8 +134,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     }
                 }
                 catch { }
-                Console.Error.WriteLine(ex.GetExtendedMessage());
-                Console.WriteLine("Press any key to exit");
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    $"{ex.GetExtendedMessage()}{Environment.NewLine}Press any key to exit");
                 _ = Console.ReadKey(true);
                 return;
             }
@@ -241,6 +241,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
+            bool handled = false;
+
             switch (args.Exception)
             {
                 case CommandNotFoundException:
@@ -284,13 +286,21 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     if (findCommand != null)
                     {
+                        handled = true;
                         try
                         {
                             await Commands.ExecuteCommandAsync(
                                 Commands.CreateContext(args.Context.Message, StringPrefixes[0], findCommand));
                         }
                         catch { }
-                        return;
+                    }
+                    break;
+
+                case ArgumentException:
+                    if (args.Command != null)
+                    {
+                        handled = true;
+                        handler.Message.Send(new ArgumentException("Wrong or invalid command parameter(s)"));
                     }
                     break;
             }
@@ -299,7 +309,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 $"Command errored{Environment.NewLine}" +
                 $"{args.Exception.GetExtendedMessage()}");
 
-            handler.Message.Send(args.Exception);
+            if (!handled)
+            {
+                handler.Message.Send(args.Exception);
+            }
         }
     }
 }

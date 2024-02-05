@@ -10,6 +10,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     /// <summary>
@@ -49,9 +51,19 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private ConnectionHandler(DiscordGuild guild)
         {
             _guild = guild;
-            Log = new(writer: Console.Out, guildName: guild.Name);
-            LogError = new(writer: Console.Error, guildName: guild.Name);
+
+            Log = new(
+                writer: Console.Out,
+                guildName: guild.Name,
+                defaultLogLevel: LogLevel.Information);
+
+            LogError = new(
+                writer: Console.Error,
+                guildName: guild.Name,
+                defaultLogLevel: LogLevel.Error);
+
             Message = new(messageDelay: 1000);
+
             Voice = new(guild);
 
             try
@@ -74,7 +86,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 return null;
             }
+
             ulong key = guild.Id;
+
             return ConnectionDictionary.TryGetValue(key, out ConnectionHandler? handler)
                 ? handler
                 : ConnectionDictionary.TryAdd(key, new(guild))

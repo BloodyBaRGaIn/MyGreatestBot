@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -89,13 +90,14 @@ namespace MyGreatestBot.ApiClasses
                 }
 
                 desired.PerformAuth();
-                Console.WriteLine($"{desired.ApiType} SUCCESS");
+                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} SUCCESS");
                 FailedIntents &= ~desired.ApiType;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{desired.ApiType} FAILED");
-                Console.Error.WriteLine(ex.GetExtendedMessage());
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    $"{desired.ApiType} FAILED{Environment.NewLine}{ex.GetExtendedMessage()}");
+
                 try
                 {
                     desired.Logout();

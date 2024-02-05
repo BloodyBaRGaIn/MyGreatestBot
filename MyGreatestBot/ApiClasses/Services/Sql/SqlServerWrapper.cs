@@ -87,7 +87,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                                 break;
 
                             default:
-                                Console.WriteLine(ex.Number);
+                                //Console.WriteLine(ex.Number);
                                 throw;
                         }
                     }
@@ -187,7 +187,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                         switch (ex.Number)
                         {
                             default:
-                                Console.WriteLine(ex.Number);
+                                //Console.WriteLine(ex.Number);
                                 throw;
                         }
                     }
@@ -284,7 +284,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     switch (ex.Number)
                     {
                         default:
-                            Console.WriteLine(ex.Number);
+                            //Console.WriteLine(ex.Number);
                             throw;
                     }
                 }
@@ -319,7 +319,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     switch (ex.Number)
                     {
                         default:
-                            Console.WriteLine(ex.Number);
+                            //Console.WriteLine(ex.Number);
                             throw;
                     }
                 }
@@ -354,7 +354,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
                     switch (ex.Number)
                     {
                         default:
-                            Console.WriteLine(ex.Number);
+                            //Console.WriteLine(ex.Number);
                             throw;
                     }
                 }

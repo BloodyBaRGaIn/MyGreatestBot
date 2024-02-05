@@ -25,11 +25,6 @@ namespace MyGreatestBot
     internal class Program
     {
         /// <summary>
-        /// Log handler for unhandled exceptions
-        /// </summary>
-        private static readonly LogHandler CurrentDomainLogErrorHandler = new(Console.Error, AppDomain.CurrentDomain.FriendlyName);
-
-        /// <summary>
         /// Process initialization
         /// </summary>
         static Program()
@@ -68,6 +63,7 @@ namespace MyGreatestBot
 
         private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
         {
+            _ = sender;
             try
             {
                 ConnectionHandler.Logout(false).Wait();
@@ -77,9 +73,10 @@ namespace MyGreatestBot
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            _ = sender;
             try
             {
-                CurrentDomainLogErrorHandler.Send(
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     $"Unhandled exception was thrown{Environment.NewLine}" +
                     $"{(e.ExceptionObject as Exception)?.GetExtendedMessage() ?? string.Empty}");
             }

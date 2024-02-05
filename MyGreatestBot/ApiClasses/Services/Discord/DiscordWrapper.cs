@@ -5,10 +5,18 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     public static class DiscordWrapper
     {
+        public static readonly Handlers.LogHandler CurrentDomainLogHandler
+            = new(Console.Out, AppDomain.CurrentDomain.FriendlyName, LogLevel.Information);
+
+        public static readonly Handlers.LogHandler CurrentDomainLogErrorHandler
+            = new(Console.Error, AppDomain.CurrentDomain.FriendlyName, LogLevel.Error);
+
         public static readonly DiscordBot Instance = new();
         public static IServiceProvider ServiceProvider => Instance.ServiceProvider;
 
@@ -27,7 +35,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.GetExtendedMessage());
+                CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
             }
         }
     }
