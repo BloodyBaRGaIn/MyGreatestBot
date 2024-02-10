@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot
 {
@@ -56,9 +57,14 @@ namespace MyGreatestBot
 
             ApiManager.InitApis();
 
-            DiscordWrapper.Run(connection_timeout: 10000);
+            DiscordWrapper.Run(connectionTimeout: 10000,
+                               disconnectionTimeout: 500);
+
+            AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
 
             ApiManager.DeinitApis();
+
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
 
         private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
@@ -69,6 +75,14 @@ namespace MyGreatestBot
                 ConnectionHandler.Logout(false).Wait();
             }
             catch { }
+            while (true)
+            {
+                try
+                {
+                    Task.Delay(1).Wait();
+                }
+                catch { }
+            }
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

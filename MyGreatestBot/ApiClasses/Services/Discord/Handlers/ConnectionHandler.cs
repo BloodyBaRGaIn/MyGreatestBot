@@ -202,12 +202,15 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                DiscordWrapper.Commands?.UnregisterCommands(
-                    DiscordWrapper.Commands?.RegisteredCommands.Values.ToArray() ?? []);
+                if (DiscordWrapper.Commands != null
+                    && DiscordWrapper.RegisteredCommands.Any())
+                {
+                    DiscordWrapper.Commands.UnregisterCommands(cmds: DiscordWrapper.RegisteredCommands.Values.ToArray());
+                }
             }
             catch { }
 
-            ParallelLoopResult result = Parallel.ForEach(ConnectionDictionary.Values, async (handler) =>
+            ParallelLoopResult result = Parallel.ForEach(ConnectionDictionary.Values, (handler) =>
             {
                 try
                 {
@@ -217,13 +220,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
                 try
                 {
-                    await handler.Leave(null, null);
+                    handler.Leave(null, null).Wait();
                 }
                 catch { }
 
                 if (wave)
                 {
-                    await handler.Message.SendAsync(":wave:");
+                    handler.Message.Send(":wave:");
                 }
             });
 
@@ -232,45 +235,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 await Task.Delay(1);
             }
 
-            DSharpPlus.DiscordClient? bot_client = DiscordWrapper.Client;
-
-            // NullReferenceException could be thrown
-            try
-            {
-                if (bot_client != null)
-                {
-                    lock (bot_client)
-                    {
-                        Task disconnectTask = Task.Run(() =>
-                        {
-                            try
-                            {
-                                _ = bot_client.DisconnectAsync();
-                            }
-                            catch { }
-                        });
-                        Task offlineTask = Task.Run(() =>
-                        {
-                            try
-                            {
-                                _ = bot_client.UpdateStatusAsync(new DiscordActivity("Offline"), UserStatus.Offline);
-                            }
-                            catch { }
-                        });
-                        try
-                        {
-                            Task.WaitAll(disconnectTask, offlineTask);
-                        }
-                        catch { }
-                    }
-                    bot_client.Dispose();
-                }
-            }
-            catch { }
-
-            ApiManager.DeinitApis();
-
-            Environment.Exit(0);
+            DiscordWrapper.Exit();
+            await Task.Yield();
         }
     }
 }

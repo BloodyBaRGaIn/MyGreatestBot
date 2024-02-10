@@ -18,6 +18,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     public sealed class DiscordBot : IAPI, IAccessible
@@ -30,9 +32,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         public CommandsNextExtension Commands { get; private set; }
         [AllowNull]
         public VoiceNextExtension Voice { get; private set; }
-        public ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
+
+        private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
         private string[]? StringPrefixes;
+
+        private volatile bool exitRequest;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
 
@@ -44,7 +49,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             DiscordConfiguration discordConfig = new()
             {
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Error,
+                MinimumLogLevel = LogLevel.Error,
                 Intents = DiscordIntents.All,
                 Token = config_js.Token,
                 TokenType = TokenType.Bot,
@@ -66,12 +71,20 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             Client.ClientErrored += async (sender, args) =>
             {
-                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(args.Exception.GetExtendedMessage());
+                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                    args.Exception.GetExtendedMessage());
             };
 
             Client.SocketErrored += async (sender, args) =>
             {
-                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(args.Exception.GetExtendedMessage());
+                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                    args.Exception.GetExtendedMessage());
+            };
+
+            Client.SocketClosed += async (sender, args) =>
+            {
+                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                    args.CloseMessage);
             };
 
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
@@ -108,8 +121,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             MarkdownWriter.GenerateFile();
         }
 
-        public async Task RunAsync(int connectionTimeout)
+        /// <summary>
+        /// Runs bot
+        /// </summary>
+        /// <param name="connectionTimeout">Timeout for connection</param>
+        /// <param name="disconnectionTimeout">Timeout for disconnection</param>
+        internal void Run(int connectionTimeout, int disconnectionTimeout)
         {
+            // try to start
             try
             {
                 if (Client == null)
@@ -125,32 +144,71 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
             catch (Exception ex)
             {
-                try
-                {
-                    if (Client != null)
-                    {
-                        await Client.DisconnectAsync();
-                        Client.Dispose();
-                    }
-                }
-                catch { }
+                Disconnect(disconnectionTimeout);
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     $"{ex.GetExtendedMessage()}{Environment.NewLine}Press any key to exit");
                 _ = Console.ReadKey(true);
                 return;
             }
 
+            // waiting for stop request
             while (true)
             {
+                if (exitRequest)
+                {
+                    break;
+                }
                 try
                 {
-                    await Task.Delay(Timeout.Infinite);
+                    Thread.Sleep(1);
                 }
                 catch
                 {
-                    return;
+                    break;
                 }
             }
+
+            if (Client == null)
+            {
+                return;
+            }
+
+            // try to set offline status
+            try
+            {
+                _ = Client.UpdateStatusAsync(
+                    new(), UserStatus.Offline)
+                .Wait(disconnectionTimeout);
+            }
+            catch { }
+
+            Disconnect(disconnectionTimeout);
+        }
+
+        /// <summary>
+        /// Bot stop request
+        /// </summary>
+        internal void Exit()
+        {
+            exitRequest = true;
+        }
+
+        /// <summary>
+        /// Try to disconnect with timeout
+        /// </summary>
+        /// <param name="ms">Timeout</param>
+        private void Disconnect(int ms)
+        {
+            if (Client == null)
+            {
+                return;
+            }
+            try
+            {
+                _ = Client.DisconnectAsync().Wait(ms);
+                Client.Dispose();
+            }
+            catch { }
         }
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
@@ -199,6 +257,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
         }
 
+        /// <summary>
+        /// Command with parameters to string
+        /// </summary>
+        /// <param name="args">Command</param>
+        /// <returns></returns>
         private static string GetCommandInfo(CommandEventArgs args)
         {
             string result = string.Empty;
@@ -274,9 +337,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     }
 
                     int firstSpaceIndex = badCommandText.IndexOf(' ');
+                    string? rawArguments = null;
 
                     if (firstSpaceIndex != -1)
                     {
+                        rawArguments = badCommandText[firstSpaceIndex..].Trim();
                         badCommandText = badCommandText[..firstSpaceIndex];
                     }
 
@@ -290,7 +355,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         try
                         {
                             await Commands.ExecuteCommandAsync(
-                                Commands.CreateContext(args.Context.Message, StringPrefixes[0], findCommand));
+                                Commands.CreateContext(
+                                    args.Context.Message,
+                                    StringPrefixes[0],
+                                    findCommand,
+                                    rawArguments));
                         }
                         catch { }
                     }
