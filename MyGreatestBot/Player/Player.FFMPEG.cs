@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
 
 namespace MyGreatestBot.Player
 {
@@ -98,12 +99,14 @@ namespace MyGreatestBot.Player
                     return false;
                 }
 
-                int ticks = 0;
+                double ticks = 0;
+
+                DateTime start = DateTime.Now;
 
                 while (StandardOutput.EndOfStream)
                 {
-                    Task.Delay(TRANSMIT_SINK_MS).Wait();
-                    ticks += TRANSMIT_SINK_MS;
+                    Task.Delay(1).Wait();
+                    ticks += (DateTime.Now - start).TotalMilliseconds;
                     if (ticks > milliseconds)
                     {
                         return false;

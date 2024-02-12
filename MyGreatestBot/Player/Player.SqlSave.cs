@@ -12,7 +12,8 @@ namespace MyGreatestBot.Player
     {
         internal void SqlSave(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -20,7 +21,7 @@ namespace MyGreatestBot.Player
 
             if (!_sqlSemaphore.WaitOne(1))
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new SqlSaveException("Operation in progress");
                 }
@@ -31,7 +32,7 @@ namespace MyGreatestBot.Player
             {
                 if (tracks_queue.Count == 0)
                 {
-                    if (!mute)
+                    if (nomute)
                     {
                         throw new SqlSaveException("Nothing to save");
                     }
@@ -53,9 +54,9 @@ namespace MyGreatestBot.Player
 
                     Stop(source | CommandActionSource.Mute);
 
-                    if (!mute)
+                    if (nomute)
                     {
-                        Handler.Message.Send(new SqlSaveException($"Saved {tracksCount} track(s)"), true);
+                        Handler.Message.Send(new SqlSaveException($"Saved {tracksCount} track(s)").WithSuccess());
                     }
                 }
             }

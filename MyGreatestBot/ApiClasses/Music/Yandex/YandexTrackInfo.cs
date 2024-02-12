@@ -34,7 +34,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         public string AudioURL { get; private set; } = string.Empty;
         [AllowNull]
-        public string CoverURL { get; }
+        public string CoverURL { get; } = null;
 
         bool ITrackInfo.BypassCheck { get; set; } = false;
 
@@ -115,7 +115,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        public int CompareTo([AllowNull] ITrackInfo other)
+        public int CompareTo(ITrackInfo? other)
         {
             return Base.CompareTo(other);
         }

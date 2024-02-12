@@ -12,7 +12,8 @@ namespace MyGreatestBot.Player
     {
         internal void IgnoreTrack(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -20,7 +21,7 @@ namespace MyGreatestBot.Player
 
             if (!IsPlaying || currentTrack == null)
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new IgnoreException("Nothing to ignore");
                 }
@@ -38,15 +39,16 @@ namespace MyGreatestBot.Player
 
             Skip(0, source | CommandActionSource.Mute);
 
-            if (!mute)
+            if (nomute)
             {
-                Handler.Message.Send(new IgnoreException("Track ignored"), true);
+                Handler.Message.Send(new IgnoreException("Track ignored").WithSuccess());
             }
         }
 
         internal void IgnoreArtist(int index, CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -54,27 +56,10 @@ namespace MyGreatestBot.Player
 
             if (!IsPlaying || currentTrack == null)
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new IgnoreException("Nothing to ignore");
                 }
-                return;
-            }
-
-            AddIgnoredArtistBody(index);
-
-            Skip(0, source | CommandActionSource.Mute);
-
-            if (!mute)
-            {
-                Handler.Message.Send(new IgnoreException("Artist ignored"), true);
-            }
-        }
-
-        private void AddIgnoredArtistBody(int index)
-        {
-            if (currentTrack == null)
-            {
                 return;
             }
 
@@ -101,6 +86,13 @@ namespace MyGreatestBot.Player
                 {
                     throw new IgnoreException("Failed to ignore artist", ex);
                 }
+            }
+
+            Skip(0, source | CommandActionSource.Mute);
+
+            if (nomute)
+            {
+                Handler.Message.Send(new IgnoreException("Artist ignored").WithSuccess());
             }
         }
     }

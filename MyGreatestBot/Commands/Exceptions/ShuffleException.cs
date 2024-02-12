@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class ShuffleException : CommandExecutionException
     {
-        public override string Title => "Shuffle";
-        public override DiscordColor ExecutedColor => DiscordColor.Orange;
+        public override string Title { get; } = "Shuffle";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Orange;
 
         public ShuffleException() : base() { }
         public ShuffleException(string message) : base(message) { }

@@ -1,5 +1,7 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -9,7 +11,8 @@ namespace MyGreatestBot.Player
     {
         internal void RequestSeek(TimeSpan span, CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (IsPlaying && currentTrack != null)
             {
                 if (currentTrack.IsSeekPossible(span))
@@ -20,16 +23,25 @@ namespace MyGreatestBot.Player
                         SeekRequested = true;
                     }
 
-                    if (!mute)
+                    if (nomute)
                     {
-                        Handler.Message.Send(GetPlayingMessage<SeekException>(currentTrack, "Playing"));
+                        DiscordEmbedBuilder builder;
+                        try
+                        {
+                            builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
+                        }
+                        catch
+                        {
+                            builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
+                        }
+                        Handler.Message.Send(builder);
                     }
 
                     Task.Yield().GetAwaiter().GetResult();
                 }
                 else
                 {
-                    if (!mute)
+                    if (nomute)
                     {
                         throw new SeekException("Cannot seek");
                     }
@@ -38,7 +50,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new SeekException("Nothing to seek");
                 }

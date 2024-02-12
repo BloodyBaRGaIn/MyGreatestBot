@@ -4,6 +4,7 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace MyGreatestBot.Player
 {
@@ -12,14 +13,26 @@ namespace MyGreatestBot.Player
         private static DiscordEmbedBuilder GetPlayingMessage<T>(ITrackInfo track, string state)
             where T : CommandExecutionException
         {
-            T exception = (typeof(T).GetConstructors()
+            T exception;
+
+            try
+            {
+                exception = (typeof(T).GetConstructors()
                 .First(c =>
                 {
-                    System.Reflection.ParameterInfo[] parameters = c.GetParameters();
+                    ParameterInfo[] parameters = c.GetParameters();
                     return parameters.Length == 1 && parameters[0].ParameterType == typeof(string);
                 })
-                .Invoke(new[] { track.GetMessage(state) }) as T) ?? throw new NullReferenceException();
-            DiscordEmbedBuilder message = exception.GetDiscordEmbed(true);
+                .Invoke(new[] { track.GetMessage(state) }) as T)
+                ?? throw new ArgumentException("Cannot create message");
+            }
+            catch
+            {
+                throw;
+            }
+
+            _ = exception.WithSuccess();
+            DiscordEmbedBuilder message = exception.GetDiscordEmbed();
             message.Thumbnail = track.GetThumbnail();
             return message;
         }

@@ -7,17 +7,19 @@ namespace MyGreatestBot.Player
     {
         internal void Skip(int add_count, CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             lock (tracks_queue)
             {
                 if (tracks_queue.Count < add_count)
                 {
-                    if (!mute)
+                    if (nomute)
                     {
                         throw new SkipException("Requested number exceeds the queue length");
                     }
                     return;
                 }
+
                 for (int i = 0; i < add_count; i++)
                 {
                     _ = tracks_queue.Dequeue();
@@ -27,11 +29,14 @@ namespace MyGreatestBot.Player
 
                 IsPlaying = false;
 
-                if (!mute)
+                if (nomute)
                 {
                     if (was_playing)
                     {
-                        Handler.Message.Send(new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}"), true);
+                        Handler.Message.Send(
+                            new SkipException(
+                                $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
+                            .WithSuccess());
                     }
                     else
                     {

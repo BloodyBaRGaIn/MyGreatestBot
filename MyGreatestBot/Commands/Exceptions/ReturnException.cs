@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class ReturnException : CommandExecutionException
     {
-        public override string Title => "Return";
-        public override DiscordColor ExecutedColor => DiscordColor.Yellow;
+        public override string Title { get; } = "Return";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Yellow;
 
         public ReturnException() : base() { }
         public ReturnException(string message) : base(message) { }

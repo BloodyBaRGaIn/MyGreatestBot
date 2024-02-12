@@ -4,16 +4,16 @@
     /// API and services flags
     /// </summary>
     [System.Flags]
-    public enum ApiIntents : int
+    public enum ApiIntents : uint
     {
-        None = 0x00,
-        Youtube = 0x01,
-        Yandex = 0x02,
-        Vk = 0x04,
-        Spotify = 0x08,
-        Sql = 0x10,
+        None = 0x00000000U,
+        Youtube = 0x00000001U,
+        Yandex = 0x00000002U,
+        Vk = 0x00000004U,
+        Spotify = 0x00000008U,
 
-        Discord = 0x10000000,
+        Sql = 0x40000000U,
+        Discord = 0x80000000U,
 
         Music = Youtube | Yandex | Vk | Spotify,
         Services = Sql | Discord,

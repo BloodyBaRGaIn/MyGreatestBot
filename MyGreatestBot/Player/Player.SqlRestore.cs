@@ -14,7 +14,8 @@ namespace MyGreatestBot.Player
     {
         internal void SqlRestore(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
             {
                 throw new SqlApiException();
@@ -22,7 +23,7 @@ namespace MyGreatestBot.Player
 
             if (!_sqlSemaphore.WaitOne(1))
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new SqlRestoreException("Operation in progress");
                 }
@@ -39,7 +40,7 @@ namespace MyGreatestBot.Player
                 catch (Exception ex)
                 {
                     DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                    if (!mute)
+                    if (nomute)
                     {
                         throw new SqlRestoreException("Restore failed", ex);
                     }
@@ -47,7 +48,7 @@ namespace MyGreatestBot.Player
                 }
                 if (info.Count == 0)
                 {
-                    if (!mute)
+                    if (nomute)
                     {
                         throw new SqlRestoreException("Nothing to restore");
                     }
@@ -66,9 +67,9 @@ namespace MyGreatestBot.Player
                     restoreCount++;
                 }
                 SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
-                if (!mute)
+                if (nomute)
                 {
-                    Handler.Message.Send(new SqlRestoreException($"Restored {restoreCount} track(s)"), true);
+                    Handler.Message.Send(new SqlRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
                 }
             }
             catch

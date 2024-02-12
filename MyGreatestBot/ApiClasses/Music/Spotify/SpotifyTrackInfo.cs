@@ -31,7 +31,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         public string AudioURL { get; private set; }
         [AllowNull]
-        public string CoverURL { get; }
+        public string CoverURL { get; } = null;
 
         bool ITrackInfo.BypassCheck { get; set; } = false;
 
@@ -61,7 +61,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     ? new(playlist.Name)
                     : new(playlist.Name, $"{Base.Domain}playlist/{playlist.Id}");
 
-            CoverURL = track.Album.Images.FirstOrDefault()?.Url;
+            string? cover = track.Album.Images.FirstOrDefault()?.Url;
+
+            if (!string.IsNullOrWhiteSpace(cover) && IAccessible.IsUrlSuccess(cover, false))
+            {
+                CoverURL = cover;
+            }
 
             // default
             AudioURL = track.PreviewUrl;
@@ -164,7 +169,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             ApiManager.ReloadApis(Base.TrackType | AudioFrom);
         }
 
-        public int CompareTo([AllowNull] ITrackInfo other)
+        public int CompareTo(ITrackInfo? other)
         {
             return Base.CompareTo(other);
         }

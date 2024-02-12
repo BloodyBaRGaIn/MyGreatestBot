@@ -9,10 +9,11 @@ namespace MyGreatestBot.Player
     {
         internal void ReturnCurrentTrackToQueue(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (currentTrack == null)
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new ReturnException("Nothing to return");
                 }
@@ -36,9 +37,9 @@ namespace MyGreatestBot.Player
 
                 IsPlaying = false;
 
-                if (!mute)
+                if (nomute)
                 {
-                    Handler.Message.Send(new ReturnException("Returned to queue"), true);
+                    Handler.Message.Send(new ReturnException("Returned to queue").WithSuccess());
                 }
             }
         }

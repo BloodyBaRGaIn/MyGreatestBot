@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class PlayerException : CommandExecutionException
     {
-        public override string Title => "Player";
-        public override DiscordColor ExecutedColor => GenericColor;
+        public override string Title { get; } = "Player";
+        protected override DiscordColor ExecutedColor { get; } = GenericColor;
 
         public PlayerException() : base() { }
         public PlayerException(string message) : base(message) { }

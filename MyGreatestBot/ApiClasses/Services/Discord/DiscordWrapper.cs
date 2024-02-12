@@ -4,8 +4,8 @@ using DSharpPlus.VoiceNext;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord

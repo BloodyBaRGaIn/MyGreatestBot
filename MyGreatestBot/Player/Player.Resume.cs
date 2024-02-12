@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
             }
             else if (IsPlaying)
             {
-                Handler.Message.Send(new ResumeException("Resumed"), true);
+                Handler.Message.Send(new ResumeException("Resumed").WithSuccess());
             }
             else
             {

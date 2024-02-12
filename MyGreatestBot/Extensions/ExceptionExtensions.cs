@@ -19,12 +19,14 @@ namespace MyGreatestBot.Extensions
             {
                 return exception.GetType().Name;
             }
+
             string result = $"{exception.GetType().Name} : {exception.Message} {exception.GetStackFrame()}";
 
             if (exception.InnerException != null)
             {
                 result += $"{Environment.NewLine}{exception.InnerException.GetExtendedMessage()}";
             }
+
             return result;
         }
 
@@ -58,21 +60,21 @@ namespace MyGreatestBot.Extensions
 #endif
         }
 
-        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception, bool isExecutedSuccessfully = false)
+        public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)
         {
-            return exception is CommandExecutionException cmd
-                ? new DiscordEmbedBuilder()
-                {
-                    Color = isExecutedSuccessfully ? cmd.ExecutedColor : cmd.ErroredColor,
-                    Title = cmd.Title,
-                    Description = exception.Message
-                }
-                : new DiscordEmbedBuilder()
-                {
-                    Color = DiscordColor.Red,
-                    Title = exception.GetType().Name,
-                    Description = exception.Message
-                };
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                .WithDescription(exception.Message);
+
+            return exception switch
+            {
+                CommandExecutionException cmd => builder
+                .WithColor(cmd.Color)
+                .WithTitle(cmd.Title),
+
+                _ => builder
+                .WithColor(DiscordColor.Red)
+                .WithTitle(exception.GetType().Name)
+            };
         }
     }
 }

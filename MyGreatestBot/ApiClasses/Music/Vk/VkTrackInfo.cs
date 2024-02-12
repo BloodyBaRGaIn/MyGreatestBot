@@ -29,7 +29,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         TimeSpan ITrackInfo.Seek { get; set; }
 
         [AllowNull]
-        public string CoverURL { get; }
+        public string CoverURL { get; } = null;
         public string AudioURL { get; private set; }
 
         bool ITrackInfo.BypassCheck { get; set; } = false;
@@ -75,7 +75,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                     ? new(playlist.Title)
                     : new(playlist.Title, $"{Base.Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
 
-            CoverURL = album?.Thumb?.Photo135;
+            string? cover = album?.Thumb?.Photo135;
+            if (!string.IsNullOrWhiteSpace(cover) && IAccessible.IsUrlSuccess(cover))
+            {
+                CoverURL = cover;
+            }
 
             Duration = TimeSpan.FromSeconds(audio.Duration);
 
@@ -98,7 +102,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        public int CompareTo([AllowNull] ITrackInfo other)
+        public int CompareTo(ITrackInfo? other)
         {
             return Base.CompareTo(other);
         }

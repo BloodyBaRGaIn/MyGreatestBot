@@ -14,10 +14,10 @@ using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord
@@ -349,20 +349,24 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     Command? findCommand = Commands.FindCommand(badCommandText, out _);
 
-                    if (findCommand != null)
+                    if (findCommand == null)
                     {
-                        handled = true;
-                        try
-                        {
-                            await Commands.ExecuteCommandAsync(
-                                Commands.CreateContext(
-                                    args.Context.Message,
-                                    StringPrefixes[0],
-                                    findCommand,
-                                    rawArguments));
-                        }
-                        catch { }
+                        break;
                     }
+
+                    handled = true;
+
+                    try
+                    {
+                        await Commands.ExecuteCommandAsync(
+                            Commands.CreateContext(
+                                args.Context.Message,
+                                StringPrefixes[0],
+                                findCommand,
+                                rawArguments));
+                    }
+                    catch { }
+
                     break;
 
                 case ArgumentException:

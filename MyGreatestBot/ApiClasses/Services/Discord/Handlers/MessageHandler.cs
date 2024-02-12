@@ -16,20 +16,30 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task SendAsync(DiscordEmbedBuilder embed)
         {
-            if (Channel is not null)
+            if (Channel is null)
             {
-                DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().AddEmbed(embed).SuppressNotifications();
-                _ = await Channel.SendMessageAsync(messageBuilder);
+                return;
             }
+
+            DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder()
+                .AddEmbed(embed)
+                .SuppressNotifications();
+
+            _ = await Channel.SendMessageAsync(messageBuilder);
         }
 
         public async Task SendAsync(string message)
         {
-            if (Channel is not null)
+            if (Channel is null)
             {
-                DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().WithContent(message).SuppressNotifications();
-                _ = await Channel.SendMessageAsync(messageBuilder);
+                return;
             }
+
+            DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder()
+                .WithContent(message)
+                .SuppressNotifications();
+
+            _ = await Channel.SendMessageAsync(messageBuilder);
         }
 
         public void Send(DiscordEmbedBuilder embed)
@@ -40,9 +50,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
         }
 
-        public void Send(Exception exception, bool isSuccess = false)
+        public void Send(Exception exception)
         {
-            Send(exception.GetDiscordEmbed(isSuccess));
+            Send(exception.GetDiscordEmbed());
         }
 
         public void Send(string message)

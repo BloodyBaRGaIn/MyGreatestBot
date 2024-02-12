@@ -49,7 +49,7 @@ namespace MyGreatestBot.Player
                 {
                     Handler.Message.Send(new PlayerException(
                         $"Added: {tracks.Count()}{Environment.NewLine}" +
-                        $"Total: {totalCount}"), true);
+                        $"Total: {totalCount}").WithSuccess());
                 }
             }
         }

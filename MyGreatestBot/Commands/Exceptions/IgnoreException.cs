@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class IgnoreException : CommandExecutionException
     {
-        public override string Title => "Ignore";
-        public override DiscordColor ExecutedColor => DiscordColor.Yellow;
+        public override string Title { get; } = "Ignore";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Yellow;
 
         public IgnoreException() : base() { }
         public IgnoreException(string message) : base(message) { }

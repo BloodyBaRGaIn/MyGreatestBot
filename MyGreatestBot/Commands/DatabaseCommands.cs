@@ -2,9 +2,11 @@
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Utils;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
+using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
 namespace MyGreatestBot.Commands
 {

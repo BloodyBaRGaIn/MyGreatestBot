@@ -1,5 +1,7 @@
-﻿using MyGreatestBot.ApiClasses.Music;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -11,7 +13,16 @@ namespace MyGreatestBot.Player
             {
                 lock (currentTrack)
                 {
-                    Handler.Message.Send(GetPlayingMessage<TrackInfoException>(currentTrack, "Current"));
+                    DiscordEmbedBuilder builder;
+                    try
+                    {
+                        builder = GetPlayingMessage<TrackInfoException>(currentTrack, "Current");
+                    }
+                    catch
+                    {
+                        builder = new TrackInfoException("Cannot make track message").GetDiscordEmbed();
+                    }
+                    Handler.Message.Send(builder);
                 }
             }
             else if (!IsPlaying)
@@ -37,7 +48,16 @@ namespace MyGreatestBot.Player
                             _ = tracks_queue.Dequeue();
                             continue;
                         }
-                        Handler.Message.Send(GetPlayingMessage<TrackInfoException>(track, "Next"));
+                        DiscordEmbedBuilder builder;
+                        try
+                        {
+                            builder = GetPlayingMessage<TrackInfoException>(track, "Next");
+                        }
+                        catch
+                        {
+                            builder = new TrackInfoException("Cannot make next track message").GetDiscordEmbed();
+                        }
+                        Handler.Message.Send(builder);
                         break;
                     }
                     else

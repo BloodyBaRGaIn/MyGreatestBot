@@ -45,6 +45,13 @@ namespace MyGreatestBot.Player
 
         private static readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
 
+        private enum LowPlayerResult : int
+        {
+            TrackNull = -1,
+            Success = 0,
+            Restart = 1
+        }
+
         internal Player(ConnectionHandler handler)
         {
             Handler = handler;
@@ -160,6 +167,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
+                _ = Handler.Message.SendAsync(ex.GetDiscordEmbed());
                 Handler.LogError.Send(ex.GetExtendedMessage());
                 return false;
             }
@@ -219,7 +227,7 @@ namespace MyGreatestBot.Player
 
                 if (!ffmpeg.TryLoad(5000))
                 {
-                    Wait(100);
+                    Wait(1);
 
                     if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
                     {
@@ -229,7 +237,7 @@ namespace MyGreatestBot.Player
                     {
                         throw new ApiException(currentTrack.TrackType);
                     }
-                    currentTrack.Reload();
+                    //currentTrack.Reload();
                     already_restarted = true;
                     obtain_audio = true;
                     continue;
@@ -275,13 +283,6 @@ namespace MyGreatestBot.Player
             Handler.Log.Send("Stop ffmpeg");
 
             currentTrack = null;
-        }
-
-        private enum LowPlayerResult : int
-        {
-            TrackNull = -1,
-            Success = 0,
-            Restart = 1
         }
 
         private LowPlayerResult LowPlayer()

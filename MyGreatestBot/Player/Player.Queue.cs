@@ -30,7 +30,7 @@ namespace MyGreatestBot.Player
 
                 description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
-                Handler.Message.Send(new QueueLengthException(description), true);
+                Handler.Message.Send(new QueueLengthException(description).WithSuccess());
             }
             else
             {

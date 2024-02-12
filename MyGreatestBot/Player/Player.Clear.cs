@@ -7,17 +7,18 @@ namespace MyGreatestBot.Player
     {
         internal void Clear(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             lock (tracks_queue)
             {
                 int count = tracks_queue.Count;
                 tracks_queue.Clear();
 
-                if (!mute)
+                if (nomute)
                 {
                     if (count > 0)
                     {
-                        Handler.Message.Send(new ClearException("Queue cleared"), isSuccess: true);
+                        Handler.Message.Send(new ClearException("Queue cleared").WithSuccess());
                     }
                     else
                     {

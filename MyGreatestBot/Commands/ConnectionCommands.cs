@@ -8,9 +8,10 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+
+using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
 namespace MyGreatestBot.Commands
 {
@@ -94,13 +95,13 @@ namespace MyGreatestBot.Commands
                 }
             }
 
-            if (!string.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result))
             {
-                handler.Message.Send(new StatusException(result.TrimEnd(Environment.NewLine.ToCharArray())), true);
+                handler.Message.Send(new StatusException("No APIs initialized"));
             }
             else
             {
-                handler.Message.Send(new StatusException("No APIs initialized"));
+                handler.Message.Send(new StatusException(result.TrimEnd(Environment.NewLine.ToCharArray())).WithSuccess());
             }
 
             await Task.Delay(1);
@@ -128,7 +129,7 @@ namespace MyGreatestBot.Commands
 
             if (ApiManager.FailedIntents == ApiIntents.None)
             {
-                handler.Message.Send(new ReloadException("Reload success"), isSuccess: true);
+                handler.Message.Send(new ReloadException("Reload success").WithSuccess());
             }
             else
             {
@@ -155,7 +156,7 @@ namespace MyGreatestBot.Commands
                 IEnumerable<DiscordUser>? owners = DiscordWrapper.Client.CurrentApplication.Owners;
                 if (owners != null && !owners.Select(x => x.Id).Contains(ctx.User.Id))
                 {
-                    throw new CommandExecutionException("You are not allowed to execute this command");
+                    throw new InvalidOperationException("You are not allowed to execute this command");
                 }
             }
 

@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class SkipException : CommandExecutionException
     {
-        public override string Title => "Skip";
-        public override DiscordColor ExecutedColor => DiscordColor.Blue;
+        public override string Title { get; } = "Skip";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Blue;
 
         public SkipException() : base() { }
         public SkipException(string message) : base(message) { }

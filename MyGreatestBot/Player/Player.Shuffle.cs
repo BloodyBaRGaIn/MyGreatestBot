@@ -11,7 +11,8 @@ namespace MyGreatestBot.Player
     {
         internal void ShuffleQueue(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (tracks_queue.Count != 0)
             {
                 lock (tracks_queue)
@@ -29,14 +30,14 @@ namespace MyGreatestBot.Player
                     tracks_queue.EnqueueRange(collection);
                 }
 
-                if (!mute)
+                if (nomute)
                 {
-                    Handler.Message.Send(new ShuffleException("Queue shuffled"), true);
+                    Handler.Message.Send(new ShuffleException("Queue shuffled").WithSuccess());
                 }
             }
             else
             {
-                if (!mute)
+                if (nomute)
                 {
                     throw new ShuffleException("Nothing to shuffle");
                 }

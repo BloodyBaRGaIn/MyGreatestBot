@@ -6,10 +6,10 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
@@ -139,11 +139,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.Disconnect();
                 Voice.WaitForDisconnectionAsync().Wait();
                 await Task.Yield();
-                //if (channel != null)
-                //{
-                //    await Join(text, channel, throw_exception);
-                //}
-                //return;
             }
 
             if (channel is not null)

@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class SqlSaveException : CommandExecutionException
     {
-        public override string Title => "Save";
-        public override DiscordColor ExecutedColor => DiscordColor.Blurple;
+        public override string Title { get; } = "Save";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Blurple;
 
         public SqlSaveException() : base() { }
         public SqlSaveException(string message) : base(message) { }

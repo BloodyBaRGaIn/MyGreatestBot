@@ -1,11 +1,13 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Discord;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+
+using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
 
 namespace MyGreatestBot.ApiClasses
 {
@@ -58,7 +60,7 @@ namespace MyGreatestBot.ApiClasses
             if (InitIntents.HasFlag(ApiIntents.Youtube))
             {
                 // YoutubeExplode won't work without specific environment variable
-                Utils.YoutubeExplodeBypass.Bypass();
+                YoutubeExplodeBypass.Bypass();
             }
 
             foreach (IAPI? api in ApiCollection.Values)

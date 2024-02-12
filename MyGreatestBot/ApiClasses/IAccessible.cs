@@ -2,6 +2,8 @@
 using System;
 using System.Net.Http;
 
+using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
+
 namespace MyGreatestBot.ApiClasses
 {
     /// <summary>
@@ -36,7 +38,7 @@ namespace MyGreatestBot.ApiClasses
             throw new ApplicationException($"{ApiType} is not available");
         }
 
-        public static bool IsUrlSuccess(string url, bool isApi = true)
+        public static bool IsUrlSuccess([DisallowNull] string url, bool isApi = true)
         {
             if (url == string.Empty)
             {
@@ -46,9 +48,10 @@ namespace MyGreatestBot.ApiClasses
             using HttpClient client = new();
             try
             {
-                using HttpResponseMessage message = client.Send(new HttpRequestMessage(isApi ? HttpMethod.Get : HttpMethod.Head, url));
+                using HttpResponseMessage message = client.Send(new(isApi ? HttpMethod.Get : HttpMethod.Head,
+                                                                    url));
 
-                if (message.IsSuccessStatusCode || message.StatusCode == (System.Net.HttpStatusCode)418)
+                if (message.IsSuccessStatusCode || (int)message.StatusCode == 418)
                 {
                     return true;
                 }

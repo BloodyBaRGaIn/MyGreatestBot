@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class TrackInfoException : CommandExecutionException
     {
-        public override string Title => "Track info";
-        public override DiscordColor ExecutedColor => GenericColor;
+        public override string Title { get; } = "Track info";
+        protected override DiscordColor ExecutedColor { get; } = GenericColor;
 
         public TrackInfoException() : base() { }
         public TrackInfoException(string message) : base(message) { }

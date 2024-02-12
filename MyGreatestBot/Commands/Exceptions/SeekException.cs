@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class SeekException : CommandExecutionException
     {
-        public override string Title => "Seek";
-        public override DiscordColor ExecutedColor => GenericColor;
+        public override string Title { get; } = "Seek";
+        protected override DiscordColor ExecutedColor { get; } = GenericColor;
 
         public SeekException() : base() { }
         public SeekException(string message) : base(message) { }

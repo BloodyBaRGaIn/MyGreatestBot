@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class StatusException : CommandExecutionException
     {
-        public override string Title => "Status";
-        public override DiscordColor ExecutedColor => DiscordColor.Blue;
+        public override string Title { get; } = "Status";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Blue;
 
         public StatusException() : base() { }
         public StatusException(string message) : base(message) { }

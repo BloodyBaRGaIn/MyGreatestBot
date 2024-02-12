@@ -7,7 +7,8 @@ namespace MyGreatestBot.Player
     {
         internal void Stop(CommandActionSource source)
         {
-            bool mute = source.HasFlag(CommandActionSource.Mute);
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
             if (IsPlaying || tracks_queue.Count != 0)
             {
                 StopRequested = true;
@@ -16,14 +17,14 @@ namespace MyGreatestBot.Player
 
                 IsPlaying = false;
 
-                if (!mute)
+                if (nomute)
                 {
-                    Handler.Message.Send(new StopException("Stopped"), true);
+                    Handler.Message.Send(new StopException("Stopped").WithSuccess());
                 }
             }
             else
             {
-                if (!mute && !source.HasFlag(CommandActionSource.Event))
+                if (nomute && !source.HasFlag(CommandActionSource.Event))
                 {
                     throw new StopException("Nothing to stop");
                 }

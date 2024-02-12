@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+using EmbedThumbnail = DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail;
+
 namespace MyGreatestBot.ApiClasses.Music
 {
     /// <summary>
@@ -18,6 +20,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Base URL
         /// </summary>
+        [DisallowNull]
         public virtual string Domain => ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
 
         /// <summary>
@@ -71,6 +74,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Audio URL for FFMPEG
         /// </summary>
+        [DisallowNull]
         public string AudioURL { get; }
 
         public bool BypassCheck { get; set; }
@@ -155,12 +159,11 @@ namespace MyGreatestBot.ApiClasses.Music
         /// Get Discord message thumbnail with track cover image
         /// </summary>
         /// <returns>Track cover image as thumbnail</returns>
-        [return: MaybeNull]
-        public DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail GetThumbnail()
+        public EmbedThumbnail? GetThumbnail()
         {
             return string.IsNullOrWhiteSpace(CoverURL)
                 ? null
-                : new DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail()
+                : new EmbedThumbnail()
                 {
                     Url = CoverURL
                 };
@@ -190,7 +193,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         /// <param name="other">Other track info instance</param>
         /// <returns>Zero if fully equals</returns>
-        public int CompareTo([AllowNull] ITrackInfo other)
+        public int CompareTo(ITrackInfo? other)
         {
             System.Numerics.BigInteger result = 0;
             if (this is null || other is null)

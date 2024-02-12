@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class PauseException : CommandExecutionException
     {
-        public override string Title => "Pause";
-        public override DiscordColor ExecutedColor => DiscordColor.LightGray;
+        public override string Title { get; } = "Pause";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.LightGray;
 
         public PauseException() : base() { }
         public PauseException(string message) : base(message) { }

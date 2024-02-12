@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class ClearException : CommandExecutionException
     {
-        public override string Title => "Clear";
-        public override DiscordColor ExecutedColor => DiscordColor.Aquamarine;
+        public override string Title { get; } = "Clear";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Aquamarine;
 
         public ClearException() : base() { }
         public ClearException(string message) : base(message) { }

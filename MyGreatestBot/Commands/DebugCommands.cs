@@ -6,8 +6,10 @@ using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+
+using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
+using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 
 namespace MyGreatestBot.Commands
 {
@@ -86,7 +88,8 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task EchoCommand(
             CommandContext ctx,
-            [RemainingText, Description("Text")] string text)
+            [RemainingText,
+            Description("Text")] string text)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -105,16 +108,20 @@ namespace MyGreatestBot.Commands
         [Category(CommandStrings.DebugCategoryName)]
         public async Task HelpCommand(
             CommandContext ctx,
-            [AllowNull, RemainingText, Description("Command name")] string command = null)
+            [AllowNull, RemainingText,
+            Description("Command name")] string command = null)
         {
-            ArgumentNullException.ThrowIfNull(DiscordWrapper.Commands, nameof(DiscordWrapper.Commands));
+            ArgumentNullException.ThrowIfNull(DiscordWrapper.Commands,
+                                              nameof(DiscordWrapper.Commands));
 
             List<CustomHelpFormatter> collection = [];
+
             if (string.IsNullOrWhiteSpace(command))
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
             }
-            else if (DiscordWrapper.Commands.RegisteredCommands.TryGetValue(command.ToLowerInvariant(), out Command? cmd))
+            else if (DiscordWrapper.RegisteredCommands.TryGetValue(command.ToLowerInvariant(),
+                                                                   out Command? cmd))
             {
                 collection.Add(new CustomHelpFormatter(ctx).WithCommand(cmd));
             }
@@ -125,9 +132,12 @@ namespace MyGreatestBot.Commands
 
             foreach (CustomHelpFormatter formatter in collection)
             {
-                string message = formatter.Build().Content ?? throw new ArgumentException("Cannot build message");
+                string message = formatter.Build().Content
+                    ?? throw new ArgumentException("Cannot build message");
 
-                _ = ctx.Member is null ? await ctx.Channel.SendMessageAsync(message) : await ctx.Member.SendMessageAsync(message);
+                _ = ctx.Member is null
+                    ? await ctx.Channel.SendMessageAsync(message)
+                    : await ctx.Member.SendMessageAsync(message);
             }
         }
     }

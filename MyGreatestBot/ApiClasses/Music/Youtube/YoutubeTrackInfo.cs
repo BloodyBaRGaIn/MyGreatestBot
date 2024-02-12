@@ -57,11 +57,17 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             Duration = video.Duration ?? TimeSpan.Zero;
 
             AudioURL = string.Empty;
-            CoverURL = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
 
             if (playlist != null)
             {
                 PlaylistName = new(playlist.Title, playlist.Url);
+            }
+
+            string cover = $"https://img.youtube.com/vi/{video.Id}/mqdefault.jpg";
+
+            if (IAccessible.IsUrlSuccess(cover, false))
+            {
+                CoverURL = cover;
             }
         }
 
@@ -96,7 +102,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
         }
 
-        public int CompareTo([AllowNull] ITrackInfo other)
+        public int CompareTo(ITrackInfo? other)
         {
             return Base.CompareTo(other);
         }

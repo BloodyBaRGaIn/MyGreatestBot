@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class StopException : CommandExecutionException
     {
-        public override string Title => "Stop";
-        public override DiscordColor ExecutedColor => DiscordColor.Black;
+        public override string Title { get; } = "Stop";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Black;
 
         public StopException() : base() { }
         public StopException(string message) : base(message) { }

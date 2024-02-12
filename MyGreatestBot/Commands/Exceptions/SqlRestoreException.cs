@@ -5,8 +5,8 @@ namespace MyGreatestBot.Commands.Exceptions
 {
     public sealed class SqlRestoreException : CommandExecutionException
     {
-        public override string Title => "Restore";
-        public override DiscordColor ExecutedColor => DiscordColor.Blurple;
+        public override string Title { get; } = "Restore";
+        protected override DiscordColor ExecutedColor { get; } = DiscordColor.Blurple;
 
         public SqlRestoreException() : base() { }
         public SqlRestoreException(string message) : base(message) { }

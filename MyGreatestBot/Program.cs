@@ -70,6 +70,7 @@ namespace MyGreatestBot
         private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
         {
             _ = sender;
+            _ = e;
             try
             {
                 ConnectionHandler.Logout(false).Wait();
