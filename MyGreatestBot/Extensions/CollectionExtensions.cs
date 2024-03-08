@@ -34,7 +34,7 @@ namespace MyGreatestBot.Extensions
 
         public static void EnqueueToHead<T>(this Queue<T> queue, T item)
         {
-            queue.EnqueueRangeToHead(new[] { item });
+            queue.EnqueueRangeToHead([item]);
         }
 
         public static void EnqueueRange<T>(this Queue<T> queue, IEnumerable<T> items)

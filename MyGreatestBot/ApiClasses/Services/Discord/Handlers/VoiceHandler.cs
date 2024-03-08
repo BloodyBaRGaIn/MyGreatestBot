@@ -99,6 +99,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             IsManualDisconnect = true;
             try
             {
+                SendSpeaking(false);
                 Connection?.Disconnect();
                 Connection?.Dispose();
                 Connection = null;

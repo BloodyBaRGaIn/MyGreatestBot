@@ -74,7 +74,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
 
-        DomainCollection IAccessible.Domains { get; } = new("https://music.yandex.ru/");
+        DomainCollection IAccessible.Domains { get; } = "https://music.yandex.ru/";
 
         public void PerformAuth()
         {

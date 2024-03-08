@@ -62,7 +62,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         ApiIntents IAPI.ApiType => ApiIntents.Vk;
 
-        DomainCollection IAccessible.Domains { get; } = new("https://www.vk.com/");
+        DomainCollection IAccessible.Domains { get; } = "https://www.vk.com/";
 
         public void PerformAuth()
         {
@@ -121,7 +121,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             {
                 return null;
             }
-            VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = new[] { trackId }, Count = 1 });
+            VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = [trackId], Count = 1 });
             Audio? audio = collection.FirstOrDefault();
             return audio == null ? null : new VkTrackInfo(audio);
         }

@@ -145,6 +145,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 Voice.Connect(channel);
                 Voice.WaitForConnectionAsync().Wait();
+                Voice.SendSpeaking(false);
             }
             else if (throw_exception)
             {

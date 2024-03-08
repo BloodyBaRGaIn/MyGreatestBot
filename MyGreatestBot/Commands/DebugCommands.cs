@@ -106,6 +106,7 @@ namespace MyGreatestBot.Commands
         [Aliases("h")]
         [Description("Get help")]
         [Category(CommandStrings.DebugCategoryName)]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task HelpCommand(
             CommandContext ctx,
             [AllowNull, RemainingText,

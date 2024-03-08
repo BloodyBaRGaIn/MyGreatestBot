@@ -41,7 +41,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
 
-        DomainCollection IAccessible.Domains { get; } = new("http://www.discord.com/");
+        DomainCollection IAccessible.Domains { get; } = "http://www.discord.com/";
 
         public void PerformAuth()
         {

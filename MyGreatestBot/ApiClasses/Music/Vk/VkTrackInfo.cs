@@ -51,12 +51,16 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 ? new(audio.Title)
                 : new HyperLink(audio.Title, $"{Base.Domain}audio{audio.OwnerId}_{id_str}").WithId(id_str);
 
-            IEnumerable<AudioArtist> main_artists = audio.MainArtists;
-            IEnumerable<AudioArtist> feat_artists = audio.FeaturedArtists;
+            IEnumerable<AudioArtist> audioArtists = Enumerable.Empty<AudioArtist>()
+                .Concat(audio.MainArtists)
+                .Concat(audio.FeaturedArtists)
+                .DistinctBy(a => a.Name);
 
-            IEnumerable<AudioArtist> audioArtists = main_artists != null && main_artists.Any()
-                ? main_artists
-                : feat_artists != null && feat_artists.Any() ? feat_artists : (new[] { new AudioArtist() { Name = audio.Artist } });
+            if (!audioArtists.Any())
+            {
+                audioArtists = [new AudioArtist() { Name = audio.Artist }];
+            }
+
             ArtistArr = audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)

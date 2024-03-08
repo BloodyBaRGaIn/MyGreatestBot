@@ -144,6 +144,7 @@ namespace MyGreatestBot.Commands
         [Command("seek")]
         [Aliases("sk")]
         [Description("Seek audio stream")]
+        [SuppressMessage("Performance", "CA1822")]
         public async Task SeekCommand(
             CommandContext ctx,
             [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)

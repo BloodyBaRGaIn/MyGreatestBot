@@ -72,7 +72,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
-        DomainCollection IAccessible.Domains { get; } = new("https://www.youtube.com/");
+        DomainCollection IAccessible.Domains { get; } = "https://www.youtube.com/";
 
         public void PerformAuth()
         {
@@ -80,7 +80,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
             _ = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets: GoogleClientSecrets.FromStream(fileStream).Secrets,
-                scopes: new string[1] { YouTubeService.Scope.YoutubeReadonly },
+                scopes: [YouTubeService.Scope.YoutubeReadonly],
                 user: user.Username,
                 taskCancellationToken: CancellationToken.None).GetAwaiter().GetResult();
 

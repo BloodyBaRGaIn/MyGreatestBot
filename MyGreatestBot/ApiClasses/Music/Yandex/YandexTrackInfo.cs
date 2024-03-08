@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
-using Yandex.Music.Client.Extensions;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {

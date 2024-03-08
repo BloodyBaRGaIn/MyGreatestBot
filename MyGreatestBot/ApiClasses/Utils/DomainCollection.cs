@@ -45,5 +45,10 @@ namespace MyGreatestBot.ApiClasses.Utils
         {
             return domainCollection.GetPrimary();
         }
+
+        public static implicit operator DomainCollection(string domain)
+        {
+            return new(domain);
+        }
     }
 }
