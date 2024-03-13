@@ -243,6 +243,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return GetTracks(query);
         }
 
+        public ITrackInfo? GetRadio(string id)
+        {
+            return null;
+        }
+
         private void FromAlbumId(string album_id, List<ITrackInfo> tracks)
         {
             FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();

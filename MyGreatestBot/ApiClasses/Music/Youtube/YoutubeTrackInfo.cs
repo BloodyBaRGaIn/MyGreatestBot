@@ -36,7 +36,8 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         public string CoverURL { get; }
         public string AudioURL { get; private set; }
 
-        bool ITrackInfo.BypassCheck { get; set; } = false;
+        bool ITrackInfo.Radio { get; set; }
+        bool ITrackInfo.BypassCheck { get; set; }
 
         /// <summary>
         /// Youtube track info constructor

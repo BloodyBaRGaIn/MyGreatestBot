@@ -32,7 +32,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         public string CoverURL { get; } = null;
         public string AudioURL { get; private set; }
 
-        bool ITrackInfo.BypassCheck { get; set; } = false;
+        bool ITrackInfo.Radio { get; set; }
+        bool ITrackInfo.BypassCheck { get; set; }
 
         private readonly Audio origin;
 

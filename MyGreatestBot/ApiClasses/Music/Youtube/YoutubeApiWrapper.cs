@@ -264,5 +264,10 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             return tracks;
         }
+
+        public ITrackInfo? GetRadio(string id)
+        {
+            return null;
+        }
     }
 }

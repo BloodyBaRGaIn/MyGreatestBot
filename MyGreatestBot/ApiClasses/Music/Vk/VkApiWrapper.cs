@@ -131,6 +131,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return GetTracks(query);
         }
 
+        public ITrackInfo? GetRadio(string id)
+        {
+            return null;
+        }
+
         private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)
         {
             bool success = false;

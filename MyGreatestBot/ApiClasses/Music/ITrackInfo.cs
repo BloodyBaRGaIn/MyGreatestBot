@@ -77,6 +77,7 @@ namespace MyGreatestBot.ApiClasses.Music
         [DisallowNull]
         public string AudioURL { get; }
 
+        public bool Radio { get; set; }
         public bool BypassCheck { get; set; }
 
         /// <summary>

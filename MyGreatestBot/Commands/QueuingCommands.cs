@@ -51,6 +51,7 @@ namespace MyGreatestBot.Commands
             "\t\t- ```\\SH - shuffle```\r\n" +
             "\t\t- ```\\FF - enqueue to the head```\r\n" +
             "\t\t- ```\\T - play immediatly```\r\n" +
+            "\t\t- ```\\R - play radio```\r\n" +
             "\t\t- ```\\B - bypass SQL check")] params string[] args)
         {
             CommandActionSource source = CommandActionSource.Command;
@@ -81,7 +82,9 @@ namespace MyGreatestBot.Commands
                             case "\\T":
                                 source |= CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent;
                                 break;
-
+                            case "\\R":
+                                source |= CommandActionSource.PlayerRadio;
+                                break;
                             case "\\B":
                                 source |= CommandActionSource.PlayerNoBlacklist;
                                 break;
@@ -143,6 +146,18 @@ namespace MyGreatestBot.Commands
         {
             await PlayCommandGeneric(ctx, query,
                 CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent);
+        }
+
+        [Command("playradio")]
+        [Aliases("radio", "pr")]
+        [Description("")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task PlayRadioCommand(
+            CommandContext ctx,
+            [RemainingText, Description("URL")] string query)
+        {
+            await PlayCommandGeneric(ctx, query,
+                CommandActionSource.Command | CommandActionSource.PlayerRadio);
         }
 
         [Command("playbypass")]

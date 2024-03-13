@@ -28,5 +28,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <param name="time">Track starting time in seconds (should be positive)</param>
         /// <returns>Track</returns>
         ITrackInfo? GetTrack(string id, int time = 0);
+
+        ITrackInfo? GetRadio(string id);
     }
 }

@@ -210,5 +210,10 @@ namespace MyGreatestBot.ApiClasses
                 ? throw new InvalidOperationException("Invalid query")
                 : !tracks.Any() ? throw new InvalidOperationException("No results") : tracks;
         }
+
+        public static ITrackInfo? GetRadio(ApiIntents intents, string id)
+        {
+            return QueryIdentifier.GetRadio(intents, id);
+        }
     }
 }

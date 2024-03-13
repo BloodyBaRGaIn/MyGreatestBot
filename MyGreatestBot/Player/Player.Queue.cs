@@ -17,7 +17,7 @@ namespace MyGreatestBot.Player
                 lock (tracks_queue)
                 {
                     count = tracks_queue.Count;
-                    live_streams_count = tracks_queue.Count(t => t != null && (t.IsLiveStream || t.Duration == TimeSpan.Zero));
+                    live_streams_count = tracks_queue.Count(t => t != null && t.IsLiveStream);
                     total_duration = tracks_queue.Aggregate(TimeSpan.Zero, (sum, next) => sum + (next?.Duration ?? TimeSpan.Zero));
                 }
 
@@ -26,6 +26,11 @@ namespace MyGreatestBot.Player
                 if (live_streams_count != 0)
                 {
                     description += $"Enqueued live streams: {live_streams_count}{Environment.NewLine}";
+                }
+
+                if (currentTrack != null && currentTrack.Radio)
+                {
+                    description += $"Player is on radio mode{Environment.NewLine}";
                 }
 
                 description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";

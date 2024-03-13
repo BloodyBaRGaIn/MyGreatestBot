@@ -24,6 +24,14 @@ namespace MyGreatestBot.Player
                     }
                 }
 
+                if (source.HasFlag(CommandActionSource.PlayerRadio))
+                {
+                    foreach (ITrackInfo track in tracks)
+                    {
+                        track.Radio = true;
+                    }
+                }
+
                 if (source.HasFlag(CommandActionSource.PlayerShuffle))
                 {
                     tracks = tracks.Shuffle();

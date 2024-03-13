@@ -1,8 +1,10 @@
 ﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
+using System;
 using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player
@@ -37,6 +39,33 @@ namespace MyGreatestBot.Player
                 }
 
                 Handler.Message.Send(builder);
+
+                if (track.Radio)
+                {
+                    ITrackInfo? radio_track = null;
+                    string message = string.Empty;
+
+                    try
+                    {
+                        radio_track = ApiManager.GetRadio(track.TrackType, track.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        message = ex.Message;
+                    }
+
+                    if (radio_track == null)
+                    {
+                        track.Radio = false;
+                        Handler.Message.Send(
+                            new PlayerException($"Cannot get the next radio track" +
+                            $"{(message != string.Empty ? $"{Environment.NewLine}{message}" : "")}"));
+                    }
+                    else
+                    {
+                        tracks_queue.EnqueueToHead(radio_track);
+                    }
+                }
 
                 if (!track.BypassCheck)
                 {

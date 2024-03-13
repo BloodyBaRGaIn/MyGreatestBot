@@ -23,6 +23,49 @@ namespace MyGreatestBot.ApiClasses.Music
             return TracksReceiver.Execute(query);
         }
 
+        public static ITrackInfo? GetRadio(ApiIntents intents, string id)
+        {
+            return TracksRadio.Execute(intents, id);
+        }
+
+        private sealed class TracksRadio
+        {
+            private delegate ITrackInfo? GetRadio(string id);
+
+            private readonly GetRadio get_radio;
+            private readonly ApiIntents desired;
+
+            private TracksRadio(ApiIntents desired, GetRadio get_radio)
+            {
+                this.desired = desired;
+                this.get_radio = get_radio;
+            }
+
+            internal static ITrackInfo? Execute(ApiIntents intents, string id)
+            {
+                foreach (TracksRadio radio in collection)
+                {
+                    if ((radio.desired & intents) == ApiIntents.None)
+                    {
+                        continue;
+                    }
+                    return ApiManager.InitIntents.HasFlag(radio.desired)
+                        ? radio.get_radio.Invoke(id)
+                        : throw new ApiException(radio.desired);
+                }
+
+                throw new InvalidOperationException("Radio mode is not supported");
+            }
+
+            private static readonly TracksRadio[] collection =
+            [
+                //new(ApiIntents.Youtube, Youtube.YoutubeApiWrapper.Instance.GetRadio),
+                new(ApiIntents.Yandex, Yandex.YandexApiWrapper.Instance.GetRadio),
+                //new(ApiIntents.Vk, Vk.VkApiWrapper.Instance.GetRadio),
+                //new(ApiIntents.Spotify, Spotify.SpotifyApiWrapper.Instance.GetRadio)
+            ];
+        }
+
         private sealed class TracksReceiver
         {
             private delegate IEnumerable<ITrackInfo>? GetTracks(string query);

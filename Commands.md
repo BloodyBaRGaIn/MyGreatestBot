@@ -19,6 +19,7 @@ Commands are organized into categories for better readability
         - ```\SH - shuffle```
         - ```\FF - enqueue to the head```
         - ```\T - play immediatly```
+        - ```\R - play radio```
         - ```\B - bypass SQL check```  
 - ```playshuffled (psh) - Add shuffled tracks to the queue```  
     Arguments:
@@ -27,6 +28,9 @@ Commands are organized into categories for better readability
     Arguments:
     - ```query (String) - URL```  
 - ```playimmediatly (pi, t, r) - Play the track immediatly```  
+    Arguments:
+    - ```query (String) - URL```  
+- ```playradio (radio, pr)```  
     Arguments:
     - ```query (String) - URL```  
 - ```playbypass (pb, b) - Play the track without check```  

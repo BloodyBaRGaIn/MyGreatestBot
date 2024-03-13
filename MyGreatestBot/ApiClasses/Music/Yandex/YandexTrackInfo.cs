@@ -36,7 +36,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         [AllowNull]
         public string CoverURL { get; } = null;
 
-        bool ITrackInfo.BypassCheck { get; set; } = false;
+        bool ITrackInfo.Radio { get; set; }
+        bool ITrackInfo.BypassCheck { get; set; }
 
         private readonly YTrack origin;
 
