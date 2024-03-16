@@ -179,18 +179,18 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         public ITrackInfo? GetTrack(string id, int time = 0)
         {
-            Video video = Videos.GetAsync(id)
+            Video origin = Videos.GetAsync(id)
                     .AsTask()
                     .GetAwaiter()
                     .GetResult();
 
-            if (video == null)
+            if (origin == null)
             {
                 return null;
             }
 
 #pragma warning disable CA1859
-            ITrackInfo track = new YoutubeTrackInfo(video);
+            ITrackInfo track = new YoutubeTrackInfo(origin);
 #pragma warning restore CA1859
 
             if (time > 0)

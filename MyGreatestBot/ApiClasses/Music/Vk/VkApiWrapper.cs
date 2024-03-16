@@ -116,14 +116,27 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         public ITrackInfo? GetTrack(string id, int time = 0)
         {
-            _ = time;
             if (!long.TryParse(id, out long trackId))
             {
                 return null;
             }
             VkCollection<Audio> collection = Audio.Get(new AudioGetParams() { AudioIds = [trackId], Count = 1 });
-            Audio? audio = collection.FirstOrDefault();
-            return audio == null ? null : new VkTrackInfo(audio);
+            Audio? origin = collection.FirstOrDefault();
+            if (origin == null)
+            {
+                return null;
+            }
+
+#pragma warning disable CA1859
+            ITrackInfo track = new VkTrackInfo(origin);
+#pragma warning restore CA1859
+
+            if (time > 0)
+            {
+                track.PerformSeek(TimeSpan.FromSeconds(time));
+            }
+
+            return track;
         }
 
         public IEnumerable<ITrackInfo>? GetTracksSearch(string query)

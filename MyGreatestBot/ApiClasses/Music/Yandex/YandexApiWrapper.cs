@@ -235,14 +235,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             try
             {
                 temp = radio.SendFeedBack(
-                    YStationFeedbackType.RadioStarted,
-                    originTrack);
-            }
-            catch { }
-
-            try
-            {
-                temp = radio.SendFeedBack(
                     YStationFeedbackType.TrackStarted,
                     originTrack);
             }
@@ -406,15 +398,23 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         public ITrackInfo? GetTrack(string? track_id_str, int time = 0)
         {
-            _ = time;
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
                 return null;
             }
 
-            YTrack track = Client.GetTrack(track_id_str);
+            YTrack origin = Client.GetTrack(track_id_str);
 
-            return track == null ? null : new YandexTrackInfo(track);
+#pragma warning disable CA1859
+            ITrackInfo track = new YandexTrackInfo(origin);
+#pragma warning restore CA1859
+
+            if (time > 0)
+            {
+                track.PerformSeek(TimeSpan.FromSeconds(time));
+            }
+
+            return track;
         }
 
         public IEnumerable<ITrackInfo>? GetTracksSearch(string query)

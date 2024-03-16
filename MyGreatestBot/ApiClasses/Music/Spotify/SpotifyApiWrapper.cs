@@ -2,6 +2,7 @@
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using SpotifyAPI.Web;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -232,10 +233,18 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         public ITrackInfo? GetTrack(string id, int time = 0)
         {
-            _ = time;
-            FullTrack? track = Tracks.Get(id).GetAwaiter().GetResult();
+            FullTrack? origin = Tracks.Get(id).GetAwaiter().GetResult();
 
-            return track == null ? null : new SpotifyTrackInfo(track);
+#pragma warning disable CA1859
+            ITrackInfo track = new SpotifyTrackInfo(origin);
+#pragma warning restore CA1859
+
+            if (time > 0)
+            {
+                track.PerformSeek(TimeSpan.FromSeconds(time));
+            }
+
+            return track;
         }
 
         public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
