@@ -68,7 +68,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         }
 
-        public static IMusicAPI Instance { get; private set; } = new YoutubeApiWrapper();
+        private static readonly YoutubeApiWrapper _instance = new();
+
+        public static IMusicAPI MusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
@@ -263,11 +265,6 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
 
             return tracks;
-        }
-
-        public ITrackInfo? GetRadio(string id)
-        {
-            return null;
         }
     }
 }

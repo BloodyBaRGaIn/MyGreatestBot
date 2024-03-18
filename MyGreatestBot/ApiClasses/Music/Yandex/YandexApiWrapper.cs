@@ -1,5 +1,4 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
-using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
@@ -23,7 +22,7 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    public sealed class YandexApiWrapper : IMusicAPI, ISearchable
+    public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI, ISearchable
     {
         [AllowNull]
         private YandexMusicClient _client;
@@ -73,7 +72,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         }
 
-        public static IMusicAPI Instance { get; private set; } = new YandexApiWrapper();
+        private static readonly YandexApiWrapper _instance = new();
+
+        public static IMusicAPI MusicInstance { get; } = _instance;
+        public static IRadioAPI RadioInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
 

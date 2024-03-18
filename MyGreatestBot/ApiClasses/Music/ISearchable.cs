@@ -1,6 +1,9 @@
 ﻿namespace MyGreatestBot.ApiClasses.Music
 {
-    public interface ISearchable : IAPI, IAccessible
+    /// <summary>
+    /// Interface for music APIs with search support
+    /// </summary>
+    public interface ISearchable : IMusicAPI
     {
         /// <summary>
         /// Search track with other

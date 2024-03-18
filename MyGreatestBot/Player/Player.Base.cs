@@ -33,17 +33,16 @@ namespace MyGreatestBot.Player
 
         private TimeSpan TimeRemaining => (currentTrack == null ? Seek : currentTrack.Duration) - Seek;
 
-        private readonly Queue<ITrackInfo?> tracks_queue = new();
-        private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
-        private readonly CancellationToken MainPlayerCancellationToken;
-        private readonly Task MainPlayerTask;
-        private readonly FFMPEG ffmpeg = new();
-
         private readonly ConnectionHandler Handler;
+        private readonly Task MainPlayerTask;
+        private readonly CancellationToken MainPlayerCancellationToken;
+
+        private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
+        private readonly Queue<ITrackInfo?> tracks_queue = new();
+        private readonly FFMPEG ffmpeg = new();
+        private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
 
         private static readonly Semaphore _sqlSemaphore = new(1, 1);
-
-        private static readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
 
         private enum LowPlayerResult : int
         {

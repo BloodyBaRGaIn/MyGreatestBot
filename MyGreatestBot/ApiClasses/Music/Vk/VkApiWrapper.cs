@@ -58,7 +58,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         }
 
-        public static IMusicAPI Instance { get; private set; } = new VkApiWrapper();
+        private static readonly VkApiWrapper _instance = new();
+
+        public static IMusicAPI MusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Vk;
 
@@ -142,11 +144,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
         {
             return GetTracks(query);
-        }
-
-        public ITrackInfo? GetRadio(string id)
-        {
-            return null;
         }
 
         private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)

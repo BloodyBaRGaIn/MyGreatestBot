@@ -234,10 +234,10 @@ namespace MyGreatestBot.ApiClasses.Music
         {
             return api switch
             {
-                ApiIntents.Youtube => Youtube.YoutubeApiWrapper.Instance.GetTrack(id),
-                ApiIntents.Yandex => Yandex.YandexApiWrapper.Instance.GetTrack(id),
-                ApiIntents.Vk => Vk.VkApiWrapper.Instance.GetTrack(id),
-                ApiIntents.Spotify => Spotify.SpotifyApiWrapper.Instance.GetTrack(id),
+                ApiIntents.Youtube => Youtube.YoutubeApiWrapper.MusicInstance.GetTrack(id),
+                ApiIntents.Yandex => Yandex.YandexApiWrapper.MusicInstance.GetTrack(id),
+                ApiIntents.Vk => Vk.VkApiWrapper.MusicInstance.GetTrack(id),
+                ApiIntents.Spotify => Spotify.SpotifyApiWrapper.MusicInstance.GetTrack(id),
                 _ => null,
             };
         }

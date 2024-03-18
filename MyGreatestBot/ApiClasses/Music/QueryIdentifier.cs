@@ -18,7 +18,7 @@ namespace MyGreatestBot.ApiClasses.Music
         private static readonly Regex GENERIC_RE = new("((\\s)|(\\S))+");
 #pragma warning restore SYSLIB1045
 
-        public static IEnumerable<ITrackInfo>? Execute(string query)
+        public static IEnumerable<ITrackInfo>? GetTracks(string query)
         {
             return TracksReceiver.Execute(query);
         }
@@ -60,7 +60,7 @@ namespace MyGreatestBot.ApiClasses.Music
             private static readonly TracksRadio[] collection =
             [
                 //new(ApiIntents.Youtube, Youtube.YoutubeApiWrapper.Instance.GetRadio),
-                new(ApiIntents.Yandex, Yandex.YandexApiWrapper.Instance.GetRadio),
+                new(ApiIntents.Yandex, Yandex.YandexApiWrapper.RadioInstance.GetRadio),
                 //new(ApiIntents.Vk, Vk.VkApiWrapper.Instance.GetRadio),
                 //new(ApiIntents.Spotify, Spotify.SpotifyApiWrapper.Instance.GetRadio)
             ];
@@ -99,12 +99,12 @@ namespace MyGreatestBot.ApiClasses.Music
 
             private static readonly TracksReceiver[] collection =
             [
-                new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.Instance.GetTracks),
-                new(ApiIntents.Youtube, YOUTUBE_SHORT_RE, Youtube.YoutubeApiWrapper.Instance.GetTracks),
-                new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.Instance.GetTracks),
-                new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.Instance.GetTracks),
-                new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.Instance.GetTracks),
-                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.Instance.GetTracksSearch)
+                new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracks),
+                new(ApiIntents.Youtube, YOUTUBE_SHORT_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracks),
+                new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.MusicInstance.GetTracks),
+                new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.MusicInstance.GetTracks),
+                new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.MusicInstance.GetTracks),
+                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracksSearch)
             ];
         }
     }

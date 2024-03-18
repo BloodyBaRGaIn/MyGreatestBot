@@ -49,10 +49,10 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
             ApiManager.Add(SqlServerWrapper.Instance);
-            ApiManager.Add(YoutubeApiWrapper.Instance);
-            ApiManager.Add(YandexApiWrapper.Instance);
-            ApiManager.Add(VkApiWrapper.Instance);
-            ApiManager.Add(SpotifyApiWrapper.Instance);
+            ApiManager.Add(YoutubeApiWrapper.MusicInstance);
+            ApiManager.Add(YandexApiWrapper.MusicInstance);
+            ApiManager.Add(VkApiWrapper.MusicInstance);
+            ApiManager.Add(SpotifyApiWrapper.MusicInstance);
             ApiManager.Add(DiscordWrapper.Instance);
 
             ApiManager.InitApis();

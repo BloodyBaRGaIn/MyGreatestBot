@@ -99,12 +99,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         private bool TrySearchYandex()
         {
-            return TrySearchGeneric(YandexApiWrapper.Instance);
+            return TrySearchGeneric(YandexApiWrapper.MusicInstance);
         }
 
         private bool TrySearchYoutube()
         {
-            return TrySearchGeneric(YoutubeApiWrapper.Instance);
+            return TrySearchGeneric(YoutubeApiWrapper.MusicInstance);
         }
 
         void ITrackInfo.ObtainAudioURL()

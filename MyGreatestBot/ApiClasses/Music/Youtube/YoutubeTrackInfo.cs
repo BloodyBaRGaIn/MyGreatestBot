@@ -76,7 +76,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             try
             {
-                YoutubeApiWrapper _api_instance = YoutubeApiWrapper.Instance as YoutubeApiWrapper ?? throw new ArgumentNullException(nameof(YoutubeApiWrapper));
+                YoutubeApiWrapper _api_instance = YoutubeApiWrapper.MusicInstance as YoutubeApiWrapper ?? throw new ArgumentNullException(nameof(YoutubeApiWrapper));
 
                 AudioURL = Base.IsLiveStream
                     ? _api_instance.Streams

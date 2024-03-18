@@ -65,7 +65,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         }
 
-        public static IMusicAPI Instance { get; private set; } = new SpotifyApiWrapper();
+        private static readonly SpotifyApiWrapper _instance = new();
+
+        public static IMusicAPI MusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Spotify;
 
@@ -250,11 +252,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
         {
             return GetTracks(query);
-        }
-
-        public ITrackInfo? GetRadio(string id)
-        {
-            return null;
         }
 
         private void FromAlbumId(string album_id, List<ITrackInfo> tracks)

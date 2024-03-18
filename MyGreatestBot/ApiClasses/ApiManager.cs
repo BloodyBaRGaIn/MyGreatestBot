@@ -199,7 +199,7 @@ namespace MyGreatestBot.ApiClasses
 
             try
             {
-                tracks = QueryIdentifier.Execute(query);
+                tracks = QueryIdentifier.GetTracks(query);
             }
             catch (Exception ex)
             {
