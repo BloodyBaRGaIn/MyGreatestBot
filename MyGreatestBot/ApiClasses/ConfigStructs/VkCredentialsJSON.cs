@@ -7,6 +7,8 @@ namespace MyGreatestBot.ApiClasses.ConfigStructs
     /// </summary>
     internal struct VkCredentialsJSON
     {
+        [JsonProperty("appid")]
+        public string AppId { get; private set; }
         [JsonProperty("username")]
         public string Username { get; private set; }
         [JsonProperty("password")]

@@ -74,15 +74,21 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             _ = serviceCollection.AddAudioBypass();
             _api = new VkApi(serviceCollection);
 
+            ApiAuthParams apiAuthParams = new()
+            {
+                Login = credentials.Username,
+                Password = credentials.Password
+            };
+
+            if (ulong.TryParse(credentials.AppId, out ulong appid))
+            {
+                apiAuthParams.ApplicationId = appid;
+            }
+
             try
             {
                 Logout();
-
-                _api.Authorize(new ApiAuthParams()
-                {
-                    Login = credentials.Username,
-                    Password = credentials.Password
-                });
+                _api.Authorize(apiAuthParams);
             }
             catch (Exception ex)
             {
@@ -113,7 +119,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 ? tracks
                 : TryAddAsCollection(query, tracks, is_playlist: true)
                 ? tracks
-                : TryAddAsCollection(query, tracks, is_playlist: false) ? tracks : (IEnumerable<ITrackInfo>?)null;
+                : TryAddAsCollection(query, tracks, is_playlist: false)
+                ? tracks
+                : null;
         }
 
         public ITrackInfo? GetTrack(string id, int time = 0)
