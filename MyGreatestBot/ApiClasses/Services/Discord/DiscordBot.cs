@@ -224,6 +224,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             try
             {
                 Thread.BeginCriticalRegion();
+                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
                 ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 if (handler != null)
                 {
@@ -248,11 +249,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     handler.Update(e.Guild);
                 }
-                Thread.EndCriticalRegion();
             }
             catch { }
             finally
             {
+                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+                Thread.EndCriticalRegion();
                 await Task.Delay(1);
             }
         }

@@ -112,8 +112,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         }
 
         private async Task Join(
-            [AllowNull] DiscordChannel text,
-            [AllowNull] DiscordChannel channel, bool throw_exception = false)
+            DiscordChannel? text,
+            DiscordChannel? channel, bool throw_exception = false)
         {
             if (text is not null)
             {
@@ -129,6 +129,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             await Task.Yield();
 
+            DiscordChannel? new_channel = null;
+            DiscordChannel? old_channel = null;
+            if (VoiceChannel is not null)
+            {
+                old_channel = _guild.GetChannel(VoiceChannel.Id);
+            }
+            if (channel is not null)
+            {
+                new_channel = _guild.GetChannel(channel.Id);
+            }
+
+            bool connection_rollback = false;
+
+            if (channel is not null && !channel.PermissionsFor(_guild.CurrentMember)
+                .HasFlag(DSharpPlus.Permissions.AccessChannels |
+                         DSharpPlus.Permissions.UseVoice))
+            {
+                connection_rollback = true;
+                new_channel = old_channel;
+            }
+
 #pragma warning disable CS8604
             bool channel_changed = VoiceChannel != channel;
 #pragma warning restore CS8604
@@ -141,15 +162,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 await Task.Yield();
             }
 
-            if (channel is not null)
+            await Task.Delay(200);
+
+            if (new_channel is not null)
             {
-                Voice.Connect(channel);
+                Voice.Connect(new_channel);
                 Voice.WaitForConnectionAsync().Wait();
                 Voice.SendSpeaking(false);
             }
             else if (throw_exception)
             {
-                throw new InvalidOperationException("You need to be in the voice channel");
+                Message.Send(new InvalidOperationException("You need to be in the voice channel"));
+            }
+
+            if (connection_rollback)
+            {
+                Message.Send(new InvalidOperationException("Cannot join this channel"));
             }
 
             await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
