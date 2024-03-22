@@ -103,6 +103,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Connection?.Disconnect();
                 Connection?.Dispose();
                 Connection = null;
+                Channel = null;
             }
             catch { }
         }

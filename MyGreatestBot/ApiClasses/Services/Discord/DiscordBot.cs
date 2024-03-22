@@ -243,6 +243,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                                 Color = DiscordColor.Red,
                                 Title = "Kicked from voice channel"
                             });
+                            handler.Voice.Disconnect();
                         }
                         handler.Voice.IsManualDisconnect = false;
                     }

@@ -169,18 +169,35 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.Connect(new_channel);
                 Voice.WaitForConnectionAsync().Wait();
                 Voice.SendSpeaking(false);
+
+                await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
             }
-            else if (throw_exception)
+            else if (!connection_rollback)
             {
-                Message.Send(new InvalidOperationException("You need to be in the voice channel"));
+                InvalidOperationException exception = new("You need to be in the voice channel");
+                if (throw_exception)
+                {
+                    throw exception;
+                }
+                else
+                {
+                    Message.Send(exception);
+                }
             }
 
             if (connection_rollback)
             {
-                Message.Send(new InvalidOperationException("Cannot join this channel"));
+                InvalidOperationException exception = new("Cannot join this channel");
+                if (throw_exception)
+                {
+                    throw exception;
+                }
+                else
+                {
+                    Message.Send(exception);
+                }
+                    
             }
-
-            await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
 
             await Task.Delay(1);
         }
