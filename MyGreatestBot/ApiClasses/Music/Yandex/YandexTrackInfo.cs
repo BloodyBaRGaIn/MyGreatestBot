@@ -14,11 +14,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// <summary>
     /// Yandex track info implementation
     /// </summary>
-    public sealed class YandexTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class YandexTrackInfo : ITrackInfo
     {
-#pragma warning disable CA1859
         private ITrackInfo Base => this;
-#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Yandex;
 
@@ -30,7 +28,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
-        TimeSpan ITrackInfo.Seek { get; set; }
+        TimeSpan ITrackInfo.TimePosition { get; set; }
 
         public string AudioURL { get; private set; } = string.Empty;
         [AllowNull]
@@ -114,11 +112,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 throw new YandexApiException("Cannot get audio URL", ex);
             }
-        }
-
-        public int CompareTo(ITrackInfo? other)
-        {
-            return Base.CompareTo(other);
         }
     }
 }

@@ -11,11 +11,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify track info implementation
     /// </summary>
-    public sealed class SpotifyTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class SpotifyTrackInfo : ITrackInfo
     {
-#pragma warning disable CA1859
         private ITrackInfo Base => this;
-#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Spotify;
 
@@ -27,7 +25,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; private set; }
-        TimeSpan ITrackInfo.Seek { get; set; }
+        TimeSpan ITrackInfo.TimePosition { get; set; }
 
         public string AudioURL { get; private set; }
         [AllowNull]
@@ -73,12 +71,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             AudioURL = track.PreviewUrl;
         }
 
-        private bool TrySearchGeneric(IMusicAPI instance)
+        private bool TrySearchGeneric(ISearchable instance)
         {
             try
             {
-                ISearchable searchable = instance as ISearchable ?? throw new ApiException(instance.ApiType);
-                ITrackInfo? result = searchable?.SearchTrack(this);
+                ITrackInfo? result = instance.SearchTrack(this);
                 if (result == null)
                 {
                     return false;
@@ -88,7 +85,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
                 AudioFrom = instance.ApiType;
                 AudioURL = result.AudioURL;
-                //Duration = result.Duration;
+                Duration = result.Duration;
                 return true;
             }
             catch
@@ -97,41 +94,18 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        private bool TrySearchYandex()
-        {
-            return TrySearchGeneric(YandexApiWrapper.MusicInstance);
-        }
-
         private bool TrySearchYoutube()
         {
-            return TrySearchGeneric(YoutubeApiWrapper.MusicInstance);
+            return TrySearchGeneric(YoutubeApiWrapper.SearchInstance);
         }
 
         void ITrackInfo.ObtainAudioURL()
         {
             try
             {
-                switch (AudioFrom)
+                if (TrySearchYoutube())
                 {
-                    case ApiIntents.Youtube:
-                        _ = TrySearchYoutube();
-                        return;
-
-                    case ApiIntents.Yandex:
-                        _ = TrySearchYandex();
-                        return;
-
-                    default:
-                        if (TrySearchYoutube())
-                        {
-                            return;
-                        }
-                        if (TrySearchYandex())
-                        {
-                            return;
-                        }
-
-                        break;
+                    return;
                 }
 
                 // default Spotify preview track duration
@@ -168,11 +142,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         void ITrackInfo.Reload()
         {
             ApiManager.ReloadApis(Base.TrackType | AudioFrom);
-        }
-
-        public int CompareTo(ITrackInfo? other)
-        {
-            return Base.CompareTo(other);
         }
     }
 }

@@ -12,17 +12,14 @@ using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
-using Yandex.Music.Api.Models.Common;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Radio;
-using Yandex.Music.Api.Models.Search;
-using Yandex.Music.Api.Models.Search.Track;
 using Yandex.Music.Api.Models.Track;
 using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
-    public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI, ISearchable
+    public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI
     {
         [AllowNull]
         private YandexMusicClient _client;
@@ -131,78 +128,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         public void Logout()
         {
             _client = null;
-        }
-
-        /// <summary>
-        /// Search similar track on Yandex
-        /// </summary>
-        /// <param name="otherTrack">Track info from another API</param>
-        /// <returns>Track info</returns>
-        public ITrackInfo? SearchTrack(ITrackInfo otherTrack)
-        {
-            if (otherTrack.TrackType == ApiIntents.Yandex)
-            {
-                return otherTrack;
-            }
-
-            YSearch? response = null;
-            string last_request = string.Empty;
-
-            if (otherTrack.AlbumName != null)
-            {
-                last_request = $"{otherTrack.Title} - {otherTrack.AlbumName.Title}";
-                response = Client.Search(last_request, YSearchType.Track);
-            }
-
-            if (response == null)
-            {
-                return null;
-            }
-            if (response.Tracks == null)
-            {
-                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Client.Search(last_request, YSearchType.Track);
-            }
-
-            if (response == null || response.Tracks == null)
-            {
-                return null;
-            }
-
-            IEnumerable<YSearchTrackModel> tracks = response.Tracks.Results.Where(t => t is not null
-                && otherTrack.AlbumName != null
-                && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
-                && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                           .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
-
-            if (!tracks.Any())
-            {
-                last_request = $"{otherTrack.Title} - {string.Join(", ", otherTrack.ArtistArr.Select(a => a.Title.ToTransletters()))}";
-                response = Client.Search(last_request, YSearchType.Track);
-                if (response == null || response.Tracks == null)
-                {
-                    return null;
-                }
-
-                tracks = response.Tracks.Results.Where(t => t is not null
-                    && otherTrack.AlbumName != null
-                    && !string.IsNullOrWhiteSpace(otherTrack.AlbumName.Title)
-                    && t.Albums.Select(a => a.Title.ToTransletters().ToUpperInvariant())
-                               .Contains(otherTrack.AlbumName.Title.ToTransletters().ToUpperInvariant()));
-
-                if (!tracks.Any())
-                {
-                    return null;
-                }
-            }
-
-            YSearchTrackModel t = tracks.First();
-            YTrack y = t;
-            y.Albums = t.Albums.Select(a => a as YAlbum).ToList();
-
-            ITrackInfo first = new YandexTrackInfo(y, null, true);
-            first.ObtainAudioURL();
-            return first;
         }
 
         public ITrackInfo? GetRadio(string id)

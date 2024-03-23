@@ -23,15 +23,16 @@ namespace MyGreatestBot.Player
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
         private volatile ITrackInfo? currentTrack;
+        private volatile PlayerStatus Status = PlayerStatus.Init;
 
         private volatile bool IsPlaying;
         private volatile bool IsPaused;
         private volatile bool SeekRequested;
         private volatile bool StopRequested;
 
-        private TimeSpan Seek;
+        private TimeSpan PlayerTimePosition;
 
-        private TimeSpan TimeRemaining => (currentTrack == null ? Seek : currentTrack.Duration) - Seek;
+        private TimeSpan TimeRemaining => (currentTrack == null ? PlayerTimePosition : currentTrack.Duration) - PlayerTimePosition;
 
         private readonly ConnectionHandler Handler;
         private readonly Task MainPlayerTask;
@@ -49,6 +50,18 @@ namespace MyGreatestBot.Player
             TrackNull = -1,
             Success = 0,
             Restart = 1
+        }
+
+        private enum PlayerStatus
+        {
+            Init,
+            Idle,
+            Start,
+            Playing,
+            Paused,
+            Finish,
+            Deinit,
+            Error
         }
 
         internal Player(ConnectionHandler handler)
@@ -102,11 +115,13 @@ namespace MyGreatestBot.Player
             {
                 if (MainPlayerCancellationToken.IsCancellationRequested)
                 {
+                    Status = PlayerStatus.Deinit;
                     return;
                 }
 
                 if (tracks_queue.Count == 0)
                 {
+                    Status = PlayerStatus.Idle;
                     Wait();
                     continue;
                 }
@@ -122,7 +137,9 @@ namespace MyGreatestBot.Player
 
                     if (currentTrack != null)
                     {
+                        Status = PlayerStatus.Start;
                         PlayBody();
+                        Status = PlayerStatus.Finish;
                     }
 
                     if (tracks_queue.Count == 0 && !StopRequested)
@@ -134,10 +151,12 @@ namespace MyGreatestBot.Player
                 }
                 catch (TaskCanceledException)
                 {
+                    Status = PlayerStatus.Deinit;
                     return;
                 }
                 catch (TypeInitializationException ex)
                 {
+                    Status = PlayerStatus.Error;
                     Stop(CommandActionSource.Mute);
                     await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
@@ -145,6 +164,7 @@ namespace MyGreatestBot.Player
                 }
                 catch (Exception ex)
                 {
+                    Status = PlayerStatus.Error;
                     IsPlaying = false;
                     await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                 }
@@ -158,7 +178,7 @@ namespace MyGreatestBot.Player
                 return false;
             }
 
-            Seek = currentTrack.Seek;
+            PlayerTimePosition = currentTrack.TimePosition;
 
             try
             {
@@ -218,7 +238,7 @@ namespace MyGreatestBot.Player
                     }
                 }
 
-                currentTrack.PerformSeek(Seek);
+                currentTrack.PerformSeek(PlayerTimePosition);
 
                 ffmpeg.Start(currentTrack);
 
@@ -244,9 +264,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Voice.SendSpeaking(true);
 
-                LowPlayerResult low_result = LowPlayer();
-
-                Handler.Voice.SendSpeaking(false);
+                LowPlayerResult low_result = LowPlayer();                
 
                 if (low_result == LowPlayerResult.Restart)
                 {
@@ -271,6 +289,7 @@ namespace MyGreatestBot.Player
                 }
                 else
                 {
+                    Handler.Voice.SendSpeaking(false);
                     break;
                 }
             }
@@ -295,10 +314,11 @@ namespace MyGreatestBot.Player
             {
                 while (IsPaused && IsPlaying && !SeekRequested)
                 {
+                    Status = PlayerStatus.Paused;
                     Wait();
                 }
 
-                if (!IsPlaying)
+                if (!IsPlaying || StopRequested)
                 {
                     return LowPlayerResult.Success;
                 }
@@ -307,11 +327,11 @@ namespace MyGreatestBot.Player
                 {
                     SeekRequested = false;
                     IsPaused = false;
-                    Seek = currentTrack.Seek;
+                    PlayerTimePosition = currentTrack.TimePosition;
                     return LowPlayerResult.Restart;
                 }
 
-                currentTrack.PerformSeek(Seek);
+                currentTrack.PerformSeek(PlayerTimePosition);
 
                 if (!PerformRead(PlayerByteBuffer, out int cnt))
                 {
@@ -325,7 +345,7 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.Restart;
                 }
 
-                Seek += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((double)cnt / BUFFER_SIZE);
+                PlayerTimePosition += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((double)cnt / BUFFER_SIZE);
 
                 if (!currentTrack.IsLiveStream && TimeRemaining < TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS))
                 {
@@ -341,6 +361,8 @@ namespace MyGreatestBot.Player
                     Handler.Voice.UpdateSink();
                     return LowPlayerResult.Restart;
                 }
+
+                Status = PlayerStatus.Playing;
             }
         }
 

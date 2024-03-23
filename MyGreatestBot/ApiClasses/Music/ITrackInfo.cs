@@ -63,7 +63,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Current track time position
         /// </summary>
-        public TimeSpan Seek { get; protected set; }
+        public TimeSpan TimePosition { get; protected set; }
 
         /// <summary>
         /// Thumbnails image URL
@@ -103,7 +103,7 @@ namespace MyGreatestBot.ApiClasses.Music
         {
             if (IsSeekPossible(span))
             {
-                Seek = span;
+                TimePosition = span;
             }
         }
 
@@ -133,9 +133,9 @@ namespace MyGreatestBot.ApiClasses.Music
                 result += $"{Environment.NewLine}Playlist: {PlaylistName}";
             }
 
-            if (Seek != TimeSpan.Zero)
+            if (TimePosition != TimeSpan.Zero)
             {
-                result += $"{Environment.NewLine}Time: {GetCustomTime(Seek)}";
+                result += $"{Environment.NewLine}Time: {GetCustomTime(TimePosition)}";
             }
 
             return result;
@@ -173,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Retrieves the audio URL
         /// </summary>
-        public void ObtainAudioURL();
+        public abstract void ObtainAudioURL();
 
         /// <summary>
         /// Reloads the corresponding API
@@ -186,43 +186,8 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Arguments string for FFMPEG
         /// </summary>
-        public string Arguments => $"-loglevel error {(Seek == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {Seek} ")}" +
+        public string Arguments => $"-loglevel error {(TimePosition == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {TimePosition} ")}" +
                                    $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
-
-        /// <summary>
-        /// Tracks comparsion method
-        /// </summary>
-        /// <param name="other">Other track info instance</param>
-        /// <returns>Zero if fully equals</returns>
-        public int CompareTo(ITrackInfo? other)
-        {
-            System.Numerics.BigInteger result = 0;
-            if (this is null || other is null)
-            {
-                return int.MaxValue;
-            }
-
-            int name = other.TrackName.CompareTo(TrackName);
-            int album = other.AlbumName is null ? int.MaxValue : other.AlbumName.CompareTo(AlbumName);
-            int artist = 0;
-            if (other.ArtistArr.Length != ArtistArr.Length)
-            {
-                artist = int.MaxValue;
-            }
-            else
-            {
-                for (int i = 0; i < ArtistArr.Length; i++)
-                {
-                    artist += other.ArtistArr[i].CompareTo(ArtistArr[i]);
-                }
-            }
-
-            result += name;
-            result += album;
-            result += artist;
-
-            return result > int.MaxValue ? int.MaxValue : result < int.MinValue ? int.MinValue : (int)result;
-        }
 
         /// <summary>
         /// Get track from search result by its id

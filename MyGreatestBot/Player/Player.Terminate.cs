@@ -6,11 +6,25 @@ namespace MyGreatestBot.Player
     {
         internal void Terminate(CommandActionSource source)
         {
-            // player still restarts sometimes while closing app
             Stop(source | CommandActionSource.Mute);
-            Wait(10);
-            MainPlayerCancellationTokenSource.Cancel();
-            Wait(10);
+            while (true)
+            {
+                switch (Status)
+                {
+                    case PlayerStatus.Idle:
+                        MainPlayerCancellationTokenSource.Cancel();
+                        return;
+
+                    case PlayerStatus.Init:
+                    case PlayerStatus.Deinit:
+                    case PlayerStatus.Error:
+                        return;
+
+                    default:
+                        Wait();
+                        break;
+                }
+            }
         }
     }
 }

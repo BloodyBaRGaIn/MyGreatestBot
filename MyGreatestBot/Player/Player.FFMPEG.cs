@@ -136,6 +136,8 @@ namespace MyGreatestBot.Player
                     Process.Dispose();
                 }
                 catch { }
+
+                Process = null;
             }
         }
     }

@@ -10,11 +10,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk track info implementation
     /// </summary>
-    public sealed class VkTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class VkTrackInfo : ITrackInfo
     {
-#pragma warning disable CA1859
         private ITrackInfo Base => this;
-#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
 
@@ -26,7 +24,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
-        TimeSpan ITrackInfo.Seek { get; set; }
+        TimeSpan ITrackInfo.TimePosition { get; set; }
 
         [AllowNull]
         public string CoverURL { get; } = null;
@@ -105,11 +103,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             {
                 throw new VkApiException("Cannot get audio URL", ex);
             }
-        }
-
-        public int CompareTo(ITrackInfo? other)
-        {
-            return Base.CompareTo(other);
         }
     }
 }

@@ -71,6 +71,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         private static readonly YoutubeApiWrapper _instance = new();
 
         public static IMusicAPI MusicInstance { get; } = _instance;
+        public static ISearchable SearchInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
@@ -226,7 +227,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 {
                     TimeSpan found_duration = track.Duration.GetValueOrDefault();
                     TimeSpan diff = found_duration - other.Duration;
-                    if (Math.Abs(diff.Ticks) > TimeSpan.FromSeconds(2).Ticks)
+                    if (Math.Abs(diff.Ticks) > ISearchable.MaximumTimeDifference.Ticks)
                     {
                         continue;
                     }

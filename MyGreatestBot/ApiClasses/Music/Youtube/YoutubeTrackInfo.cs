@@ -10,11 +10,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube track info implementation
     /// </summary>
-    public sealed class YoutubeTrackInfo : ITrackInfo, IComparable<ITrackInfo>
+    public sealed class YoutubeTrackInfo : ITrackInfo
     {
-#pragma warning disable CA1859
         private ITrackInfo Base => this;
-#pragma warning restore CA1859
 
         string ITrackInfo.Domain => "https://www.youtube.com/";
 
@@ -30,7 +28,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
-        TimeSpan ITrackInfo.Seek { get; set; }
+        TimeSpan ITrackInfo.TimePosition { get; set; }
 
         [AllowNull]
         public string CoverURL { get; }
@@ -101,11 +99,6 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             {
                 throw new YoutubeApiException("Cannot get audio URL", ex);
             }
-        }
-
-        public int CompareTo(ITrackInfo? other)
-        {
-            return Base.CompareTo(other);
         }
     }
 }
