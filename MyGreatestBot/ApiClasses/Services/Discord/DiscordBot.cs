@@ -35,6 +35,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
+        private readonly Semaphore voiceUpdateSemaphore = new(1, 1);
+
         private string[]? StringPrefixes;
 
         private volatile bool exitRequest;
@@ -213,50 +215,70 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
+            bool isBotVoiceStateUpdated = e.User == client.CurrentUser && e.User.IsBot;
+            if (!isBotVoiceStateUpdated)
+            {
+                return;
+            }
+
+            bool semaphoreReady = voiceUpdateSemaphore.WaitOne(1000);
+            if (semaphoreReady)
+            {
+                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+            }
+
 #pragma warning disable CS8604
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
 #pragma warning restore CS8604
 
-            if (e.User != client.CurrentUser || !e.User.IsBot || !channel_changed)
+            if (isBotVoiceStateUpdated && channel_changed)
             {
-                return;
-            }
-            try
-            {
-                Thread.BeginCriticalRegion();
-                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
-                ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
-                if (handler != null)
+                try
                 {
-                    if (e.After?.Channel is not null)
+                    ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+                    if (handler != null)
                     {
-                        await handler.Join(e);
-                        await handler.Voice.WaitForConnectionAsync();
-                    }
-                    else
-                    {
-                        if (!handler.Voice.IsManualDisconnect)
+                        if (semaphoreReady)
                         {
-                            handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
+                            if (e.After?.Channel is not null)
+                            {
+                                await handler.Join(e);
+                                await handler.Voice.WaitForConnectionAsync();
+                            }
+                            else
+                            {
+                                if (!handler.Voice.IsManualDisconnect)
+                                {
+                                    handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
+                                    handler.Message.Send(new DiscordEmbedBuilder()
+                                    {
+                                        Color = DiscordColor.Red,
+                                        Title = "Kicked from voice channel"
+                                    });
+                                    handler.Voice.Disconnect();
+                                }
+                                handler.Voice.IsManualDisconnect = false;
+                            }
+                        }
+                        else
+                        {
                             handler.Message.Send(new DiscordEmbedBuilder()
                             {
                                 Color = DiscordColor.Red,
-                                Title = "Kicked from voice channel"
+                                Title = "Failed to update voice state"
                             });
-                            handler.Voice.Disconnect();
                         }
-                        handler.Voice.IsManualDisconnect = false;
-                    }
 
-                    handler.Update(e.Guild);
+                        handler.Update(e.Guild);
+                    }
                 }
+                catch { }
             }
-            catch { }
-            finally
+
+            if (semaphoreReady)
             {
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                Thread.EndCriticalRegion();
-                await Task.Delay(1);
+                _ = voiceUpdateSemaphore.Release();
             }
         }
 
