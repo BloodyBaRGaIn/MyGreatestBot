@@ -138,18 +138,20 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return null;
             }
 
-            YAlbum? album = originTrack.Albums.FirstOrDefault();
-            if (album == null)
+            YAlbum? mainAlbum = originTrack.Albums.FirstOrDefault();
+            if (mainAlbum == null)
             {
                 return null;
             }
+
+            string mainGenre = mainAlbum.Genre;
 
             List<YStation> stations = Client.GetRadioStations();
 
             YStation? radio = stations
                 .FirstOrDefault(s => string.Equals(
                     s.AdParams.GenreName,
-                    album.Genre,
+                    mainGenre,
                     StringComparison.OrdinalIgnoreCase));
 
             if (radio == null)
@@ -167,26 +169,33 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch { }
 
-            List<YSequenceItem> sequence = radio.GetTracks(id);
-            if (sequence == null || sequence.Count == 0)
+            IEnumerable<YSequenceItem> sequence = radio.GetTracks(id);
+            if (sequence == null || !sequence.Any())
             {
                 return null;
             }
 
-            sequence = sequence.Where(i => !i.Track.Equals(originTrack)).ToList();
-            if (sequence.Count == 0)
+            sequence = sequence.Where(i => !i.Track.Equals(originTrack));
+            if (sequence == null || !sequence.Any())
             {
                 return null;
             }
 
-            // still could be duplicates there
-            YSequenceItem? item = sequence.Shuffle().FirstOrDefault();
-            if (item == null)
+            IEnumerable<YSequenceItem> sameGenreTracks = sequence.Where(i => string.Equals(
+                (i.Track.Albums.FirstOrDefault() ?? new()).Genre,
+                mainGenre,
+                StringComparison.OrdinalIgnoreCase));
+
+            YSequenceItem? selectedItem = (sameGenreTracks.Any() ? sameGenreTracks : sequence)
+                .Shuffle()
+                .FirstOrDefault();
+
+            if (selectedItem == null)
             {
                 return null;
             }
 
-            YTrack next = item.Track;
+            YTrack next = selectedItem.Track;
             if (next == null)
             {
                 return null;
@@ -202,9 +211,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 temp = radio.SendFeedBack(
                     YStationFeedbackType.TrackFinished,
-                    originTrack,
-                    "",
-                    originTrack.DurationMs / 1000.0);
+                    originTrack);
             }
             catch { }
 
