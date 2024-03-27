@@ -16,6 +16,7 @@ namespace MyGreatestBot.Player
                 Clear(source | CommandActionSource.Mute);
 
                 IsPlaying = false;
+                WaitForIdle();
 
                 if (nomute)
                 {
@@ -24,9 +25,28 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                if (nomute && !source.HasFlag(CommandActionSource.Event))
+                if (nomute)
                 {
                     throw new StopException("Nothing to stop");
+                }
+            }
+        }
+
+        private void WaitForIdle()
+        {
+            while (true)
+            {
+                switch (Status)
+                {
+                    case PlayerStatus.Idle:
+                    case PlayerStatus.Init:
+                    case PlayerStatus.Deinit:
+                    case PlayerStatus.Error:
+                        return;
+
+                    default:
+                        Wait();
+                        break;
                 }
             }
         }

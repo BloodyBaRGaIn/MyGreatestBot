@@ -47,7 +47,8 @@ namespace MyGreatestBot.Commands
             }
         }
 
-        [Command("status")]
+        [Command("apistatus")]
+        [Aliases("status")]
         [Description("Get APIs status")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task StatusCommand(CommandContext ctx)
@@ -107,7 +108,8 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("reload")]
+        [Command("apireload")]
+        [Aliases("reload")]
         [Description("Reload failed APIs")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task ReloadCommand(CommandContext ctx)
@@ -139,6 +141,23 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
+        [Command("playerstatus")]
+        [Aliases("plst")]
+        [Description("Get player status")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task PlayerStatusCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await Task.Run(() => handler.PlayerInstance.GetStatus(CommandActionSource.Command));
+        }
+
         [Command("logout")]
         [Aliases("exit", "quit", "bye", "bb")]
         [Description("Logout and exit")]
@@ -151,6 +170,8 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
+            handler.TextChannel = ctx.Channel;
+
             if (DiscordWrapper.Client != null)
             {
                 IEnumerable<DiscordUser>? owners = DiscordWrapper.Client.CurrentApplication.Owners;
@@ -159,8 +180,6 @@ namespace MyGreatestBot.Commands
                     throw new InvalidOperationException("You are not allowed to execute this command");
                 }
             }
-
-            handler.TextChannel = ctx.Channel;
 
             await ConnectionHandler.Logout();
         }

@@ -85,10 +85,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     && channel_changed)
                 {
                     _ = (VoiceNext?.ConnectAsync(channel).Wait(1000));
-                    Channel = channel;
                 }
             }
             catch { }
+
+            Channel = channel;
         }
 
         /// <summary>

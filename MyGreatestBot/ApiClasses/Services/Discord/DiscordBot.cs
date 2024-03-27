@@ -35,7 +35,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
-        private readonly Semaphore voiceUpdateSemaphore = new(1, 1);
+        private readonly Semaphore voiceStateUpdateSemaphore = new(1, 1);
+        private readonly Semaphore voiceServerUpdateSemaphore = new(1, 1);
 
         private string[]? StringPrefixes;
 
@@ -90,6 +91,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             };
 
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+            Client.VoiceServerUpdated += Client_VoiceServerUpdated;
 
             Interactivity = Client.UseInteractivity(new()
             {
@@ -215,13 +217,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
-            bool isBotVoiceStateUpdated = e.User == client.CurrentUser && e.User.IsBot;
+            bool isBotVoiceStateUpdated = e.User.Id == client.CurrentUser.Id && e.User.IsBot;
             if (!isBotVoiceStateUpdated)
             {
                 return;
             }
 
-            bool semaphoreReady = voiceUpdateSemaphore.WaitOne(1000);
+            bool semaphoreReady = voiceStateUpdateSemaphore.WaitOne(1000);
             if (semaphoreReady)
             {
                 Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
@@ -231,11 +233,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
 #pragma warning restore CS8604
 
-            if (isBotVoiceStateUpdated && channel_changed)
+            if (channel_changed)
             {
+                ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                 try
                 {
-                    ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
                     if (handler != null)
                     {
                         if (semaphoreReady)
@@ -268,18 +270,60 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                                 Title = "Failed to update voice state"
                             });
                         }
-
-                        handler.Update(e.Guild);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    if (handler != null)
+                    {
+                        handler.Message.Send(ex);
+                    }
+                    else
+                    {
+                        DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                    }
+                }
+
+                handler?.Update(e.Guild);
             }
 
             if (semaphoreReady)
             {
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                _ = voiceUpdateSemaphore.Release();
+                _ = voiceStateUpdateSemaphore.Release();
             }
+        }
+
+        private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
+        {
+            bool isBotVoiceServerUpdated = Client.CurrentUser.Id == client.CurrentUser.Id;
+            if (!isBotVoiceServerUpdated)
+            {
+                return;
+            }
+
+            bool semaphoreReady = voiceServerUpdateSemaphore.WaitOne(1000);
+            if (!semaphoreReady)
+            {
+                return;
+            }
+
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+
+            await handler.Reconnect();
+
+            handler.Update(e.Guild);
+
+            Client.VoiceServerUpdated += Client_VoiceServerUpdated;
+            _ = voiceServerUpdateSemaphore.Release();
+
+            await Task.Delay(1);
         }
 
         /// <summary>

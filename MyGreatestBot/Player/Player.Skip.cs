@@ -26,8 +26,8 @@ namespace MyGreatestBot.Player
                 }
 
                 bool was_playing = IsPlaying;
-
                 IsPlaying = false;
+                WaitForFinish();
 
                 if (nomute)
                 {
@@ -42,6 +42,25 @@ namespace MyGreatestBot.Player
                     {
                         throw new SkipException("Nothing to skip");
                     }
+                }
+            }
+        }
+
+        private void WaitForFinish()
+        {
+            while (true)
+            {
+                switch (Status)
+                {
+                    case PlayerStatus.Finish:
+                    case PlayerStatus.Idle:
+                    case PlayerStatus.Deinit:
+                    case PlayerStatus.Error:
+                        return;
+
+                    default:
+                        Wait();
+                        break;
                 }
             }
         }

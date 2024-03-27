@@ -6,8 +6,9 @@ Commands are organized into categories for better readability
 
 - ```join (j) - Join voice channel```  
 - ```leave (l) - Leave voice channel```  
-- ```status - Get APIs status```  
-- ```reload - Reload failed APIs```  
+- ```apistatus (status) - Get APIs status```  
+- ```apireload (reload) - Reload failed APIs```  
+- ```playerstatus (plst) - Get player status```  
 - ```logout (exit, quit, bye, bb) - Logout and exit```  
 
 ## Queuing commands

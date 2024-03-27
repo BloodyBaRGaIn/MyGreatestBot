@@ -264,7 +264,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Voice.SendSpeaking(true);
 
-                LowPlayerResult low_result = LowPlayer();                
+                LowPlayerResult low_result = LowPlayer();
 
                 if (low_result == LowPlayerResult.Restart)
                 {

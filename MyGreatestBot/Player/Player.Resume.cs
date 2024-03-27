@@ -8,6 +8,7 @@ namespace MyGreatestBot.Player
         internal void Resume(CommandActionSource source)
         {
             IsPaused = false;
+            WaitForResume();
             if (source.HasFlag(CommandActionSource.Mute))
             {
                 return;
@@ -23,6 +24,25 @@ namespace MyGreatestBot.Player
             else
             {
                 throw new PlayerException("Illegal state detected");
+            }
+        }
+
+        private void WaitForResume()
+        {
+            while (true)
+            {
+                switch (Status)
+                {
+                    case PlayerStatus.Playing:
+                    case PlayerStatus.Idle:
+                    case PlayerStatus.Deinit:
+                    case PlayerStatus.Error:
+                        return;
+
+                    default:
+                        Wait();
+                        break;
+                }
             }
         }
     }

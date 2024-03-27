@@ -151,25 +151,24 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
 
 #pragma warning disable CS8604
-            bool channel_changed = VoiceChannel != channel;
+            bool channel_changed = VoiceChannel != channel || VoiceConnection?.TargetChannel != channel;
 #pragma warning restore CS8604
 
-            if (VoiceConnection != null
-                && (channel_changed || VoiceConnection.TargetChannel != channel))
+            if (VoiceConnection != null && channel_changed)
             {
+                await Task.Run(() => PlayerInstance.Pause(CommandActionSource.Mute));
+                await Task.Delay(10);
                 Voice.Disconnect();
                 Voice.WaitForDisconnectionAsync().Wait();
-                await Task.Yield();
+                await Task.Delay(200);
             }
-
-            await Task.Delay(200);
 
             if (new_channel is not null)
             {
                 Voice.Connect(new_channel);
                 Voice.WaitForConnectionAsync().Wait();
                 Voice.SendSpeaking(false);
-
+                await Task.Delay(10);
                 await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
             }
             else if (!connection_rollback)
@@ -196,8 +195,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 {
                     Message.Send(exception);
                 }
-                    
             }
+
+            Voice.UpdateVoiceConnection();
 
             await Task.Delay(1);
         }
@@ -235,7 +235,44 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             Voice.Disconnect();
 
             await Voice.WaitForDisconnectionAsync();
+            await Task.Delay(1);
+        }
 
+        public async Task Reconnect()
+        {
+            DiscordChannel? origin = VoiceConnection?.TargetChannel ?? VoiceChannel;
+            if (origin is null)
+            {
+                return;
+            }
+
+            DiscordChannel? channel = _guild.GetChannel(origin.Id);
+
+            if (channel is null)
+            {
+                return;
+            }
+
+            await Task.Run(() => PlayerInstance.Pause(CommandActionSource.Event | CommandActionSource.Mute));
+
+            try
+            {
+                Voice.Disconnect();
+                await Voice.WaitForDisconnectionAsync();
+                await Task.Yield();
+                Voice.Connect(channel);
+                await Voice.WaitForConnectionAsync();
+                Voice.SendSpeaking(false);
+                await Task.Yield();
+            }
+            catch (Exception ex)
+            {
+                Message.Send(ex);
+            }
+
+            await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Event | CommandActionSource.Mute));
+
+            Voice.UpdateVoiceConnection();
             await Task.Delay(1);
         }
 
