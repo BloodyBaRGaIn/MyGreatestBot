@@ -12,6 +12,7 @@ using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
+using Yandex.Music.Api.Models.Common;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Radio;
 using Yandex.Music.Api.Models.Track;
@@ -32,7 +33,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 #pragma warning disable SYSLIB1045
             private static readonly Regex TRACK_RE = new("/track/(\\d+)$");
             private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
-            private static readonly Regex ARTIST_RE = new("/artist/(\\d+)$");
+            private static readonly Regex ARTIST_RE = new("/artist/(\\d+)(/\\w*)?$");
             private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/([^?]+)");
             private static readonly Regex PODCAST_RE = new("/track/([^?]+)");
 #pragma warning restore SYSLIB1045
@@ -356,6 +357,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return GetTracks(query);
         }
 
+        private static IEnumerable<YTrack> GetVolumes([DisallowNull] YAlbum album)
+        {
+            return album.WithTracks().Volumes.SelectMany(t => t)
+                                             .Where(t => t != null && !string.IsNullOrWhiteSpace(t.Id))
+                                             .DistinctBy(t => t.Id);
+        }
+
         private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
         {
             List<YandexTrackInfo?> tracks_collection = [];
@@ -366,19 +374,23 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             YAlbum album = Client.GetAlbum(album_id_str);
+            IEnumerable<YTrack> volumes;
 
             try
             {
-                IEnumerable<YTrack> tracks = album.Volumes.SelectMany(t => t).Where(t => t != null);
-                foreach (YTrack track in tracks)
-                {
-                    tracks_collection.Add(new(track));
-                }
+                volumes = GetVolumes(album);
             }
             catch
             {
                 return tracks_collection;
             }
+
+            if (!volumes.Any())
+            {
+                return tracks_collection;
+            }
+
+            tracks_collection.AddRange(volumes.Select(track => new YandexTrackInfo(track)));
 
             return tracks_collection;
         }
@@ -392,21 +404,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
-            YArtistBriefInfo info = Client.GetArtist(artist_id_str);
-            foreach (YAlbum? album in info.Albums.DistinctBy(t => t.Id).OrderByDescending(a => a.ReleaseDate))
-            {
-                if (album != null)
-                {
-                    List<YandexTrackInfo?> tracks = GetAlbum(album.Id);
-                    foreach (YandexTrackInfo? track in tracks)
-                    {
-                        if (track != null)
-                        {
-                            tracks_collection.Add(track);
-                        }
-                    }
-                }
-            }
+            IEnumerable<YTrack> yTracks = Client.GetArtist(artist_id_str).Artist
+                .GetAllTracks().Where(track => track != null);
+
+            tracks_collection.AddRange(yTracks.Select(track => new YandexTrackInfo(track)));
 
             return tracks_collection;
         }
@@ -426,16 +427,23 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                tracks = playlist.Tracks.Select(t => t.Track).Where(t => t != null);
+                tracks = playlist.Tracks
+                    .Select(t => t.Track)
+                    .Where(t => t != null);
             }
             catch
             {
                 return tracks_collection;
             }
 
-            foreach (YTrack track in tracks.Where(t => t != null))
+            try
             {
-                tracks_collection.Add(new(track, playlist));
+                tracks_collection.AddRange(tracks.Where(t => t != null)
+                                                 .Select(track => new YandexTrackInfo(track, playlist)));
+            }
+            catch
+            {
+                return tracks_collection;
             }
 
             return tracks_collection;
