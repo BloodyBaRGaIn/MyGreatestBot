@@ -3,6 +3,7 @@ using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -10,7 +11,7 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        private static DiscordEmbedBuilder GetPlayingMessage<T>(ITrackInfo track, string state)
+        private static DiscordEmbedBuilder GetPlayingMessage<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ITrackInfo track, string state)
             where T : CommandExecutionException
         {
             T exception;

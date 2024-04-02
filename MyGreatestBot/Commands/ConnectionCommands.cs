@@ -8,6 +8,7 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,6 +52,7 @@ namespace MyGreatestBot.Commands
         [Aliases("status")]
         [Description("Get APIs status")]
         [SuppressMessage("Performance", "CA1822")]
+        [RequiresDynamicCode("Calls System.Enum.GetValues(Type)")]
         public async Task StatusCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
