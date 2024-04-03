@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     public static class DiscordWrapper
     {
-        public static readonly Handlers.LogHandler CurrentDomainLogHandler
+        public static readonly LogHandler CurrentDomainLogHandler
             = new(Console.Out, AppDomain.CurrentDomain.FriendlyName, LogLevel.Information);
 
-        public static readonly Handlers.LogHandler CurrentDomainLogErrorHandler
+        public static readonly LogHandler CurrentDomainLogErrorHandler
             = new(Console.Error, AppDomain.CurrentDomain.FriendlyName, LogLevel.Error);
 
         public static readonly DiscordBot Instance = new();

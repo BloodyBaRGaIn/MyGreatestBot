@@ -11,8 +11,6 @@ using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
-using Yandex.Music.Api.Models.Artist;
-using Yandex.Music.Api.Models.Common;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Radio;
 using Yandex.Music.Api.Models.Track;
@@ -79,7 +77,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         DomainCollection IAccessible.Domains { get; } = "https://music.yandex.ru/";
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
@@ -100,13 +98,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch (Exception ex)
             {
-                Logout();
+                (this as IAPI).Logout();
                 throw new YandexApiException("Cannot authorize", ex);
             }
 
             if (!Client.IsAuthorized)
             {
-                Logout();
+                (this as IAPI).Logout();
                 throw GenericException;
             }
 
@@ -115,23 +113,23 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 string token = Client.GetAccessToken().AccessToken;
                 if (string.IsNullOrWhiteSpace(token))
                 {
-                    Logout();
+                    (this as IAPI).Logout();
                     throw new ArgumentNullException(nameof(token));
                 }
             }
             catch (Exception ex)
             {
-                Logout();
+                (this as IAPI).Logout();
                 throw new YandexApiException("Cannot get valid access token", ex);
             }
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             _client = null;
         }
 
-        public ITrackInfo? GetRadio(string id)
+        ITrackInfo? IRadioAPI.GetRadio(string id)
         {
             YTrack originTrack = Client.GetTrack(id);
             if (originTrack == null)
@@ -223,7 +221,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track;
         }
 
-        public IEnumerable<ITrackInfo>? GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
         {
             List<ITrackInfo> tracks_collection = [];
 
@@ -239,7 +237,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = GetTrack(track_id_str);
+                ITrackInfo? track = MusicInstance.GetTrack(track_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -254,7 +252,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = GetTrack(podcast_id_str);
+                ITrackInfo? track = MusicInstance.GetTrack(podcast_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -331,7 +329,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return null;
         }
 
-        public ITrackInfo? GetTrack(string? track_id_str, int time = 0)
+        ITrackInfo? IMusicAPI.GetTrack(string? track_id_str, int time)
         {
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
@@ -352,17 +350,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track;
         }
 
-        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
         {
-            return GetTracks(query);
+            _ = text;
+            throw new NotImplementedException();
         }
 
-        private static IEnumerable<YTrack> GetVolumes([DisallowNull] YAlbum album)
-        {
-            return album.WithTracks().Volumes.SelectMany(t => t)
-                                             .Where(t => t != null && !string.IsNullOrWhiteSpace(t.Id))
-                                             .DistinctBy(t => t.Id);
-        }
+        #region Private methods
 
         private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
         {
@@ -378,7 +372,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                volumes = GetVolumes(album);
+                volumes = album.WithTracks().Volumes.SelectMany(t => t)
+                               .Where(t => t != null && !string.IsNullOrWhiteSpace(t.Id))
+                               .DistinctBy(t => t.Id);
             }
             catch
             {
@@ -448,5 +444,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             return tracks_collection;
         }
+
+        #endregion Private methods
     }
 }

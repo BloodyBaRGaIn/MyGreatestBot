@@ -1,5 +1,4 @@
-﻿using MyGreatestBot.ApiClasses.Music.Yandex;
-using MyGreatestBot.ApiClasses.Music.Youtube;
+﻿using MyGreatestBot.ApiClasses.Music.Youtube;
 using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;
 using System;
@@ -120,23 +119,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             {
                 throw new SpotifyApiException("Cannot get audio URL", ex);
             }
-
-            //var player = SpotifyApiWrapper.Player;
-
-            //var devices = player.GetAvailableDevices().GetAwaiter().GetResult();
-
-            //if (devices.Devices.Any(d => d.IsActive))
-            //{
-            //    player.TransferPlayback(new PlayerTransferPlaybackRequest(new List<string>() { devices.Devices.Find(d => d.IsActive).Id })).GetAwaiter().GetResult();
-
-            //    bool result = player.AddToQueue(new PlayerAddToQueueRequest(_track_uri)).GetAwaiter().GetResult();
-
-            //    var playback = player.GetCurrentPlayback().GetAwaiter().GetResult();
-
-            //    var current = player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest()).GetAwaiter().GetResult();
-
-            //    AudioURL = current.Context.Uri;
-            //}
         }
 
         void ITrackInfo.Reload()

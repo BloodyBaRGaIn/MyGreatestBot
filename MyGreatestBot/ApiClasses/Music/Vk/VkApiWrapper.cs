@@ -66,7 +66,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         DomainCollection IAccessible.Domains { get; } = "https://www.vk.com/";
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
@@ -87,7 +87,24 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             try
             {
-                Logout();
+                if (_api is null)
+                {
+                    throw new ArgumentNullException(nameof(_api), "VkApi is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new VkApiException("Cannot authorize", ex);
+            }
+
+            try
+            {
+                _api.LogOut();
+            }
+            catch { }
+
+            try
+            {
                 _api.Authorize(apiAuthParams);
             }
             catch (Exception ex)
@@ -101,12 +118,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             _api?.LogOut();
         }
 
-        public IEnumerable<ITrackInfo>? GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
         {
             if (_api == null || !_api.IsAuthorized)
             {
@@ -124,7 +141,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 : null;
         }
 
-        public ITrackInfo? GetTrack(string id, int time = 0)
+        ITrackInfo? IMusicAPI.GetTrack(string id, int time)
         {
             if (!long.TryParse(id, out long trackId))
             {
@@ -149,10 +166,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             return track;
         }
 
-        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
         {
-            return GetTracks(query);
+            _ = text;
+            throw new NotImplementedException();
         }
+
+        #region Private methods
 
         private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)
         {
@@ -190,5 +210,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             return success;
         }
+
+        #endregion Private methods
     }
 }

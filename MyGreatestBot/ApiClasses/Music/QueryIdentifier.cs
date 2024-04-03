@@ -104,7 +104,7 @@ namespace MyGreatestBot.ApiClasses.Music
                 new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.MusicInstance.GetTracks),
                 new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.MusicInstance.GetTracks),
                 new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracksSearch)
+                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracksFromPlainText)
             ];
         }
     }

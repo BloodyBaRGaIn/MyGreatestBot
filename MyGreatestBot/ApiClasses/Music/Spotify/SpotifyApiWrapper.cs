@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-//using SpotifyAPI.Web.Auth;
 using System.Text.RegularExpressions;
 
 namespace MyGreatestBot.ApiClasses.Music.Spotify
@@ -73,65 +72,24 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         DomainCollection IAccessible.Domains { get; } = new("https://open.spotify.com/", string.Empty);
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
-            //server = new(new Uri("http://localhost:5543/callback"), 5543);
-            //server.Start().Wait();
-
-            //server.AuthorizationCodeReceived += Server_AuthorizationCodeReceived;
-            //server.ErrorReceived += Server_ErrorReceived;
-
-            //var request = new LoginRequest(server.BaseUri, spotifyClientSecrets.ClientId, LoginRequest.ResponseType.Code)
-            //{
-            //    Scope = new List<string> { Scopes.UserModifyPlaybackState, Scopes.UserReadPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadEmail }
-            //};
-            //BrowserUtil.Open(request.ToUri());
-
-            SpotifyClientConfig config = SpotifyClientConfig.CreateDefault()
-                .WithAuthenticator(
-                    new ClientCredentialsAuthenticator(
-                        spotifyClientSecrets.ClientId,
-                        spotifyClientSecrets.ClientSecret
-                        )
-                    );
+            SpotifyClientConfig config = SpotifyClientConfig.CreateDefault().WithAuthenticator(
+                new ClientCredentialsAuthenticator(
+                    spotifyClientSecrets.ClientId,
+                    spotifyClientSecrets.ClientSecret));
 
             _api = new(config);
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             _api = null;
         }
 
-        //private static Task Server_ErrorReceived(object arg1, string arg2, string? arg3)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //private static async Task Server_AuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
-        //{
-        //    if (server == null)
-        //    {
-        //        return;
-        //    }
-
-        //    await server.Stop();
-
-        //    SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
-
-        //    var config = SpotifyClientConfig.CreateDefault();
-        //    var tokenResponse = await new OAuthClient(config).RequestToken(
-        //      new AuthorizationCodeTokenRequest(
-        //        spotifyClientSecrets.ClientId, spotifyClientSecrets.ClientSecret, response.Code, new Uri("http://localhost:5543/callback")
-        //      )
-        //    );
-
-        //    _api = new(tokenResponse.AccessToken);
-        //}
-
-        public IEnumerable<ITrackInfo>? GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
         {
             List<ITrackInfo> tracks = [];
 
@@ -220,7 +178,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     break;
                 }
 
-                ITrackInfo? track = GetTrack(track_id);
+                ITrackInfo? track = MusicInstance.GetTrack(track_id);
 
                 if (track != null)
                 {
@@ -233,7 +191,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return null;
         }
 
-        public ITrackInfo? GetTrack(string id, int time = 0)
+        ITrackInfo? IMusicAPI.GetTrack(string id, int time)
         {
             FullTrack? origin = Tracks.Get(id).GetAwaiter().GetResult();
 
@@ -249,10 +207,13 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return track;
         }
 
-        public IEnumerable<ITrackInfo>? GetTracksSearch(string query)
+        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
         {
-            return GetTracks(query);
+            _ = text;
+            throw new NotImplementedException();
         }
+
+        #region Private methods
 
         private void FromAlbumId(string album_id, List<ITrackInfo> tracks)
         {
@@ -305,5 +266,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 tracks.Add(new SpotifyTrackInfo(full));
             }
         }
+
+        #endregion Private methods
     }
 }

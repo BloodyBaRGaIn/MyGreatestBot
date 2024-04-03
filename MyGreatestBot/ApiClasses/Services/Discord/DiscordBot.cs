@@ -38,7 +38,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private readonly Semaphore voiceStateUpdateSemaphore = new(1, 1);
         private readonly Semaphore voiceServerUpdateSemaphore = new(1, 1);
 
-        private string[]? StringPrefixes;
+        private const string DefaultPrefix = "d!";
+        private string CommandPrefix = string.Empty;
 
         private volatile bool exitRequest;
 
@@ -98,11 +99,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Timeout = TimeSpan.FromMinutes(20)
             });
 
-            StringPrefixes = [config_js.Prefix];
+            CommandPrefix = config_js.Prefix;
+
+            if (string.IsNullOrWhiteSpace(CommandPrefix))
+            {
+                CommandPrefix = DefaultPrefix;
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Command prefix set to its default value", LogLevel.Warning);
+            }
 
             CommandsNextConfiguration commandsConfig = new()
             {
-                StringPrefixes = StringPrefixes,
+                StringPrefixes = [CommandPrefix],
                 CaseSensitive = false,
                 EnableMentionPrefix = true,
                 EnableDms = true,
@@ -200,8 +207,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <summary>
         /// Try to disconnect with timeout
         /// </summary>
-        /// <param name="ms">Timeout</param>
-        private void Disconnect(int ms)
+        /// <param name="disconnectionTimeout">Timeout</param>
+        private void Disconnect(int disconnectionTimeout)
         {
             if (Client == null)
             {
@@ -209,7 +216,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
             try
             {
-                _ = Client.DisconnectAsync().Wait(ms);
+                _ = Client.DisconnectAsync().Wait(disconnectionTimeout);
                 Client.Dispose();
             }
             catch { }
@@ -384,11 +391,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         break;
                     }
 
-                    if (StringPrefixes == null || StringPrefixes.Length == 0)
-                    {
-                        return;
-                    }
-
                     string? badCommandText = args.Context.Message.Content;
 
                     if (badCommandText == null)
@@ -396,13 +398,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         return;
                     }
 
-                    foreach (string prefix in StringPrefixes)
+                    if (badCommandText.StartsWith(CommandPrefix))
                     {
-                        if (badCommandText.StartsWith(prefix))
-                        {
-                            badCommandText = badCommandText[prefix.Length..];
-                            break;
-                        }
+                        badCommandText = badCommandText[CommandPrefix.Length..];
                     }
 
                     int firstSpaceIndex = badCommandText.IndexOf(' ');
@@ -430,7 +428,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         await Commands.ExecuteCommandAsync(
                             Commands.CreateContext(
                                 args.Context.Message,
-                                StringPrefixes[0],
+                                CommandPrefix,
                                 findCommand,
                                 rawArguments));
                     }

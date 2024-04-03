@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
