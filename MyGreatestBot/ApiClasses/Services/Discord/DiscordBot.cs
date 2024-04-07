@@ -35,9 +35,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
-        private readonly Semaphore voiceStateUpdateSemaphore = new(1, 1);
-        private readonly Semaphore voiceServerUpdateSemaphore = new(1, 1);
-
         private const string DefaultPrefix = "d!";
         private string CommandPrefix = string.Empty;
 
@@ -230,75 +227,75 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            bool semaphoreReady = voiceStateUpdateSemaphore.WaitOne(1000);
-            if (semaphoreReady)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+            if (handler == null)
             {
-                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+                return;
             }
+
+            handler.VoiceUpdating = true;
 
 #pragma warning disable CS8604
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
 #pragma warning restore CS8604
 
-            if (channel_changed)
+            if (!channel_changed)
             {
-                ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
-                try
+                return;
+            }
+
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.WaitOne(1000);
+            if (semaphoreReady)
+            {
+                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+            }
+
+            try
+            {
+                if (semaphoreReady)
                 {
-                    if (handler != null)
+                    if (e.After?.Channel is not null)
                     {
-                        if (semaphoreReady)
-                        {
-                            if (e.After?.Channel is not null)
-                            {
-                                await handler.Join(e);
-                                await handler.Voice.WaitForConnectionAsync();
-                            }
-                            else
-                            {
-                                if (!handler.Voice.IsManualDisconnect)
-                                {
-                                    handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
-                                    handler.Message.Send(new DiscordEmbedBuilder()
-                                    {
-                                        Color = DiscordColor.Red,
-                                        Title = "Kicked from voice channel"
-                                    });
-                                    handler.Voice.Disconnect();
-                                }
-                                handler.Voice.IsManualDisconnect = false;
-                            }
-                        }
-                        else
-                        {
-                            handler.Message.Send(new DiscordEmbedBuilder()
-                            {
-                                Color = DiscordColor.Red,
-                                Title = "Failed to update voice state"
-                            });
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (handler != null)
-                    {
-                        handler.Message.Send(ex);
+                        await handler.Join(e);
+                        await handler.Voice.WaitForConnectionAsync();
                     }
                     else
                     {
-                        DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                        if (!handler.Voice.IsManualDisconnect)
+                        {
+                            handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
+                            handler.Message.Send(new DiscordEmbedBuilder()
+                            {
+                                Color = DiscordColor.Red,
+                                Title = "Kicked from voice channel"
+                            });
+                            handler.Voice.Disconnect(false);
+                        }
                     }
                 }
-
-                handler?.Update(e.Guild);
+                else
+                {
+                    handler.Message.Send(new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Red,
+                        Title = "Failed to update voice state"
+                    });
+                }
             }
+            catch (Exception ex)
+            {
+                handler.Message.Send(ex);
+            }
+
+            handler.Update(e.Guild);
 
             if (semaphoreReady)
             {
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                _ = voiceStateUpdateSemaphore.Release();
+                _ = handler.VoiceUpdateSemaphore.Release();
             }
+
+            handler.VoiceUpdating = false;
         }
 
         private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
@@ -309,14 +306,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            bool semaphoreReady = voiceServerUpdateSemaphore.WaitOne(1000);
-            if (!semaphoreReady)
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+            if (handler == null)
             {
                 return;
             }
 
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
-            if (handler == null)
+            while (handler.ServerUpdating)
+            {
+                await Task.Delay(1);
+                await Task.Yield();
+            }
+
+            handler.ServerUpdating = true;
+
+            bool semaphoreReady = handler.ServerUpdateSemaphore.WaitOne(1000);
+            if (!semaphoreReady)
             {
                 return;
             }
@@ -328,7 +333,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             handler.Update(e.Guild);
 
             Client.VoiceServerUpdated += Client_VoiceServerUpdated;
-            _ = voiceServerUpdateSemaphore.Release();
+            _ = handler.ServerUpdateSemaphore.Release();
+
+            handler.ServerUpdating = false;
 
             await Task.Delay(1);
         }

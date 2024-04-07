@@ -7,6 +7,7 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
@@ -45,6 +46,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         public LogHandler LogError { get; }
         public MessageHandler Message { get; }
         public VoiceHandler Voice { get; }
+
+        public Semaphore VoiceUpdateSemaphore { get; } = new(1, 1);
+        public Semaphore ServerUpdateSemaphore { get; } = new(1, 1);
+
+        public volatile bool VoiceUpdating = false;
+        public volatile bool ServerUpdating = false;
 
         private static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = [];
 

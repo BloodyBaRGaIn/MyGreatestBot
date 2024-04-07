@@ -84,20 +84,21 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     && channel is not null
                     && channel_changed)
                 {
-                    _ = (VoiceNext?.ConnectAsync(channel).Wait(1000));
+                    _ = VoiceNext.ConnectAsync(channel).Wait(1000);
                 }
             }
             catch { }
 
             Channel = channel;
+            IsManualDisconnect = false;
         }
 
         /// <summary>
         /// Disconnect from channel
         /// </summary>
-        public void Disconnect()
+        public void Disconnect(bool isManual = true)
         {
-            IsManualDisconnect = true;
+            IsManualDisconnect = isManual;
             try
             {
                 SendSpeaking(false);
