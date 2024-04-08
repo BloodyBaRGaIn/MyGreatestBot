@@ -62,11 +62,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             Log = new(
                 writer: Console.Out,
                 guildName: guild.Name,
+                logDelay: 1000,
                 defaultLogLevel: LogLevel.Information);
 
             LogError = new(
                 writer: Console.Error,
                 guildName: guild.Name,
+                logDelay: 1000,
                 defaultLogLevel: LogLevel.Error);
 
             Message = new(messageDelay: 1000);

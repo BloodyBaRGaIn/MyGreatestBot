@@ -30,12 +30,14 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await handler.Message.SendAsync(new DiscordEmbedBuilder()
+            handler.Message.Send(new DiscordEmbedBuilder()
             {
                 Color = DiscordColor.White,
                 Title = "Test",
                 Description = "Hello World from .NET"
             });
+
+            await Task.Delay(1);
         }
 
         [Command("name")]
@@ -79,7 +81,9 @@ namespace MyGreatestBot.Commands
                 }
             }
 
-            await handler.Message.SendAsync(_embed);
+            handler.Message.Send(_embed);
+
+            await Task.Delay(1);
         }
 
         [Command("echo")]
@@ -99,7 +103,9 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await handler.Message.SendAsync(text);
+            handler.Message.Send(text);
+
+            await Task.Delay(1);
         }
 
         [Command(CommandStrings.HelpCommandName)]

@@ -12,6 +12,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// </summary>
     public sealed class LogHandler(TextWriter writer,
                                    string guildName,
+                                   int logDelay,
                                    LogLevel defaultLogLevel = LogLevel.None)
     {
         private static readonly Semaphore writerSemaphore = new(1, 1);
@@ -22,18 +23,20 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 return;
             }
-            if (!writerSemaphore.WaitOne(1000))
+            if (!writerSemaphore.WaitOne(logDelay))
             {
                 return;
             }
-
-            await writer.WriteLineAsync(
-                $"[{DateTime.Now:dd.MM.yyyy HH:mm:ss}]\t" +
-                $"{(logLevel == LogLevel.None ? "" : $"[{logLevel}]")}\t" +
-                $"{guildName}" +
-                $"{Environment.NewLine}{text}");
-
+            lock (writer)
+            {
+                writer.WriteLine(
+                    $"[{DateTime.Now:dd.MM.yyyy HH:mm:ss}]\t" +
+                    $"{(logLevel == LogLevel.None ? "" : $"[{logLevel}]")}\t" +
+                    $"{guildName}" +
+                    $"{Environment.NewLine}{text}");
+            }
             _ = writerSemaphore.Release(1);
+            await Task.Delay(1);
         }
 
         public async Task SendAsync(string text, LogLevel logLevel)

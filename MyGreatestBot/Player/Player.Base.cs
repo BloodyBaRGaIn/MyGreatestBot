@@ -186,7 +186,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
-                _ = Handler.Message.SendAsync(ex.GetDiscordEmbed());
+                Handler.Message.Send(ex);
                 Handler.LogError.Send(ex.GetExtendedMessage());
                 return false;
             }

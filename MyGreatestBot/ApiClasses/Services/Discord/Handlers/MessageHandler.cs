@@ -2,6 +2,7 @@
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
@@ -14,40 +15,36 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         [AllowNull]
         public DiscordChannel Channel { get; set; }
 
-        public async Task SendAsync(DiscordEmbedBuilder embed)
+        private readonly Semaphore messageSendSemaphore = new(1, 1);
+
+        private async Task SendAsync(DiscordMessageBuilder messageBuilder)
         {
             if (Channel is null)
             {
                 return;
             }
-
-            DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder()
-                .AddEmbed(embed)
-                .SuppressNotifications();
+            if (!messageSendSemaphore.WaitOne(messageDelay))
+            {
+                return;
+            }
 
             _ = await Channel.SendMessageAsync(messageBuilder);
+            _ = messageSendSemaphore.Release();
         }
 
-        public async Task SendAsync(string message)
+        private static DiscordMessageBuilder GetBuilder(string message)
         {
-            if (Channel is null)
-            {
-                return;
-            }
+            return new DiscordMessageBuilder().WithContent(message).SuppressNotifications();
+        }
 
-            DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder()
-                .WithContent(message)
-                .SuppressNotifications();
-
-            _ = await Channel.SendMessageAsync(messageBuilder);
+        private static DiscordMessageBuilder GetBuilder(DiscordEmbedBuilder embed)
+        {
+            return new DiscordMessageBuilder().AddEmbed(embed).SuppressNotifications();
         }
 
         public void Send(DiscordEmbedBuilder embed)
         {
-            if (SendAsync(embed).Wait(messageDelay))
-            {
-                Task.Delay(messageDelay).Wait();
-            }
+            SendAsync(GetBuilder(embed)).Wait();
         }
 
         public void Send(Exception exception)
@@ -57,10 +54,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Send(string message)
         {
-            if (SendAsync(message).Wait(messageDelay))
-            {
-                Task.Delay(messageDelay).Wait();
-            }
+            SendAsync(GetBuilder(message)).Wait();
         }
     }
 }
