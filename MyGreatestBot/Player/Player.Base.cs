@@ -57,6 +57,7 @@ namespace MyGreatestBot.Player
             Init,
             Idle,
             Start,
+            Loading,
             Playing,
             Paused,
             Finish,
@@ -217,6 +218,8 @@ namespace MyGreatestBot.Player
 
             while (true)
             {
+                Status = PlayerStatus.Loading;
+
                 Wait(100);
 
                 if (obtain_audio)
@@ -248,13 +251,13 @@ namespace MyGreatestBot.Player
                 {
                     Wait(1);
 
-                    if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
+                    if ((!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration) || !IsPlaying)
                     {
                         break;
                     }
                     if (already_restarted)
                     {
-                        throw new ApiException(currentTrack.TrackType);
+                        Handler.LogError.Send("Cannot load track");
                     }
                     //currentTrack.Reload();
                     already_restarted = true;
