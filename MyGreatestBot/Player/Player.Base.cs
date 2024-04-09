@@ -84,10 +84,25 @@ namespace MyGreatestBot.Player
             }
         }
 
-        private static void Wait(int ms = 1)
+        private void Reset()
         {
-            Task.Yield().GetAwaiter().GetResult();
-            Task.Delay(ms).Wait();
+            Thread.BeginCriticalRegion();
+
+            currentTrack = null;
+            IsPlaying = false;
+            IsPaused = false;
+            StopRequested = false;
+            SeekRequested = false;
+            PlayerTimePosition = TimeSpan.Zero;
+            tracks_queue?.Clear();
+            ffmpeg?.Stop();
+
+            Thread.EndCriticalRegion();
+        }
+
+        private static void Wait(int delay = 1)
+        {
+            Task.Delay(delay).Wait();
             Task.Yield().GetAwaiter().GetResult();
         }
 
@@ -117,7 +132,7 @@ namespace MyGreatestBot.Player
                 if (MainPlayerCancellationToken.IsCancellationRequested)
                 {
                     Status = PlayerStatus.Deinit;
-                    return;
+                    break;
                 }
 
                 if (tracks_queue.Count == 0)
@@ -153,7 +168,7 @@ namespace MyGreatestBot.Player
                 catch (TaskCanceledException)
                 {
                     Status = PlayerStatus.Deinit;
-                    return;
+                    break;
                 }
                 catch (TypeInitializationException ex)
                 {
@@ -161,15 +176,17 @@ namespace MyGreatestBot.Player
                     Stop(CommandActionSource.Mute);
                     await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                     Environment.Exit(1);
-                    return;
+                    break;
                 }
                 catch (Exception ex)
                 {
                     Status = PlayerStatus.Error;
-                    IsPlaying = false;
+                    Reset();
                     await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                 }
             }
+
+            Reset();
         }
 
         private bool TryObtainAudio()
