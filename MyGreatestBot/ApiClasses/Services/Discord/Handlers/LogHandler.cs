@@ -39,7 +39,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             await Task.Delay(1);
         }
 
-        public async Task SendAsync(string text, LogLevel logLevel)
+        private async Task SendAsync(string text, LogLevel logLevel)
         {
             try
             {

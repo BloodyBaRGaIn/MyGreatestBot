@@ -263,7 +263,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     {
                         if (!handler.Voice.IsManualDisconnect)
                         {
-                            handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute);
+                            await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute));
                             handler.Message.Send(new DiscordEmbedBuilder()
                             {
                                 Color = DiscordColor.Red,

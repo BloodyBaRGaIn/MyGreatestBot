@@ -12,9 +12,6 @@ namespace MyGreatestBot.Player
             if (IsPlaying || tracks_queue.Count != 0)
             {
                 StopRequested = true;
-
-                Clear(source | CommandActionSource.Mute);
-
                 IsPlaying = false;
                 WaitForIdle();
 

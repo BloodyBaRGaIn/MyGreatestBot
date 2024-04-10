@@ -25,6 +25,8 @@ namespace MyGreatestBot.Player
                     _ = tracks_queue.Dequeue();
                 }
 
+                Skipping = true;
+
                 bool was_playing = IsPlaying;
                 IsPlaying = false;
                 WaitForFinish();
@@ -37,9 +39,11 @@ namespace MyGreatestBot.Player
                             new SkipException(
                                 $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
                             .WithSuccess());
+                        Skipping = false;
                     }
                     else
                     {
+                        Skipping = false;
                         throw new SkipException("Nothing to skip");
                     }
                 }

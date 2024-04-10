@@ -14,6 +14,8 @@ namespace MyGreatestBot.Player
         {
             int totalCount;
 
+            Queuing = true;
+
             lock (tracks_queue)
             {
                 if (source.HasFlag(CommandActionSource.PlayerNoBlacklist))
@@ -60,6 +62,8 @@ namespace MyGreatestBot.Player
                         $"Total: {totalCount}").WithSuccess());
                 }
             }
+
+            Queuing = false;
         }
     }
 }

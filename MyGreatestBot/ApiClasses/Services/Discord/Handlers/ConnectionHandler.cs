@@ -238,7 +238,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 throw new InvalidOperationException("You need to be in the same voice channel");
             }
 
-            PlayerInstance.Stop(CommandActionSource.Mute);
+            await Task.Run(() => PlayerInstance.Stop(CommandActionSource.Mute));
 
             Voice.UpdateVoiceConnection();
             Voice.Disconnect();
