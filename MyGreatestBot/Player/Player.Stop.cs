@@ -9,7 +9,7 @@ namespace MyGreatestBot.Player
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            if (IsPlaying || tracks_queue.Count != 0)
+            if (IsPlaying || tracksQueue.Count != 0)
             {
                 StopRequested = true;
                 IsPlaying = false;
@@ -24,7 +24,7 @@ namespace MyGreatestBot.Player
             {
                 if (nomute)
                 {
-                    throw new StopException("Nothing to stop");
+                    Handler.Message.Send(new StopException("Nothing to stop"));
                 }
             }
         }

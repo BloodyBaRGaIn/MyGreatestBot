@@ -6,7 +6,6 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
 using System.Runtime.Versioning;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -17,13 +16,15 @@ namespace MyGreatestBot.Player
         {
             while (true)
             {
-                Task.Yield().GetAwaiter().GetResult();
-                lock (tracks_queue)
+                lock (queueLock)
                 {
-                    if (!tracks_queue.TryDequeue(out ITrackInfo? track))
+                    if (!tracksQueue.TryDequeue(out ITrackInfo? track))
                     {
-                        currentTrack = null;
-                        return;
+                        lock (trackLock)
+                        {
+                            currentTrack = null;
+                        }
+                        break;
                     }
 
                     if (track == null)
@@ -67,7 +68,7 @@ namespace MyGreatestBot.Player
                         }
                         else
                         {
-                            tracks_queue.EnqueueToHead(radio_track);
+                            tracksQueue.EnqueueToHead(radio_track);
                         }
                     }
 
@@ -88,17 +89,20 @@ namespace MyGreatestBot.Player
 
                     if (track.Duration >= MaxTrackDuration)
                     {
-                        Handler.Message.Send(new IgnoreException("Track is too long").WithSuccess());
+                        Handler.Message.Send(new IgnoreException("Track is too long"));
                         continue;
                     }
 
                     if (!track.IsLiveStream && track.Duration <= MinTrackDuration)
                     {
-                        Handler.Message.Send(new IgnoreException("Track is too short").WithSuccess());
+                        Handler.Message.Send(new IgnoreException("Track is too short"));
                         continue;
                     }
 
-                    currentTrack = track;
+                    lock (trackLock)
+                    {
+                        currentTrack = track;
+                    }
                     break;
                 }
             }

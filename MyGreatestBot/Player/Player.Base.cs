@@ -2,7 +2,6 @@
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
-using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -30,9 +29,6 @@ namespace MyGreatestBot.Player
         private volatile bool SeekRequested;
         private volatile bool StopRequested;
 
-        private volatile bool Skipping;
-        private volatile bool Queuing;
-
         private TimeSpan PlayerTimePosition;
 
         private TimeSpan TimeRemaining => (currentTrack == null ? PlayerTimePosition : currentTrack.Duration) - PlayerTimePosition;
@@ -42,9 +38,12 @@ namespace MyGreatestBot.Player
         private readonly CancellationToken MainPlayerCancellationToken;
 
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
-        private readonly Queue<ITrackInfo?> tracks_queue = new();
+        private readonly Queue<ITrackInfo?> tracksQueue = new();
         private readonly FFMPEG ffmpeg = new();
         private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
+
+        private readonly object queueLock = new();
+        private readonly object trackLock = new();
 
         private static readonly Semaphore _sqlSemaphore = new(1, 1);
 
@@ -96,10 +95,8 @@ namespace MyGreatestBot.Player
             IsPaused = false;
             StopRequested = false;
             SeekRequested = false;
-            Skipping = false;
-            Queuing = false;
             PlayerTimePosition = TimeSpan.Zero;
-            tracks_queue?.Clear();
+            tracksQueue?.Clear();
             ffmpeg?.Stop();
 
             Thread.EndCriticalRegion();
@@ -140,7 +137,7 @@ namespace MyGreatestBot.Player
                     break;
                 }
 
-                if (tracks_queue.Count == 0)
+                if (tracksQueue.Count == 0)
                 {
                     Status = PlayerStatus.Idle;
                     Wait();
@@ -150,18 +147,6 @@ namespace MyGreatestBot.Player
                 try
                 {
                     Task.Run(Handler.Voice.WaitForConnectionAsync, MainPlayerCancellationToken).Wait();
-
-                    {
-                        int waitQueuing = 0;
-                        do
-                        {
-                            Wait(10);
-                            waitQueuing += 10;
-                        }
-                        while (Queuing && waitQueuing > 1000);
-
-                        Queuing = false;
-                    }
 
                     if (currentTrack is null)
                     {
@@ -195,17 +180,10 @@ namespace MyGreatestBot.Player
                     await Handler.LogError.SendAsync(ex.GetExtendedMessage());
                 }
 
+                lock (queueLock)
                 {
-                    int waitSkipping = 0;
-                    do
-                    {
-                        Wait(10);
-                        waitSkipping += 10;
-                    }
-                    while (Skipping && waitSkipping < 1000);
+                    Wait();
                 }
-
-                Skipping = false;
 
                 if (StopRequested)
                 {
@@ -213,7 +191,7 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
-                if (tracks_queue.Count == 0)
+                if (tracksQueue.Count == 0)
                 {
                     Handler.Message.Send(new PlayerException("No more tracks"));
                 }

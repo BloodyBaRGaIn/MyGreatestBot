@@ -13,48 +13,46 @@ namespace MyGreatestBot.Player
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            if (IsPlaying && currentTrack != null)
+            lock (trackLock)
             {
-                if (currentTrack.IsSeekPossible(span))
+                if (IsPlaying && currentTrack != null)
                 {
-                    lock (currentTrack)
+                    if (currentTrack.IsSeekPossible(span))
                     {
                         currentTrack.PerformSeek(span);
                         SeekRequested = true;
-                    }
 
-                    if (nomute)
+                        if (nomute)
+                        {
+                            DiscordEmbedBuilder builder;
+                            try
+                            {
+                                builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
+                            }
+                            catch
+                            {
+                                builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
+                            }
+                            Handler.Message.Send(builder);
+                        }
+                    }
+                    else
                     {
-                        DiscordEmbedBuilder builder;
-                        try
+                        if (nomute)
                         {
-                            builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
+                            Handler.Message.Send(new SeekException("Cannot seek"));
                         }
-                        catch
-                        {
-                            builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
-                        }
-                        Handler.Message.Send(builder);
+                        return;
                     }
-
-                    Task.Yield().GetAwaiter().GetResult();
                 }
                 else
                 {
                     if (nomute)
                     {
-                        throw new SeekException("Cannot seek");
+                        Handler.Message.Send(new SeekException("Nothing to seek"));
                     }
                     return;
                 }
-            }
-            else
-            {
-                if (nomute)
-                {
-                    throw new SeekException("Nothing to seek");
-                }
-                return;
             }
         }
     }

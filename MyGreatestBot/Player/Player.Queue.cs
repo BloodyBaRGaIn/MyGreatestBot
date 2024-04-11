@@ -8,17 +8,17 @@ namespace MyGreatestBot.Player
     {
         internal void GetQueueLength()
         {
-            if (tracks_queue.Count != 0)
+            if (tracksQueue.Count != 0)
             {
                 int count;
                 int live_streams_count;
                 TimeSpan total_duration = TimeSpan.Zero;
 
-                lock (tracks_queue)
+                lock (queueLock)
                 {
-                    count = tracks_queue.Count;
-                    live_streams_count = tracks_queue.Count(t => t != null && t.IsLiveStream);
-                    total_duration = tracks_queue.Aggregate(TimeSpan.Zero, (sum, next) => sum + (next?.Duration ?? TimeSpan.Zero));
+                    count = tracksQueue.Count;
+                    live_streams_count = tracksQueue.Count(t => t != null && t.IsLiveStream);
+                    total_duration = tracksQueue.Aggregate(TimeSpan.Zero, (sum, next) => sum + (next?.Duration ?? TimeSpan.Zero));
                 }
 
                 string description = $"Enqueued tracks count: {count}{Environment.NewLine}";

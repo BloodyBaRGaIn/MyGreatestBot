@@ -44,17 +44,26 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Send(DiscordEmbedBuilder embed)
         {
-            SendAsync(GetBuilder(embed)).Wait();
+            if (embed is not null)
+            {
+                SendAsync(GetBuilder(embed)).Wait();
+            }
         }
 
         public void Send(Exception exception)
         {
-            Send(exception.GetDiscordEmbed());
+            if (exception is not null)
+            {
+                Send(exception.GetDiscordEmbed());
+            }
         }
 
         public void Send(string message)
         {
-            SendAsync(GetBuilder(message)).Wait();
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                SendAsync(GetBuilder(message)).Wait();
+            }
         }
     }
 }

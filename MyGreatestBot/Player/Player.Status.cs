@@ -7,8 +7,7 @@ namespace MyGreatestBot.Player
     {
         internal void GetStatus(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
-            if (nomute)
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
                 Handler.Message.Send(
                     new PlayerStatusException(

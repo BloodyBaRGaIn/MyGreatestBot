@@ -9,10 +9,10 @@ namespace MyGreatestBot.Player
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            lock (tracks_queue)
+            lock (queueLock)
             {
-                int count = tracks_queue.Count;
-                tracks_queue.Clear();
+                int count = tracksQueue.Count;
+                tracksQueue.Clear();
 
                 if (nomute)
                 {
@@ -22,7 +22,7 @@ namespace MyGreatestBot.Player
                     }
                     else
                     {
-                        throw new ClearException("Nothing to clear");
+                        Handler.Message.Send(new ClearException("Nothing to clear"));
                     }
                 }
             }

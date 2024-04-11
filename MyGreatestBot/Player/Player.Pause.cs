@@ -19,11 +19,11 @@ namespace MyGreatestBot.Player
             }
             else if (!IsPlaying)
             {
-                throw new PauseException("Nothing to pause");
+                Handler.Message.Send(new PauseException("Nothing to pause"));
             }
             else
             {
-                throw new PlayerException("Illegal state detected");
+                Handler.Message.Send(new PlayerException("Illegal state detected"));
             }
         }
 

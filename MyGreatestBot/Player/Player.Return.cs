@@ -20,18 +20,18 @@ namespace MyGreatestBot.Player
                 return;
             }
 
-            lock (tracks_queue)
+            lock (queueLock)
             {
-                lock (currentTrack)
+                lock (trackLock)
                 {
                     if (source.HasFlag(CommandActionSource.PlayerToHead))
                     {
-                        tracks_queue.EnqueueToHead(currentTrack);
+                        tracksQueue.EnqueueToHead(currentTrack);
                     }
                     else
                     {
                         currentTrack.PerformSeek(TimeSpan.Zero);
-                        tracks_queue.Enqueue(currentTrack);
+                        tracksQueue.Enqueue(currentTrack);
                     }
                 }
 

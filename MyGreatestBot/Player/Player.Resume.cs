@@ -15,7 +15,7 @@ namespace MyGreatestBot.Player
             }
             if (currentTrack == null)
             {
-                throw new ResumeException("Nothing to resume");
+                Handler.Message.Send(new ResumeException("Nothing to resume"));
             }
             else if (IsPlaying)
             {
@@ -23,7 +23,7 @@ namespace MyGreatestBot.Player
             }
             else
             {
-                throw new PlayerException("Illegal state detected");
+                Handler.Message.Send(new PlayerException("Illegal state detected"));
             }
         }
 

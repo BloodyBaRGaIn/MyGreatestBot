@@ -14,9 +14,7 @@ namespace MyGreatestBot.Player
         {
             int totalCount;
 
-            Queuing = true;
-
-            lock (tracks_queue)
+            lock (queueLock)
             {
                 if (source.HasFlag(CommandActionSource.PlayerNoBlacklist))
                 {
@@ -41,7 +39,7 @@ namespace MyGreatestBot.Player
 
                 if (source.HasFlag(CommandActionSource.PlayerToHead))
                 {
-                    tracks_queue.EnqueueRangeToHead(tracks);
+                    tracksQueue.EnqueueRangeToHead(tracks);
                     if (source.HasFlag(CommandActionSource.PlayerSkipCurrent))
                     {
                         IsPlaying = false;
@@ -50,10 +48,10 @@ namespace MyGreatestBot.Player
                 }
                 else
                 {
-                    tracks_queue.EnqueueRange(tracks);
+                    tracksQueue.EnqueueRange(tracks);
                 }
 
-                totalCount = tracks_queue.Count;
+                totalCount = tracksQueue.Count;
 
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {
@@ -62,8 +60,6 @@ namespace MyGreatestBot.Player
                         $"Total: {totalCount}").WithSuccess());
                 }
             }
-
-            Queuing = false;
         }
     }
 }

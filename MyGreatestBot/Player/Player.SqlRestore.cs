@@ -25,7 +25,7 @@ namespace MyGreatestBot.Player
             {
                 if (nomute)
                 {
-                    throw new SqlRestoreException("Operation in progress");
+                    Handler.Message.Send(new SqlRestoreException("Operation in progress"));
                 }
                 return;
             }
@@ -42,7 +42,7 @@ namespace MyGreatestBot.Player
                     DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
                     if (nomute)
                     {
-                        throw new SqlRestoreException("Restore failed", ex);
+                        Handler.Message.Send(new SqlRestoreException("Restore failed", ex));
                     }
                     return;
                 }
@@ -50,7 +50,7 @@ namespace MyGreatestBot.Player
                 {
                     if (nomute)
                     {
-                        throw new SqlRestoreException("Nothing to restore");
+                        Handler.Message.Send(new SqlRestoreException("Nothing to restore"));
                     }
                     return;
                 }
@@ -62,7 +62,10 @@ namespace MyGreatestBot.Player
                     {
                         continue;
                     }
-                    tracks_queue.Enqueue(track);
+                    lock (queueLock)
+                    {
+                        tracksQueue.Enqueue(track);
+                    }
                     Handler.Log.Send(track.GetShortMessage("Track restored: "));
                     restoreCount++;
                 }

@@ -23,41 +23,47 @@ namespace MyGreatestBot.Player
             {
                 if (nomute)
                 {
-                    throw new SqlSaveException("Operation in progress");
+                    Handler.Message.Send(new SqlSaveException("Operation in progress"));
                 }
                 return;
             }
 
             try
             {
-                if (tracks_queue.Count == 0)
+                if (tracksQueue.Count == 0)
                 {
                     if (nomute)
                     {
-                        throw new SqlSaveException("Nothing to save");
+                        Handler.Message.Send(new SqlSaveException("Nothing to save"));
                     }
                     return;
                 }
-                lock (tracks_queue)
+
+                List<ITrackInfo> tracks = [];
+                lock (trackLock)
                 {
-                    //SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
-
-                    List<ITrackInfo> tracks = currentTrack != null ? [currentTrack] : [];
-
-#pragma warning disable CS8620
-                    tracks.AddRange(tracks_queue.Where(t => t != null));
-#pragma warning restore CS8620
-
-                    SqlServerWrapper.Instance.SaveTracks(tracks, Handler.GuildId);
-
-                    int tracksCount = tracks.Count;
-
-                    Stop(source | CommandActionSource.Mute);
-
-                    if (nomute)
+                    if (currentTrack != null)
                     {
-                        Handler.Message.Send(new SqlSaveException($"Saved {tracksCount} track(s)").WithSuccess());
+                        tracks.Add(currentTrack);
                     }
+                }
+
+                lock (queueLock)
+                {
+#pragma warning disable CS8620
+                    tracks.AddRange(tracksQueue.Where(t => t != null));
+#pragma warning restore CS8620
+                }
+
+                SqlServerWrapper.Instance.SaveTracks(tracks, Handler.GuildId);
+
+                int tracksCount = tracks.Count;
+
+                Stop(source | CommandActionSource.Mute);
+
+                if (nomute)
+                {
+                    Handler.Message.Send(new SqlSaveException($"Saved {tracksCount} track(s)").WithSuccess());
                 }
             }
             catch

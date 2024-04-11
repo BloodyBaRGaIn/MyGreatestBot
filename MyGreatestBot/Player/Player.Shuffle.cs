@@ -13,21 +13,21 @@ namespace MyGreatestBot.Player
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            if (tracks_queue.Count != 0)
+            if (tracksQueue.Count != 0)
             {
-                lock (tracks_queue)
+                lock (queueLock)
                 {
                     List<ITrackInfo> collection = [];
-                    while (tracks_queue.Count != 0)
+                    while (tracksQueue.Count != 0)
                     {
-                        ITrackInfo? track = tracks_queue.Dequeue();
+                        ITrackInfo? track = tracksQueue.Dequeue();
                         if (track != null)
                         {
                             collection.Add(track);
                         }
                     }
                     collection = collection.Shuffle().ToList();
-                    tracks_queue.EnqueueRange(collection);
+                    tracksQueue.EnqueueRange(collection);
                 }
 
                 if (nomute)
@@ -39,7 +39,7 @@ namespace MyGreatestBot.Player
             {
                 if (nomute)
                 {
-                    throw new ShuffleException("Nothing to shuffle");
+                    Handler.Message.Send(new ShuffleException("Nothing to shuffle"));
                 }
                 return;
             }

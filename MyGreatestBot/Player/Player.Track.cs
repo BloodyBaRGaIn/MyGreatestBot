@@ -9,11 +9,11 @@ namespace MyGreatestBot.Player
     {
         internal void GetCurrentTrackInfo()
         {
-            if (currentTrack != null)
+            DiscordEmbedBuilder builder;
+            lock (trackLock)
             {
-                lock (currentTrack)
+                if (currentTrack != null)
                 {
-                    DiscordEmbedBuilder builder;
                     try
                     {
                         builder = GetPlayingMessage<TrackInfoException>(currentTrack, "Current");
@@ -22,30 +22,30 @@ namespace MyGreatestBot.Player
                     {
                         builder = new TrackInfoException("Cannot make track message").GetDiscordEmbed();
                     }
-                    Handler.Message.Send(builder);
                 }
-            }
-            else if (!IsPlaying)
-            {
-                throw new TrackInfoException("No tracks playing");
-            }
-            else
-            {
-                throw new TrackInfoException("Illegal state detected");
+                else if (!IsPlaying)
+                {
+                    builder = new TrackInfoException("No tracks playing").GetDiscordEmbed();
+                }
+                else
+                {
+                    builder = new TrackInfoException("Illegal state detected").GetDiscordEmbed();
+                }
+                Handler.Message.Send(builder);
             }
         }
 
         internal void GetNextTrackInfo()
         {
-            lock (tracks_queue)
+            lock (queueLock)
             {
                 while (true)
                 {
-                    if (tracks_queue.TryPeek(out ITrackInfo? track))
+                    if (tracksQueue.TryPeek(out ITrackInfo? track))
                     {
                         if (track == null)
                         {
-                            _ = tracks_queue.Dequeue();
+                            _ = tracksQueue.Dequeue();
                             continue;
                         }
                         DiscordEmbedBuilder builder;
@@ -58,12 +58,12 @@ namespace MyGreatestBot.Player
                             builder = new TrackInfoException("Cannot make next track message").GetDiscordEmbed();
                         }
                         Handler.Message.Send(builder);
-                        break;
                     }
                     else
                     {
-                        throw new TrackInfoException("Tracks queue is empty");
+                        Handler.Message.Send(new TrackInfoException("Tracks queue is empty"));
                     }
+                    break;
                 }
             }
         }
