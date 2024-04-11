@@ -40,7 +40,7 @@ namespace MyGreatestBot.Player
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly Queue<ITrackInfo?> tracksQueue = new();
         private readonly FFMPEG ffmpeg = new();
-        private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE];
+        private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE * 2];
 
         private readonly object queueLock = new();
         private readonly object trackLock = new();
@@ -297,12 +297,7 @@ namespace MyGreatestBot.Player
 
                 LowPlayerResult low_result = LowPlayer();
 
-                if (StopRequested)
-                {
-                    low_result = LowPlayerResult.Success;
-                }
-
-                if (low_result == LowPlayerResult.Restart)
+                if (low_result == LowPlayerResult.Restart && !StopRequested)
                 {
                     Handler.Log.Send("Restart ffmpeg");
 
@@ -391,7 +386,7 @@ namespace MyGreatestBot.Player
 
                 // when discord voice server changed
                 // needs to be handled more propertly
-                if (!Handler.Voice.WriteAsync(PlayerByteBuffer).Wait(TRANSMIT_SINK_MS * 100))
+                if (!Handler.Voice.WriteAsync(PlayerByteBuffer, cnt).Wait(TRANSMIT_SINK_MS * 100))
                 {
                     Handler.Voice.UpdateVoiceConnection();
                     Handler.Voice.UpdateSink();

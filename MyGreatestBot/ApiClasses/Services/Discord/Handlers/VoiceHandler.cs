@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
+using System;
 using System.Threading.Tasks;
 
 using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
@@ -128,7 +129,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// </summary>
         /// <param name="bytes">Data to write</param>
         /// <returns></returns>
-        public async Task WriteAsync(byte[] bytes)
+        public async Task WriteAsync(byte[] bytes, int cnt = 0)
         {
             while (TransmitSink == null)
             {
@@ -137,7 +138,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 await Task.Yield();
             }
 
-            await TransmitSink.WriteAsync(bytes);
+            if (cnt == 0)
+            {
+                cnt = bytes.Length;
+            }
+
+            await TransmitSink.WriteAsync(bytes.AsMemory()[..cnt]);
         }
 
         /// <summary>
