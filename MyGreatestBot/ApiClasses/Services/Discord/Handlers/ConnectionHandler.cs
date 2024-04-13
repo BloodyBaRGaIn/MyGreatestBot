@@ -30,6 +30,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private readonly DiscordGuild _guild;
 
         public ulong GuildId => _guild.Id;
+        public string GuildName => _guild.Name;
 
         public DiscordChannel? TextChannel
         {

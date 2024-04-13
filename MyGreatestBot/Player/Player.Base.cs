@@ -112,22 +112,13 @@ namespace MyGreatestBot.Player
         {
             try
             {
-                Thread.CurrentThread.Name = nameof(PlayerTaskFunction);
+                Thread.CurrentThread.Name = $"{nameof(PlayerTaskFunction)} {Handler.GuildName}";
             }
             catch { }
 
-            try
-            {
-                Thread.CurrentThread.Priority = ThreadPriority.Highest;
-            }
-            catch
-            {
-                try
-                {
-                    Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
-                }
-                catch { }
-            }
+            Thread.CurrentThread.SetHighestAvailableTheadPriority(
+                ThreadPriority.Highest,
+                ThreadPriority.AboveNormal);
 
             while (true)
             {

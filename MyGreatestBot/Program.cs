@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot
@@ -45,6 +46,10 @@ namespace MyGreatestBot
         /// </summary>
         private static void Main()
         {
+            Thread.CurrentThread.SetHighestAvailableTheadPriority(
+                ThreadPriority.Highest,
+                ThreadPriority.Normal);
+
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
