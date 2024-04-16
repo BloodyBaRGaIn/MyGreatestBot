@@ -26,11 +26,19 @@ namespace MyGreatestBot
     [UnsupportedOSPlatform("ios")]
     internal class Program
     {
+        public static bool Release => !_debug;
+        public static bool Debug => _debug;
+
+        private static readonly bool _debug;
+
         /// <summary>
         /// Process initialization
         /// </summary>
         static Program()
         {
+#if DEBUG
+            _debug = true;
+#endif
             try
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;

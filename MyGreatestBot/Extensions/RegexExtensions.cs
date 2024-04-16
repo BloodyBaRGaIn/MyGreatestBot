@@ -18,18 +18,20 @@ namespace MyGreatestBot.Extensions
 
             Match match = regex.Match(query);
 
-            if (match.Success)
+            if (!match.Success)
             {
-                for (int i = 0; i < groups.Length; i++)
+                return result;
+            }
+
+            for (int i = 0; i < groups.Length; i++)
+            {
+                try
                 {
-                    try
-                    {
-                        result[i] = match.Groups[groups[i]].Value;
-                    }
-                    catch
-                    {
-                        result[i] = null;
-                    }
+                    result[i] = match.Groups[groups[i]].Value;
+                }
+                catch
+                {
+                    result[i] = null;
                 }
             }
 

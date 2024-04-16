@@ -1,6 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Commands.Exceptions;
 using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace MyGreatestBot.Extensions
 {
@@ -15,12 +17,14 @@ namespace MyGreatestBot.Extensions
             {
                 return string.Empty;
             }
+
+            string typeName = exception.GetType().Name;
             if (string.IsNullOrWhiteSpace(exception.Message))
             {
-                return exception.GetType().Name;
+                return typeName;
             }
 
-            string result = $"{exception.GetType().Name} : {exception.Message} {exception.GetStackFrame()}";
+            string result = $"{typeName} : {exception.Message} {exception.GetStackFrame()}";
 
             if (exception.InnerException != null)
             {
@@ -32,32 +36,55 @@ namespace MyGreatestBot.Extensions
 
         public static string GetStackFrame(this Exception? exception)
         {
-#if DEBUG
-            if (exception == null)
+            if (Program.Release || exception == null)
             {
                 return string.Empty;
             }
-            System.Diagnostics.StackTrace st = new(exception, true);
+
+            StackTrace? st = null;
+            try
+            {
+                st = new(exception, true);
+            }
+            catch { }
+
             if (st == null)
             {
                 return string.Empty;
             }
-            System.Diagnostics.StackFrame? frame = st.GetFrame(0);
+
+            StackFrame? frame = st.GetFrame(0);
             if (frame == null)
             {
                 return string.Empty;
             }
+
             string? name = frame.GetFileName();
             if (string.IsNullOrWhiteSpace(name))
             {
                 return string.Empty;
             }
+
+            FileInfo? fileInfo = null;
+            try
+            {
+                fileInfo = new(name);
+            }
+            catch { }
+
+            if (fileInfo == null)
+            {
+                return string.Empty;
+            }
+
+            string fileName = fileInfo.Name;
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return string.Empty;
+            }
+
             int line = frame.GetFileLineNumber();
-            return $"({new System.IO.FileInfo(name).Name} : {line})";
-#else
-            // Full stack trace available in Debug build configuration
-            return string.Empty;
-#endif
+            return line == 0 ? $"(at {fileName})" : $"(at {fileName} : line {line})";
         }
 
         public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)
@@ -68,12 +95,12 @@ namespace MyGreatestBot.Extensions
             return exception switch
             {
                 CommandExecutionException cmd => builder
-                .WithColor(cmd.Color)
-                .WithTitle(cmd.Title),
+                    .WithColor(cmd.Color)
+                    .WithTitle(cmd.Title),
 
                 _ => builder
-                .WithColor(DiscordColor.Red)
-                .WithTitle(exception.GetType().Name)
+                    .WithColor(DiscordColor.Red)
+                    .WithTitle(exception.GetType().Name)
             };
         }
     }

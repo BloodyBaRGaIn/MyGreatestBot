@@ -11,6 +11,9 @@ using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
+using Yandex.Music.Api.Models.Landing;
+using Yandex.Music.Api.Models.Landing.Entity;
+using Yandex.Music.Api.Models.Landing.Entity.Entities;
 using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Radio;
 using Yandex.Music.Api.Models.Track;
@@ -34,6 +37,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             private static readonly Regex ARTIST_RE = new("/artist/(\\d+)(/\\w*)?$");
             private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/([^?]+)");
             private static readonly Regex PODCAST_RE = new("/track/([^?]+)");
+            private static readonly Regex CHART_RE = new("/chart");
 #pragma warning restore SYSLIB1045
 
             internal static string? TryGetPodcastId(string query)
@@ -60,6 +64,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 string?[] strings = PLAYLIST_RE.GetMatchValue(query, 1, 2);
                 return (strings[0], strings[1]);
+            }
+
+            internal static bool TryGetAsChart(string query)
+            {
+                return CHART_RE.IsMatch(query);
             }
         }
 
@@ -267,18 +276,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                List<YandexTrackInfo?> tracks = GetAlbum(album_id_str);
-                if (tracks == null || tracks.Count == 0)
-                {
-                    return tracks_collection;
-                }
-                foreach (YandexTrackInfo? track in tracks)
-                {
-                    if (track != null)
-                    {
-                        tracks_collection.Add(track);
-                    }
-                }
+
+                tracks_collection.AddRange(GetAlbum(album_id_str));
+
                 return tracks_collection;
             }
 
@@ -289,18 +289,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                List<YandexTrackInfo?> tracks = GetArtist(artist_id_str);
-                if (tracks == null || tracks.Count == 0)
-                {
-                    return tracks_collection;
-                }
-                foreach (YandexTrackInfo? track in tracks)
-                {
-                    if (track != null)
-                    {
-                        tracks_collection.Add(track);
-                    }
-                }
+
+                tracks_collection.AddRange(GetArtist(artist_id_str));
+
                 return tracks_collection;
             }
 
@@ -311,18 +302,21 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                List<YandexTrackInfo?> tracks = GetPlaylist(playlist_user_str, playlist_id_str);
-                if (tracks == null || tracks.Count == 0)
+
+                tracks_collection.AddRange(GetPlaylist(playlist_user_str, playlist_id_str));
+
+                return tracks_collection;
+            }
+
+            while (true)
+            {
+                if (!YandexQueryDecomposer.TryGetAsChart(query))
                 {
-                    return tracks_collection;
+                    break;
                 }
-                foreach (YandexTrackInfo? track in tracks)
-                {
-                    if (track != null)
-                    {
-                        tracks_collection.Add(track);
-                    }
-                }
+
+                tracks_collection.AddRange(GetChart());
+
                 return tracks_collection;
             }
 
@@ -358,9 +352,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         #region Private methods
 
-        private List<YandexTrackInfo?> GetAlbum(string? album_id_str)
+        private List<YandexTrackInfo> GetAlbum(string? album_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = [];
+            List<YandexTrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(album_id_str))
             {
@@ -386,14 +380,16 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
-            tracks_collection.AddRange(volumes.Select(track => new YandexTrackInfo(track)));
+            tracks_collection.AddRange(volumes
+                .Select(track => new YandexTrackInfo(track))
+                .Where(track => track != null));
 
             return tracks_collection;
         }
 
-        private List<YandexTrackInfo?> GetArtist(string? artist_id_str)
+        private List<YandexTrackInfo> GetArtist(string? artist_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = [];
+            List<YandexTrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(artist_id_str))
             {
@@ -401,16 +397,19 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             IEnumerable<YTrack> yTracks = Client.GetArtist(artist_id_str).Artist
-                .GetAllTracks().Where(track => track != null);
+                .GetAllTracks()
+                .Where(track => track != null);
 
-            tracks_collection.AddRange(yTracks.Select(track => new YandexTrackInfo(track)));
+            tracks_collection.AddRange(yTracks
+                .Select(track => new YandexTrackInfo(track))
+                .Where(track => track != null));
 
             return tracks_collection;
         }
 
-        private List<YandexTrackInfo?> GetPlaylist(string playlist_user_str, string playlist_id_str)
+        private List<YandexTrackInfo> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
-            List<YandexTrackInfo?> tracks_collection = [];
+            List<YandexTrackInfo> tracks_collection = [];
 
             YPlaylist playlist = Client.GetPlaylist(playlist_user_str, playlist_id_str);
 
@@ -435,11 +434,62 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             try
             {
                 tracks_collection.AddRange(tracks.Where(t => t != null)
-                                                 .Select(track => new YandexTrackInfo(track, playlist)));
+                                                 .Select(t => new YandexTrackInfo(t, playlist))
+                                                 .Where(t => t != null));
             }
             catch
             {
                 return tracks_collection;
+            }
+
+            return tracks_collection;
+        }
+
+        private List<YandexTrackInfo> GetChart()
+        {
+            List<YandexTrackInfo> tracks_collection = [];
+
+            List<YLandingBlock> blocks = Client.GetLanding(YLandingBlockType.Chart).Blocks;
+
+            if (blocks == null || blocks.Count == 0)
+            {
+                return tracks_collection;
+            }
+
+            IEnumerable<YLandingEntity> entities = blocks.SelectMany(b => b.Entities);
+
+            if (entities == null || !entities.Any())
+            {
+                return tracks_collection;
+            }
+
+            foreach (YLandingEntity entity in entities)
+            {
+                if (entity is not YLandingEntityChart chart_entity)
+                {
+                    continue;
+                }
+                YChartItem data = chart_entity.Data;
+                if (data == null)
+                {
+                    continue;
+                }
+                YTrack origin = data.Track;
+                if (origin == null)
+                {
+                    continue;
+                }
+                origin = Client.GetTrack(origin.Id);
+                if (origin == null)
+                {
+                    continue;
+                }
+                YandexTrackInfo track = new(origin);
+                if (track == null)
+                {
+                    continue;
+                }
+                tracks_collection.Add(track);
             }
 
             return tracks_collection;
