@@ -38,7 +38,28 @@ namespace MyGreatestBot
         {
 #if DEBUG
             _debug = true;
+#else
+            _debug = false;
 #endif
+            string? projectName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name;
+            if (string.IsNullOrWhiteSpace(projectName))
+            {
+                projectName = "MyGreatestBot";
+            }
+
+            if (Debug)
+            {
+                Console.Title = $"{projectName} | {nameof(Debug)}";
+            }
+            else if (Release)
+            {
+                Console.Title = $"{projectName} | {nameof(Release)}";
+            }
+            else
+            {
+                Console.Title = projectName;
+            }
+
             try
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;

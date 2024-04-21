@@ -23,14 +23,13 @@ namespace MyGreatestBot.Player
                         builder = new TrackInfoException("Cannot make track message").GetDiscordEmbed();
                     }
                 }
-                else if (!IsPlaying)
-                {
-                    builder = new TrackInfoException("No tracks playing").GetDiscordEmbed();
-                }
                 else
                 {
-                    builder = new TrackInfoException("Illegal state detected").GetDiscordEmbed();
+                    builder = !IsPlaying
+                        ? new TrackInfoException("No tracks playing").GetDiscordEmbed()
+                        : new TrackInfoException("Illegal state detected").GetDiscordEmbed();
                 }
+
                 Handler.Message.Send(builder);
             }
         }
@@ -39,6 +38,8 @@ namespace MyGreatestBot.Player
         {
             lock (queueLock)
             {
+                DiscordEmbedBuilder builder;
+
                 while (true)
                 {
                     if (tracksQueue.TryPeek(out ITrackInfo? track))
@@ -48,7 +49,7 @@ namespace MyGreatestBot.Player
                             _ = tracksQueue.Dequeue();
                             continue;
                         }
-                        DiscordEmbedBuilder builder;
+
                         try
                         {
                             builder = GetPlayingMessage<TrackInfoException>(track, "Next");
@@ -57,14 +58,15 @@ namespace MyGreatestBot.Player
                         {
                             builder = new TrackInfoException("Cannot make next track message").GetDiscordEmbed();
                         }
-                        Handler.Message.Send(builder);
                     }
                     else
                     {
-                        Handler.Message.Send(new TrackInfoException("Tracks queue is empty"));
+                        builder = new TrackInfoException("Tracks queue is empty").GetDiscordEmbed();
                     }
                     break;
                 }
+
+                Handler.Message.Send(builder);
             }
         }
     }

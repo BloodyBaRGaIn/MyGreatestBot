@@ -54,17 +54,21 @@ namespace MyGreatestBot.Player
             Restart = 1
         }
 
+        [Flags]
         private enum PlayerStatus
         {
-            Init,
-            Idle,
-            Start,
-            Loading,
-            Playing,
-            Paused,
-            Finish,
-            Deinit,
-            Error
+            None = 0,
+            Init = 1,
+            Idle = 2,
+            InitOrIdle = Init | Idle,
+            Start = 4,
+            Loading = 8,
+            Playing = 16,
+            Paused = 32,
+            Finish = 64,
+            Deinit = 128,
+            Error = 256,
+            DeinitOrError = Deinit | Error
         }
 
         internal Player(ConnectionHandler handler)
@@ -84,28 +88,6 @@ namespace MyGreatestBot.Player
             {
                 throw new PlayerException("Cannot start player", ex);
             }
-        }
-
-        private void Reset()
-        {
-            Thread.BeginCriticalRegion();
-
-            currentTrack = null;
-            IsPlaying = false;
-            IsPaused = false;
-            StopRequested = false;
-            SeekRequested = false;
-            PlayerTimePosition = TimeSpan.Zero;
-            tracksQueue?.Clear();
-            ffmpeg?.Stop();
-
-            Thread.EndCriticalRegion();
-        }
-
-        private static void Wait(int delay = 1)
-        {
-            Task.Delay(delay).Wait();
-            Task.Yield().GetAwaiter().GetResult();
         }
 
         private async void PlayerTaskFunction()
@@ -264,9 +246,9 @@ namespace MyGreatestBot.Player
 
                 ffmpeg.Start(currentTrack);
 
-                Handler.Log.Send("Start ffmpeg");
+                Handler.Log.Send("Load ffmpeg");
 
-                if (!ffmpeg.TryLoad(5000))
+                if (!ffmpeg.TryLoad(10000))
                 {
                     Wait(1);
 
@@ -283,6 +265,8 @@ namespace MyGreatestBot.Player
                     obtain_audio = true;
                     continue;
                 }
+
+                Handler.Log.Send("Start ffmpeg");
 
                 Handler.Voice.SendSpeaking(true);
 

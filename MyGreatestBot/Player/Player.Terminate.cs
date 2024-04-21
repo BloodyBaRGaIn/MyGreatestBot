@@ -7,28 +7,17 @@ namespace MyGreatestBot.Player
         internal void Terminate(CommandActionSource source)
         {
             Stop(source | CommandActionSource.Mute);
-            WaitForIdleOrError();
-            if (Status == PlayerStatus.Idle)
-            {
-                MainPlayerCancellationTokenSource.Cancel();
-            }
-        }
-
-        private void WaitForIdleOrError()
-        {
+            MainPlayerCancellationTokenSource.Cancel();
+            WaitForStatus(PlayerStatus.DeinitOrError);
             while (true)
             {
-                switch (Status)
+                if (MainPlayerTask == null
+                    || MainPlayerTask.IsCompletedSuccessfully
+                    || MainPlayerTask.IsCompleted
+                    || MainPlayerTask.IsCanceled
+                    || MainPlayerTask.IsFaulted)
                 {
-                    case PlayerStatus.Idle:
-                    case PlayerStatus.Init:
-                    case PlayerStatus.Deinit:
-                    case PlayerStatus.Error:
-                        return;
-
-                    default:
-                        Wait();
-                        break;
+                    break;
                 }
             }
         }

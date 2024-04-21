@@ -1,4 +1,6 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
+using MyGreatestBot.Extensions;
 using System;
 using System.Linq;
 
@@ -8,7 +10,13 @@ namespace MyGreatestBot.Player
     {
         internal void GetQueueLength()
         {
-            if (tracksQueue.Count != 0)
+            DiscordEmbedBuilder builder;
+
+            if (tracksQueue.Count == 0)
+            {
+                builder = new QueueLengthException("Tracks queue is empty").GetDiscordEmbed();
+            }
+            else
             {
                 int count;
                 int live_streams_count;
@@ -35,12 +43,10 @@ namespace MyGreatestBot.Player
 
                 description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
-                Handler.Message.Send(new QueueLengthException(description).WithSuccess());
+                builder = new QueueLengthException(description).WithSuccess().GetDiscordEmbed();
             }
-            else
-            {
-                throw new QueueLengthException("Tracks queue is empty");
-            }
+
+            Handler.Message.Send(builder);
         }
     }
 }

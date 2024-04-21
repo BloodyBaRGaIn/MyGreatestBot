@@ -1,5 +1,7 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -7,60 +9,35 @@ namespace MyGreatestBot.Player
     {
         internal void Skip(int add_count, CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            DiscordEmbedBuilder builder;
 
             lock (queueLock)
             {
                 if (tracksQueue.Count < add_count)
                 {
-                    if (nomute)
+                    builder = new SkipException("Requested number exceeds the queue length")
+                        .GetDiscordEmbed();
+                }
+                else
+                {
+                    for (int i = 0; i < add_count; i++)
                     {
-                        Handler.Message.Send(new SkipException("Requested number exceeds the queue length"));
+                        _ = tracksQueue.Dequeue();
                     }
-                    return;
+
+                    builder = IsPlaying
+                        ? new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
+                            .WithSuccess()
+                            .GetDiscordEmbed()
+                        : new SkipException("Nothing to skip").GetDiscordEmbed();
+
+                    IsPlaying = false;
+                    WaitForFinish();
                 }
 
-                for (int i = 0; i < add_count; i++)
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    _ = tracksQueue.Dequeue();
-                }
-
-                bool was_playing = IsPlaying;
-                IsPlaying = false;
-                WaitForFinish();
-
-                if (nomute)
-                {
-                    if (was_playing)
-                    {
-                        Handler.Message.Send(
-                            new SkipException(
-                                $"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
-                            .WithSuccess());
-                    }
-                    else
-                    {
-                        Handler.Message.Send(new SkipException("Nothing to skip"));
-                    }
-                }
-            }
-        }
-
-        private void WaitForFinish()
-        {
-            while (true)
-            {
-                switch (Status)
-                {
-                    case PlayerStatus.Finish:
-                    case PlayerStatus.Idle:
-                    case PlayerStatus.Deinit:
-                    case PlayerStatus.Error:
-                        return;
-
-                    default:
-                        Wait();
-                        break;
+                    Handler.Message.Send(builder);
                 }
             }
         }

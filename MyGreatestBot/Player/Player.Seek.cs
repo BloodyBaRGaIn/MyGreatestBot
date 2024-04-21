@@ -3,7 +3,6 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -11,10 +10,10 @@ namespace MyGreatestBot.Player
     {
         internal void RequestSeek(TimeSpan span, CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
-
             lock (trackLock)
             {
+                DiscordEmbedBuilder builder;
+
                 if (IsPlaying && currentTrack != null)
                 {
                     if (currentTrack.IsSeekPossible(span))
@@ -22,36 +21,28 @@ namespace MyGreatestBot.Player
                         currentTrack.PerformSeek(span);
                         SeekRequested = true;
 
-                        if (nomute)
+                        try
                         {
-                            DiscordEmbedBuilder builder;
-                            try
-                            {
-                                builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
-                            }
-                            catch
-                            {
-                                builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
-                            }
-                            Handler.Message.Send(builder);
+                            builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
+                        }
+                        catch
+                        {
+                            builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
                         }
                     }
                     else
                     {
-                        if (nomute)
-                        {
-                            Handler.Message.Send(new SeekException("Cannot seek"));
-                        }
-                        return;
+                        builder = new SeekException("Cannot seek").GetDiscordEmbed();
                     }
                 }
                 else
                 {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new SeekException("Nothing to seek"));
-                    }
-                    return;
+                    builder = new SeekException("Nothing to seek").GetDiscordEmbed();
+                }
+
+                if (!source.HasFlag(CommandActionSource.Mute))
+                {
+                    Handler.Message.Send(builder);
                 }
             }
         }

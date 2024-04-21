@@ -6,6 +6,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
@@ -36,6 +38,45 @@ namespace MyGreatestBot.Player
             DiscordEmbedBuilder message = exception.GetDiscordEmbed();
             message.Thumbnail = track.GetThumbnail();
             return message;
+        }
+
+        private void Reset()
+        {
+            Thread.BeginCriticalRegion();
+
+            currentTrack = null;
+            IsPlaying = false;
+            IsPaused = false;
+            StopRequested = false;
+            SeekRequested = false;
+            PlayerTimePosition = TimeSpan.Zero;
+            tracksQueue?.Clear();
+            ffmpeg?.Stop();
+
+            Thread.EndCriticalRegion();
+        }
+
+        private static void Wait(int delay = 1)
+        {
+            Task.Delay(delay).Wait();
+            Task.Yield().GetAwaiter().GetResult();
+        }
+
+        private void WaitForStatus(PlayerStatus status)
+        {
+            while (true)
+            {
+                if ((Status & status) != PlayerStatus.None)
+                {
+                    break;
+                }
+                Wait();
+            }
+        }
+
+        private void WaitForFinish()
+        {
+            WaitForStatus(PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
         }
     }
 }

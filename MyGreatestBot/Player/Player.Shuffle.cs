@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses.Music;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -11,9 +12,13 @@ namespace MyGreatestBot.Player
     {
         internal void ShuffleQueue(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            DiscordEmbedBuilder builder;
 
-            if (tracksQueue.Count != 0)
+            if (tracksQueue.Count == 0)
+            {
+                builder = new ShuffleException("Nothing to shuffle").GetDiscordEmbed();
+            }
+            else
             {
                 lock (queueLock)
                 {
@@ -30,18 +35,12 @@ namespace MyGreatestBot.Player
                     tracksQueue.EnqueueRange(collection);
                 }
 
-                if (nomute)
-                {
-                    Handler.Message.Send(new ShuffleException("Queue shuffled").WithSuccess());
-                }
+                builder = new ShuffleException("Queue shuffled").WithSuccess().GetDiscordEmbed();
             }
-            else
+
+            if (!source.HasFlag(CommandActionSource.Mute))
             {
-                if (nomute)
-                {
-                    Handler.Message.Send(new ShuffleException("Nothing to shuffle"));
-                }
-                return;
+                Handler.Message.Send(builder);
             }
         }
     }

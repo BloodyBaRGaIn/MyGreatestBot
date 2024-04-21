@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
@@ -9,37 +10,41 @@ namespace MyGreatestBot.Player
     {
         internal void ReturnCurrentTrackToQueue(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            DiscordEmbedBuilder builder;
 
             if (currentTrack == null)
             {
-                if (nomute)
-                {
-                    throw new ReturnException("Nothing to return");
-                }
-                return;
+                builder = new ReturnException("Nothing to return").GetDiscordEmbed();
             }
 
             lock (queueLock)
             {
                 lock (trackLock)
                 {
-                    if (source.HasFlag(CommandActionSource.PlayerToHead))
+                    if (currentTrack == null)
                     {
-                        tracksQueue.EnqueueToHead(currentTrack);
+                        builder = new ReturnException("Nothing to return").GetDiscordEmbed();
                     }
                     else
                     {
-                        currentTrack.PerformSeek(TimeSpan.Zero);
-                        tracksQueue.Enqueue(currentTrack);
+                        if (source.HasFlag(CommandActionSource.PlayerToHead))
+                        {
+                            tracksQueue.EnqueueToHead(currentTrack);
+                        }
+                        else
+                        {
+                            currentTrack.PerformSeek(TimeSpan.Zero);
+                            tracksQueue.Enqueue(currentTrack);
+                        }
+                        builder = new ReturnException("Returned to queue").WithSuccess().GetDiscordEmbed();
                     }
                 }
 
                 IsPlaying = false;
 
-                if (nomute)
+                if (!source.HasFlag(CommandActionSource.Mute))
                 {
-                    Handler.Message.Send(new ReturnException("Returned to queue").WithSuccess());
+                    Handler.Message.Send(builder);
                 }
             }
         }

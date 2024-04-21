@@ -7,13 +7,14 @@ namespace MyGreatestBot.Player
     {
         internal void GetStatus(CommandActionSource source)
         {
-            if (!source.HasFlag(CommandActionSource.Mute))
+            if (source.HasFlag(CommandActionSource.Mute))
             {
-                Handler.Message.Send(
-                    new PlayerStatusException(
-                        $"Player current status is \"{Status.ToString().ToUpperInvariant()}\"")
-                    .WithSuccess());
+                return;
             }
+            Handler.Message.Send(
+                new PlayerStatusException(
+                    $"Player current status is \"{Status.ToString().ToUpperInvariant()}\"")
+                .WithSuccess());
         }
     }
 }

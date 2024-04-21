@@ -300,22 +300,28 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             ParallelLoopResult result = Parallel.ForEach(ConnectionDictionary.Values, (handler) =>
             {
+                if (wave)
+                {
+                    handler.Message.Send(":wave:");
+                }
+                else
+                {
+                    handler.Message.Send(new DiscordEmbedBuilder()
+                        .WithTitle("Application is closing")
+                        .WithColor(DiscordColor.Red));
+                }
+
+                try
+                {
+                    handler.Leave(handler.TextChannel, handler.VoiceChannel).Wait();
+                }
+                catch { }
+
                 try
                 {
                     handler.PlayerInstance.Terminate(CommandActionSource.Command);
                 }
                 catch { }
-
-                try
-                {
-                    handler.Leave(null, null).Wait();
-                }
-                catch { }
-
-                if (wave)
-                {
-                    handler.Message.Send(":wave:");
-                }
             });
 
             while (!result.IsCompleted)

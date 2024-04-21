@@ -1,5 +1,7 @@
-﻿using MyGreatestBot.Commands.Exceptions;
+﻿using DSharpPlus.Entities;
+using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -7,24 +9,21 @@ namespace MyGreatestBot.Player
     {
         internal void Clear(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            DiscordEmbedBuilder builder;
 
             lock (queueLock)
             {
                 int count = tracksQueue.Count;
                 tracksQueue.Clear();
 
-                if (nomute)
-                {
-                    if (count > 0)
-                    {
-                        Handler.Message.Send(new ClearException("Queue cleared").WithSuccess());
-                    }
-                    else
-                    {
-                        Handler.Message.Send(new ClearException("Nothing to clear"));
-                    }
-                }
+                builder = count != 0
+                    ? new ClearException("Queue cleared").WithSuccess().GetDiscordEmbed()
+                    : new ClearException("Nothing to clear").GetDiscordEmbed();
+            }
+
+            if (!source.HasFlag(CommandActionSource.Mute))
+            {
+                Handler.Message.Send(builder);
             }
         }
     }
