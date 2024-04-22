@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot
 {
@@ -73,12 +72,13 @@ namespace MyGreatestBot
         /// <summary>
         /// Main entry point
         /// </summary>
-        private static void Main()
+        private static int Main()
         {
             Thread.CurrentThread.SetHighestAvailableTheadPriority(
                 ThreadPriority.Highest,
                 ThreadPriority.Normal);
 
+            Console.CancelKeyPress += Console_CancelKeyPress;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
@@ -99,12 +99,31 @@ namespace MyGreatestBot
             ApiManager.DeinitApis();
 
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+
+            return 0;
+        }
+
+        private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        {
+            _ = sender;
+
+            e.Cancel = true;
+            Console.CancelKeyPress -= Console_CancelKeyPress;
+
+            try
+            {
+                ConnectionHandler.Logout(false).Wait();
+            }
+            catch { }
         }
 
         private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
         {
             _ = sender;
             _ = e;
+
+            AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
+
             try
             {
                 ConnectionHandler.Logout(false).Wait();
@@ -114,15 +133,19 @@ namespace MyGreatestBot
             {
                 try
                 {
-                    Task.Delay(1).Wait();
+                    Thread.Sleep(1);
                 }
-                catch { }
+                catch
+                {
+                    break;
+                }
             }
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _ = sender;
+
             try
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
