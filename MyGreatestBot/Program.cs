@@ -23,23 +23,22 @@ namespace MyGreatestBot
     [UnsupportedOSPlatform("macos")]
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("ios")]
-    internal class Program
+    internal static class Program
     {
-        public static bool Release => !_debug;
-        public static bool Debug => _debug;
-
-        private static readonly bool _debug;
+        public static bool Release => !Debug;
+        public static bool Debug { get; } =
+#if DEBUG
+                true
+#else
+                false
+#endif
+                ;
 
         /// <summary>
         /// Process initialization
         /// </summary>
         static Program()
         {
-#if DEBUG
-            _debug = true;
-#else
-            _debug = false;
-#endif
             string? projectName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name;
             if (string.IsNullOrWhiteSpace(projectName))
             {
@@ -107,8 +106,8 @@ namespace MyGreatestBot
         {
             _ = sender;
 
-            e.Cancel = true;
             Console.CancelKeyPress -= Console_CancelKeyPress;
+            e.Cancel = true;
 
             try
             {
