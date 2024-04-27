@@ -11,6 +11,9 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
+    /// <summary>
+    /// Discord API wrapper class
+    /// </summary>
     public static class DiscordWrapper
     {
         public static readonly LogHandler CurrentDomainLogHandler = new(

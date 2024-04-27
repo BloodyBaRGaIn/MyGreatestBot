@@ -21,6 +21,9 @@ using YoutubeExplode.Videos.Streams;
 
 namespace MyGreatestBot.ApiClasses.Music.Youtube
 {
+    /// <summary>
+    /// Youtube API wrapper class
+    /// </summary>
     public sealed class YoutubeApiWrapper : IMusicAPI, ISearchable
     {
         [AllowNull]

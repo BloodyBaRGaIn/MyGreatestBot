@@ -63,9 +63,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 await sender.UpdateStatusAsync(new()
                 {
-                    ActivityType = ActivityType.ListeningTo,
+                    ActivityType = DiscordActivityType.ListeningTo,
                     Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
-                }, UserStatus.Online);
+                }, DiscordUserStatus.Online);
 
                 DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
             };
@@ -185,7 +185,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             try
             {
                 _ = Client.UpdateStatusAsync(
-                    new(), UserStatus.Offline)
+                    new(), DiscordUserStatus.Offline)
                 .Wait(disconnectionTimeout);
             }
             catch { }

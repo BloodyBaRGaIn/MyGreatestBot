@@ -153,8 +153,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             bool connection_rollback = false;
 
             if (channel is not null && !channel.PermissionsFor(_guild.CurrentMember)
-                .HasFlag(DSharpPlus.Permissions.AccessChannels |
-                         DSharpPlus.Permissions.UseVoice))
+                .HasFlag(DiscordPermissions.AccessChannels |
+                         DiscordPermissions.UseVoice |
+                         DiscordPermissions.Speak))
             {
                 connection_rollback = true;
                 new_channel = old_channel;

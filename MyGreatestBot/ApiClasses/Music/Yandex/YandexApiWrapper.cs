@@ -21,6 +21,9 @@ using Yandex.Music.Client;
 
 namespace MyGreatestBot.ApiClasses.Music.Yandex
 {
+    /// <summary>
+    /// Yandex API wrapper class
+    /// </summary>
     public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI
     {
         [AllowNull]
