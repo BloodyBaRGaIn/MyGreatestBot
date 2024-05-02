@@ -6,7 +6,6 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -291,11 +290,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                if (DiscordWrapper.Commands != null
-                    && DiscordWrapper.RegisteredCommands.Any())
-                {
-                    DiscordWrapper.Commands.UnregisterCommands(cmds: DiscordWrapper.RegisteredCommands.Values.ToArray());
-                }
+                DiscordWrapper.Instance.Logout();
             }
             catch { }
 

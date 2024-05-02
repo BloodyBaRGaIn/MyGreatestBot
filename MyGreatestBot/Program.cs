@@ -13,6 +13,8 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 namespace MyGreatestBot
 {
     /// <summary>
@@ -45,18 +47,11 @@ namespace MyGreatestBot
                 projectName = "MyGreatestBot";
             }
 
-            if (Debug)
-            {
-                Console.Title = $"{projectName} | {nameof(Debug)}";
-            }
-            else if (Release)
-            {
-                Console.Title = $"{projectName} | {nameof(Release)}";
-            }
-            else
-            {
-                Console.Title = projectName;
-            }
+            Console.Title = Debug
+                ? $"{projectName} | {nameof(Debug)}"
+                : Release
+                ? $"{projectName} | {nameof(Release)}"
+                : projectName;
 
             try
             {
@@ -106,6 +101,8 @@ namespace MyGreatestBot
         {
             _ = sender;
 
+            DiscordWrapper.CurrentDomainLogHandler.Send("CancelKey pressed. Closing...", LogLevel.Warning);
+
             Console.CancelKeyPress -= Console_CancelKeyPress;
             e.Cancel = true;
 
@@ -121,6 +118,8 @@ namespace MyGreatestBot
             _ = sender;
             _ = e;
 
+            DiscordWrapper.CurrentDomainLogHandler.Send("Close button pressed. Closing...", LogLevel.Warning);
+
             AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
 
             try
@@ -128,6 +127,7 @@ namespace MyGreatestBot
                 ConnectionHandler.Logout(false).Wait();
             }
             catch { }
+
             while (true)
             {
                 try
@@ -145,11 +145,16 @@ namespace MyGreatestBot
         {
             _ = sender;
 
+            string? message = (e.ExceptionObject as Exception)?.GetExtendedMessage();
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                message = "Cannot get exception message";
+            }
+
             try
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    $"Unhandled exception was thrown{Environment.NewLine}" +
-                    $"{(e.ExceptionObject as Exception)?.GetExtendedMessage() ?? string.Empty}");
+                    $"Unhandled exception was thrown{Environment.NewLine}{message}");
             }
             catch { }
         }

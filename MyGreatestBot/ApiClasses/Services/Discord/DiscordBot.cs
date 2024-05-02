@@ -14,6 +14,7 @@ using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,37 +58,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 AutoReconnect = true
             };
 
+            CommandPrefix = config_js.Prefix;
+
             Client = new DiscordClient(discordConfig);
 
-            Client.SessionCreated += async (sender, args) =>
-            {
-                await sender.UpdateStatusAsync(new()
-                {
-                    ActivityType = DiscordActivityType.ListeningTo,
-                    Name = $"{config_js.Prefix}{CommandStrings.HelpCommandName}"
-                }, DiscordUserStatus.Online);
-
-                DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
-            };
-
-            Client.ClientErrored += async (sender, args) =>
-            {
-                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                    args.Exception.GetExtendedMessage());
-            };
-
-            Client.SocketErrored += async (sender, args) =>
-            {
-                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                    args.Exception.GetExtendedMessage());
-            };
-
-            Client.SocketClosed += async (sender, args) =>
-            {
-                await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                    args.CloseMessage);
-            };
-
+            Client.SessionCreated += Client_SessionCreated;
+            Client.ClientErrored += Client_ClientErrored;
+            Client.SocketErrored += Client_SocketErrored;
+            Client.SocketClosed += Client_SocketClosed;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
             Client.VoiceServerUpdated += Client_VoiceServerUpdated;
 
@@ -95,8 +73,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 Timeout = TimeSpan.FromMinutes(20)
             });
-
-            CommandPrefix = config_js.Prefix;
 
             if (string.IsNullOrWhiteSpace(CommandPrefix))
             {
@@ -127,6 +103,36 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             Commands.CommandExecuted += Commands_CommandExecuted;
 
             MarkdownWriter.GenerateFile();
+        }
+
+        public void Logout()
+        {
+            if (Commands != null)
+            {
+                if (Commands.RegisteredCommands.Count != 0)
+                {
+                    try
+                    {
+                        Commands.UnregisterCommands(cmds: Commands.RegisteredCommands.Values.ToArray());
+                    }
+                    catch { }
+                }
+
+                Commands.CommandExecuted -= Commands_CommandExecuted;
+                Commands.CommandErrored -= Commands_CommandErrored;
+            }
+
+            if (Client != null)
+            {
+                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+                Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+                Client.SessionCreated -= Client_SessionCreated;
+                Client.ClientErrored -= Client_ClientErrored;
+                Client.SocketErrored -= Client_SocketErrored;
+                Client.SocketClosed -= Client_SocketClosed;
+                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+                Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+            }
         }
 
         /// <summary>
@@ -194,6 +200,32 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         }
 
         /// <summary>
+        /// Command with parameters to string
+        /// </summary>
+        /// <param name="args">Command</param>
+        /// <returns></returns>
+        private static string GetCommandInfo(CommandEventArgs args)
+        {
+            string result = string.Empty;
+            if (args.Context.Member is not null)
+            {
+                result += $"{args.Context.Member.DisplayName} : ";
+            }
+
+            if (args.Command != null)
+            {
+                result += $"{args.Command.Name}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(args.Context.RawArgumentString))
+            {
+                result += $" {args.Context.RawArgumentString}";
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Bot stop request
         /// </summary>
         internal void Exit()
@@ -217,6 +249,37 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Client.Dispose();
             }
             catch { }
+        }
+
+        #region Private event handlers
+
+        private async Task Client_SessionCreated(DiscordClient sender, SessionReadyEventArgs args)
+        {
+            await sender.UpdateStatusAsync(new()
+            {
+                ActivityType = DiscordActivityType.ListeningTo,
+                Name = $"{CommandPrefix}{CommandStrings.HelpCommandName}"
+            }, DiscordUserStatus.Online);
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
+        }
+
+        private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
+        {
+            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                args.Exception.GetExtendedMessage());
+        }
+
+        private async Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
+        {
+            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                args.Exception.GetExtendedMessage());
+        }
+
+        private async Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)
+        {
+            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
+                args.CloseMessage);
         }
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
@@ -340,32 +403,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             await Task.Delay(1);
         }
 
-        /// <summary>
-        /// Command with parameters to string
-        /// </summary>
-        /// <param name="args">Command</param>
-        /// <returns></returns>
-        private static string GetCommandInfo(CommandEventArgs args)
-        {
-            string result = string.Empty;
-            if (args.Context.Member is not null)
-            {
-                result += $"{args.Context.Member.DisplayName} : ";
-            }
-
-            if (args.Command != null)
-            {
-                result += $"{args.Command.Name}";
-            }
-
-            if (!string.IsNullOrWhiteSpace(args.Context.RawArgumentString))
-            {
-                result += $" {args.Context.RawArgumentString}";
-            }
-
-            return result;
-        }
-
         private async Task Commands_CommandExecuted(
             CommandsNextExtension sender,
             CommandExecutionEventArgs args)
@@ -461,5 +498,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 handler.Message.Send(args.Exception);
             }
         }
+
+        #endregion
     }
 }
