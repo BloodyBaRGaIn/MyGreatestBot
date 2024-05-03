@@ -13,8 +13,9 @@ namespace MyGreatestBot.ApiClasses
         private const string CONFIG_DIR = "Config";
 
         private const string DISCORD_JSON_PATH = $"{CONFIG_DIR}/config.json";
-        private const string SQL_DATABASE_JSON_PATH = $"{CONFIG_DIR}/sql_db_config.json";
-        private const string SQL_SERVICE_JSON_PATH = $"{CONFIG_DIR}/sql_service_config.json";
+        private const string NOSQL_DATABASE_JSON_PATH = $"{CONFIG_DIR}/db_nosql_config.json";
+        private const string SQL_DATABASE_JSON_PATH = $"{CONFIG_DIR}/db_sql_config.json";
+        private const string SQL_SERVICE_JSON_PATH = $"{CONFIG_DIR}/db_sql_service_config.json";
 
         private const string GOOGLE_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/google_cred.json";
         private const string YANDEX_CREDENTIALS_JSON_PATH = $"{CONFIG_DIR}/yandex_cred.json";
@@ -121,6 +122,15 @@ namespace MyGreatestBot.ApiClasses
         internal static SpotifyClientSecretsJSON GetSpotifyClientSecretsJSON()
         {
             return ReadConfig<SpotifyClientSecretsJSON>(SPOTIFY_CLIENT_SECRETS_JSON_PATH);
+        }
+
+        /// <summary>
+        /// Reads NoSql database config
+        /// </summary>
+        /// <returns>NoSql database config</returns>
+        internal static NoSqlDatabaseConfigJSON GetNoSqlDatabaseConfigJSON()
+        {
+            return ReadConfig<NoSqlDatabaseConfigJSON>(NOSQL_DATABASE_JSON_PATH);
         }
 
         /// <summary>

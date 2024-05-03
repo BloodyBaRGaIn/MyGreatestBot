@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.ServiceProcess;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 {
     [SupportedOSPlatform("windows")]
     internal static class SqlServiceWrapper
@@ -99,7 +99,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
             catch (Exception ex)
             {
-                throw new SqlApiException("Cannot run service", ex);
+                throw new DbApiException("Cannot run service", ex);
             }
         }
     }

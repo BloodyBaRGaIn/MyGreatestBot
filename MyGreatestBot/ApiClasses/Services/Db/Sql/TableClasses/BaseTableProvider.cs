@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql.TableClasses
 {
     internal class BaseTableProvider
     {

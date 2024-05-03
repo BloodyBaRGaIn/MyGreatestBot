@@ -8,4 +8,4 @@ Supported APIs:
 - Vk
 - Spotify
 
-Also can use MSSQL local server. See Database commands category.  
+Also can use local database. See Database commands category.  

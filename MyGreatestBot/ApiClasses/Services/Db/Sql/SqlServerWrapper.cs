@@ -3,7 +3,7 @@ using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Music;
-using MyGreatestBot.ApiClasses.Services.Sql.TableClasses;
+using MyGreatestBot.ApiClasses.Services.Db.Sql.TableClasses;
 using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Collections.Generic;
@@ -11,10 +11,10 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 {
     [SupportedOSPlatform("windows")]
-    public sealed class SqlServerWrapper : IAPI
+    public sealed class SqlServerWrapper : ITrackDatabaseAPI
     {
         private readonly string ServerString;
         private readonly string ConnectionString;
@@ -49,7 +49,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
             catch (Exception ex)
             {
-                throw new SqlApiException("Initialization failed", ex);
+                throw new DbApiException("Initialization failed", ex);
             }
         }
 
@@ -109,7 +109,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             PerformAuth();
         }
 
-        internal bool IsTrackIgnored(ITrackInfo track, ulong guild)
+        public bool IsTrackIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -117,7 +117,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
+        public bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -125,7 +125,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal void AddIgnoredTrack(ITrackInfo track, ulong guild)
+        public void AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -133,7 +133,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal void AddIgnoredArtist(ITrackInfo track, int index, ulong guild)
+        public void AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
         {
             HyperLink artist = track.ArtistArr[index];
             lock (_queryLock)
@@ -142,7 +142,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
+        public void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
             lock (_queryLock)
             {
@@ -153,7 +153,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal List<(ApiIntents, string)> RestoreTracks(ulong guild)
+        public List<(ApiIntents, string)> RestoreTracks(ulong guild)
         {
             List<(ApiIntents, string)> items = [];
             lock (_queryLock)
@@ -220,7 +220,7 @@ namespace MyGreatestBot.ApiClasses.Services.Sql
             }
         }
 
-        internal void RemoveTracks(ulong guild)
+        public void RemoveTracks(ulong guild)
         {
             lock (_queryLock)
             {

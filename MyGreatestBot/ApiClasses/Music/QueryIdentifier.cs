@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace MyGreatestBot.ApiClasses.Music
@@ -49,7 +50,7 @@ namespace MyGreatestBot.ApiClasses.Music
                     {
                         continue;
                     }
-                    return ApiManager.InitIntents.HasFlag(radio.desired)
+                    return ApiManager.IsApiRegisterdAndAllowed(radio.desired)
                         ? radio.get_radio.Invoke(id)
                         : throw new ApiException(radio.desired);
                 }
@@ -89,7 +90,7 @@ namespace MyGreatestBot.ApiClasses.Music
                     {
                         continue;
                     }
-                    return ApiManager.InitIntents.HasFlag(receiver.desired)
+                    return ApiManager.IsApiRegisterdAndAllowed(receiver.desired)
                         ? receiver.get_tracks.Invoke(query)
                         : throw new ApiException(receiver.desired);
                 }

@@ -1,7 +1,7 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.ApiClasses.Services.Discord;
-using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -12,20 +12,17 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        internal void SqlRestore(CommandActionSource source)
+        internal void DbRestore(CommandActionSource source)
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
-            {
-                throw new SqlApiException();
-            }
+            ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
-            if (!_sqlSemaphore.WaitOne(1))
+            if (!_dbSemaphore.WaitOne(1))
             {
                 if (nomute)
                 {
-                    Handler.Message.Send(new SqlRestoreException("Operation in progress"));
+                    Handler.Message.Send(new DbRestoreException("Operation in progress"));
                 }
                 return;
             }
@@ -35,14 +32,14 @@ namespace MyGreatestBot.Player
                 List<(ApiIntents, string)> info;
                 try
                 {
-                    info = SqlServerWrapper.Instance.RestoreTracks(Handler.GuildId);
+                    info = DbInstance.RestoreTracks(Handler.GuildId);
                 }
                 catch (Exception ex)
                 {
                     DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
                     if (nomute)
                     {
-                        Handler.Message.Send(new SqlRestoreException("Restore failed", ex));
+                        Handler.Message.Send(new DbRestoreException("Restore failed", ex));
                     }
                     return;
                 }
@@ -50,7 +47,7 @@ namespace MyGreatestBot.Player
                 {
                     if (nomute)
                     {
-                        Handler.Message.Send(new SqlRestoreException("Nothing to restore"));
+                        Handler.Message.Send(new DbRestoreException("Nothing to restore"));
                     }
                     return;
                 }
@@ -69,10 +66,10 @@ namespace MyGreatestBot.Player
                     Handler.Log.Send(track.GetShortMessage("Track restored: "));
                     restoreCount++;
                 }
-                SqlServerWrapper.Instance.RemoveTracks(Handler.GuildId);
+                DbInstance.RemoveTracks(Handler.GuildId);
                 if (nomute)
                 {
-                    Handler.Message.Send(new SqlRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
+                    Handler.Message.Send(new DbRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
                 }
             }
             catch
@@ -81,7 +78,7 @@ namespace MyGreatestBot.Player
             }
             finally
             {
-                _ = _sqlSemaphore.Release();
+                _ = _dbSemaphore.Release();
             }
         }
     }

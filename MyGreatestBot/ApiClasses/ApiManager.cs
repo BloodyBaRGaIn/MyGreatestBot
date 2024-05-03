@@ -1,4 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Db.NoSql;
+using MyGreatestBot.ApiClasses.Services.Db.Sql;
 using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
@@ -24,6 +26,8 @@ namespace MyGreatestBot.ApiClasses
         public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
 
         private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = [];
+
+        public static IEnumerable<ApiIntents> RegisteredIntents => ApiCollection.Keys;
 
         public static void Add([DisallowNull] IAPI api)
         {
@@ -76,6 +80,7 @@ namespace MyGreatestBot.ApiClasses
         {
             if (!InitIntents.HasFlag(desired.ApiType))
             {
+                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} INIT SKIPPED");
                 return;
             }
 
@@ -133,10 +138,13 @@ namespace MyGreatestBot.ApiClasses
 
         private static void Deinit(ApiIntents allowed, IAPI desired, int delay = 500)
         {
-            if (allowed.HasFlag(desired.ApiType))
+            if (!allowed.HasFlag(desired.ApiType))
             {
-                DeinitBody(desired, delay);
+                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} DEINIT SKIPPED");
+                return;
             }
+
+            DeinitBody(desired, delay);
         }
 
         private static void DeinitBody(IAPI desired, int delay)
@@ -214,6 +222,20 @@ namespace MyGreatestBot.ApiClasses
         public static ITrackInfo? GetRadio(ApiIntents intents, string id)
         {
             return QueryIdentifier.GetRadio(intents, id);
+        }
+
+        public static bool IsApiRegisterdAndAllowed(ApiIntents intents)
+        {
+            return InitIntents.HasFlag(intents) && RegisteredIntents.Contains(intents);
+        }
+
+        public static ITrackDatabaseAPI? GetDbApiInstance()
+        {
+            return IsApiRegisterdAndAllowed(ApiIntents.Sql)
+                ? SqlServerWrapper.Instance
+                : IsApiRegisterdAndAllowed(ApiIntents.NoSql)
+                ? LiteDbWrapper.Instance
+                : null;
         }
     }
 }

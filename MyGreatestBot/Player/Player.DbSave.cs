@@ -1,6 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
-using MyGreatestBot.ApiClasses.Services.Sql;
+using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using System.Collections.Generic;
@@ -10,35 +10,23 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        internal void SqlSave(CommandActionSource source)
+        internal void DbSave(CommandActionSource source)
         {
             bool nomute = !source.HasFlag(CommandActionSource.Mute);
 
-            if (!ApiManager.InitIntents.HasFlag(ApiIntents.Sql))
-            {
-                throw new SqlApiException();
-            }
+            ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
-            if (!_sqlSemaphore.WaitOne(1))
+            if (!_dbSemaphore.WaitOne(1))
             {
                 if (nomute)
                 {
-                    Handler.Message.Send(new SqlSaveException("Operation in progress"));
+                    Handler.Message.Send(new DbSaveException("Operation in progress"));
                 }
                 return;
             }
 
             try
             {
-                if (tracksQueue.Count == 0)
-                {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new SqlSaveException("Nothing to save"));
-                    }
-                    return;
-                }
-
                 List<ITrackInfo> tracks = [];
                 lock (trackLock)
                 {
@@ -55,7 +43,16 @@ namespace MyGreatestBot.Player
 #pragma warning restore CS8620
                 }
 
-                SqlServerWrapper.Instance.SaveTracks(tracks, Handler.GuildId);
+                if (tracks.Count == 0)
+                {
+                    if (nomute)
+                    {
+                        Handler.Message.Send(new DbSaveException("Nothing to save"));
+                    }
+                    return;
+                }
+
+                DbInstance.SaveTracks(tracks, Handler.GuildId);
 
                 int tracksCount = tracks.Count;
 
@@ -63,7 +60,7 @@ namespace MyGreatestBot.Player
 
                 if (nomute)
                 {
-                    Handler.Message.Send(new SqlSaveException($"Saved {tracksCount} track(s)").WithSuccess());
+                    Handler.Message.Send(new DbSaveException($"Saved {tracksCount} track(s)").WithSuccess());
                 }
             }
             catch
@@ -72,7 +69,7 @@ namespace MyGreatestBot.Player
             }
             finally
             {
-                _ = _sqlSemaphore.Release();
+                _ = _dbSemaphore.Release();
             }
         }
 

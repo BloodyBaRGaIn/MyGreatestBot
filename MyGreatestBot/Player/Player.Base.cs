@@ -45,7 +45,7 @@ namespace MyGreatestBot.Player
         private readonly object queueLock = new();
         private readonly object trackLock = new();
 
-        private static readonly Semaphore _sqlSemaphore = new(1, 1);
+        private static readonly Semaphore _dbSemaphore = new(1, 1);
 
         private enum LowPlayerResult : int
         {

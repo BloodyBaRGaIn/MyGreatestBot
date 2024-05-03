@@ -28,7 +28,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.IgnoreTrack(CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.DbIgnoreTrack(CommandActionSource.Command));
         }
 
         [Command("ignoreartist")]
@@ -47,7 +47,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.IgnoreArtist(artist_index, CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.DbIgnoreArtist(artist_index, CommandActionSource.Command));
         }
 
 
@@ -64,7 +64,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.SqlSave(CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.DbSave(CommandActionSource.Command));
         }
 
         [Command("restore")]
@@ -80,7 +80,7 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            await Task.Run(() => handler.PlayerInstance.SqlRestore(CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.DbRestore(CommandActionSource.Command));
         }
     }
 }

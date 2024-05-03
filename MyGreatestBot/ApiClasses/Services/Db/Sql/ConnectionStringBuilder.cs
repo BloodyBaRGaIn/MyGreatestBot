@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 {
     internal sealed class ConnectionStringBuilder
     {

@@ -2,7 +2,7 @@
 using System;
 using System.Data;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql.TableClasses
 {
     internal class GenericTable : BaseTableProvider
     {

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace MyGreatestBot.ApiClasses.Services.Sql
+namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 {
     internal sealed class DatabaseScriptProvider
     {

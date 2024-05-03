@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
-using MyGreatestBot.ApiClasses.Services.Sql;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
@@ -72,30 +71,32 @@ namespace MyGreatestBot.Player
                         }
                     }
 
-                    if (!track.BypassCheck)
+                    ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance();
+
+                    if (DbInstance != null && !track.BypassCheck)
                     {
-                        if (SqlServerWrapper.Instance.IsAnyArtistIgnored(track, Handler.GuildId))
+                        if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
                         {
-                            Handler.Message.Send(new IgnoreException("Skipping track with ignored artist(s)").WithSuccess());
+                            Handler.Message.Send(new DbIgnoreException("Skipping track with ignored artist(s)").WithSuccess());
                             continue;
                         }
 
-                        if (SqlServerWrapper.Instance.IsTrackIgnored(track, Handler.GuildId))
+                        if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
                         {
-                            Handler.Message.Send(new IgnoreException("Skipping ignored track").WithSuccess());
+                            Handler.Message.Send(new DbIgnoreException("Skipping ignored track").WithSuccess());
                             continue;
                         }
                     }
 
                     if (track.Duration >= MaxTrackDuration)
                     {
-                        Handler.Message.Send(new IgnoreException("Track is too long"));
+                        Handler.Message.Send(new DbIgnoreException("Track is too long"));
                         continue;
                     }
 
                     if (!track.IsLiveStream && track.Duration <= MinTrackDuration)
                     {
-                        Handler.Message.Send(new IgnoreException("Track is too short"));
+                        Handler.Message.Send(new DbIgnoreException("Track is too short"));
                         continue;
                     }
 
@@ -103,6 +104,7 @@ namespace MyGreatestBot.Player
                     {
                         currentTrack = track;
                     }
+
                     break;
                 }
             }

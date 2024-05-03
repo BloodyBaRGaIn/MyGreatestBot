@@ -1,8 +1,8 @@
-﻿namespace MyGreatestBot.ApiClasses.Services.Sql.TableClasses
+﻿namespace MyGreatestBot.ApiClasses.Services.Db.Sql.TableClasses
 {
     internal class SavedTracksTable : GenericTable
     {
-        internal SavedTracksTable(string database) : base("SavedTracks", database)
+        internal SavedTracksTable(string database) : base(DbCollectionNames.SavedTracksCollectionName, database)
         {
 
         }

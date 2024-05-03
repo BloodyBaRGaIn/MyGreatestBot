@@ -12,12 +12,15 @@
         Vk = 0x00000004U,
         Spotify = 0x00000008U,
 
+        NoSql = 0x20000000U,
         Sql = 0x40000000U,
+
+        Db = Sql | NoSql,
+
         Discord = 0x80000000U,
 
         Music = Youtube | Yandex | Vk | Spotify,
-        Services = Sql | Discord,
 
-        All = Music | Services
+        All = Music | Discord
     }
 }
