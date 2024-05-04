@@ -12,13 +12,13 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// </summary>
     public sealed class YoutubeTrackInfo : ITrackInfo
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         string ITrackInfo.Domain => "https://www.youtube.com/";
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Youtube;
-
-        public string Id { get; }
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
@@ -44,13 +44,13 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         /// <param name="playlist">Playlist instance from Youtube API</param>
         internal YoutubeTrackInfo(IVideo video, Playlist? playlist = null)
         {
-            Id = video.Id;
+            TrackName = new HyperLink(video.Title, video.Url)
+                .WithId(Base.GetCompositeId(video.Id));
 
-            TrackName = new HyperLink(video.Title, video.Url).WithId(video.Id);
             ArtistArr =
             [
                 new HyperLink(video.Author.ChannelTitle, video.Author.ChannelUrl)
-                    .WithId(video.Author.ChannelId.Value)
+                    .WithId(Base.GetCompositeId(video.Author.ChannelId))
             ];
 
             Duration = video.Duration ?? TimeSpan.Zero;
@@ -78,12 +78,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
                 AudioURL = Base.IsLiveStream
                     ? _api_instance.Streams
-                        .GetHttpLiveStreamUrlAsync(Id)
+                        .GetHttpLiveStreamUrlAsync(Base.Id)
                         .AsTask()
                         .GetAwaiter()
                         .GetResult()
                     : _api_instance.Streams
-                        .GetManifestAsync(Id)
+                        .GetManifestAsync(Base.Id)
                         .AsTask()
                         .GetAwaiter()
                         .GetResult()

@@ -12,7 +12,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// </summary>
     public sealed class VkTrackInfo : ITrackInfo
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
 
@@ -48,7 +50,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             TrackName = audio.OwnerId == null || string.IsNullOrEmpty(id_str)
                 ? new(audio.Title)
-                : new HyperLink(audio.Title, $"{Base.Domain}audio{audio.OwnerId}_{id_str}").WithId(id_str);
+                : new HyperLink(audio.Title, $"{Base.Domain}audio{audio.OwnerId}_{id_str}")
+                    .WithId(Base.GetCompositeId(id_str));
 
             IEnumerable<AudioArtist> audioArtists = Enumerable.Empty<AudioArtist>()
                 .Concat(audio.MainArtists)
@@ -63,7 +66,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             ArtistArr = audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)
-                : new HyperLink(a.Name, $"{Base.Domain}artist/{a.Id}").WithId(a.Id))
+                : new HyperLink(a.Name, $"{Base.Domain}artist/{a.Id}")
+                    .WithId(Base.GetCompositeId(a.Id)))
                 .ToArray();
 
             AudioAlbum album = audio.Album;

@@ -65,25 +65,23 @@ namespace MyGreatestBot.Commands
 
             string result = string.Empty;
 
-            foreach (ApiIntents value in ApiManager.RegisteredIntents)
+            foreach (ApiIntents value in Enum.GetValues(typeof(ApiIntents)))
             {
-                if (!ApiManager.InitIntents.HasFlag(value))
+                if (ApiManager.IsApiRegisterdAndAllowed(value))
                 {
-                    continue;
-                }
+                    result += $"{value} ";
 
-                result += $"{value} ";
+                    if (ApiManager.FailedIntents.HasFlag(value))
+                    {
+                        result += "FAILED";
+                    }
+                    else
+                    {
+                        result += "SUCCESS";
+                    }
 
-                if (ApiManager.FailedIntents.HasFlag(value))
-                {
-                    result += "FAILED";
+                    result += Environment.NewLine;
                 }
-                else
-                {
-                    result += "SUCCESS";
-                }
-
-                result += Environment.NewLine;
             }
 
             if (string.IsNullOrEmpty(result))

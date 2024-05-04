@@ -42,12 +42,13 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         /// <param name="playlist">Playlist instance from Spotify API</param>
         internal SpotifyTrackInfo(FullTrack track, FullPlaylist? playlist = null)
         {
-            TrackName = new HyperLink(track.Name, $"{Base.Domain}track/{track.Id}").WithId(track.Id);
+            TrackName = new HyperLink(track.Name, $"{Base.Domain}track/{track.Id}")
+                .WithId(new(track.Id, Base.TrackType));
 
             ArtistArr = track.Artists.Select(a =>
                 new HyperLink(
                     a.Name,
-                    $"{Base.Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
+                    $"{Base.Domain}artist/{a.Id}").WithId(new(a.Id, Base.TrackType))).ToArray();
 
             AlbumName = new(track.Album.Name, $"{Base.Domain}album/{track.Album.Id}");
 

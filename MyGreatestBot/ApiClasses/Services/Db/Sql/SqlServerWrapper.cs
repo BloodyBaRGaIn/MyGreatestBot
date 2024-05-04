@@ -121,7 +121,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
         {
             lock (_queryLock)
             {
-                return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId));
+                return IsAnyArtistIgnored(guild, (int)track.TrackType, track.ArtistArr.Select(a => a.InnerId.Id));
             }
         }
 
@@ -153,9 +153,9 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public List<(ApiIntents, string)> RestoreTracks(ulong guild)
+        public List<CompositeId> RestoreTracks(ulong guild)
         {
-            List<(ApiIntents, string)> items = [];
+            List<CompositeId> items = [];
             lock (_queryLock)
             {
                 try
@@ -212,7 +212,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
                         continue;
                     }
                     id = id.TrimEnd();
-                    items.Add(((ApiIntents)Enum.ToObject(typeof(ApiIntents), int.Parse(type)), id));
+                    items.Add(new(id, (ApiIntents)Enum.ToObject(typeof(ApiIntents), int.Parse(type))));
                 }
                 reader.Close();
                 _ = Task.Delay(1);

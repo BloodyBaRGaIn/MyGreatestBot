@@ -16,7 +16,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// </summary>
     public sealed class YandexTrackInfo : ITrackInfo
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Yandex;
 
@@ -49,10 +51,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         {
             origin = track;
 
-            TrackName = new HyperLink(track.Title, $"{Base.Domain}track/{track.Id}").WithId(track.Id);
+            TrackName = new HyperLink(track.Title, $"{Base.Domain}track/{track.Id}").WithId(Base.GetCompositeId(track.Id));
 
             ArtistArr = track.Artists.Select(a =>
-                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Base.Domain}artist/{a.Id}").WithId(a.Id)).ToArray();
+                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Base.Domain}artist/{a.Id}")
+                .WithId(Base.GetCompositeId(a.Id))).ToArray();
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 

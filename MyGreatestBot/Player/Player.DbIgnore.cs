@@ -5,11 +5,9 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player
 {
-    [SupportedOSPlatform("windows")]
     internal sealed partial class Player
     {
         internal void DbIgnoreTrack(CommandActionSource source)

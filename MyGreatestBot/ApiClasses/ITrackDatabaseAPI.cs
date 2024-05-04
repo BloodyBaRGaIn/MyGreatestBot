@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -76,7 +77,7 @@ namespace MyGreatestBot.ApiClasses
         /// </summary>
         /// <param name="guild"><inheritdoc cref="Doxygen" path="/param[@name='guild']"/></param>
         /// <returns>Collection of API type and track ID tuples</returns>
-        List<(ApiIntents, string)> RestoreTracks(ulong guild);
+        List<CompositeId> RestoreTracks(ulong guild);
 
         /// <summary>
         /// Removes all saved tracks

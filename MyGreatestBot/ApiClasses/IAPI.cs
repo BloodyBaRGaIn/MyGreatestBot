@@ -1,9 +1,11 @@
-﻿namespace MyGreatestBot.ApiClasses
+﻿using System;
+
+namespace MyGreatestBot.ApiClasses
 {
     /// <summary>
     /// Interface for APIs initialization
     /// </summary>
-    public interface IAPI
+    public interface IAPI : IDisposable
     {
         /// <summary>
         /// API flag
@@ -24,6 +26,11 @@
         virtual void Logout()
         {
 
+        }
+
+        void IDisposable.Dispose()
+        {
+            Logout();
         }
     }
 }

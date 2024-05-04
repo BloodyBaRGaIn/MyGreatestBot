@@ -5,6 +5,8 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql.CollectionClasses
 {
     internal sealed class GenericDataValueDescriptor(GenericDataValueKey key)
     {
+        private static readonly byte[] GuidConvert = new byte[16];
+
         public Guid Id { get; set; }
 
         [DisallowNull]
@@ -12,6 +14,16 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql.CollectionClasses
 
         [AllowNull]
         public string HyperText { get; set; }
+
+        public GenericDataValueDescriptor(UInt128 id, GenericDataValueKey key) : this(key)
+        {
+            for (int i = 0; i < GuidConvert.Length; i++)
+            {
+                GuidConvert[i] = (byte)(id & 0xFF);
+                id >>= 8;
+            }
+            Id = new(GuidConvert);
+        }
     }
 
     internal sealed class GenericDataValueKey(ulong giuldId, ApiIntents apiType, string genericId)

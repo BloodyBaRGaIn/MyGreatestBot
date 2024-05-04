@@ -8,7 +8,6 @@ using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -19,11 +18,6 @@ namespace MyGreatestBot
     /// <summary>
     /// Main class
     /// </summary>
-    [SupportedOSPlatform("windows")]
-    [UnsupportedOSPlatform("linux")]
-    [UnsupportedOSPlatform("macos")]
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("ios")]
     internal static class Program
     {
         public static bool Release => !Debug;
@@ -75,7 +69,7 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            ApiManager.Add(ApiClasses.Services.Db.Sql.SqlServerWrapper.Instance);
+            //ApiManager.Add(ApiClasses.Services.Db.Sql.SqlServerWrapper.Instance);
             ApiManager.Add(ApiClasses.Services.Db.NoSql.LiteDbWrapper.Instance);
             ApiManager.Add(YoutubeApiWrapper.MusicInstance);
             ApiManager.Add(YandexApiWrapper.MusicInstance);
@@ -83,14 +77,14 @@ namespace MyGreatestBot
             ApiManager.Add(SpotifyApiWrapper.MusicInstance);
             ApiManager.Add(DiscordWrapper.Instance);
 
-            ApiManager.InitApis(ApiIntents.All | ApiIntents.NoSql);
+            ApiManager.InitApis();
 
             DiscordWrapper.Run(connectionTimeout: 10000,
                                disconnectionTimeout: 500);
 
             AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
 
-            ApiManager.DeinitApis(ApiIntents.All | ApiIntents.NoSql);
+            ApiManager.DeinitApis();
 
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
 

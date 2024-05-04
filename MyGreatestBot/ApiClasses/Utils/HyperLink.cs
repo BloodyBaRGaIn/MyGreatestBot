@@ -5,9 +5,6 @@ namespace MyGreatestBot.ApiClasses.Utils
     /// <summary>
     /// Hypertext string
     /// </summary>
-    /// <remarks>
-    /// Generic constructor
-    /// </remarks>
     /// <param name="title">Text</param>
     /// <param name="url">URL</param>
     public sealed class HyperLink(string title, string? url = null) : IComparable<HyperLink>
@@ -22,9 +19,9 @@ namespace MyGreatestBot.ApiClasses.Utils
         /// </summary>
         public string Url { get; init; } = url ?? string.Empty;
 
-        public string InnerId { get; private set; } = string.Empty;
+        public CompositeId InnerId { get; private set; } = new();
 
-        public HyperLink WithId(string id)
+        public HyperLink WithId(CompositeId id)
         {
             InnerId = id;
             return this;

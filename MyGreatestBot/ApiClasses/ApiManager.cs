@@ -27,7 +27,7 @@ namespace MyGreatestBot.ApiClasses
 
         private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = [];
 
-        public static IEnumerable<ApiIntents> RegisteredIntents => ApiCollection.Keys;
+        public static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate((a, b) => a | b);
 
         public static void Add([DisallowNull] IAPI api)
         {
@@ -50,7 +50,12 @@ namespace MyGreatestBot.ApiClasses
             }
         }
 
-        public static void InitApis(ApiIntents intents = ApiIntents.All)
+        public static void InitApis()
+        {
+            InitApis(RegisteredIntents);
+        }
+
+        public static void InitApis(ApiIntents intents)
         {
             InitIntents = intents;
 
@@ -116,6 +121,11 @@ namespace MyGreatestBot.ApiClasses
             {
                 Task.Delay(delay).Wait();
             }
+        }
+
+        public static void DeinitApis()
+        {
+            DeinitApis(RegisteredIntents);
         }
 
         public static void DeinitApis(ApiIntents intents = ApiIntents.All)
@@ -226,7 +236,7 @@ namespace MyGreatestBot.ApiClasses
 
         public static bool IsApiRegisterdAndAllowed(ApiIntents intents)
         {
-            return InitIntents.HasFlag(intents) && RegisteredIntents.Contains(intents);
+            return InitIntents.HasFlag(intents) && RegisteredIntents.HasFlag(intents);
         }
 
         public static ITrackDatabaseAPI? GetDbApiInstance()

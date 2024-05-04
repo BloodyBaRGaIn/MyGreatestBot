@@ -173,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Retrieves the audio URL
         /// </summary>
-        public abstract void ObtainAudioURL();
+        public void ObtainAudioURL();
 
         /// <summary>
         /// Reloads the corresponding API
@@ -205,6 +205,11 @@ namespace MyGreatestBot.ApiClasses.Music
                 ApiIntents.Spotify => Spotify.SpotifyApiWrapper.MusicInstance.GetTrack(id),
                 _ => null,
             };
+        }
+
+        internal CompositeId GetCompositeId(string id)
+        {
+            return new(id, TrackType);
         }
     }
 }

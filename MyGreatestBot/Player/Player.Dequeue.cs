@@ -4,11 +4,9 @@ using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
-using System.Runtime.Versioning;
 
 namespace MyGreatestBot.Player
 {
-    [SupportedOSPlatform("windows")]
     internal sealed partial class Player
     {
         private void Dequeue()

@@ -2,6 +2,7 @@
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.ApiClasses.Services.Discord;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -29,7 +30,7 @@ namespace MyGreatestBot.Player
 
             try
             {
-                List<(ApiIntents, string)> info;
+                List<CompositeId> info;
                 try
                 {
                     info = DbInstance.RestoreTracks(Handler.GuildId);
@@ -52,9 +53,9 @@ namespace MyGreatestBot.Player
                     return;
                 }
                 int restoreCount = 0;
-                foreach ((ApiIntents api, string id) in info)
+                foreach (CompositeId composite in info)
                 {
-                    ITrackInfo? track = ITrackInfo.GetTrack(api, id);
+                    ITrackInfo? track = ITrackInfo.GetTrack(composite.Api, composite.Id);
                     if (track == null)
                     {
                         continue;
