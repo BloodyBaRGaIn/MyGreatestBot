@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿global using LiteDbWrapper = MyGreatestBot.ApiClasses.Services.Db.NoSql.LiteDbWrapper;
+using LiteDB;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db.NoSql.CollectionClasses;

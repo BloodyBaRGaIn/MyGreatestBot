@@ -31,6 +31,7 @@ namespace MyGreatestBot.ApiClasses
         void IDisposable.Dispose()
         {
             Logout();
+            GC.SuppressFinalize(this);
         }
     }
 }

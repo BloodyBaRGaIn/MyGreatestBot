@@ -1,7 +1,4 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
-using MyGreatestBot.ApiClasses.Services.Db.NoSql;
-using MyGreatestBot.ApiClasses.Services.Db.Sql;
-using MyGreatestBot.ApiClasses.Services.Discord;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;

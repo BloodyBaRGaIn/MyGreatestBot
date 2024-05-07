@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses.ConfigStructs;
+﻿global using YandexApiWrapper = MyGreatestBot.ApiClasses.Music.Yandex.YandexApiWrapper;
+using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;

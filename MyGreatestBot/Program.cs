@@ -1,16 +1,9 @@
 ﻿using MyGreatestBot.ApiClasses;
-using MyGreatestBot.ApiClasses.Music.Spotify;
-using MyGreatestBot.ApiClasses.Music.Vk;
-using MyGreatestBot.ApiClasses.Music.Yandex;
-using MyGreatestBot.ApiClasses.Music.Youtube;
-using MyGreatestBot.ApiClasses.Services.Discord;
-using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot
@@ -69,8 +62,8 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            //ApiManager.Add(ApiClasses.Services.Db.Sql.SqlServerWrapper.Instance);
-            ApiManager.Add(ApiClasses.Services.Db.NoSql.LiteDbWrapper.Instance);
+            //ApiManager.Add(SqlServerWrapper.Instance);
+            ApiManager.Add(LiteDbWrapper.Instance);
             ApiManager.Add(YoutubeApiWrapper.MusicInstance);
             ApiManager.Add(YandexApiWrapper.MusicInstance);
             ApiManager.Add(VkApiWrapper.MusicInstance);

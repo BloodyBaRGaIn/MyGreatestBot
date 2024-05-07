@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿global using SqlServerWrapper = MyGreatestBot.ApiClasses.Services.Db.Sql.SqlServerWrapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using MyGreatestBot.ApiClasses.ConfigStructs;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 {
     [SupportedOSPlatform("windows")]
-    public sealed class SqlServerWrapper : ITrackDatabaseAPI
+    public sealed partial class SqlServerWrapper : ITrackDatabaseAPI
     {
         private readonly string ServerString;
         private readonly string ConnectionString;

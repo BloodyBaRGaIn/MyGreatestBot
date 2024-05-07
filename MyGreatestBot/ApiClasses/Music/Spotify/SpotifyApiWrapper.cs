@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses.ConfigStructs;
+﻿global using SpotifyApiWrapper = MyGreatestBot.ApiClasses.Music.Spotify.SpotifyApiWrapper;
+using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using SpotifyAPI.Web;

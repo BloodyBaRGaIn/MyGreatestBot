@@ -1,5 +1,4 @@
-﻿using MyGreatestBot.ApiClasses.Music.Youtube;
-using MyGreatestBot.ApiClasses.Utils;
+﻿using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;
 using System;
 using System.Diagnostics.CodeAnalysis;
