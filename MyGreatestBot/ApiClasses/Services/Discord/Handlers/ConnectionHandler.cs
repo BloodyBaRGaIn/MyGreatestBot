@@ -143,11 +143,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             DiscordChannel? old_channel = null;
             if (VoiceChannel is not null)
             {
-                old_channel = _guild.GetChannel(VoiceChannel.Id);
+                old_channel = await _guild.GetChannelAsync(VoiceChannel.Id);
             }
             if (channel is not null)
             {
-                new_channel = _guild.GetChannel(channel.Id);
+                new_channel = await _guild.GetChannelAsync(channel.Id);
             }
 
             bool connection_rollback = false;
@@ -257,7 +257,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
-            DiscordChannel? channel = _guild.GetChannel(origin.Id);
+            DiscordChannel? channel = await _guild.GetChannelAsync(origin.Id);
 
             if (channel is null)
             {
