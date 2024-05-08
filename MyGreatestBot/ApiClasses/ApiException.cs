@@ -1,8 +1,5 @@
 ﻿using System;
 
-using AllowNull = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
-using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
-
 namespace MyGreatestBot.ApiClasses
 {
     public class ApiException : Exception

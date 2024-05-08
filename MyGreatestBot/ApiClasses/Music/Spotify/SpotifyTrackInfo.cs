@@ -1,7 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using SpotifyAPI.Web;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MyGreatestBot.ApiClasses.Music.Spotify

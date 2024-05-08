@@ -1,10 +1,12 @@
-﻿using MyGreatestBot.ApiClasses;
+﻿global using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
+global using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
+global using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
+using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot
 {

@@ -2,7 +2,6 @@
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;

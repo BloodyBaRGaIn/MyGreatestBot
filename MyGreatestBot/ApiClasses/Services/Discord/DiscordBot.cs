@@ -17,9 +17,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     public sealed class DiscordBot : IAPI, IAccessible

@@ -6,9 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
-using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
-
 namespace MyGreatestBot.Commands
 {
     [Category(CommandStrings.DebugCategoryName)]

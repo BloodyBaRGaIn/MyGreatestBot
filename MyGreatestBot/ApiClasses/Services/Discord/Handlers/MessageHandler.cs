@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Extensions;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 

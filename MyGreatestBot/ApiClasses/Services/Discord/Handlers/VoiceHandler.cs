@@ -3,8 +3,6 @@ using DSharpPlus.VoiceNext;
 using System;
 using System.Threading.Tasks;
 
-using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
-
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     /// <summary>

@@ -10,9 +10,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using AllowNullAttribute = System.Diagnostics.CodeAnalysis.AllowNullAttribute;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     /// <summary>

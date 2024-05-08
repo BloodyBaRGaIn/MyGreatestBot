@@ -1,9 +1,8 @@
-﻿using System;
+﻿global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {

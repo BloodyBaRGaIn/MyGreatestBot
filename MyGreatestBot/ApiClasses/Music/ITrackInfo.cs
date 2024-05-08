@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using EmbedThumbnail = DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail;

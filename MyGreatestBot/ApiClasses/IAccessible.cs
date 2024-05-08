@@ -2,8 +2,6 @@
 using System;
 using System.Net.Http;
 
-using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
-
 namespace MyGreatestBot.ApiClasses
 {
     /// <summary>

@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
