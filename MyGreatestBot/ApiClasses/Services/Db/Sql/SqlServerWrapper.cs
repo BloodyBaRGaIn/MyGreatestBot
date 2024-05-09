@@ -58,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 
         ApiIntents IAPI.ApiType => ApiIntents.Sql;
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             lock (_connectionLock)
             {
@@ -96,7 +96,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             lock (_connectionLock)
             {
@@ -106,11 +106,11 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
 
         private void Reopen()
         {
-            Logout();
-            PerformAuth();
+            (this as IAPI).Logout();
+            (this as IAPI).PerformAuth();
         }
 
-        public bool IsTrackIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsTrackIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -118,7 +118,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -126,7 +126,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public void AddIgnoredTrack(ITrackInfo track, ulong guild)
+        void ITrackDatabaseAPI.AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
             lock (_queryLock)
             {
@@ -134,7 +134,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public void AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
+        void ITrackDatabaseAPI.AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
         {
             HyperLink artist = track.ArtistArr[index];
             lock (_queryLock)
@@ -143,7 +143,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
+        void ITrackDatabaseAPI.SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
             lock (_queryLock)
             {
@@ -154,7 +154,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public List<CompositeId> RestoreTracks(ulong guild)
+        List<CompositeId> ITrackDatabaseAPI.RestoreTracks(ulong guild)
         {
             List<CompositeId> items = [];
             lock (_queryLock)
@@ -221,7 +221,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.Sql
             }
         }
 
-        public void RemoveTracks(ulong guild)
+        void ITrackDatabaseAPI.RemoveTracks(ulong guild)
         {
             lock (_queryLock)
             {

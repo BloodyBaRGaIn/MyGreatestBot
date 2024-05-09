@@ -26,8 +26,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// </summary>
     public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI
     {
-        [AllowNull]
-        private YandexMusicClient _client;
+        private YandexMusicClient? _client;
         private readonly YandexApiException GenericException = new();
 
         private YandexMusicClient Client => _client ?? throw GenericException;
@@ -110,13 +109,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch (Exception ex)
             {
-                (this as IAPI).Logout();
                 throw new YandexApiException("Cannot authorize", ex);
             }
 
             if (!Client.IsAuthorized)
             {
-                (this as IAPI).Logout();
                 throw GenericException;
             }
 
@@ -125,13 +122,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 string token = Client.GetAccessToken().AccessToken;
                 if (string.IsNullOrWhiteSpace(token))
                 {
-                    (this as IAPI).Logout();
                     throw new ArgumentNullException(nameof(token));
                 }
             }
             catch (Exception ex)
             {
-                (this as IAPI).Logout();
                 throw new YandexApiException("Cannot get valid access token", ex);
             }
         }
@@ -345,12 +340,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             return track;
-        }
-
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
-        {
-            _ = text;
-            throw new NotImplementedException();
         }
 
         #region Private methods

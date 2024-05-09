@@ -10,7 +10,7 @@ namespace MyGreatestBot.ApiClasses.Music
         // regular Youtube link
         private static readonly Regex YOUTUBE_RE = new("^((http([s])?://)?((www|m)\\.)?(youtube\\.([\\w])+)/)");
         // reduced Youtube link
-        private static readonly Regex YOUTUBE_SHORT_RE = new("^((http([s])?://)?((www|m)\\.)?youtu\\.be/)");
+        private static readonly Regex YOUTUBE_REDUCED_RE = new("^((http([s])?://)?((www|m)\\.)?youtu\\.be/)");
         private static readonly Regex YANDEX_RE = new("^((http([s])?://)?music\\.yandex\\.([\\w])+/)");
         private static readonly Regex VK_RE = new("^((http([s])?://)?((www|m)\\.)?vk\\.com/)");
         private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
@@ -71,14 +71,19 @@ namespace MyGreatestBot.ApiClasses.Music
             private delegate IEnumerable<ITrackInfo>? GetTracks(string query);
 
             private readonly Regex pattern;
-            private readonly GetTracks get_tracks;
-            private readonly ApiIntents desired;
+            private readonly IAPI api;
+            private readonly GetTracks getTracks;
 
-            private TracksReceiver(ApiIntents desired, Regex pattern, GetTracks get_tracks)
+            private TracksReceiver(Regex pattern, IAPI api)
             {
-                this.desired = desired;
                 this.pattern = pattern;
-                this.get_tracks = get_tracks;
+                this.api = api;
+                this.getTracks = api switch
+                {
+                    IQueryMusicAPI query => query.GetTracksFromPlainText,
+                    IMusicAPI music => music.GetTracks,
+                    _ => throw new ArgumentException("Invalid API instance"),
+                };
             }
 
             internal static IEnumerable<ITrackInfo>? Execute(string query)
@@ -89,9 +94,9 @@ namespace MyGreatestBot.ApiClasses.Music
                     {
                         continue;
                     }
-                    return ApiManager.IsApiRegisterdAndAllowed(receiver.desired)
-                        ? receiver.get_tracks.Invoke(query)
-                        : throw new ApiException(receiver.desired);
+                    return ApiManager.IsApiRegisterdAndAllowed(receiver.api.ApiType)
+                        ? receiver.getTracks.Invoke(query)
+                        : throw new ApiException(receiver.api.ApiType);
                 }
 
                 throw new InvalidOperationException("Unknown music format");
@@ -99,12 +104,12 @@ namespace MyGreatestBot.ApiClasses.Music
 
             private static readonly TracksReceiver[] collection =
             [
-                new(ApiIntents.Youtube, YOUTUBE_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Youtube, YOUTUBE_SHORT_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Yandex, YANDEX_RE, Yandex.YandexApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Vk, VK_RE, Vk.VkApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Spotify, SPOTIFY_RE, Spotify.SpotifyApiWrapper.MusicInstance.GetTracks),
-                new(ApiIntents.Youtube, GENERIC_RE, Youtube.YoutubeApiWrapper.MusicInstance.GetTracksFromPlainText)
+                new TracksReceiver(YOUTUBE_RE, YoutubeApiWrapper.MusicInstance),
+                new TracksReceiver(YOUTUBE_REDUCED_RE, YoutubeApiWrapper.MusicInstance),
+                new TracksReceiver(YANDEX_RE, YandexApiWrapper.MusicInstance),
+                new TracksReceiver(VK_RE, VkApiWrapper.MusicInstance),
+                new TracksReceiver(SPOTIFY_RE, SpotifyApiWrapper.MusicInstance),
+                new TracksReceiver(GENERIC_RE, YoutubeApiWrapper.QueryInstance)
             ];
         }
     }

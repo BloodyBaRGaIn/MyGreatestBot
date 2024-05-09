@@ -27,18 +27,18 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
 
         public static LiteDbWrapper Instance { get; private set; } = new();
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             LiteDbClient = new(@$"{config.DatabaseName}.db");
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             LiteDbClient?.Dispose();
             LiteDbClient = null;
         }
 
-        public bool IsTrackIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsTrackIgnored(ITrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -58,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        public bool IsAnyArtistIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsAnyArtistIgnored(ITrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -85,7 +85,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             return false;
         }
 
-        public void AddIgnoredTrack(ITrackInfo track, ulong guild)
+        void ITrackDatabaseAPI.AddIgnoredTrack(ITrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -113,7 +113,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        public void AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
+        void ITrackDatabaseAPI.AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
         {
             if (LiteDbClient is null)
             {
@@ -141,7 +141,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        public void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
+        void ITrackDatabaseAPI.SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -165,7 +165,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        public List<CompositeId> RestoreTracks(ulong guild)
+        List<CompositeId> ITrackDatabaseAPI.RestoreTracks(ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -191,7 +191,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             return result;
         }
 
-        public void RemoveTracks(ulong guild)
+        void ITrackDatabaseAPI.RemoveTracks(ulong guild)
         {
             if (LiteDbClient is null)
             {

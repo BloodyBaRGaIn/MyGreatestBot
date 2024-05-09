@@ -20,8 +20,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// </summary>
     public sealed class VkApiWrapper : IMusicAPI
     {
-        [AllowNull]
-        private VkApi _api;
+        private VkApi? _api;
         private readonly VkApiException GenericException = new();
 
         private IAudioCategory Audio => _api?.Audio ?? throw GenericException;
@@ -72,7 +71,15 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             ServiceCollection serviceCollection = new();
             _ = serviceCollection.AddAudioBypass();
-            _api = new VkApi(serviceCollection);
+
+            try
+            {
+                _api = new VkApi(serviceCollection);
+            }
+            catch (Exception ex)
+            {
+                throw new VkApiException("Cannot add audio service", ex);
+            }
 
             ApiAuthParams apiAuthParams = new()
             {
@@ -87,7 +94,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             try
             {
-                if (_api is null)
+                if (_api == null)
                 {
                     throw new ArgumentNullException(nameof(_api), "VkApi is null");
                 }
@@ -164,12 +171,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
 
             return track;
-        }
-
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
-        {
-            _ = text;
-            throw new NotImplementedException();
         }
 
         #region Private methods

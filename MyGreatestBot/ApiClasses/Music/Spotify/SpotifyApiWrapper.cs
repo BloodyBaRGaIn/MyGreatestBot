@@ -15,18 +15,13 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// </summary>
     public sealed class SpotifyApiWrapper : IMusicAPI
     {
-        //[AllowNull]
-        //private static EmbedIOAuthServer server;
-        [AllowNull]
-        private SpotifyClient _api;
+        private SpotifyClient? _api;
         private readonly SpotifyApiException GenericException = new();
 
         private IPlaylistsClient Playlists => _api?.Playlists ?? throw GenericException;
         private IAlbumsClient Albums => _api?.Albums ?? throw GenericException;
         private IArtistsClient Artists => _api?.Artists ?? throw GenericException;
         private ITracksClient Tracks => _api?.Tracks ?? throw GenericException;
-        //private IPlayerClient Player => _api?.Player ?? throw GenericException;
-        //private ISearchClient Search => _api?.Search ?? throw GenericException;
 
         private static class SpotifyQueryDecomposer
         {
@@ -205,12 +200,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
 
             return track;
-        }
-
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracksFromPlainText(string text)
-        {
-            _ = text;
-            throw new NotImplementedException();
         }
 
         #region Private methods

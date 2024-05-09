@@ -24,10 +24,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube API wrapper class
     /// </summary>
-    public sealed class YoutubeApiWrapper : IMusicAPI, ISearchable
+    public sealed class YoutubeApiWrapper : IQueryMusicAPI, ISearchable
     {
-        [AllowNull]
-        private YoutubeClient api;
+        private YoutubeClient? api;
         private readonly YoutubeApiException GenericException = new();
 
         private VideoClient Videos => api?.Videos ?? throw GenericException;
@@ -74,6 +73,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         public static IMusicAPI MusicInstance { get; } = _instance;
         public static ISearchable SearchInstance { get; } = _instance;
+        public static IQueryMusicAPI QueryInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
@@ -229,7 +229,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return result == null ? null : new YoutubeTrackInfo(result);
         }
 
-        IEnumerable<ITrackInfo> IMusicAPI.GetTracksFromPlainText(string text)
+        IEnumerable<ITrackInfo> IQueryMusicAPI.GetTracksFromPlainText(string text)
         {
             List<ITrackInfo> tracks = [];
             IEnumerable<VideoSearchResult>? search = Search?.GetVideosAsync(text)?.ToBlockingEnumerable();

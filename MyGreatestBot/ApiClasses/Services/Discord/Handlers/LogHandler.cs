@@ -29,7 +29,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             lock (writer)
             {
                 writer.WriteLine(
-                    $"[{DateTime.Now:dd.MM.yyyy HH:mm:ss}]\t" +
+                    $"[{DateTime.Now:dd.MM.yyyy HH:mm:ss.fff}]\t" +
                     $"{(logLevel == LogLevel.None ? "" : $"[{logLevel}]")}\t" +
                     $"{guildName}" +
                     $"{Environment.NewLine}{text}");
