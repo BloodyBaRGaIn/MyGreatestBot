@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace MyGreatestBot.ApiClasses.Music
@@ -33,25 +34,29 @@ namespace MyGreatestBot.ApiClasses.Music
             private delegate ITrackInfo? GetRadio(string id);
 
             private readonly GetRadio get_radio;
-            private readonly ApiIntents desired;
+            private readonly IMusicAPI api;
 
-            private TracksRadio(ApiIntents desired, GetRadio get_radio)
+            private TracksRadio(IMusicAPI api)
             {
-                this.desired = desired;
-                this.get_radio = get_radio;
+                this.api = api;
+                get_radio = api switch
+                {
+                    IRadioMusicAPI radio => radio.GetRadio,
+                    _ => throw new ArgumentException("Invalid API instance")
+                };
             }
 
             internal static ITrackInfo? Execute(ApiIntents intents, string id)
             {
                 foreach (TracksRadio radio in collection)
                 {
-                    if ((radio.desired & intents) == ApiIntents.None)
+                    if ((radio.api.ApiType & intents) == ApiIntents.None)
                     {
                         continue;
                     }
-                    return ApiManager.IsApiRegisterdAndAllowed(radio.desired)
+                    return ApiManager.IsApiRegisterdAndAllowed(radio.api.ApiType)
                         ? radio.get_radio.Invoke(id)
-                        : throw new ApiException(radio.desired);
+                        : throw new ApiException(radio.api.ApiType);
                 }
 
                 throw new InvalidOperationException("Radio mode is not supported");
@@ -59,10 +64,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
             private static readonly TracksRadio[] collection =
             [
-                //new(ApiIntents.Youtube, Youtube.YoutubeApiWrapper.Instance.GetRadio),
-                new(ApiIntents.Yandex, Yandex.YandexApiWrapper.RadioInstance.GetRadio),
-                //new(ApiIntents.Vk, Vk.VkApiWrapper.Instance.GetRadio),
-                //new(ApiIntents.Spotify, Spotify.SpotifyApiWrapper.Instance.GetRadio)
+                new TracksRadio(YandexApiWrapper.RadioMusicInstance),
             ];
         }
 
@@ -70,27 +72,22 @@ namespace MyGreatestBot.ApiClasses.Music
         {
             private delegate IEnumerable<ITrackInfo>? GetTracks(string query);
 
-            private readonly Regex pattern;
-            private readonly IAPI api;
+            private readonly Regex[] patterns;
+            private readonly IMusicAPI api;
             private readonly GetTracks getTracks;
 
-            private TracksReceiver(Regex pattern, IAPI api)
+            private TracksReceiver(IMusicAPI api, GetTracks getTracks, params Regex[] patterns)
             {
-                this.pattern = pattern;
+                this.patterns = patterns;
                 this.api = api;
-                this.getTracks = api switch
-                {
-                    IQueryMusicAPI query => query.GetTracksFromPlainText,
-                    IMusicAPI music => music.GetTracks,
-                    _ => throw new ArgumentException("Invalid API instance"),
-                };
+                this.getTracks = getTracks;
             }
 
             internal static IEnumerable<ITrackInfo>? Execute(string query)
             {
                 foreach (TracksReceiver receiver in collection)
                 {
-                    if (!receiver.pattern.IsMatch(query))
+                    if (!receiver.patterns.Any(p => p.IsMatch(query)))
                     {
                         continue;
                     }
@@ -104,12 +101,30 @@ namespace MyGreatestBot.ApiClasses.Music
 
             private static readonly TracksReceiver[] collection =
             [
-                new TracksReceiver(YOUTUBE_RE, YoutubeApiWrapper.MusicInstance),
-                new TracksReceiver(YOUTUBE_REDUCED_RE, YoutubeApiWrapper.MusicInstance),
-                new TracksReceiver(YANDEX_RE, YandexApiWrapper.MusicInstance),
-                new TracksReceiver(VK_RE, VkApiWrapper.MusicInstance),
-                new TracksReceiver(SPOTIFY_RE, SpotifyApiWrapper.MusicInstance),
-                new TracksReceiver(GENERIC_RE, YoutubeApiWrapper.QueryInstance)
+                new TracksReceiver(
+                    YoutubeApiWrapper.UrlMusicInstance,
+                    YoutubeApiWrapper.UrlMusicInstance.GetTracksFromUrl,
+                    YOUTUBE_RE, YOUTUBE_REDUCED_RE),
+
+                new TracksReceiver(
+                    YandexApiWrapper.UrlMusicInstance,
+                    YandexApiWrapper.UrlMusicInstance.GetTracksFromUrl,
+                    YANDEX_RE),
+
+                new TracksReceiver(
+                    VkApiWrapper.UrlMusicInstance,
+                    VkApiWrapper.UrlMusicInstance.GetTracksFromUrl,
+                    VK_RE),
+
+                new TracksReceiver(
+                    SpotifyApiWrapper.UrlMusicInstance,
+                    SpotifyApiWrapper.UrlMusicInstance.GetTracksFromUrl,
+                    SPOTIFY_RE),
+
+                new TracksReceiver(
+                    YoutubeApiWrapper.TextMusicInstance,
+                    YoutubeApiWrapper.TextMusicInstance.GetTracksFromPlainText,
+                    GENERIC_RE)
             ];
         }
     }

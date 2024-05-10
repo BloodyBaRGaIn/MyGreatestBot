@@ -66,10 +66,10 @@ namespace MyGreatestBot
 
             //ApiManager.Add(SqlServerWrapper.Instance);
             ApiManager.Add(LiteDbWrapper.Instance);
-            ApiManager.Add(YoutubeApiWrapper.MusicInstance);
-            ApiManager.Add(YandexApiWrapper.MusicInstance);
-            ApiManager.Add(VkApiWrapper.MusicInstance);
-            ApiManager.Add(SpotifyApiWrapper.MusicInstance);
+            ApiManager.Add(YoutubeApiWrapper.UrlMusicInstance);
+            ApiManager.Add(YandexApiWrapper.UrlMusicInstance);
+            ApiManager.Add(VkApiWrapper.UrlMusicInstance);
+            ApiManager.Add(SpotifyApiWrapper.UrlMusicInstance);
             ApiManager.Add(DiscordWrapper.Instance);
 
             ApiManager.InitApis();

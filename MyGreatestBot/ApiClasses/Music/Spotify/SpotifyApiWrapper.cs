@@ -13,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify API wrapper class
     /// </summary>
-    public sealed class SpotifyApiWrapper : IMusicAPI
+    public sealed class SpotifyApiWrapper : IUrlMusicAPI
     {
         private SpotifyClient? _api;
         private readonly SpotifyApiException GenericException = new();
@@ -61,7 +61,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         private static readonly SpotifyApiWrapper _instance = new();
 
-        public static IMusicAPI MusicInstance { get; } = _instance;
+        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Spotify;
 
@@ -84,11 +84,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             _api = null;
         }
 
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
             List<ITrackInfo> tracks = [];
 
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(url))
             {
                 return tracks;
             }
@@ -100,7 +100,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
             while (true)
             {
-                string? playlist_id = SpotifyQueryDecomposer.TryGetPlaylistId(query);
+                string? playlist_id = SpotifyQueryDecomposer.TryGetPlaylistId(url);
 
                 if (string.IsNullOrWhiteSpace(playlist_id))
                 {
@@ -130,7 +130,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
             while (true)
             {
-                string? album_id = SpotifyQueryDecomposer.TryGetAlbumId(query);
+                string? album_id = SpotifyQueryDecomposer.TryGetAlbumId(url);
 
                 if (string.IsNullOrWhiteSpace(album_id))
                 {
@@ -143,7 +143,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
             while (true)
             {
-                string? artist_id = SpotifyQueryDecomposer.TryGetArtistId(query);
+                string? artist_id = SpotifyQueryDecomposer.TryGetArtistId(url);
 
                 if (string.IsNullOrWhiteSpace(artist_id))
                 {
@@ -166,14 +166,14 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
             while (true)
             {
-                string? track_id = SpotifyQueryDecomposer.TryGetTrackId(query);
+                string? track_id = SpotifyQueryDecomposer.TryGetTrackId(url);
 
                 if (string.IsNullOrWhiteSpace(track_id))
                 {
                     break;
                 }
 
-                ITrackInfo? track = MusicInstance.GetTrack(track_id);
+                ITrackInfo? track = UrlMusicInstance.GetTrack(track_id);
 
                 if (track != null)
                 {

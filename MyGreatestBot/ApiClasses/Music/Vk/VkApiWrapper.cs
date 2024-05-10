@@ -18,7 +18,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk API wrapper class
     /// </summary>
-    public sealed class VkApiWrapper : IMusicAPI
+    public sealed class VkApiWrapper : IUrlMusicAPI
     {
         private VkApi? _api;
         private readonly VkApiException GenericException = new();
@@ -59,7 +59,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         private static readonly VkApiWrapper _instance = new();
 
-        public static IMusicAPI MusicInstance { get; } = _instance;
+        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Vk;
 
@@ -130,7 +130,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             _api?.LogOut();
         }
 
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
             if (_api == null || !_api.IsAuthorized)
             {
@@ -139,11 +139,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             List<ITrackInfo> tracks = [];
 
-            return string.IsNullOrWhiteSpace(query)
+            return string.IsNullOrWhiteSpace(url)
                 ? tracks
-                : TryAddAsCollection(query, tracks, is_playlist: true)
+                : TryAddAsCollection(url, tracks, is_playlist: true)
                 ? tracks
-                : TryAddAsCollection(query, tracks, is_playlist: false)
+                : TryAddAsCollection(url, tracks, is_playlist: false)
                 ? tracks
                 : null;
         }

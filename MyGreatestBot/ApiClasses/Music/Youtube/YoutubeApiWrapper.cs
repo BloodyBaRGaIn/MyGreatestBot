@@ -24,7 +24,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube API wrapper class
     /// </summary>
-    public sealed class YoutubeApiWrapper : IQueryMusicAPI, ISearchable
+    public sealed class YoutubeApiWrapper : ITextMusicAPI, IUrlMusicAPI, ISearchMusicAPI
     {
         private YoutubeClient? api;
         private readonly YoutubeApiException GenericException = new();
@@ -71,9 +71,10 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         private static readonly YoutubeApiWrapper _instance = new();
 
-        public static IMusicAPI MusicInstance { get; } = _instance;
-        public static ISearchable SearchInstance { get; } = _instance;
-        public static IQueryMusicAPI QueryInstance { get; } = _instance;
+        public static YoutubeApiWrapper Instance { get; } = _instance;
+        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
+        public static ISearchMusicAPI SearchMusicInstance { get; } = _instance;
+        public static ITextMusicAPI TextMusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
@@ -103,7 +104,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             api = null;
         }
 
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string query)
+        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string url)
         {
             if (api == null)
             {
@@ -112,14 +113,14 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             List<ITrackInfo> tracks = [];
 
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(url))
             {
                 return tracks;
             }
 
             while (true)
             {
-                string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(query);
+                string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(url);
 
                 if (string.IsNullOrWhiteSpace(playlist_id))
                 {
@@ -152,24 +153,24 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             while (true)
             {
-                string? video_id = YoutubeQueryDecomposer.TryGetVideoId(query);
+                string? video_id = YoutubeQueryDecomposer.TryGetVideoId(url);
 
                 if (string.IsNullOrWhiteSpace(video_id))
                 {
-                    video_id = YoutubeQueryDecomposer.TryGetReducedId(query);
+                    video_id = YoutubeQueryDecomposer.TryGetReducedId(url);
                 }
                 if (string.IsNullOrWhiteSpace(video_id))
                 {
                     break;
                 }
 
-                string? timing = YoutubeQueryDecomposer.GetTiming(query);
+                string? timing = YoutubeQueryDecomposer.GetTiming(url);
                 if (string.IsNullOrWhiteSpace(timing) || !int.TryParse(timing, out int time))
                 {
                     time = 0;
                 }
 
-                ITrackInfo? track = MusicInstance.GetTrack(video_id, time);
+                ITrackInfo? track = UrlMusicInstance.GetTrack(video_id, time);
 
                 if (track != null)
                 {
@@ -206,9 +207,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return track;
         }
 
-        ITrackInfo? ISearchable.SearchTrack(ITrackInfo other)
+        ITrackInfo? ISearchMusicAPI.SearchTrack(ITrackInfo other)
         {
-            if (other.TrackType == MusicInstance.ApiType)
+            if (other.TrackType == UrlMusicInstance.ApiType)
             {
                 return other;
             }
@@ -224,12 +225,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             VideoSearchResult? result = search.Where(track => track != null)
                 .FirstOrDefault(track =>
-                    Math.Abs((track.Duration.GetValueOrDefault() - other.Duration).Ticks) <= ISearchable.MaximumTimeDifference.Ticks);
+                    Math.Abs((track.Duration.GetValueOrDefault() - other.Duration).Ticks) <= ISearchMusicAPI.MaximumTimeDifference.Ticks);
 
             return result == null ? null : new YoutubeTrackInfo(result);
         }
 
-        IEnumerable<ITrackInfo> IQueryMusicAPI.GetTracksFromPlainText(string text)
+        IEnumerable<ITrackInfo> ITextMusicAPI.GetTracksFromPlainText(string text)
         {
             List<ITrackInfo> tracks = [];
             IEnumerable<VideoSearchResult>? search = Search?.GetVideosAsync(text)?.ToBlockingEnumerable();

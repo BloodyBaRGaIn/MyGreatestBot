@@ -24,7 +24,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// <summary>
     /// Yandex API wrapper class
     /// </summary>
-    public sealed class YandexApiWrapper : IRadioAPI, IMusicAPI
+    public sealed class YandexApiWrapper : IRadioMusicAPI, IUrlMusicAPI
     {
         private YandexMusicClient? _client;
         private readonly YandexApiException GenericException = new();
@@ -81,8 +81,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private static readonly YandexApiWrapper _instance = new();
 
-        public static IMusicAPI MusicInstance { get; } = _instance;
-        public static IRadioAPI RadioInstance { get; } = _instance;
+        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
+        public static IRadioMusicAPI RadioMusicInstance { get; } = _instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
 
@@ -136,7 +136,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             _client = null;
         }
 
-        ITrackInfo? IRadioAPI.GetRadio(string id)
+        ITrackInfo? IRadioMusicAPI.GetRadio(string id)
         {
             YTrack originTrack = Client.GetTrack(id);
             if (originTrack == null)
@@ -228,23 +228,23 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track;
         }
 
-        IEnumerable<ITrackInfo>? IMusicAPI.GetTracks(string? query)
+        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
             List<ITrackInfo> tracks_collection = [];
 
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(url))
             {
                 return tracks_collection;
             }
 
             while (true)
             {
-                string? track_id_str = YandexQueryDecomposer.TryGetTrackId(query);
+                string? track_id_str = YandexQueryDecomposer.TryGetTrackId(url);
                 if (string.IsNullOrWhiteSpace(track_id_str))
                 {
                     break;
                 }
-                ITrackInfo? track = MusicInstance.GetTrack(track_id_str);
+                ITrackInfo? track = UrlMusicInstance.GetTrack(track_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -254,12 +254,12 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                string? podcast_id_str = YandexQueryDecomposer.TryGetPodcastId(query);
+                string? podcast_id_str = YandexQueryDecomposer.TryGetPodcastId(url);
                 if (string.IsNullOrWhiteSpace(podcast_id_str))
                 {
                     break;
                 }
-                ITrackInfo? track = MusicInstance.GetTrack(podcast_id_str);
+                ITrackInfo? track = UrlMusicInstance.GetTrack(podcast_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -269,7 +269,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                string? album_id_str = YandexQueryDecomposer.TryGetAlbumId(query);
+                string? album_id_str = YandexQueryDecomposer.TryGetAlbumId(url);
                 if (string.IsNullOrWhiteSpace(album_id_str))
                 {
                     break;
@@ -282,7 +282,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                string? artist_id_str = YandexQueryDecomposer.TryGetArtistId(query);
+                string? artist_id_str = YandexQueryDecomposer.TryGetArtistId(url);
                 if (string.IsNullOrWhiteSpace(artist_id_str))
                 {
                     break;
@@ -295,7 +295,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                (string? playlist_user_str, string? playlist_id_str) = YandexQueryDecomposer.TryGetPlaylistId(query);
+                (string? playlist_user_str, string? playlist_id_str) = YandexQueryDecomposer.TryGetPlaylistId(url);
                 if (string.IsNullOrWhiteSpace(playlist_user_str) || string.IsNullOrWhiteSpace(playlist_id_str))
                 {
                     break;
@@ -308,7 +308,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                if (!YandexQueryDecomposer.TryGetAsChart(query))
+                if (!YandexQueryDecomposer.TryGetAsChart(url))
                 {
                     break;
                 }

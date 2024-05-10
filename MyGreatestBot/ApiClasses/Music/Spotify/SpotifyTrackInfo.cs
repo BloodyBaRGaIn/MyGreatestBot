@@ -69,7 +69,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             AudioURL = track.PreviewUrl;
         }
 
-        private bool TrySearchGeneric(ISearchable instance)
+        private bool TrySearchGeneric(ISearchMusicAPI instance)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         private bool TrySearchYoutube()
         {
-            return TrySearchGeneric(YoutubeApiWrapper.SearchInstance);
+            return TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance);
         }
 
         void ITrackInfo.ObtainAudioURL()

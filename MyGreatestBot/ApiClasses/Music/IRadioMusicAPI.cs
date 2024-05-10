@@ -3,7 +3,7 @@
     /// <summary>
     /// Interface for music APIs with radio mode support
     /// </summary>
-    public interface IRadioAPI : IMusicAPI
+    public interface IRadioMusicAPI : IMusicAPI
     {
         /// <summary>
         /// Get track in radio mode
