@@ -63,21 +63,33 @@ namespace MyGreatestBot.Commands
 
             foreach (ApiIntents value in Enum.GetValues(typeof(ApiIntents)))
             {
-                if (ApiManager.IsApiRegisterdAndAllowed(value))
+                switch (value)
                 {
-                    result += $"{value} ";
-
-                    if (ApiManager.FailedIntents.HasFlag(value))
-                    {
-                        result += "FAILED";
-                    }
-                    else
-                    {
-                        result += "SUCCESS";
-                    }
-
-                    result += Environment.NewLine;
+                    case ApiIntents.None:
+                    case ApiIntents.Music:
+                    case ApiIntents.Db:
+                    case ApiIntents.Discord:
+                    case ApiIntents.All:
+                        continue;
                 }
+
+                if (!ApiManager.IsApiRegisterdAndAllowed(value))
+                {
+                    continue;
+                }
+
+                result += $"{value} ";
+
+                if (ApiManager.FailedIntents.HasFlag(value))
+                {
+                    result += "FAILED";
+                }
+                else
+                {
+                    result += "SUCCESS";
+                }
+
+                result += Environment.NewLine;
             }
 
             if (string.IsNullOrEmpty(result))

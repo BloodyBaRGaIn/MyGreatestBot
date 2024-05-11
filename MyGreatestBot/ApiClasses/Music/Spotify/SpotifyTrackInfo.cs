@@ -2,6 +2,7 @@
 using SpotifyAPI.Web;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace MyGreatestBot.ApiClasses.Music.Spotify
 {
@@ -55,8 +56,8 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             PlaylistName = playlist == null || string.IsNullOrWhiteSpace(playlist.Name)
                 ? null
                 : string.IsNullOrWhiteSpace(playlist.Id)
-                    ? new(playlist.Name)
-                    : new(playlist.Name, $"{Base.Domain}playlist/{playlist.Id}");
+                ? new(playlist.Name)
+                : new(playlist.Name, $"{Base.Domain}playlist/{playlist.Id}");
 
             string? cover = track.Album.Images.FirstOrDefault()?.Url;
 
@@ -92,31 +93,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        private bool TrySearchYoutube()
+        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
         {
-            return TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance);
-        }
-
-        void ITrackInfo.ObtainAudioURL()
-        {
-            try
+            if (!TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance))
             {
-                if (TrySearchYoutube())
-                {
-                    return;
-                }
-
                 // default Spotify preview track duration
                 Duration = TimeSpan.FromSeconds(29);
-
-                if (string.IsNullOrWhiteSpace(AudioURL))
-                {
-                    throw new ArgumentNullException(nameof(AudioURL));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new SpotifyApiException("Cannot get audio URL", ex);
             }
         }
 

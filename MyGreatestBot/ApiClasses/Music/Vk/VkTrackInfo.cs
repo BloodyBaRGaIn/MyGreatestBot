@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using VkNet.Model;
 
 namespace MyGreatestBot.ApiClasses.Music.Vk
@@ -92,20 +93,10 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             AudioURL = string.Empty;
         }
 
-        void ITrackInfo.ObtainAudioURL()
+        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
         {
-            try
-            {
-                AudioURL = origin.Url?.ToString() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(AudioURL))
-                {
-                    throw new ArgumentNullException(nameof(AudioURL));
-                }
-            }
-            catch (Exception? ex)
-            {
-                throw new VkApiException("Cannot get audio URL", ex);
-            }
+            _ = cts;
+            AudioURL = origin.Url?.ToString() ?? string.Empty;
         }
     }
 }

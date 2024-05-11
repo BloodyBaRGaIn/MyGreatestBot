@@ -1,7 +1,8 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
 using System.Linq;
-
+using System.Threading;
+using System.Threading.Tasks;
 using EmbedThumbnail = DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail;
 
 namespace MyGreatestBot.ApiClasses.Music
@@ -172,7 +173,33 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Retrieves the audio URL
         /// </summary>
-        public void ObtainAudioURL();
+        public virtual void ObtainAudioURL(int waitMs = -1)
+        {
+            CancellationTokenSource cts = new();
+            Task waitTask = Task.Delay(waitMs > 0 ? waitMs : Timeout.Infinite, cts.Token);
+            try
+            {
+                Task audioTask = Task.Run(() =>
+                {
+                    ObtainAudioURLInternal(cts);
+                }, cts.Token);
+
+                _ = Task.WaitAny(waitTask, audioTask);
+
+                cts.Cancel();
+
+                if (string.IsNullOrWhiteSpace(AudioURL))
+                {
+                    throw new InvalidOperationException("Cannot get audio URL");
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        protected void ObtainAudioURLInternal(CancellationTokenSource cts);
 
         /// <summary>
         /// Reloads the corresponding API

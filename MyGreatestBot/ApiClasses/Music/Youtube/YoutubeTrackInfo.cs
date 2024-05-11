@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
+using System.Threading;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
@@ -69,35 +70,14 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             }
         }
 
-        void ITrackInfo.ObtainAudioURL()
+        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
         {
-            try
-            {
-                YoutubeApiWrapper api_instance = YoutubeApiWrapper.Instance;
-
-                AudioURL = Base.IsLiveStream
-                    ? api_instance.Streams
-                        .GetHttpLiveStreamUrlAsync(Base.Id)
-                        .AsTask()
-                        .GetAwaiter()
-                        .GetResult()
-                    : api_instance.Streams
-                        .GetManifestAsync(Base.Id)
-                        .AsTask()
-                        .GetAwaiter()
-                        .GetResult()
-                        .GetAudioOnlyStreams()
-                        .GetWithHighestBitrate().Url;
-
-                if (string.IsNullOrWhiteSpace(AudioURL))
-                {
-                    throw new ArgumentNullException(nameof(AudioURL));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new YoutubeApiException("Cannot get audio URL", ex);
-            }
+            AudioURL = (Base.IsLiveStream
+                ? YoutubeApiWrapper.Instance.Streams.GetHttpLiveStreamUrlAsync(Base.Id, cts.Token)
+                .AsTask().GetAwaiter().GetResult()
+                : YoutubeApiWrapper.Instance.Streams.GetManifestAsync(Base.Id, cts.Token)
+                .AsTask().GetAwaiter().GetResult().GetAudioOnlyStreams()
+                .TryGetWithHighestBitrate()?.Url) ?? string.Empty;
         }
     }
 }

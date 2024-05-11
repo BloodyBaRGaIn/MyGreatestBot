@@ -3,6 +3,7 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Playlist;
@@ -100,20 +101,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        void ITrackInfo.ObtainAudioURL()
+        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
         {
-            try
-            {
-                AudioURL = origin.GetLink();
-                if (string.IsNullOrWhiteSpace(AudioURL))
-                {
-                    throw new ArgumentNullException(nameof(AudioURL));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new YandexApiException("Cannot get audio URL", ex);
-            }
+            _ = cts;
+            AudioURL = origin.GetLink();
         }
     }
 }
