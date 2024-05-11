@@ -11,7 +11,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// </summary>
     public sealed class SpotifyTrackInfo : ITrackInfo
     {
+#pragma warning disable CA1859
         private ITrackInfo Base => this;
+#pragma warning restore CA1859
 
         ApiIntents ITrackInfo.TrackType => ApiIntents.Spotify;
 
@@ -42,12 +44,12 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         internal SpotifyTrackInfo(FullTrack track, FullPlaylist? playlist = null)
         {
             TrackName = new HyperLink(track.Name, $"{Base.Domain}track/{track.Id}")
-                .WithId(new(track.Id, Base.TrackType));
+                .WithId(Base.GetCompositeId(track.Id));
 
             ArtistArr = track.Artists.Select(a =>
                 new HyperLink(
                     a.Name,
-                    $"{Base.Domain}artist/{a.Id}").WithId(new(a.Id, Base.TrackType))).ToArray();
+                    $"{Base.Domain}artist/{a.Id}").WithId(Base.GetCompositeId(a.Id))).ToArray();
 
             AlbumName = new(track.Album.Name, $"{Base.Domain}album/{track.Album.Id}");
 

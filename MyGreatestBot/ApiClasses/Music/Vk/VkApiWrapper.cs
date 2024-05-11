@@ -148,7 +148,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 : null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrack(string id, int time)
+        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             if (!long.TryParse(id, out long trackId))
             {

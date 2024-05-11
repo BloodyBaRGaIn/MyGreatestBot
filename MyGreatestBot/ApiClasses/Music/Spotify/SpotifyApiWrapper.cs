@@ -173,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     break;
                 }
 
-                ITrackInfo? track = UrlMusicInstance.GetTrack(track_id);
+                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id);
 
                 if (track != null)
                 {
@@ -186,7 +186,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrack(string id, int time)
+        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             FullTrack? origin = Tracks.Get(id).GetAwaiter().GetResult();
 

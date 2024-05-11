@@ -170,7 +170,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                     time = 0;
                 }
 
-                ITrackInfo? track = UrlMusicInstance.GetTrack(video_id, time);
+                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(video_id, time);
 
                 if (track != null)
                 {
@@ -183,7 +183,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrack(string id, int time)
+        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             Video origin = Videos.GetAsync(id)
                     .AsTask()

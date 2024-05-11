@@ -244,7 +244,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = UrlMusicInstance.GetTrack(track_id_str);
+                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -259,7 +259,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = UrlMusicInstance.GetTrack(podcast_id_str);
+                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(podcast_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -321,7 +321,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrack(string? track_id_str, int time)
+        ITrackInfo? IMusicAPI.GetTrackFromId(string? track_id_str, int time)
         {
             if (string.IsNullOrWhiteSpace(track_id_str))
             {

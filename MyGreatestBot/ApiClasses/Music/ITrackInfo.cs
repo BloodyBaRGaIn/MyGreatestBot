@@ -225,15 +225,15 @@ namespace MyGreatestBot.ApiClasses.Music
         {
             return api switch
             {
-                ApiIntents.Youtube => Youtube.YoutubeApiWrapper.UrlMusicInstance.GetTrack(id),
-                ApiIntents.Yandex => Yandex.YandexApiWrapper.UrlMusicInstance.GetTrack(id),
-                ApiIntents.Vk => Vk.VkApiWrapper.UrlMusicInstance.GetTrack(id),
-                ApiIntents.Spotify => Spotify.SpotifyApiWrapper.UrlMusicInstance.GetTrack(id),
+                ApiIntents.Youtube => YoutubeApiWrapper.UrlMusicInstance.GetTrackFromId(id),
+                ApiIntents.Yandex => YandexApiWrapper.UrlMusicInstance.GetTrackFromId(id),
+                ApiIntents.Vk => VkApiWrapper.UrlMusicInstance.GetTrackFromId(id),
+                ApiIntents.Spotify => SpotifyApiWrapper.UrlMusicInstance.GetTrackFromId(id),
                 _ => null,
             };
         }
 
-        internal CompositeId GetCompositeId(string id)
+        protected internal CompositeId GetCompositeId(string id)
         {
             return new(id, TrackType);
         }
