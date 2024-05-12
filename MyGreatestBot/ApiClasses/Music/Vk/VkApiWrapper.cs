@@ -57,9 +57,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         }
 
-        private static readonly VkApiWrapper _instance = new();
-
-        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
+        public static VkApiWrapper Instance { get; } = new();
+        public static IUrlMusicAPI UrlMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Vk;
 

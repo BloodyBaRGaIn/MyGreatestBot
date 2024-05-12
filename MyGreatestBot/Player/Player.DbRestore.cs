@@ -54,7 +54,7 @@ namespace MyGreatestBot.Player
                 int restoreCount = 0;
                 foreach (CompositeId composite in info)
                 {
-                    ITrackInfo? track = ITrackInfo.GetTrack(composite.Api, composite.Id);
+                    ITrackInfo? track = ApiManager.Get<IMusicAPI>(composite.Api)?.GetTrackFromId(composite.Id);
                     if (track == null)
                     {
                         continue;

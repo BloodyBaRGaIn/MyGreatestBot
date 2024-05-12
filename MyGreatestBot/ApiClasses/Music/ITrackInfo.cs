@@ -215,24 +215,6 @@ namespace MyGreatestBot.ApiClasses.Music
         public string Arguments => $"-loglevel error {(TimePosition == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {TimePosition} ")}" +
                                    $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
-        /// <summary>
-        /// Get track from search result by its id
-        /// </summary>
-        /// <param name="api">API flag </param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        internal static ITrackInfo? GetTrack(ApiIntents api, string id)
-        {
-            return api switch
-            {
-                ApiIntents.Youtube => YoutubeApiWrapper.UrlMusicInstance.GetTrackFromId(id),
-                ApiIntents.Yandex => YandexApiWrapper.UrlMusicInstance.GetTrackFromId(id),
-                ApiIntents.Vk => VkApiWrapper.UrlMusicInstance.GetTrackFromId(id),
-                ApiIntents.Spotify => SpotifyApiWrapper.UrlMusicInstance.GetTrackFromId(id),
-                _ => null,
-            };
-        }
-
         protected internal CompositeId GetCompositeId(string id)
         {
             return new(id, TrackType);

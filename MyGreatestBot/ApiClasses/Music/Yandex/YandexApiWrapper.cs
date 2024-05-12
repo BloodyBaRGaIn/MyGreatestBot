@@ -79,10 +79,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         }
 
-        private static readonly YandexApiWrapper _instance = new();
-
-        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
-        public static IRadioMusicAPI RadioMusicInstance { get; } = _instance;
+        public static YandexApiWrapper Instance { get; } = new();
+        public static IUrlMusicAPI UrlMusicInstance => Instance;
+        public static IRadioMusicAPI RadioMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
 

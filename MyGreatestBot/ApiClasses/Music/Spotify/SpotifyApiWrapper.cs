@@ -59,9 +59,8 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         }
 
-        private static readonly SpotifyApiWrapper _instance = new();
-
-        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
+        public static SpotifyApiWrapper Instance { get; } = new();
+        public static IUrlMusicAPI UrlMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Spotify;
 

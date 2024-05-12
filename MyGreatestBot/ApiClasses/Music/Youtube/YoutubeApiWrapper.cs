@@ -69,12 +69,10 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         }
 
-        private static readonly YoutubeApiWrapper _instance = new();
-
-        public static YoutubeApiWrapper Instance { get; } = _instance;
-        public static IUrlMusicAPI UrlMusicInstance { get; } = _instance;
-        public static ISearchMusicAPI SearchMusicInstance { get; } = _instance;
-        public static ITextMusicAPI TextMusicInstance { get; } = _instance;
+        public static YoutubeApiWrapper Instance { get; } = new();
+        public static IUrlMusicAPI UrlMusicInstance => Instance;
+        public static ISearchMusicAPI SearchMusicInstance => Instance;
+        public static ITextMusicAPI TextMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
 
