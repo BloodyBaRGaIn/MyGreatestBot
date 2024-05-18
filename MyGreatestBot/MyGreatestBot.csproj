@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -12,9 +12,6 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Platforms>AnyCPU;x86</Platforms>
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-    <PublishTrimmed>True</PublishTrimmed>
-    <PublishAot>True</PublishAot>
     <SignAssembly>False</SignAssembly>
     <AnalysisLevel>latest</AnalysisLevel>
     <ApplicationIcon>Discord_logo.ico</ApplicationIcon>
@@ -24,24 +21,28 @@
     <WarningLevel>9999</WarningLevel>
     <DebugType>embedded</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <WarningLevel>9999</WarningLevel>
     <DebugType>embedded</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
     <DebugType>embedded</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <WarningLevel>9999</WarningLevel>
     <DebugType>embedded</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,12 +63,12 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.11.3" />
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02245" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02245" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02245" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-nightly-02245" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02261" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02261" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02261" />
+    <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-nightly-02261" />
     <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3394" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3421" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.10.0" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.10.0" />
     <PackageReference Include="LiteDB" Version="5.0.19" />
@@ -82,7 +83,7 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="VkNet" Version="1.77.0-alpha-91" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.3.14" />
+    <PackageReference Include="YoutubeExplode" Version="6.3.13" />
   </ItemGroup>
 
   <ItemGroup>
