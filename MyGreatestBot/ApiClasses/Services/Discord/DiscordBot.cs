@@ -8,6 +8,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Utils;
@@ -48,6 +49,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             DiscordConfiguration discordConfig = new()
             {
                 MinimumLogLevel = LogLevel.Error,
+                LogTimestampFormat = LogHandler.DateTimeFormat,
                 Intents = DiscordIntents.All,
                 Token = config_js.Token,
                 TokenType = TokenType.Bot,

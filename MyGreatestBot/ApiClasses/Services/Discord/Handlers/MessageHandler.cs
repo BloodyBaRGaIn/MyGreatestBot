@@ -16,7 +16,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         private readonly Semaphore messageSendSemaphore = new(1, 1);
 
-        private async Task SendAsync(DiscordMessageBuilder messageBuilder)
+        private void Send(DiscordMessageBuilder messageBuilder)
         {
             if (Channel is null)
             {
@@ -27,7 +27,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
-            _ = await Channel.SendMessageAsync(messageBuilder);
+            if (!Channel.SendMessageAsync(messageBuilder).Wait(messageDelay))
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    "Cannot send message");
+
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    messageBuilder.Content ?? "Cannot get message content");
+            }
             _ = messageSendSemaphore.Release();
         }
 
@@ -45,7 +52,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             if (embed is not null)
             {
-                SendAsync(GetBuilder(embed)).Wait();
+                Send(GetBuilder(embed));
             }
         }
 
@@ -61,7 +68,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             if (!string.IsNullOrWhiteSpace(message))
             {
-                SendAsync(GetBuilder(message)).Wait();
+                Send(GetBuilder(message));
             }
         }
     }

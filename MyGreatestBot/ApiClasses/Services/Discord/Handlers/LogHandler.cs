@@ -14,6 +14,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                                    int logDelay,
                                    LogLevel defaultLogLevel = LogLevel.None)
     {
+        public const string DateTimeFormat = "dd.MM.yyyy HH:mm:ss.fff";
+
         private static readonly Semaphore writerSemaphore = new(1, 1);
 
         private async Task GenericWriteLineAsync(string text, LogLevel logLevel)
@@ -29,7 +31,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             lock (writer)
             {
                 writer.WriteLine(
-                    $"[{DateTime.Now:dd.MM.yyyy HH:mm:ss.fff}]\t" +
+                    $"[{DateTime.Now.ToString(DateTimeFormat)}]\t" +
                     $"{(logLevel == LogLevel.None ? "" : $"[{logLevel}]")}\t" +
                     $"{guildName}" +
                     $"{Environment.NewLine}{text}");
