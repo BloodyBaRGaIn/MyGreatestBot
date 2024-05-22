@@ -58,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             CommandPrefix = config_js.Prefix;
 
-            Client = new DiscordClient(discordConfig);
+            Client = new(discordConfig);
 
             Client.SessionCreated += Client_SessionCreated;
             Client.ClientErrored += Client_ClientErrored;

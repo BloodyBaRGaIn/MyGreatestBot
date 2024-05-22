@@ -153,7 +153,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
         public string GetShortMessage(string prefix)
         {
-            return $"{prefix}{Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
+            return $"{prefix}: {Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
         }
 
         /// <summary>

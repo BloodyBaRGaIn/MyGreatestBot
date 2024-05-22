@@ -34,8 +34,7 @@ namespace MyGreatestBot.Player
                 throw;
             }
 
-            _ = exception.WithSuccess();
-            DiscordEmbedBuilder message = exception.GetDiscordEmbed();
+            DiscordEmbedBuilder message = exception.WithSuccess().GetDiscordEmbed();
             message.Thumbnail = track.GetThumbnail();
             return message;
         }

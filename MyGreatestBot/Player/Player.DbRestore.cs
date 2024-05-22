@@ -63,7 +63,7 @@ namespace MyGreatestBot.Player
                     {
                         tracksQueue.Enqueue(track);
                     }
-                    Handler.Log.Send(track.GetShortMessage("Track restored: "));
+                    Handler.Log.Send(track.GetShortMessage("Track restored"));
                     restoreCount++;
                 }
                 DbInstance.RemoveTracks(Handler.GuildId);

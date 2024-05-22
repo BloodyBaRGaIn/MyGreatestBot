@@ -9,7 +9,6 @@ namespace MyGreatestBot.Commands.Exceptions
 
         protected static DiscordColor GenericColor { get; } = new(92, 45, 145);
 
-        public new string Message => base.Message;
         public virtual string Title { get; } = "Command error";
         protected virtual DiscordColor ErroredColor { get; } = DiscordColor.Red;
         protected virtual DiscordColor ExecutedColor { get; } = DiscordColor.White;
