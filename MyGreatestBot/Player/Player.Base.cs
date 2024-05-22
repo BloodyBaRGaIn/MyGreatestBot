@@ -12,11 +12,15 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
+        private const int TRACK_LOADING_DELAY_MS = 10000;
+        private const int TRACK_LOADING_WARN_RETRIES = 3;
+        private const int TRACK_LOADING_FAULT_RETRIES = 6;
+
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(101);
-        private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(3);
+        private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(1);
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
@@ -203,7 +207,7 @@ namespace MyGreatestBot.Player
                 return;
             }
 
-            bool already_restarted = false;
+            uint load_retries = 0;
             bool obtain_audio = true;
 
             try
@@ -220,7 +224,17 @@ namespace MyGreatestBot.Player
             {
                 Status = PlayerStatus.Loading;
 
-                Wait(100);
+                if (load_retries >= TRACK_LOADING_FAULT_RETRIES)
+                {
+                    Handler.LogError.Send("Cannot load track");
+                }
+                else if (load_retries > 0)
+                {
+                    Handler.LogError.Send($"Track load failed for {load_retries} times.",
+                        load_retries < TRACK_LOADING_WARN_RETRIES ? LogLevel.Warning : LogLevel.Error);
+                }
+
+                Wait(1);
 
                 if (obtain_audio)
                 {
@@ -230,7 +244,6 @@ namespace MyGreatestBot.Player
                         {
                             Handler.LogError.Send("Audio URL is not available");
                             currentTrack.Reload();
-                            already_restarted = true;
                             continue;
                         }
                     }
@@ -247,7 +260,7 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send("Load ffmpeg");
 
-                if (!ffmpeg.TryLoad(10000))
+                if (!ffmpeg.TryLoad(TRACK_LOADING_DELAY_MS))
                 {
                     Wait(1);
 
@@ -255,12 +268,7 @@ namespace MyGreatestBot.Player
                     {
                         break;
                     }
-                    if (already_restarted)
-                    {
-                        Handler.LogError.Send("Cannot load track");
-                    }
-                    //currentTrack.Reload();
-                    already_restarted = true;
+                    load_retries++;
                     obtain_audio = true;
                     continue;
                 }
