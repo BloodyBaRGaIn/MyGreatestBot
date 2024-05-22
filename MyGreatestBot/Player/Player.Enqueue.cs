@@ -10,7 +10,7 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        internal void Enqueue(IEnumerable<ITrackInfo> tracks, CommandActionSource source)
+        internal void Enqueue(ref IEnumerable<ITrackInfo> tracks, CommandActionSource source)
         {
             int totalCount;
 

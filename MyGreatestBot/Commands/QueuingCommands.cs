@@ -4,6 +4,7 @@ using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Utils;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
@@ -19,6 +20,10 @@ namespace MyGreatestBot.Commands
                 return;
             }
 
+            Stopwatch command_stopwatch = new();
+
+            command_stopwatch.Start();
+
             handler.TextChannel = ctx.Channel;
             handler.Voice.UpdateVoiceConnection();
 
@@ -29,9 +34,26 @@ namespace MyGreatestBot.Commands
                 handler.Update(ctx.Guild);
             }
 
+            command_stopwatch.Stop();
+            handler.Log.Send($"Preparation takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
+            command_stopwatch.Restart();
+
             IEnumerable<ITrackInfo> tracks = ApiManager.GetAll(query);
 
-            await Task.Run(() => handler.PlayerInstance.Enqueue(tracks, source));
+            command_stopwatch.Stop();
+            handler.Log.Send($"GetTracks takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
+            command_stopwatch.Restart();
+
+            await Task.Run(() => handler.PlayerInstance.Enqueue(ref tracks, source));
+
+            command_stopwatch.Stop();
+            handler.Log.Send($"Enqueue takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
+            command_stopwatch.Restart();
+
+            foreach (ITrackInfo track in tracks)
+            {
+                handler.Log.Send(track.GetShortMessage("Added"));
+            }
         }
 
         [Command("play")]
