@@ -19,17 +19,14 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        [AllowNull]
-        public HyperLink AlbumName { get; }
-        [AllowNull]
-        public HyperLink PlaylistName { get; }
+        [AllowNull] public HyperLink AlbumName { get; }
+        [AllowNull] public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; private set; }
         TimeSpan ITrackInfo.TimePosition { get; set; }
 
         public string AudioURL { get; private set; }
-        [AllowNull]
-        public string CoverURL { get; } = null;
+        [AllowNull] public string CoverURL { get; } = null;
 
         bool ITrackInfo.Radio { get; set; }
         bool ITrackInfo.BypassCheck { get; set; }

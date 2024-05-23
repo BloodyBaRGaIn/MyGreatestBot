@@ -24,17 +24,14 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        [AllowNull]
-        public HyperLink AlbumName { get; }
-        [AllowNull]
-        public HyperLink PlaylistName { get; }
+        [AllowNull] public HyperLink AlbumName { get; }
+        [AllowNull] public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.TimePosition { get; set; }
 
         public string AudioURL { get; private set; } = string.Empty;
-        [AllowNull]
-        public string CoverURL { get; } = null;
+        [AllowNull] public string CoverURL { get; } = null;
 
         bool ITrackInfo.Radio { get; set; }
         bool ITrackInfo.BypassCheck { get; set; }
@@ -54,7 +51,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             TrackName = new HyperLink(track.Title, $"{Base.Domain}track/{track.Id}").WithId(Base.GetCompositeId(track.Id));
 
             ArtistArr = track.Artists.Select(a =>
-                new HyperLink(transletters ? a.Name.ToTransletters() : a.Name, $"{Base.Domain}artist/{a.Id}")
+                new HyperLink(
+                    transletters ? a.Name.ToTransletters() : a.Name,
+                    $"{Base.Domain}artist/{a.Id}")
                 .WithId(Base.GetCompositeId(a.Id))).ToArray();
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);

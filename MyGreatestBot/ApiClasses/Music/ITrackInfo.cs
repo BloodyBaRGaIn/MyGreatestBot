@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EmbedThumbnail = DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail;
 
 namespace MyGreatestBot.ApiClasses.Music
 {
@@ -20,8 +19,8 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Base URL
         /// </summary>
-        [DisallowNull]
-        public virtual string Domain => ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
+        [DisallowNull] public virtual string Domain =>
+            ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
 
         /// <summary>
         /// Extended track name
@@ -36,14 +35,12 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Extended album name
         /// </summary>
-        [AllowNull]
-        public HyperLink AlbumName { get; }
+        [AllowNull] public HyperLink AlbumName { get; }
 
         /// <summary>
         /// Extended playlist name
         /// </summary>
-        [AllowNull]
-        public HyperLink PlaylistName { get; }
+        [AllowNull] public HyperLink PlaylistName { get; }
 
         /// <summary>
         /// Base track name
@@ -68,13 +65,11 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Thumbnails image URL
         /// </summary>
-        [AllowNull]
-        public string CoverURL { get; }
+        [AllowNull] public string CoverURL { get; }
 
         /// <summary>
         /// Audio URL for FFMPEG
         /// </summary>
-        [DisallowNull]
         public string AudioURL { get; }
 
         public bool Radio { get; set; }
@@ -160,11 +155,11 @@ namespace MyGreatestBot.ApiClasses.Music
         /// Get Discord message thumbnail with track cover image
         /// </summary>
         /// <returns>Track cover image as thumbnail</returns>
-        public EmbedThumbnail? GetThumbnail()
+        public DSharpPlus.Entities.DiscordEmbedBuilder.EmbedThumbnail? GetThumbnail()
         {
             return string.IsNullOrWhiteSpace(CoverURL)
                 ? null
-                : new EmbedThumbnail()
+                : new()
                 {
                     Url = CoverURL
                 };
@@ -215,7 +210,7 @@ namespace MyGreatestBot.ApiClasses.Music
         public string Arguments => $"-loglevel error {(TimePosition == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {TimePosition} ")}" +
                                    $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
-        protected internal CompositeId GetCompositeId(string id)
+        internal CompositeId GetCompositeId(string id)
         {
             return new(id, TrackType);
         }

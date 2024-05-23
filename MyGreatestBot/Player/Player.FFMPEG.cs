@@ -18,15 +18,14 @@ namespace MyGreatestBot.Player
 
             private static readonly Queue<string> ErrorQueue = new();
 
-            [AllowNull]
-            private Process Process;
+            [AllowNull] private Process Process;
 
-            [AllowNull]
-            internal StreamReader? StandardOutput => Process?.StandardOutput;
+            [AllowNull] internal StreamReader? StandardOutput => Process?.StandardOutput;
+            [AllowNull] internal StreamReader? StandardError => Process?.StandardError;
 
-            [AllowNull]
-            internal StreamReader? StandardError => Process?.StandardError;
-
+            /// <summary>
+            /// <inheritdoc cref="Process.HasExited"/>
+            /// </summary>
             internal bool HasExited => Process?.HasExited ?? true;
 
             internal static bool CheckForExecutableExists()

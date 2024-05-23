@@ -22,16 +22,13 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        [AllowNull]
-        public HyperLink AlbumName { get; } = null;
-        [AllowNull]
-        public HyperLink PlaylistName { get; }
+        [AllowNull] public HyperLink AlbumName { get; } = null;
+        [AllowNull] public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.TimePosition { get; set; }
 
-        [AllowNull]
-        public string CoverURL { get; }
+        [AllowNull] public string CoverURL { get; }
         public string AudioURL { get; private set; }
 
         bool ITrackInfo.Radio { get; set; }

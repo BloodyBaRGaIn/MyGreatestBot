@@ -28,20 +28,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         public static readonly DiscordBot Instance = new();
 
-        [AllowNull]
-        public static DiscordClient Client => Instance.Client;
-        [AllowNull]
-        public static VoiceNextExtension VoiceNext => Instance.Voice;
-        [AllowNull]
-        public static CommandsNextExtension Commands => Instance.Commands;
-        [AllowNull]
-        public static IReadOnlyDictionary<string, Command> RegisteredCommands => Commands.RegisteredCommands;
+        /// <inheritdoc cref="DiscordBot.Client"/>
+        [AllowNull] public static DiscordClient Client => Instance.Client;
+
+        /// <inheritdoc cref="DiscordBot.Voice"/>
+        [AllowNull] public static VoiceNextExtension VoiceNext => Instance.Voice;
+
+        /// <inheritdoc cref="DiscordBot.Commands"/>
+        [AllowNull] public static CommandsNextExtension Commands => Instance.Commands;
+
+        /// <inheritdoc cref="CommandsNextExtension.RegisteredCommands"/>
+        [AllowNull] public static IReadOnlyDictionary<string, Command> RegisteredCommands => Commands.RegisteredCommands;
 
         /// <summary>
         /// Try to run bot
         /// </summary>
-        /// <param name="connectionTimeout">Timeout for connection</param>
-        /// <param name="disconnectionTimeout">Timeout for disconnection</param>
+        /// <param name="connectionTimeout">
+        /// <inheritdoc cref="DiscordBot.Run(int, int)" path="/param[@name='connectionTimeout']"/>
+        /// </param>
+        /// <param name="disconnectionTimeout">
+        /// <inheritdoc cref="DiscordBot.Run(int, int)" path="/param[@name='disconnectionTimeout']"/>
+        /// </param>
         public static void Run(int connectionTimeout, int disconnectionTimeout)
         {
             try
@@ -54,9 +61,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
         }
 
-        /// <summary>
-        /// Bot stop request
-        /// </summary>
+        /// <inheritdoc cref="IAPI.Logout"/>
+        public static void Logout()
+        {
+            (Instance as IAPI)?.Logout();
+        }
+
+        /// <inheritdoc cref="DiscordBot.Exit"/>
         public static void Exit()
         {
             Instance?.Exit();

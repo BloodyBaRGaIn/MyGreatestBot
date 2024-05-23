@@ -11,8 +11,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// </summary>
     public sealed class MessageHandler(int messageDelay)
     {
-        [AllowNull]
-        public DiscordChannel Channel { get; set; }
+        [AllowNull] public DiscordChannel Channel { get; set; }
 
         private readonly Semaphore messageSendSemaphore = new(1, 1);
 

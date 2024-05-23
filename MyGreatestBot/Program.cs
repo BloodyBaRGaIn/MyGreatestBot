@@ -86,6 +86,7 @@ namespace MyGreatestBot
             return 0;
         }
 
+        /// <inheritdoc cref="Console.CancelKeyPress"/>
         private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
             _ = sender;
@@ -102,6 +103,7 @@ namespace MyGreatestBot
             catch { }
         }
 
+        /// <inheritdoc cref="AppDomain.ProcessExit"/>
         private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
         {
             _ = sender;
@@ -130,6 +132,7 @@ namespace MyGreatestBot
             }
         }
 
+        /// <inheritdoc cref="AppDomain.UnhandledException"/>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _ = sender;

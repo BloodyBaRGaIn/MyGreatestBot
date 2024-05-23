@@ -17,8 +17,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// </summary>
     public sealed class ConnectionHandler
     {
-        [AllowNull]
-        private readonly Player.Player _player = null;
+        [AllowNull] private readonly Player.Player _player = null;
+
         private readonly PlayerException playerNotInitializedException = new();
 
         internal Player.Player PlayerInstance => _player ?? throw playerNotInitializedException;
@@ -35,10 +35,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             set => Message.Channel = value;
         }
 
-        [AllowNull]
-        public DiscordChannel VoiceChannel => Voice.Channel;
-        [AllowNull]
-        public VoiceNextConnection VoiceConnection => Voice.Connection;
+        [AllowNull] public DiscordChannel VoiceChannel => Voice.Channel;
+        [AllowNull] public VoiceNextConnection VoiceConnection => Voice.Connection;
 
         public LogHandler Log { get; }
         public LogHandler LogError { get; }
@@ -288,7 +286,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                DiscordWrapper.Instance.Logout();
+                DiscordWrapper.Logout();
             }
             catch { }
 

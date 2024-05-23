@@ -20,16 +20,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         public HyperLink TrackName { get; }
         public HyperLink[] ArtistArr { get; }
-        [AllowNull]
-        public HyperLink AlbumName { get; }
-        [AllowNull]
-        public HyperLink PlaylistName { get; }
+        [AllowNull] public HyperLink AlbumName { get; }
+        [AllowNull] public HyperLink PlaylistName { get; }
 
         public TimeSpan Duration { get; }
         TimeSpan ITrackInfo.TimePosition { get; set; }
 
-        [AllowNull]
-        public string CoverURL { get; } = null;
+        [AllowNull] public string CoverURL { get; } = null;
         public string AudioURL { get; private set; }
 
         bool ITrackInfo.Radio { get; set; }

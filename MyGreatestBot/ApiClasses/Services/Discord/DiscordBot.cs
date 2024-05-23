@@ -22,18 +22,36 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 {
     public sealed class DiscordBot : IAPI, IAccessible
     {
-        [AllowNull]
-        public DiscordClient Client { get; private set; }
-        [AllowNull]
-        public InteractivityExtension Interactivity { get; private set; }
-        [AllowNull]
-        public CommandsNextExtension Commands { get; private set; }
-        [AllowNull]
-        public VoiceNextExtension Voice { get; private set; }
+        /// <summary>
+        /// Bot client instance.
+        /// </summary>
+        [AllowNull] public DiscordClient Client { get; private set; }
+
+        /// <summary>
+        /// Bot interactivity instance.
+        /// </summary>
+        [AllowNull] public InteractivityExtension Interactivity { get; private set; }
+
+        /// <summary>
+        /// Bot commands handling instance.
+        /// </summary>
+        [AllowNull] public CommandsNextExtension Commands { get; private set; }
+
+        /// <summary>
+        /// Bot voice actions handling instance.
+        /// </summary>
+        [AllowNull] public VoiceNextExtension Voice { get; private set; }
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
+        /// <summary>
+        /// Default bot's command prefix
+        /// </summary>
         private const string DefaultPrefix = "d!";
+
+        /// <summary>
+        /// Actual bot's command prefix
+        /// </summary>
         private string CommandPrefix = string.Empty;
 
         private volatile bool exitRequest;
@@ -42,7 +60,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         DomainCollection IAccessible.Domains { get; } = "http://www.discord.com/";
 
-        public void PerformAuth()
+        void IAPI.PerformAuth()
         {
             DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
 
@@ -103,7 +121,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             MarkdownWriter.GenerateFile();
         }
 
-        public void Logout()
+        void IAPI.Logout()
         {
             if (Commands != null)
             {
