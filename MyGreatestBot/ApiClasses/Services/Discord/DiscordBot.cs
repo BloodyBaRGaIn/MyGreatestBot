@@ -42,6 +42,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// </summary>
         [AllowNull] public VoiceNextExtension Voice { get; private set; }
 
+        /// <summary>
+        /// Bot's age. Zero if it's not its anniversary today.
+        /// </summary>
+        public int Age { get; private set; }
+
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
         /// <summary>
@@ -278,6 +283,24 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }, DiscordUserStatus.Online);
 
             DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
+
+            DateTime birthdate =
+                Client.CurrentUser.CreationTimestamp.Date
+                //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
+            ;
+
+            DateTime today = DateTime.Today;
+
+            int age = today.Year - birthdate.Year;
+
+            if (birthdate.Date > today.AddYears(-age)) age--;
+
+            if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
+            {
+                Age = age;
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                        $"It's my {Age} year anniversary today!!!");
+            }
         }
 
         private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)

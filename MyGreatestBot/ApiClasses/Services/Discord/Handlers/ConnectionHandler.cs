@@ -29,10 +29,30 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         public ulong GuildId => _guild.Id;
         public string GuildName => _guild.Name;
 
+        private bool FirstTimeTextChannelAssigned = true;
+
         public DiscordChannel? TextChannel
         {
             get => Message.Channel;
-            set => Message.Channel = value;
+            set
+            {
+                Message.Channel = value;
+                if (value is null || !FirstTimeTextChannelAssigned)
+                {
+                    return;
+                }
+                FirstTimeTextChannelAssigned = false;
+                if (DiscordWrapper.Age <= 0)
+                {
+                    return;
+                }
+                Message.Send(new DiscordEmbedBuilder()
+                {
+                    Color = DiscordColor.White,
+                    Title = "Anniversary",
+                    Description = $":partying_face:It's my {DiscordWrapper.Age} year anniversary today!!!:partying_face:"
+                });
+            }
         }
 
         [AllowNull] public DiscordChannel VoiceChannel => Voice.Channel;

@@ -40,6 +40,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <inheritdoc cref="CommandsNextExtension.RegisteredCommands"/>
         [AllowNull] public static IReadOnlyDictionary<string, Command> RegisteredCommands => Commands.RegisteredCommands;
 
+        /// <inheritdoc cref="DiscordBot.Age"/>
+        public static int Age => Instance.Age;
+
         /// <summary>
         /// Try to run bot
         /// </summary>
