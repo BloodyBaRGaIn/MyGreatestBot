@@ -1,4 +1,5 @@
 ﻿global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using MyGreatestBot.Extensions;
 using System;
 using System.IO;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     public sealed class LogHandler(TextWriter writer,
                                    string guildName,
                                    int logDelay,
-                                   LogLevel defaultLogLevel = LogLevel.None)
+                                   LogLevel defaultLogLevel = LogLevel.None) : IDisposable
     {
         public const string DateTimeFormat = "dd.MM.yyyy HH:mm:ss.fff";
 
@@ -24,7 +25,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 return;
             }
-            if (!writerSemaphore.WaitOne(logDelay))
+            if (!writerSemaphore.TryWaitOne(logDelay))
             {
                 return;
             }
@@ -36,7 +37,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     $"{guildName}" +
                     $"{Environment.NewLine}{text}");
             }
-            _ = writerSemaphore.Release(1);
+            _ = writerSemaphore.TryRelease();
             await Task.Delay(1);
         }
 
@@ -61,5 +62,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         }
 
         public void Send(string text) => Send(text, defaultLogLevel);
+
+        public void Dispose()
+        {
+            writerSemaphore.TryDispose();
+        }
     }
 }

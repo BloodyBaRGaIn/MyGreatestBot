@@ -3,6 +3,7 @@ using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace MyGreatestBot.Player
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
-            if (!_dbSemaphore.WaitOne(1))
+            if (!DbSemaphore.TryWaitOne(1))
             {
                 if (nomute)
                 {
@@ -69,7 +70,7 @@ namespace MyGreatestBot.Player
             }
             finally
             {
-                _ = _dbSemaphore.Release();
+                _ = DbSemaphore.TryRelease();
             }
         }
 

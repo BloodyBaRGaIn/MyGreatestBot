@@ -50,7 +50,7 @@ namespace MyGreatestBot.Player
             SeekRequested = false;
             PlayerTimePosition = TimeSpan.Zero;
             tracksQueue?.Clear();
-            ffmpeg?.Stop();
+            FfmpegInstance?.Stop();
 
             Thread.EndCriticalRegion();
         }

@@ -349,7 +349,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.WaitOne(1000);
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(1000);
             if (semaphoreReady)
             {
                 Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
@@ -397,7 +397,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             if (semaphoreReady)
             {
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                _ = handler.VoiceUpdateSemaphore.Release();
+                _ = handler.VoiceUpdateSemaphore.TryRelease();
             }
 
             handler.VoiceUpdating = false;
@@ -425,7 +425,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             handler.ServerUpdating = true;
 
-            bool semaphoreReady = handler.ServerUpdateSemaphore.WaitOne(1000);
+            bool semaphoreReady = handler.ServerUpdateSemaphore.TryWaitOne(1000);
             if (!semaphoreReady)
             {
                 return;
@@ -438,7 +438,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             handler.Update(e.Guild);
 
             Client.VoiceServerUpdated += Client_VoiceServerUpdated;
-            _ = handler.ServerUpdateSemaphore.Release();
+            _ = handler.ServerUpdateSemaphore.TryRelease();
 
             handler.ServerUpdating = false;
 

@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
-            if (!_dbSemaphore.WaitOne(1))
+            if (!DbSemaphore.TryWaitOne(1))
             {
                 if (nomute)
                 {
@@ -78,7 +78,7 @@ namespace MyGreatestBot.Player
             }
             finally
             {
-                _ = _dbSemaphore.Release();
+                _ = DbSemaphore.TryRelease();
             }
         }
     }

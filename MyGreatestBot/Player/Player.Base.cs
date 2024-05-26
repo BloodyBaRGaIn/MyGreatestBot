@@ -24,6 +24,8 @@ namespace MyGreatestBot.Player
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
+        internal static Semaphore DbSemaphore { get; } = new(1, 1);
+
         private volatile ITrackInfo? currentTrack;
         private volatile PlayerStatus Status = PlayerStatus.Init;
 
@@ -36,19 +38,20 @@ namespace MyGreatestBot.Player
 
         private TimeSpan TimeRemaining => (currentTrack == null ? PlayerTimePosition : currentTrack.Duration) - PlayerTimePosition;
 
-        private readonly ConnectionHandler Handler;
+        private ConnectionHandler Handler { get; }
+
+        private FFMPEG FfmpegInstance { get; }
+
         private readonly Task MainPlayerTask;
+        private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly CancellationToken MainPlayerCancellationToken;
 
-        private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly Queue<ITrackInfo?> tracksQueue = new();
-        private readonly FFMPEG ffmpeg = new();
+
         private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE * 2];
 
         private readonly object queueLock = new();
         private readonly object trackLock = new();
-
-        private static readonly Semaphore _dbSemaphore = new(1, 1);
 
         private enum LowPlayerResult : int
         {
@@ -59,20 +62,29 @@ namespace MyGreatestBot.Player
             RestartWrite
         }
 
-        [Flags]
-        private enum PlayerStatus
+        private enum ReadBytesResult : int
         {
-            None = 0,
-            Init = 1,
-            Idle = 2,
+            TaskNull = -1,
+            Success = 0,
+            NotStarted,
+            ZeroLength,
+            Timeout
+        }
+
+        [Flags]
+        private enum PlayerStatus : uint
+        {
+            None = 0x0000U,
+            Init = 0x0001U,
+            Idle = 0x0002U,
             InitOrIdle = Init | Idle,
-            Start = 4,
-            Loading = 8,
-            Playing = 16,
-            Paused = 32,
-            Finish = 64,
-            Deinit = 128,
-            Error = 256,
+            Start = 0x0004U,
+            Loading = 0x0008U,
+            Playing = 0x0010U,
+            Paused = 0x0020U,
+            Finish = 0x0040U,
+            Deinit = 0x0080U,
+            Error = 0x0100U,
             DeinitOrError = Deinit | Error
         }
 
@@ -85,7 +97,7 @@ namespace MyGreatestBot.Player
                 MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
                 if (!FFMPEG.CheckForExecutableExists())
                 {
-                    throw new FileNotFoundException($"ffmpeg executable file not found{Environment.NewLine}" +
+                    throw new FileNotFoundException($"{nameof(FFMPEG)} executable file not found{Environment.NewLine}" +
                         "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip");
                 }
             }
@@ -93,6 +105,7 @@ namespace MyGreatestBot.Player
             {
                 throw new PlayerException("Cannot start player", ex);
             }
+            FfmpegInstance = new(Handler.GuildName);
         }
 
         private async void PlayerTaskFunction()
@@ -258,11 +271,11 @@ namespace MyGreatestBot.Player
 
                 currentTrack.PerformSeek(PlayerTimePosition);
 
-                ffmpeg.Start(currentTrack);
+                FfmpegInstance.Start(currentTrack);
 
-                Handler.Log.Send("Load ffmpeg");
+                Handler.Log.Send($"Load {nameof(FFMPEG)}", LogLevel.Debug);
 
-                if (!ffmpeg.TryLoad(TRACK_LOADING_DELAY_MS))
+                if (!FfmpegInstance.TryLoad(TRACK_LOADING_DELAY_MS))
                 {
                     Wait(1);
 
@@ -275,30 +288,32 @@ namespace MyGreatestBot.Player
                     continue;
                 }
 
-                Handler.Log.Send("Start ffmpeg");
+                Handler.Log.Send($"Start {nameof(FFMPEG)}", LogLevel.Debug);
 
                 Handler.Voice.SendSpeaking(true);
 
-                LowPlayerResult low_result = LowPlayer();
+                LowPlayerResult lowPlayerResult = LowPlayer(out ReadBytesResult readBytesResult);
 
-                if (low_result != LowPlayerResult.Success && !StopRequested)
+                if (lowPlayerResult != LowPlayerResult.Success && !StopRequested)
                 {
                     Handler.Log.Send(
-                        $"{low_result} ffmpeg{Environment.NewLine}PlayerTimePosition " +
-                        $"{ITrackInfo.GetCustomTime(PlayerTimePosition)}");
+                        $"{lowPlayerResult} {nameof(FFMPEG)}{Environment.NewLine}" +
+                        $"{nameof(ReadBytesResult)} {readBytesResult}{Environment.NewLine}" +
+                        $"PlayerTimePosition {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}",
+                        LogLevel.Debug);
 
-                    string errorMessage = ffmpeg.GetErrorMessage();
+                    string errorMessage = FfmpegInstance.GetErrorMessage();
 
                     if (string.IsNullOrWhiteSpace(errorMessage))
                     {
-                        Handler.Log.Send("Unexpected process exit");
+                        Handler.Log.Send("Unexpected process exit", LogLevel.Debug);
                     }
                     else
                     {
                         Handler.Log.Send(
                             $"{Environment.NewLine}Error message begin" +
                             $"{Environment.NewLine}{errorMessage}" +
-                            $"{Environment.NewLine}Error message end");
+                            $"{Environment.NewLine}Error message end", LogLevel.Debug);
                     }
 
                     obtain_audio = false;
@@ -313,15 +328,17 @@ namespace MyGreatestBot.Player
 
             IsPlaying = false;
 
-            ffmpeg.Stop();
+            FfmpegInstance.Stop();
 
-            Handler.Log.Send("Stop ffmpeg");
+            Handler.Log.Send($"Stop {nameof(FFMPEG)}", LogLevel.Debug);
 
             currentTrack = null;
         }
 
-        private LowPlayerResult LowPlayer()
+        private LowPlayerResult LowPlayer(out ReadBytesResult readBytesResult)
         {
+            readBytesResult = ReadBytesResult.NotStarted;
+
             if (currentTrack == null)
             {
                 return LowPlayerResult.TrackNull;
@@ -350,7 +367,9 @@ namespace MyGreatestBot.Player
 
                 currentTrack.PerformSeek(PlayerTimePosition);
 
-                if (!PerformRead(PlayerByteBuffer, out int cnt))
+                readBytesResult = PerformRead(PlayerByteBuffer, out int cnt);
+
+                if (readBytesResult != ReadBytesResult.Success)
                 {
                     if (!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration)
                     {
@@ -383,41 +402,26 @@ namespace MyGreatestBot.Player
             }
         }
 
-        private bool PerformRead(byte[] buff, out int origin_cnt)
+        private ReadBytesResult PerformRead(byte[] buff, out int bytesReadCount)
         {
-            int bytesCount;
-            origin_cnt = 0;
+            bytesReadCount = 0;
             CancellationTokenSource cts = new();
-            Task<int>? read_task = ffmpeg.StandardOutput?.BaseStream?.ReadAsync(buff, 0, buff.Length, cts.Token);
+            Task<int>? read_task = FfmpegInstance.ReadAsync(buff, 0, buff.Length, cts.Token);
             if (read_task == null)
             {
-                return false;
+                return ReadBytesResult.TaskNull;
             }
             if (!read_task.Wait(TRANSMIT_SINK_MS * 100))
             {
                 cts.Cancel();
-                bytesCount = 0;
+                bytesReadCount = 0;
+                return ReadBytesResult.Timeout;
             }
             else
             {
-                bytesCount = read_task.Result;
+                bytesReadCount = read_task.Result;
             }
-            if (bytesCount == 0)
-            {
-                return false;
-            }
-
-            origin_cnt = bytesCount;
-            if (bytesCount < buff.Length)
-            {
-                Task.Delay(TRANSMIT_SINK_MS).Wait();
-                while (bytesCount < buff.Length)
-                {
-                    buff[bytesCount++] = 0;
-                }
-            }
-
-            return true;
+            return bytesReadCount == 0 ? ReadBytesResult.ZeroLength : ReadBytesResult.Success;
         }
     }
 }

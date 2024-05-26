@@ -8,7 +8,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// <summary>
     /// Discord messages handler class
     /// </summary>
-    public sealed class MessageHandler(int messageDelay)
+    public sealed class MessageHandler(int messageDelay) : IDisposable
     {
         [AllowNull] public DiscordChannel Channel { get; set; }
 
@@ -20,7 +20,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 return;
             }
-            if (!messageSendSemaphore.WaitOne(messageDelay))
+            if (!messageSendSemaphore.TryWaitOne(messageDelay))
             {
                 return;
             }
@@ -33,7 +33,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     messageBuilder.Content ?? "Cannot get message content");
             }
-            _ = messageSendSemaphore.Release();
+            _ = messageSendSemaphore.TryRelease();
         }
 
         private static DiscordMessageBuilder GetBuilder(string message)
@@ -68,6 +68,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 Send(GetBuilder(message));
             }
+        }
+
+        public void Dispose()
+        {
+            messageSendSemaphore.TryDispose();
         }
     }
 }

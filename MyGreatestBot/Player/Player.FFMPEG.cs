@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,15 +19,26 @@ namespace MyGreatestBot.Player
 
             private static readonly Queue<string> ErrorQueue = new();
 
-            [AllowNull] private Process Process;
+            private readonly string guildName;
 
-            [AllowNull] internal StreamReader? StandardOutput => Process?.StandardOutput;
-            [AllowNull] internal StreamReader? StandardError => Process?.StandardError;
+            [AllowNull] private Process Process;
+            [AllowNull] private StreamReader? StandardOutput => Process?.StandardOutput;
+            [AllowNull] private StreamReader? StandardError => Process?.StandardError;
 
             /// <summary>
             /// <inheritdoc cref="Process.HasExited"/>
             /// </summary>
             internal bool HasExited => Process?.HasExited ?? true;
+
+            internal FFMPEG(string guildName)
+            {
+                if (string.IsNullOrWhiteSpace(guildName))
+                {
+                    guildName = "Unknown guild";
+                }
+
+                this.guildName = guildName;
+            }
 
             internal static bool CheckForExecutableExists()
             {
@@ -46,7 +58,7 @@ namespace MyGreatestBot.Player
                     UseShellExecute = false,
                     LoadUserProfile = true,
                     WorkingDirectory = "ffmpeg_binaries"
-                }) ?? throw new InvalidOperationException("ffmpeg not started");
+                }) ?? throw new InvalidOperationException($"{nameof(FFMPEG)} not started");
 
                 try
                 {
@@ -55,6 +67,12 @@ namespace MyGreatestBot.Player
                 catch { }
 
                 Process = process;
+            }
+
+            /// <inheritdoc cref="Stream.ReadAsync(byte[], int, int, CancellationToken)"/>
+            internal Task<int>? ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                return StandardOutput?.BaseStream?.ReadAsync(buffer, offset, count, cancellationToken);
             }
 
             internal bool WaitForExit(int milliseconds)
@@ -72,14 +90,20 @@ namespace MyGreatestBot.Player
                 CancellationTokenSource cts = new();
                 Task task = Task.Factory.StartNew(() =>
                 {
-                    Thread.CurrentThread.Name = $"{nameof(GetErrorMessage)}{++ErrorCount}";
+                    Thread.CurrentThread.SetHighestAvailableTheadPriority(
+                        ThreadPriority.Highest,
+                        ThreadPriority.Normal);
+
+                    Thread.CurrentThread.Name = $"{nameof(GetErrorMessage)} {guildName} {++ErrorCount}";
                     if (StandardError != null && !StandardError.EndOfStream)
                     {
                         ErrorQueue.Enqueue(StandardError.ReadToEnd());
                     }
                 }, cts.Token);
 
-                return ErrorQueue.TryDequeue(out string? result) && !string.IsNullOrWhiteSpace(result) ? result : string.Empty;
+                return !ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result)
+                    ? string.Empty
+                    : result;
             }
 
             internal bool TryLoad(int milliseconds)
