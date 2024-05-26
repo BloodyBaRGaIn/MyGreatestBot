@@ -54,7 +54,9 @@ namespace MyGreatestBot.Player
         {
             TrackNull = -1,
             Success = 0,
-            Restart = 1
+            RestartSeek,
+            RestartRead,
+            RestartWrite
         }
 
         [Flags]
@@ -234,7 +236,7 @@ namespace MyGreatestBot.Player
                         load_retries < TRACK_LOADING_WARN_RETRIES ? LogLevel.Warning : LogLevel.Error);
                 }
 
-                Wait(1);
+                Wait(100);
 
                 if (obtain_audio)
                 {
@@ -279,9 +281,11 @@ namespace MyGreatestBot.Player
 
                 LowPlayerResult low_result = LowPlayer();
 
-                if (low_result == LowPlayerResult.Restart && !StopRequested)
+                if (low_result != LowPlayerResult.Success && !StopRequested)
                 {
-                    Handler.Log.Send("Restart ffmpeg");
+                    Handler.Log.Send(
+                        $"{low_result} ffmpeg{Environment.NewLine}PlayerTimePosition " +
+                        $"{ITrackInfo.GetCustomTime(PlayerTimePosition)}");
 
                     string errorMessage = ffmpeg.GetErrorMessage();
 
@@ -291,10 +295,10 @@ namespace MyGreatestBot.Player
                     }
                     else
                     {
-                        Handler.Log.Send(Environment.NewLine +
-                            $"Error message begin{Environment.NewLine}" +
-                            $"{errorMessage}{Environment.NewLine}" +
-                            "Error message end");
+                        Handler.Log.Send(
+                            $"{Environment.NewLine}Error message begin" +
+                            $"{Environment.NewLine}{errorMessage}" +
+                            $"{Environment.NewLine}Error message end");
                     }
 
                     obtain_audio = false;
@@ -341,7 +345,7 @@ namespace MyGreatestBot.Player
                     SeekRequested = false;
                     IsPaused = false;
                     PlayerTimePosition = currentTrack.TimePosition;
-                    return LowPlayerResult.Restart;
+                    return LowPlayerResult.RestartSeek;
                 }
 
                 currentTrack.PerformSeek(PlayerTimePosition);
@@ -355,7 +359,7 @@ namespace MyGreatestBot.Player
                     }
 
                     // restart ffmpeg
-                    return LowPlayerResult.Restart;
+                    return LowPlayerResult.RestartRead;
                 }
 
                 PlayerTimePosition += TimeSpan.FromMilliseconds(FRAMES_TO_MS) * ((double)cnt / BUFFER_SIZE);
@@ -372,7 +376,7 @@ namespace MyGreatestBot.Player
                 {
                     Handler.Voice.UpdateVoiceConnection();
                     Handler.Voice.UpdateSink();
-                    return LowPlayerResult.Restart;
+                    return LowPlayerResult.RestartWrite;
                 }
 
                 Status = PlayerStatus.Playing;
@@ -384,8 +388,7 @@ namespace MyGreatestBot.Player
             int bytesCount;
             origin_cnt = 0;
             CancellationTokenSource cts = new();
-            CancellationToken token = cts.Token;
-            Task<int>? read_task = ffmpeg.StandardOutput?.BaseStream?.ReadAsync(buff, 0, buff.Length, token);
+            Task<int>? read_task = ffmpeg.StandardOutput?.BaseStream?.ReadAsync(buff, 0, buff.Length, cts.Token);
             if (read_task == null)
             {
                 return false;

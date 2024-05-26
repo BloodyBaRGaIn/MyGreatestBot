@@ -66,6 +66,7 @@ namespace MyGreatestBot.Player
                         else
                         {
                             tracksQueue.EnqueueToHead(radio_track);
+                            Handler.Log.Send(radio_track.GetShortMessage("Added radio"));
                         }
                     }
 

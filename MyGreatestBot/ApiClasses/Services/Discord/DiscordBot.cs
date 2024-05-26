@@ -286,14 +286,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             DateTime birthdate =
                 Client.CurrentUser.CreationTimestamp.Date
-                //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
+            //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
             ;
 
             DateTime today = DateTime.Today;
 
             int age = today.Year - birthdate.Year;
 
-            if (birthdate.Date > today.AddYears(-age)) age--;
+            if (birthdate.Date > today.AddYears(-age))
+            {
+                age--;
+            }
 
             if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
             {

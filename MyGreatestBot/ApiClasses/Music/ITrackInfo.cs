@@ -19,7 +19,8 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Base URL
         /// </summary>
-        [DisallowNull] public virtual string Domain =>
+        [DisallowNull]
+        public virtual string Domain =>
             ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
 
         /// <summary>
@@ -136,14 +137,15 @@ namespace MyGreatestBot.ApiClasses.Music
             return result;
         }
 
-        private static string GetCustomTime(TimeSpan time)
+        public static string GetCustomTime(TimeSpan time, bool withMilliseconds = false)
         {
-            static string GetPaddedValue(double x)
+            static string GetPaddedValue(double x, int pad = 2)
             {
-                return $"{(int)x}".PadLeft(2, '0');
+                return $"{(int)x}".PadLeft(pad, '0');
             }
 
-            return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}";
+            return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}" +
+                (withMilliseconds ? $":{GetPaddedValue(time.Milliseconds, 3)}" : "");
         }
 
         public string GetShortMessage(string prefix)

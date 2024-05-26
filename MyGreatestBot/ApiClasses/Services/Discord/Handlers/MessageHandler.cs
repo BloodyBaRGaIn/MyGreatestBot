@@ -2,7 +2,6 @@
 using MyGreatestBot.Extensions;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {

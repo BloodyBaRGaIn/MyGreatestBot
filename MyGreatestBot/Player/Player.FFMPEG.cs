@@ -102,7 +102,11 @@ namespace MyGreatestBot.Player
 
                 while (StandardOutput.EndOfStream)
                 {
-                    Task.Delay(1).Wait();
+                    exit = WaitForExit(1);
+                    if (HasExited && exit)
+                    {
+                        return false;
+                    }
                     ticks += (DateTime.Now - start).TotalMilliseconds;
                     if (ticks > milliseconds)
                     {
