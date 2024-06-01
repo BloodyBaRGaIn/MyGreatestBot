@@ -11,13 +11,17 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        private sealed class FFMPEG
+        private sealed class FFMPEG : IDisposable
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
 
-            private static ulong ErrorCount;
+            private ulong ErrorCount;
 
-            private static readonly Queue<string> ErrorQueue = new();
+            private readonly Queue<string> ErrorQueue = new();
+
+            private Task? ErrorTask;
+            private CancellationTokenSource? ErrorTaskCts;
+            private readonly Semaphore ErrorSemaphore = new(1, 1);
 
             private readonly string guildName;
 
@@ -29,6 +33,28 @@ namespace MyGreatestBot.Player
             /// <inheritdoc cref="Process.HasExited"/>
             /// </summary>
             internal bool HasExited => Process?.HasExited ?? true;
+
+            /// <summary>
+            /// <inheritdoc cref="Process.ExitCode"/>
+            /// </summary>
+            internal int ExitCode
+            {
+                get
+                {
+                    if (!HasExited)
+                    {
+                        return 0;
+                    }
+                    try
+                    {
+                        return Process?.ExitCode ?? 0;
+                    }
+                    catch
+                    {
+                        return 0;
+                    }
+                }
+            }
 
             internal FFMPEG(string guildName)
             {
@@ -67,6 +93,31 @@ namespace MyGreatestBot.Player
                 catch { }
 
                 Process = process;
+
+                ErrorTaskCts = new();
+                ErrorTask = Task.Factory.StartNew(() =>
+                {
+                    Thread.CurrentThread.SetHighestAvailableTheadPriority();
+                    Thread.CurrentThread.Name = $"{nameof(FFMPEG)}_{nameof(ErrorTask)} {guildName} {ErrorCount}";
+                    while (true)
+                    {
+                        if (ErrorTaskCts.IsCancellationRequested || StandardError == null)
+                        {
+                            return;
+                        }
+                        if (!WaitForExit(1))
+                        {
+                            continue;
+                        }
+                        ++ErrorCount;
+                        if (!StandardError.EndOfStream && HasExited)
+                        {
+                            _ = ErrorSemaphore.TryWaitOne();
+                            ErrorQueue.Enqueue(StandardError.ReadToEnd());
+                            _ = ErrorSemaphore.TryRelease();
+                        }
+                    }
+                }, ErrorTaskCts.Token);
             }
 
             /// <inheritdoc cref="Stream.ReadAsync(byte[], int, int, CancellationToken)"/>
@@ -82,28 +133,13 @@ namespace MyGreatestBot.Player
 
             internal string GetErrorMessage()
             {
-                if (Process == null)
+                _ = ErrorSemaphore.TryWaitOne();
+                if (Process == null || ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result))
                 {
-                    return string.Empty;
+                    result = string.Empty;
                 }
-
-                CancellationTokenSource cts = new();
-                Task task = Task.Factory.StartNew(() =>
-                {
-                    Thread.CurrentThread.SetHighestAvailableTheadPriority(
-                        ThreadPriority.Highest,
-                        ThreadPriority.Normal);
-
-                    Thread.CurrentThread.Name = $"{nameof(GetErrorMessage)} {guildName} {++ErrorCount}";
-                    if (StandardError != null && !StandardError.EndOfStream)
-                    {
-                        ErrorQueue.Enqueue(StandardError.ReadToEnd());
-                    }
-                }, cts.Token);
-
-                return !ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result)
-                    ? string.Empty
-                    : result;
+                _ = ErrorSemaphore?.TryRelease();
+                return result;
             }
 
             internal bool TryLoad(int milliseconds)
@@ -145,6 +181,9 @@ namespace MyGreatestBot.Player
 
             internal void Stop()
             {
+                ErrorTaskCts?.Cancel();
+                ErrorTask?.Wait();
+
                 if (Process == null)
                 {
                     return;
@@ -163,6 +202,19 @@ namespace MyGreatestBot.Player
                 catch { }
 
                 Process = null;
+                ErrorTaskCts = null;
+            }
+
+            public void Dispose()
+            {
+                Stop();
+                try
+                {
+                    ErrorTask?.Dispose();
+                }
+                catch { }
+
+                ErrorSemaphore.TryDispose();
             }
         }
     }

@@ -20,7 +20,7 @@ namespace MyGreatestBot.Player
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
         private const int FRAMES_TO_MS = TRANSMIT_SINK_MS * 2;
         private static readonly TimeSpan MaxTrackDuration = TimeSpan.FromHours(101);
-        private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(3);
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
 
@@ -297,9 +297,14 @@ namespace MyGreatestBot.Player
                 if (lowPlayerResult != LowPlayerResult.Success && !StopRequested)
                 {
                     Handler.Log.Send(
-                        $"{lowPlayerResult} {nameof(FFMPEG)}{Environment.NewLine}" +
+                        $"{Environment.NewLine}" +
+                        $"{nameof(FFMPEG.ExitCode)} {FfmpegInstance.ExitCode}{Environment.NewLine}" +
+                        $"{nameof(LowPlayerResult)} {lowPlayerResult}{Environment.NewLine}" +
                         $"{nameof(ReadBytesResult)} {readBytesResult}{Environment.NewLine}" +
-                        $"PlayerTimePosition {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}",
+                        $"{nameof(PlayerTimePosition)} {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}" +
+                        $"{Environment.NewLine}" +
+                        $"{nameof(TimeRemaining)} {ITrackInfo.GetCustomTime(TimeRemaining, true)}" +
+                        $"{Environment.NewLine}",
                         LogLevel.Debug);
 
                     string errorMessage = FfmpegInstance.GetErrorMessage();
