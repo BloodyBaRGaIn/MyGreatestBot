@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
+    /// <summary>
+    /// Player handler class
+    /// </summary>
     internal sealed partial class Player
     {
         private const int TRACK_LOADING_DELAY_MS = 10000;
@@ -88,6 +91,15 @@ namespace MyGreatestBot.Player
             DeinitOrError = Deinit | Error
         }
 
+        /// <summary>
+        /// Default class constructor.
+        /// </summary>
+        /// 
+        /// <param name="handler">
+        /// Referecned <see cref="ConnectionHandler"/> instance.
+        /// </param>
+        /// 
+        /// <exception cref="PlayerException"></exception>
         internal Player(ConnectionHandler handler)
         {
             Handler = handler;
@@ -108,6 +120,9 @@ namespace MyGreatestBot.Player
             FfmpegInstance = new(Handler.GuildName);
         }
 
+        /// <summary>
+        /// Main player method.
+        /// </summary>
         private async void PlayerTaskFunction()
         {
             try

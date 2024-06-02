@@ -13,8 +13,7 @@ namespace MyGreatestBot.ApiClasses
 
         }
 
-        public ApiException(ApiIntents intents)
-            : this(intents, "Not initialized")
+        public ApiException(ApiIntents intents) : this(intents, "Not initialized")
         {
 
         }

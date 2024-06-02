@@ -11,6 +11,9 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
+        /// <summary>
+        /// Audio decoder handling class
+        /// </summary>
         private sealed class FFMPEG : IDisposable
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
@@ -25,14 +28,34 @@ namespace MyGreatestBot.Player
 
             private readonly string guildName;
 
+            /// <summary>
+            /// FFMPEG process.
+            /// </summary>
             [AllowNull] private Process Process;
+
+            /// <inheritdoc cref="Process.StandardOutput"/>
             [AllowNull] private StreamReader? StandardOutput => Process?.StandardOutput;
+
+            /// <inheritdoc cref="Process.StandardError"/>
             [AllowNull] private StreamReader? StandardError => Process?.StandardError;
 
             /// <summary>
             /// <inheritdoc cref="Process.HasExited"/>
             /// </summary>
-            internal bool HasExited => Process?.HasExited ?? true;
+            internal bool HasExited
+            {
+                get
+                {
+                    try
+                    {
+                        return Process?.HasExited ?? true;
+                    }
+                    catch
+                    {
+                        return true;
+                    }
+                }
+            }
 
             /// <summary>
             /// <inheritdoc cref="Process.ExitCode"/>
@@ -56,6 +79,13 @@ namespace MyGreatestBot.Player
                 }
             }
 
+            /// <summary>
+            /// Default class constructor.
+            /// </summary>
+            /// 
+            /// <param name="guildName">
+            /// Guild name referenced to the <see cref="ConnectionHandler"/> instance.
+            /// </param>
             internal FFMPEG(string guildName)
             {
                 if (string.IsNullOrWhiteSpace(guildName))
@@ -66,11 +96,27 @@ namespace MyGreatestBot.Player
                 this.guildName = guildName;
             }
 
+            /// <summary>
+            /// Checks if executable file exists.
+            /// </summary>
+            /// 
+            /// <returns>
+            /// True if exists, otherwise false.
+            /// </returns>
             internal static bool CheckForExecutableExists()
             {
                 return File.Exists(FFMPEG_PATH);
             }
 
+            /// <summary>
+            /// Starts track audio decoding.
+            /// </summary>
+            /// 
+            /// <param name="track">
+            /// Track to decode.
+            /// </param>
+            /// 
+            /// <exception cref="InvalidOperationException"></exception>
             internal void Start(ITrackInfo track)
             {
                 Stop();
@@ -126,11 +172,19 @@ namespace MyGreatestBot.Player
                 return StandardOutput?.BaseStream?.ReadAsync(buffer, offset, count, cancellationToken);
             }
 
+            /// <inheritdoc cref="Process.WaitForExit(int)"/>
             internal bool WaitForExit(int milliseconds)
             {
                 return Process == null || Process.WaitForExit(milliseconds);
             }
 
+            /// <summary>
+            /// Gets last FFMPEG error message.
+            /// </summary>
+            /// 
+            /// <returns>
+            /// Message string or empty string if there were no errors occured.
+            /// </returns>
             internal string GetErrorMessage()
             {
                 _ = ErrorSemaphore.TryWaitOne();
@@ -142,6 +196,14 @@ namespace MyGreatestBot.Player
                 return result;
             }
 
+            /// <summary>
+            /// Tries to get at least one byte from decoding process.
+            /// </summary>
+            /// 
+            /// <param name="milliseconds">
+            /// 
+            /// </param>
+            /// <returns></returns>
             internal bool TryLoad(int milliseconds)
             {
                 if (Process == null || StandardOutput == null)
@@ -149,36 +211,30 @@ namespace MyGreatestBot.Player
                     return false;
                 }
 
-                bool exit = WaitForExit(1);
+                _ = WaitForExit(1);
 
-                if (HasExited && exit && StandardOutput.EndOfStream)
-                {
-                    return false;
-                }
-
-                double ticks = 0;
-
-                DateTime start = DateTime.Now;
+                Stopwatch stopwatch = Stopwatch.StartNew();
 
                 while (StandardOutput.EndOfStream)
                 {
-                    exit = WaitForExit(1);
-                    if (HasExited && exit)
+                    bool exit = WaitForExit(1);
+                    if (HasExited && exit || stopwatch.ElapsedMilliseconds >= milliseconds)
                     {
-                        return false;
-                    }
-                    ticks += (DateTime.Now - start).TotalMilliseconds;
-                    if (ticks > milliseconds)
-                    {
+                        stopwatch.Stop();
                         return false;
                     }
                 }
+
+                stopwatch.Stop();
 
                 string errorMessage = GetErrorMessage();
 
                 return string.IsNullOrWhiteSpace(errorMessage);
             }
 
+            /// <summary>
+            /// Stops decoding.
+            /// </summary>
             internal void Stop()
             {
                 ErrorTaskCts?.Cancel();

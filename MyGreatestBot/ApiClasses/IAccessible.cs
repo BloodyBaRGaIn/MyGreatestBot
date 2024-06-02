@@ -15,8 +15,10 @@ namespace MyGreatestBot.ApiClasses
         DomainCollection Domains { get; }
 
         /// <summary>
-        /// Try HTTP request to domain URLs
+        /// Try HTTP request to domain URLs.<br/>
+        /// Throws <see cref="ApplicationException"/> if fails.
         /// </summary>
+        /// 
         /// <exception cref="ApplicationException"></exception>
         public void TryAccess()
         {
@@ -36,7 +38,25 @@ namespace MyGreatestBot.ApiClasses
             throw new ApplicationException($"{ApiType} is not available");
         }
 
-        public static bool IsUrlSuccess([DisallowNull] string url, bool isApi = true)
+        /// <summary>
+        /// Checks if given URL is available.
+        /// </summary>
+        /// 
+        /// <param name="url">
+        /// URL to check.
+        /// </param>
+        /// 
+        /// <param name="isApi">
+        /// True if <see cref="HttpMethod.Get"/> is required,<br/>
+        /// otherwise <see cref="HttpMethod.Head"/> will be performed.
+        /// </param>
+        /// 
+        /// <returns>
+        /// True if the response returned successful status code or given URL is an empty string.
+        /// </returns>
+        public static bool IsUrlSuccess(
+            [DisallowNull] string url,
+            bool isApi = true)
         {
             if (url == string.Empty)
             {
@@ -46,8 +66,9 @@ namespace MyGreatestBot.ApiClasses
             using HttpClient client = new();
             try
             {
-                using HttpResponseMessage message = client.Send(new(isApi ? HttpMethod.Get : HttpMethod.Head,
-                                                                    url));
+                using HttpResponseMessage message = client.Send(
+                    new(isApi ? HttpMethod.Get : HttpMethod.Head,
+                        url));
 
                 if (message.IsSuccessStatusCode || (int)message.StatusCode == 418)
                 {

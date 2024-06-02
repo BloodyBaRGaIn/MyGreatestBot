@@ -10,14 +10,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// </summary>
     public sealed class VoiceHandler(DiscordGuild guild)
     {
-        [AllowNull]
-        private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
-        [AllowNull]
-        public VoiceNextConnection Connection { get; private set; }
-        [AllowNull]
-        public DiscordChannel Channel { get; private set; }
-        [AllowNull]
-        private VoiceTransmitSink TransmitSink { get; set; }
+        [AllowNull] private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
+        [AllowNull] public VoiceNextConnection Connection { get; private set; }
+        [AllowNull] public DiscordChannel Channel { get; private set; }
+        [AllowNull] private VoiceTransmitSink TransmitSink { get; set; }
 
         internal volatile bool IsManualDisconnect;
 
