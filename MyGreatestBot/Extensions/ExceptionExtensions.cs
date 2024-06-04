@@ -11,6 +11,24 @@ namespace MyGreatestBot.Extensions
     /// </summary>
     public static class ExceptionExtensions
     {
+        public static string GetTypeName(this Exception? exception)
+        {
+            return exception?.GetType()?.Name ?? string.Empty;
+        }
+
+        public static string GetNonEmptyMessage(this Exception? exception)
+        {
+            if (exception == null)
+            {
+                return string.Empty;
+            }
+            if (!string.IsNullOrWhiteSpace(exception.Message))
+            {
+                return exception.Message;
+            }
+            return $"{exception.GetTypeName()} was thrown";
+        }
+
         public static string GetExtendedMessage(this Exception? exception)
         {
             if (exception == null)
@@ -18,13 +36,9 @@ namespace MyGreatestBot.Extensions
                 return string.Empty;
             }
 
-            string typeName = exception.GetType().Name;
-            if (string.IsNullOrWhiteSpace(exception.Message))
-            {
-                return typeName;
-            }
+            string typeName = exception.GetTypeName();
 
-            string result = $"{typeName} : {exception.Message} {exception.GetStackFrame()}";
+            string result = $"{typeName} : {exception.GetNonEmptyMessage()} {exception.GetStackFrame()}";
 
             if (exception.InnerException != null)
             {
@@ -90,7 +104,7 @@ namespace MyGreatestBot.Extensions
         public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)
         {
             DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
-                .WithDescription(exception.Message);
+                .WithDescription(exception.GetNonEmptyMessage());
 
             return exception switch
             {
@@ -100,7 +114,7 @@ namespace MyGreatestBot.Extensions
 
                 _ => builder
                     .WithColor(DiscordColor.Red)
-                    .WithTitle(exception.GetType().Name)
+                    .WithTitle(exception.GetTypeName())
             };
         }
     }

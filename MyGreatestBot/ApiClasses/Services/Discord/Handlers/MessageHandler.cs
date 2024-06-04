@@ -16,10 +16,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         private void Send(DiscordMessageBuilder messageBuilder)
         {
-            if (Channel is null)
+            if (Channel is null
+                || messageBuilder is null
+                || string.IsNullOrWhiteSpace(messageBuilder.Content))
             {
                 return;
             }
+
             if (!messageSendSemaphore.TryWaitOne(messageDelay))
             {
                 return;
