@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Extensions;
 using System;
+using System.Linq;
 using System.Threading;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
@@ -16,10 +17,31 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         private void Send(DiscordMessageBuilder messageBuilder)
         {
-            if (Channel is null
-                || messageBuilder is null
-                || string.IsNullOrWhiteSpace(messageBuilder.Content))
+            if (Channel is null)
             {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message channel is null");
+
+                return;
+            }
+
+            if (messageBuilder is null)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Mesage is null");
+
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(messageBuilder.Content)
+                && (messageBuilder.Embeds.Count == 0
+                    || messageBuilder.Embeds.All(e =>
+                    {
+                        return string.IsNullOrWhiteSpace(e.Title)
+                            && string.IsNullOrWhiteSpace(e.Description);
+                    })))
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    "Mesage corrupted");
+
                 return;
             }
 
@@ -30,11 +52,36 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             if (!Channel.SendMessageAsync(messageBuilder).Wait(messageDelay))
             {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    "Cannot send message");
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Cannot send message");
 
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    messageBuilder.Content ?? "Cannot get message content");
+                string? content = messageBuilder.Content;
+
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    content = messageBuilder.Embeds.Count == 0
+                        ? string.Empty
+                        : string.Join(Environment.NewLine, messageBuilder.Embeds.Select(e =>
+                        {
+                            string? title = e.Title;
+                            if (string.IsNullOrWhiteSpace(title))
+                            {
+                                title = "No title provided";
+                            }
+                            string? description = e.Description;
+                            if (string.IsNullOrWhiteSpace(description))
+                            {
+                                description = "No description provided";
+                            }
+                            return $"{title} {description}";
+                        }));
+                }
+
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    content = "Cannot get message content";
+                }
+
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(content);
             }
             _ = messageSendSemaphore.TryRelease();
         }
