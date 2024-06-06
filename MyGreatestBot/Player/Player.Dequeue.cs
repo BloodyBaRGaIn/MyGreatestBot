@@ -60,8 +60,10 @@ namespace MyGreatestBot.Player
                         {
                             track.Radio = false;
                             Handler.Message.Send(
-                                new PlayerException($"Cannot get the next radio track" +
-                                $"{(message != string.Empty ? $"{Environment.NewLine}{message}" : "")}"));
+                                new PlayerException(
+                                    string.Join(Environment.NewLine,
+                                        $"Cannot get the next radio track",
+                                        message)));
                         }
                         else
                         {

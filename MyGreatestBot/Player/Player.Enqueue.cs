@@ -56,8 +56,9 @@ namespace MyGreatestBot.Player
                 if (!source.HasFlag(CommandActionSource.Mute))
                 {
                     Handler.Message.Send(new PlayerException(
-                        $"Added: {tracks.Count()}{Environment.NewLine}" +
-                        $"Total: {totalCount}").WithSuccess());
+                        string.Join(Environment.NewLine,
+                            $"Added: {tracks.Count()}",
+                            $"Total: {totalCount}")).WithSuccess());
                 }
             }
         }

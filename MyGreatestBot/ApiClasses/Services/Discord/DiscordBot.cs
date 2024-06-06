@@ -45,7 +45,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <summary>
         /// Bot's age. Zero if it's not its anniversary today.
         /// </summary>
-        public int Age { get; private set; }
+        public int Age { get; private set; } = -1;
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
@@ -180,8 +180,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             catch (Exception ex)
             {
                 Disconnect(disconnectionTimeout);
+
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    $"{ex.GetExtendedMessage()}{Environment.NewLine}Press any key to exit");
+                    string.Join(Environment.NewLine,
+                        ex.GetExtendedMessage(),
+                        "Press any key to exit"));
+
                 _ = Console.ReadKey(true);
                 return;
             }
@@ -284,25 +288,32 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
 
-            DateTime birthdate =
-                Client.CurrentUser.CreationTimestamp.Date
-            //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
-            ;
-
-            DateTime today = DateTime.Today;
-
-            int age = today.Year - birthdate.Year;
-
-            if (birthdate.Date > today.AddYears(-age))
+            if (Age == -1)
             {
-                age--;
-            }
+                DateTime birthdate =
+                    Client.CurrentUser.CreationTimestamp.Date
+                    //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
+                ;
 
-            if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
-            {
-                Age = age;
-                DiscordWrapper.CurrentDomainLogHandler.Send(
+                DateTime today = DateTime.Today;
+
+                int age = today.Year - birthdate.Year;
+
+                if (birthdate.Date > today.AddYears(-age))
+                {
+                    age--;
+                }
+
+                if (age >= 0)
+                {
+                    Age = age;
+                }
+
+                if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
+                {
+                    DiscordWrapper.CurrentDomainLogHandler.Send(
                         $"It's my {Age} year anniversary today!!!");
+                }
             }
         }
 
@@ -531,9 +542,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     break;
             }
 
-            await handler.LogError.SendAsync($"{GetCommandInfo(args)}{Environment.NewLine}" +
-                $"Command errored{Environment.NewLine}" +
-                $"{args.Exception.GetExtendedMessage()}");
+            await handler.LogError.SendAsync(
+                string.Join(Environment.NewLine,
+                    GetCommandInfo(args),
+                    "Command errored", 
+                    args.Exception.GetExtendedMessage()));
 
             if (!handled)
             {

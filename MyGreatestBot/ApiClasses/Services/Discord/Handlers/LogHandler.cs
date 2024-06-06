@@ -32,10 +32,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             lock (writer)
             {
                 writer.WriteLine(
-                    $"[{DateTime.Now.ToString(DateTimeFormat)}]\t" +
-                    $"{(logLevel == LogLevel.None ? "" : $"[{logLevel}]")}\t" +
-                    $"{guildName}" +
-                    $"{Environment.NewLine}{text}");
+                    string.Join('\t',
+                        $"[{DateTime.Now.ToString(DateTimeFormat)}]",
+                        logLevel == LogLevel.None
+                            ? string.Empty
+                            : $"[{logLevel}]",
+                        string.Join(Environment.NewLine,
+                            guildName,
+                            text)));
             }
             _ = writerSemaphore.TryRelease();
             await Task.Delay(1);

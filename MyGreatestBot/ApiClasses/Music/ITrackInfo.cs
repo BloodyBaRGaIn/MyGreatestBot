@@ -72,7 +72,14 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         public string AudioURL { get; }
 
+        /// <summary>
+        /// Indicates when a new track should be added, if possible.
+        /// </summary>
         public bool Radio { get; set; }
+
+        /// <summary>
+        /// Indicates when a blacklist check should not be performed.
+        /// </summary>
         public bool BypassCheck { get; set; }
 
         /// <summary>
@@ -144,7 +151,7 @@ namespace MyGreatestBot.ApiClasses.Music
             }
 
             return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}" +
-                (withMilliseconds ? $":{GetPaddedValue(time.Milliseconds, 3)}" : "");
+                (withMilliseconds ? $":{GetPaddedValue(time.Milliseconds, 3)}" : string.Empty);
         }
 
         public string GetShortMessage(string prefix)
@@ -204,12 +211,6 @@ namespace MyGreatestBot.ApiClasses.Music
         {
             ApiManager.ReloadApis(TrackType);
         }
-
-        /// <summary>
-        /// Arguments string for FFMPEG
-        /// </summary>
-        public string Arguments => $"-loglevel error {(TimePosition == TimeSpan.Zero || IsLiveStream ? "" : $"-ss {TimePosition} ")}" +
-                                   $"-i \"{AudioURL}\" -f s16le -ac 2 -ar 48000 -filter:a \"volume = 0.25\" pipe:1";
 
         internal CompositeId GetCompositeId(string id)
         {

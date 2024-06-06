@@ -109,8 +109,10 @@ namespace MyGreatestBot.Player
                 MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
                 if (!FFMPEG.CheckForExecutableExists())
                 {
-                    throw new FileNotFoundException($"{nameof(FFMPEG)} executable file not found{Environment.NewLine}" +
-                        "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip");
+                    throw new FileNotFoundException(
+                        string.Join(Environment.NewLine,
+                            $"{nameof(FFMPEG)} executable file not found",
+                            "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"));
                 }
             }
             catch (Exception ex)
@@ -312,14 +314,14 @@ namespace MyGreatestBot.Player
                 if (lowPlayerResult != LowPlayerResult.Success && !StopRequested)
                 {
                     Handler.Log.Send(
-                        $"{Environment.NewLine}" +
-                        $"{nameof(FFMPEG.ExitCode)} {FfmpegInstance.ExitCode}{Environment.NewLine}" +
-                        $"{nameof(LowPlayerResult)} {lowPlayerResult}{Environment.NewLine}" +
-                        $"{nameof(ReadBytesResult)} {readBytesResult}{Environment.NewLine}" +
-                        $"{nameof(PlayerTimePosition)} {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}" +
-                        $"{Environment.NewLine}" +
-                        $"{nameof(TimeRemaining)} {ITrackInfo.GetCustomTime(TimeRemaining, true)}" +
-                        $"{Environment.NewLine}",
+                        Environment.NewLine +
+                        string.Join(Environment.NewLine,
+                            $"{nameof(FFMPEG.ExitCode)} {FfmpegInstance.ExitCode}",
+                            $"{nameof(LowPlayerResult)} {lowPlayerResult}",
+                            $"{nameof(ReadBytesResult)} {readBytesResult}",
+                            $"{nameof(PlayerTimePosition)} {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}",
+                            $"{nameof(TimeRemaining)} {ITrackInfo.GetCustomTime(TimeRemaining, true)}") +
+                        Environment.NewLine,
                         LogLevel.Debug);
 
                     string errorMessage = FfmpegInstance.GetErrorMessage();
@@ -331,9 +333,12 @@ namespace MyGreatestBot.Player
                     else
                     {
                         Handler.Log.Send(
-                            $"{Environment.NewLine}Error message begin" +
-                            $"{Environment.NewLine}{errorMessage}" +
-                            $"{Environment.NewLine}Error message end", LogLevel.Debug);
+                            Environment.NewLine +
+                            string.Join(Environment.NewLine,
+                                "Error message begin",
+                                errorMessage,
+                                "Error message end") +
+                            Environment.NewLine, LogLevel.Debug);
                     }
 
                     obtain_audio = false;

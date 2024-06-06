@@ -96,6 +96,8 @@ namespace MyGreatestBot
             Console.CancelKeyPress -= Console_CancelKeyPress;
             e.Cancel = true;
 
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+
             try
             {
                 ConnectionHandler.Logout(false).Wait();
@@ -112,6 +114,8 @@ namespace MyGreatestBot
             DiscordWrapper.CurrentDomainLogHandler.Send("Close button pressed. Closing...", LogLevel.Warning);
 
             AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
+
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
 
             try
             {
@@ -146,7 +150,9 @@ namespace MyGreatestBot
             try
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    $"Unhandled exception was thrown{Environment.NewLine}{message}");
+                    string.Join(Environment.NewLine,
+                        "Unhandled exception was thrown",
+                        message));
             }
             catch { }
         }

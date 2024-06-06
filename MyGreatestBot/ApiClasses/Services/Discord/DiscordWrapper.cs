@@ -14,19 +14,19 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
     /// </summary>
     public static class DiscordWrapper
     {
-        public static readonly LogHandler CurrentDomainLogHandler = new(
+        public static LogHandler CurrentDomainLogHandler { get; } = new(
             writer: Console.Out,
             guildName: AppDomain.CurrentDomain.FriendlyName,
             logDelay: 1000,
             defaultLogLevel: LogLevel.Information);
 
-        public static readonly LogHandler CurrentDomainLogErrorHandler = new(
+        public static LogHandler CurrentDomainLogErrorHandler { get; } = new(
             writer: Console.Error,
             guildName: AppDomain.CurrentDomain.FriendlyName,
             logDelay: 1000,
             defaultLogLevel: LogLevel.Error);
 
-        public static readonly DiscordBot Instance = new();
+        public static DiscordBot Instance { get; } = new();
 
         /// <inheritdoc cref="DiscordBot.Client"/>
         [AllowNull] public static DiscordClient Client => Instance.Client;

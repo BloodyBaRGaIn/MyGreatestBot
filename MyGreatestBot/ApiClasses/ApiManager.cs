@@ -103,7 +103,9 @@ namespace MyGreatestBot.ApiClasses
             catch (Exception ex)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    $"{desired.ApiType} FAILED{Environment.NewLine}{ex.GetExtendedMessage()}");
+                    string.Join(Environment.NewLine,
+                        $"{desired.ApiType} FAILED",
+                        ex.GetExtendedMessage()));
 
                 try
                 {
@@ -216,7 +218,10 @@ namespace MyGreatestBot.ApiClasses
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Query execution failed{Environment.NewLine}{ex.Message}", ex);
+                throw new InvalidOperationException(
+                    string.Join(Environment.NewLine,
+                        "Query execution failed",
+                        ex.Message), ex);
             }
 
             return tracks is null

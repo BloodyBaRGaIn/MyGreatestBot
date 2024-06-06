@@ -1,8 +1,10 @@
-﻿using MyGreatestBot.ApiClasses.Music;
+﻿using Google.Apis.YouTube.v3.Data;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +19,9 @@ namespace MyGreatestBot.Player
         private sealed class FFMPEG : IDisposable
         {
             internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
+
+            private static float VolumeRatio { get; } = 0.25f;
+            private static uint FrequencyHz { get; } = 48000;
 
             private ulong ErrorCount;
 
@@ -124,7 +129,7 @@ namespace MyGreatestBot.Player
                 Process process = Process.Start(new ProcessStartInfo()
                 {
                     FileName = FFMPEG_PATH,
-                    Arguments = track.Arguments,
+                    Arguments = GetTrackArguments(track),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -259,6 +264,42 @@ namespace MyGreatestBot.Player
 
                 Process = null;
                 ErrorTaskCts = null;
+            }
+
+            /// <summary>
+            /// Gets argument string for FFMPEG
+            /// </summary>
+            private static string GetTrackArguments(ITrackInfo track)
+            {
+                string log_level = "-loglevel error";
+
+                string time_pos = track.TimePosition != TimeSpan.Zero && !track.IsLiveStream
+                    ? $"-ss {track.TimePosition}"
+                    : string.Empty;
+
+                string audio_url = $"-i \"{track.AudioURL}\"";
+
+                string io_format = "-f s16le";
+
+                string audio_channels = "-ac 2";
+
+                string sampling_frequency = $"-ar {FrequencyHz.ToString(CultureInfo.InvariantCulture)}";
+
+                string volume = (VolumeRatio is > 0 and < 1)
+                    ? $"-filter:a \"volume = {VolumeRatio.ToString("0.00", CultureInfo.InvariantCulture)}\""
+                    : string.Empty;
+
+                string pipe = "pipe:1";
+
+                return string.Join(' ',
+                    log_level,
+                    time_pos,
+                    audio_url,
+                    io_format,
+                    audio_channels,
+                    sampling_frequency,
+                    volume,
+                    pipe);
             }
 
             public void Dispose()
