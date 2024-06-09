@@ -292,7 +292,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 DateTime birthdate =
                     Client.CurrentUser.CreationTimestamp.Date
-                    //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
+                //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
                 ;
 
                 DateTime today = DateTime.Today;
@@ -545,7 +545,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             await handler.LogError.SendAsync(
                 string.Join(Environment.NewLine,
                     GetCommandInfo(args),
-                    "Command errored", 
+                    "Command errored",
                     args.Exception.GetExtendedMessage()));
 
             if (!handled)

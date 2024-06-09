@@ -31,7 +31,8 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("Performance", "CA1822")]
         public async Task IgnoreArtistCommand(
             CommandContext ctx,
-            [AllowNull, Description("Artist zero-based index")] int artist_index = -1)
+            [AllowNull,
+            Description("Artist zero-based index")] int artist_index = -1)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -59,6 +60,22 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.DbSave(CommandActionSource.Command));
+        }
+
+        [Command("savedcount")]
+        [Description("Get saved tracks count")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task SavedCountCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await Task.Run(() => handler.PlayerInstance.DbGetSavedCount(CommandActionSource.Command));
         }
 
         [Command("restore")]

@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
@@ -241,9 +242,7 @@ namespace MyGreatestBot.ApiClasses
 
         public static ITrackDatabaseAPI? GetDbApiInstance()
         {
-            return IsApiRegisterdAndAllowed(ApiIntents.Sql)
-                ? SqlServerWrapper.Instance
-                : IsApiRegisterdAndAllowed(ApiIntents.NoSql)
+            return IsApiRegisterdAndAllowed(ApiIntents.NoSql)
                 ? LiteDbWrapper.Instance
                 : null;
         }

@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
+using MyGreatestBot.ApiClasses.Services.Db;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Extensions;
 using System;
@@ -76,16 +77,43 @@ namespace MyGreatestBot.Player
 
                     if (DbInstance != null && !track.BypassCheck)
                     {
-                        if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
+                        bool semaphoerReady = true;
+
+                        if (!DbSemaphore.TryWaitOne())
                         {
-                            Handler.Message.Send(new DbIgnoreException("Skipping track with ignored artist(s)").WithSuccess());
-                            continue;
+                            semaphoerReady = false;
                         }
 
-                        if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
+                        if (semaphoerReady)
                         {
-                            Handler.Message.Send(new DbIgnoreException("Skipping ignored track").WithSuccess());
-                            continue;
+                            try
+                            {
+                                if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
+                                {
+                                    Handler.Message.Send(
+                                        new DbIgnoreException("Skipping track with ignored artist(s)")
+                                        .WithSuccess());
+
+                                    continue;
+                                }
+
+                                if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
+                                {
+                                    Handler.Message.Send(
+                                        new DbIgnoreException("Skipping ignored track")
+                                        .WithSuccess());
+
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                                throw;
+                            }
+                            finally
+                            {
+                                _ = DbSemaphore.TryRelease();
+                            }
                         }
                     }
 

@@ -49,11 +49,6 @@ namespace MyGreatestBot.Commands
             command_stopwatch.Stop();
             handler.Log.Send($"Enqueue takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
             command_stopwatch.Restart();
-
-            foreach (ITrackInfo track in tracks)
-            {
-                handler.Log.Send(track.GetShortMessage("Added"));
-            }
         }
 
         [Command("play")]
@@ -102,9 +97,11 @@ namespace MyGreatestBot.Commands
                                 source |= CommandActionSource.PlayerSkipCurrent;
                                 break;
                             case "\\R":
+                            case "\\RADIO":
                                 source |= CommandActionSource.PlayerRadio;
                                 break;
                             case "\\B":
+                            case "\\BYPASS":
                                 source |= CommandActionSource.PlayerNoBlacklist;
                                 break;
 

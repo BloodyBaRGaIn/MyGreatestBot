@@ -64,7 +64,6 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            //ApiManager.Add(SqlServerWrapper.Instance);
             ApiManager.Add(LiteDbWrapper.Instance);
             ApiManager.Add(YoutubeApiWrapper.Instance);
             ApiManager.Add(YandexApiWrapper.Instance);

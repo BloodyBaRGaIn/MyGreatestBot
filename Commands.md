@@ -63,6 +63,7 @@ Commands are organized into categories for better readability
     Arguments:
     - ```artist_index (Int32) - Artist zero-based index (optional)```  
 - ```save - Save tracks```  
+- ```savedcount - Get saved tracks count```  
 - ```restore - Restore saved tracks```  
 
 ## Debug commands

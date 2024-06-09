@@ -74,5 +74,47 @@ namespace MyGreatestBot.Player
             }
         }
 
+        internal void DbGetSavedCount(CommandActionSource source)
+        {
+            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+
+            ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
+
+            if (!DbSemaphore.TryWaitOne(1))
+            {
+                if (nomute)
+                {
+                    Handler.Message.Send(new DbSaveException("Operation in progress"));
+                }
+                return;
+            }
+
+            int tracksCount;
+
+            try
+            {
+                tracksCount = DbInstance.GetTracksCount(Handler.GuildId);
+
+                if (nomute)
+                {
+                    if (tracksCount > 0)
+                    {
+                        Handler.Message.Send(new DbGetSavedException($"Saved {tracksCount} track(s)").WithSuccess());
+                    }
+                    else
+                    {
+                        Handler.Message.Send(new DbGetSavedException("No tracks saved"));
+                    }
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                _ = DbSemaphore.TryRelease();
+            }
+        }
     }
 }

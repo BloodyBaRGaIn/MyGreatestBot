@@ -19,7 +19,8 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Base URL
         /// </summary>
-        [DisallowNull] public virtual string Domain =>
+        [DisallowNull]
+        public virtual string Domain =>
             ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
 
         /// <summary>

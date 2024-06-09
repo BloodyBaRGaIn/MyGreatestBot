@@ -13,20 +13,16 @@ namespace MyGreatestBot.Extensions
     {
         public static string GetTypeName(this Exception? exception)
         {
-            return exception?.GetType()?.Name ?? string.Empty;
+            return (exception?.GetType() ?? typeof(Exception)).Name ?? string.Empty;
         }
 
         public static string GetNonEmptyMessage(this Exception? exception)
         {
-            if (exception == null)
-            {
-                return string.Empty;
-            }
-            if (!string.IsNullOrWhiteSpace(exception.Message))
-            {
-                return exception.Message;
-            }
-            return $"{exception.GetTypeName()} was thrown";
+            return exception == null
+                ? string.Empty
+                : string.IsNullOrWhiteSpace(exception.Message)
+                ? $"{exception.GetTypeName()} was thrown"
+                : exception.Message;
         }
 
         public static string GetExtendedMessage(this Exception? exception)
@@ -97,8 +93,16 @@ namespace MyGreatestBot.Extensions
                 return string.Empty;
             }
 
+            string result = $"(at {fileName}";
             int line = frame.GetFileLineNumber();
-            return line == 0 ? $"(at {fileName})" : $"(at {fileName} : line {line})";
+
+            if (line > 0)
+            {
+                result += $" : line {line}";
+            }
+            result += ")";
+
+            return result;
         }
 
         public static DiscordEmbedBuilder GetDiscordEmbed(this Exception exception)

@@ -165,6 +165,31 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
+        int ITrackDatabaseAPI.GetTracksCount(ulong guild)
+        {
+            if (LiteDbClient is null)
+            {
+                throw new InvalidOperationException("DB connection not initialized");
+            }
+
+            int tracksCount;
+
+            lock (_queryLock)
+            {
+                BotStorageCollection querryCollection =
+                    GetLiteCollection(DbCollectionNames.SavedTracksCollectionName);
+
+                _ = querryCollection.EnsureIndex(item => item.Key.GiuldId);
+
+                IEnumerable<GenericDataValueDescriptor> collection =
+                    querryCollection.Find(item => item.Key.GiuldId == guild);
+
+                tracksCount = collection.Count();
+            }
+
+            return tracksCount;
+        }
+
         List<CompositeId> ITrackDatabaseAPI.RestoreTracks(ulong guild)
         {
             if (LiteDbClient is null)

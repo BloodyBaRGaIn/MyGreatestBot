@@ -58,7 +58,31 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ApiClasses\Services\Db\Sql\ConnectionStringBuilder.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\DatabaseScriptProvider.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\SqlServerWrapper.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\SqlServiceWrapper.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\TableClasses\BaseTableProvider.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\TableClasses\GenericTable.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\TableClasses\IgnoredArtistsTable.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\TableClasses\IgnoredTracksTable.cs" />
+    <Compile Remove="ApiClasses\Services\Db\Sql\TableClasses\SavedTracksTable.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Discord_logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ApiClasses\Services\Db\Sql\ConnectionStringBuilder.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\DatabaseScriptProvider.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\SqlServerWrapper.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\SqlServiceWrapper.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\TableClasses\BaseTableProvider.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\TableClasses\GenericTable.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\TableClasses\IgnoredArtistsTable.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\TableClasses\IgnoredTracksTable.cs" />
+    <None Include="ApiClasses\Services\Db\Sql\TableClasses\SavedTracksTable.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,7 +95,7 @@
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3421" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.10.0" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.10.0" />
-    <PackageReference Include="LiteDB" Version="5.0.19" />
+    <PackageReference Include="LiteDB" Version="5.0.20" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="171.30.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

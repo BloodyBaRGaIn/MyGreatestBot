@@ -1,5 +1,4 @@
-﻿using Google.Apis.YouTube.v3.Data;
-using MyGreatestBot.ApiClasses.Music;
+﻿using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -223,7 +222,7 @@ namespace MyGreatestBot.Player
                 while (StandardOutput.EndOfStream)
                 {
                     bool exit = WaitForExit(1);
-                    if (HasExited && exit || stopwatch.ElapsedMilliseconds >= milliseconds)
+                    if ((HasExited && exit) || stopwatch.ElapsedMilliseconds >= milliseconds)
                     {
                         stopwatch.Stop();
                         return false;
