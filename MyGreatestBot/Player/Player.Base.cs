@@ -335,7 +335,7 @@ namespace MyGreatestBot.Player
                         Handler.Log.Send(
                             Environment.NewLine +
                             string.Join(Environment.NewLine,
-                                "Error message begin",
+                                $"Error message begin{Environment.NewLine}",
                                 errorMessage,
                                 "Error message end") +
                             Environment.NewLine, LogLevel.Debug);
@@ -436,7 +436,7 @@ namespace MyGreatestBot.Player
             {
                 return ReadBytesResult.TaskNull;
             }
-            if (!read_task.Wait(TRANSMIT_SINK_MS * 100))
+            if (!read_task.Wait(TRANSMIT_SINK_MS))
             {
                 cts.Cancel();
                 bytesReadCount = 0;

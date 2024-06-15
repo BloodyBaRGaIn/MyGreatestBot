@@ -1,5 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -177,20 +178,31 @@ namespace MyGreatestBot.ApiClasses.Music
         /// <summary>
         /// Retrieves the audio URL
         /// </summary>
-        public virtual void ObtainAudioURL(int waitMs = -1)
+        /// <exception cref="InvalidOperationException"></exception>
+        public void ObtainAudioURL(
+            int waitMs = Timeout.Infinite,
+            CancellationTokenSource? cts = null)
         {
-            CancellationTokenSource cts = new();
-            Task waitTask = Task.Delay(waitMs > 0 ? waitMs : Timeout.Infinite, cts.Token);
+            Task? audioTask = null;
+
             try
             {
-                Task audioTask = Task.Run(() =>
+                cts ??= new();
+                audioTask = Task.Run(() =>
                 {
                     ObtainAudioURLInternal(cts);
                 }, cts.Token);
 
-                _ = Task.WaitAny(waitTask, audioTask);
-
-                cts.Cancel();
+                if (waitMs > 0)
+                {
+                    cts.CancelAfter(waitMs);
+                    Task.Delay(1).Wait();
+                    _ = audioTask.Wait(waitMs);
+                }
+                else
+                {
+                    audioTask.Wait();
+                }
 
                 if (string.IsNullOrWhiteSpace(AudioURL))
                 {
@@ -200,6 +212,19 @@ namespace MyGreatestBot.ApiClasses.Music
             catch
             {
                 throw;
+            }
+            finally
+            {
+                try
+                {
+                    cts?.Dispose();
+                }
+                catch { }
+                try
+                {
+                    audioTask?.Dispose();
+                }
+                catch { }
             }
         }
 

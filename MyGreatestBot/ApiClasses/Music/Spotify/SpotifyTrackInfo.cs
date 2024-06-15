@@ -69,7 +69,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             AudioURL = track.PreviewUrl;
         }
 
-        private bool TrySearchGeneric(ISearchMusicAPI instance)
+        private bool TrySearchGeneric(ISearchMusicAPI instance, CancellationTokenSource cts)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     return false;
                 }
 
-                result.ObtainAudioURL();
+                result.ObtainAudioURL(Timeout.Infinite, cts);
 
                 AudioFrom = instance.ApiType;
                 AudioURL = result.AudioURL;
@@ -94,7 +94,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
         {
-            if (!TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance))
+            if (!TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance, cts))
             {
                 // default Spotify preview track duration
                 Duration = TimeSpan.FromSeconds(29);

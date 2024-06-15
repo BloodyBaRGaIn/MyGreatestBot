@@ -159,13 +159,17 @@ namespace MyGreatestBot.Player
                         {
                             continue;
                         }
+
                         ++ErrorCount;
+
+                        _ = ErrorSemaphore.TryWaitOne();
+
                         if (!StandardError.EndOfStream && HasExited)
                         {
-                            _ = ErrorSemaphore.TryWaitOne();
                             ErrorQueue.Enqueue(StandardError.ReadToEnd());
-                            _ = ErrorSemaphore.TryRelease();
                         }
+
+                        _ = ErrorSemaphore.TryRelease();
                     }
                 }, ErrorTaskCts.Token);
             }
@@ -192,7 +196,7 @@ namespace MyGreatestBot.Player
             internal string GetErrorMessage()
             {
                 _ = ErrorSemaphore.TryWaitOne();
-                if (Process == null || ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result))
+                if (Process == null || !ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result))
                 {
                     result = string.Empty;
                 }
@@ -270,11 +274,21 @@ namespace MyGreatestBot.Player
             /// </summary>
             private static string GetTrackArguments(ITrackInfo track)
             {
-                string log_level = "-loglevel error";
+                string log_level = "-loglevel warning";
 
                 string time_pos = track.TimePosition != TimeSpan.Zero && !track.IsLiveStream
                     ? $"-ss {track.TimePosition}"
                     : string.Empty;
+
+                string multiple_requests = "-multiple_requests 1";
+
+                string reconnect_on_network_error = "-reconnect_on_network_error 1";
+
+                string reconnect_streamed = "-reconnect_streamed 1";
+
+                string reconnect_delay_max = "-reconnect_delay_max 1";
+
+                string reconnect_max_retries = "-reconnect_max_retries 5";
 
                 string audio_url = $"-i \"{track.AudioURL}\"";
 
@@ -293,6 +307,9 @@ namespace MyGreatestBot.Player
                 return string.Join(' ',
                     log_level,
                     time_pos,
+                    multiple_requests,
+                    reconnect_on_network_error, reconnect_streamed,
+                    reconnect_delay_max, reconnect_max_retries,
                     audio_url,
                     io_format,
                     audio_channels,
