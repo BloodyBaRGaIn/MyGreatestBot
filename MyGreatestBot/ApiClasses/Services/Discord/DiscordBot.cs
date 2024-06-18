@@ -63,6 +63,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
 
+        bool IAPI.IsEssential => true;
+
         DomainCollection IAccessible.Domains { get; } = "http://www.discord.com/";
 
         void IAPI.PerformAuth()
@@ -286,7 +288,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Name = $"{CommandPrefix}{CommandStrings.HelpCommandName}"
             }, DiscordUserStatus.Online);
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Discord ONLINE");
+            DiscordWrapper.CurrentDomainLogHandler.Send("Session created.");
 
             if (Age == -1)
             {

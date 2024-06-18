@@ -73,8 +73,16 @@ namespace MyGreatestBot
 
             ApiManager.InitApis();
 
-            DiscordWrapper.Run(connectionTimeout: 10000,
-                               disconnectionTimeout: 500);
+            if (ApiManager.IsAnyEssentialApiFailed)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    "Essential API(s) failed.");
+            }
+            else
+            {
+                DiscordWrapper.Run(connectionTimeout: 10000,
+                                   disconnectionTimeout: 500);
+            }
 
             AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
 

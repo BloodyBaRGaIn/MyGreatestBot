@@ -59,47 +59,11 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            string result = string.Empty;
+            string result = ApiManager.GetRegisteredApiStatus();
 
-            foreach (ApiIntents value in Enum.GetValues(typeof(ApiIntents)))
-            {
-                switch (value)
-                {
-                    case ApiIntents.None:
-                    case ApiIntents.Music:
-                    case ApiIntents.Db:
-                    case ApiIntents.Discord:
-                    case ApiIntents.All:
-                        continue;
-                }
-
-                if (!ApiManager.IsApiRegisterdAndAllowed(value))
-                {
-                    continue;
-                }
-
-                result += $"{value} ";
-
-                if (ApiManager.FailedIntents.HasFlag(value))
-                {
-                    result += "FAILED";
-                }
-                else
-                {
-                    result += "SUCCESS";
-                }
-
-                result += Environment.NewLine;
-            }
-
-            if (string.IsNullOrEmpty(result))
-            {
-                handler.Message.Send(new StatusException("No APIs initialized"));
-            }
-            else
-            {
-                handler.Message.Send(new StatusException(result.TrimEnd(Environment.NewLine.ToCharArray())).WithSuccess());
-            }
+            handler.Message.Send(string.IsNullOrEmpty(result)
+                ? new StatusException("No APIs initialized")
+                : new StatusException(result).WithSuccess());
 
             await Task.Delay(1);
         }
@@ -118,14 +82,14 @@ namespace MyGreatestBot.Commands
 
             handler.TextChannel = ctx.Channel;
 
-            if (ApiManager.FailedIntents == ApiIntents.None)
+            if (!ApiManager.IsAnyApiFailed)
             {
                 throw new ReloadException("No failed APIs to reload");
             }
 
             ApiManager.ReloadFailedApis();
 
-            if (ApiManager.FailedIntents == ApiIntents.None)
+            if (!ApiManager.IsAnyApiFailed)
             {
                 handler.Message.Send(new ReloadException("Reload success").WithSuccess());
             }

@@ -13,6 +13,11 @@ namespace MyGreatestBot.ApiClasses
         ApiIntents ApiType { get; }
 
         /// <summary>
+        /// Is API essential for bot running
+        /// </summary>
+        virtual bool IsEssential => false;
+
+        /// <summary>
         /// Performs log in
         /// </summary>
         virtual void PerformAuth()

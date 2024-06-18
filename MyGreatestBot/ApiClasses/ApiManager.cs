@@ -14,16 +14,23 @@ namespace MyGreatestBot.ApiClasses
     /// </summary>
     public static class ApiManager
     {
-        /// <summary>
-        /// Intents used on initialization
-        /// </summary>
-        public static ApiIntents InitIntents { get; private set; } = ApiIntents.None;
-
-        public static ApiIntents FailedIntents { get; private set; } = ApiIntents.None;
-
         private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = [];
 
-        public static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate((a, b) => a | b);
+        private static ApiIntents InitIntents { get; set; } = ApiIntents.None;
+        private static ApiIntents FailedIntents { get; set; } = ApiIntents.None;
+        private static ApiIntents EssentialFailedIntents { get; set; } = ApiIntents.None;
+        private static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate((a, b) => a | b);
+
+        public static bool IsAnyEssentialApiFailed => EssentialFailedIntents != ApiIntents.None;
+        public static bool IsAnyApiFailed => FailedIntents != ApiIntents.None;
+
+        private enum ApiStatus
+        {
+            Success,
+            Failed,
+            InitSkip,
+            DeinitSkip
+        }
 
         public static void Add([DisallowNull] IAPI api)
         {
@@ -33,17 +40,6 @@ namespace MyGreatestBot.ApiClasses
         public static T? Get<T>(ApiIntents intents) where T : IAPI
         {
             return (T?)ApiCollection[intents];
-        }
-
-        public static void TryAcessDomain(ApiIntents intents)
-        {
-            if (ApiCollection.TryGetValue(intents, out IAPI? api))
-            {
-                if (api is IAccessible accessible)
-                {
-                    accessible.TryAccess();
-                }
-            }
         }
 
         public static void InitApis()
@@ -81,7 +77,10 @@ namespace MyGreatestBot.ApiClasses
         {
             if (!InitIntents.HasFlag(desired.ApiType))
             {
-                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} INIT SKIPPED");
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                   GetApiStatusString(desired.ApiType, ApiStatus.InitSkip),
+                   LogLevel.Debug);
+
                 return;
             }
 
@@ -90,6 +89,11 @@ namespace MyGreatestBot.ApiClasses
 
         private static void InitBody(IAPI desired, int delay)
         {
+            if (desired.IsEssential)
+            {
+                delay = 1;
+            }
+
             try
             {
                 if (desired is IAccessible accessible)
@@ -98,14 +102,17 @@ namespace MyGreatestBot.ApiClasses
                 }
 
                 desired.PerformAuth();
-                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} SUCCESS");
+
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                    GetApiStatusString(desired.ApiType, ApiStatus.Success));
+
                 FailedIntents &= ~desired.ApiType;
             }
             catch (Exception ex)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     string.Join(Environment.NewLine,
-                        $"{desired.ApiType} FAILED",
+                        GetApiStatusString(desired.ApiType, ApiStatus.Failed),
                         ex.GetExtendedMessage()));
 
                 try
@@ -114,6 +121,10 @@ namespace MyGreatestBot.ApiClasses
                 }
                 catch { }
                 FailedIntents |= desired.ApiType;
+                if (desired.IsEssential)
+                {
+                    EssentialFailedIntents |= desired.ApiType;
+                }
             }
             finally
             {
@@ -126,7 +137,7 @@ namespace MyGreatestBot.ApiClasses
             DeinitApis(RegisteredIntents);
         }
 
-        public static void DeinitApis(ApiIntents intents = ApiIntents.All)
+        public static void DeinitApis(ApiIntents intents)
         {
             intents &= InitIntents;
 
@@ -148,7 +159,10 @@ namespace MyGreatestBot.ApiClasses
         {
             if (!allowed.HasFlag(desired.ApiType))
             {
-                DiscordWrapper.CurrentDomainLogHandler.Send($"{desired.ApiType} DEINIT SKIPPED");
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                    GetApiStatusString(desired.ApiType, ApiStatus.DeinitSkip),
+                    LogLevel.Debug);
+
                 return;
             }
 
@@ -238,6 +252,38 @@ namespace MyGreatestBot.ApiClasses
         public static bool IsApiRegisterdAndAllowed(ApiIntents intents)
         {
             return InitIntents.HasFlag(intents) && RegisteredIntents.HasFlag(intents);
+        }
+
+        public static bool IsApiFailed(ApiIntents intents)
+        {
+            return IsApiRegisterdAndAllowed(intents) && FailedIntents.HasFlag(intents);
+        }
+
+        private static string GetApiStatusString(ApiIntents intents, ApiStatus status)
+        {
+            return $"{intents} {status}";
+        }
+
+        public static string GetRegisteredApiStatus()
+        {
+            try
+            {
+                return string.Join(
+                Environment.NewLine,
+                    ApiCollection
+                    .Where(record => record.Value != null && !record.Value.IsEssential)
+                    .Select(record => record.Key)
+                    .Where(IsApiRegisterdAndAllowed)
+                    .Select(intents =>
+                        GetApiStatusString(intents, IsApiFailed(intents)
+                                                    ? ApiStatus.Failed
+                                                    : ApiStatus.Success))
+                    );
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         public static ITrackDatabaseAPI? GetDbApiInstance()
