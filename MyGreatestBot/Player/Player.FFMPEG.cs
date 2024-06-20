@@ -38,10 +38,10 @@ namespace MyGreatestBot.Player
             [AllowNull] private Process Process;
 
             /// <inheritdoc cref="Process.StandardOutput"/>
-            [AllowNull] private StreamReader? StandardOutput => Process?.StandardOutput;
+            private StreamReader StandardOutput => Process?.StandardOutput ?? StreamReader.Null;
 
             /// <inheritdoc cref="Process.StandardError"/>
-            [AllowNull] private StreamReader? StandardError => Process?.StandardError;
+            private StreamReader StandardError => Process?.StandardError ?? StreamReader.Null;
 
             /// <summary>
             /// <inheritdoc cref="Process.HasExited"/>
@@ -151,7 +151,7 @@ namespace MyGreatestBot.Player
                     Thread.CurrentThread.Name = $"{nameof(FFMPEG)}_{nameof(ErrorTask)} {guildName} {ErrorCount}";
                     while (true)
                     {
-                        if (ErrorTaskCts.IsCancellationRequested || StandardError == null)
+                        if (ErrorTaskCts.IsCancellationRequested)
                         {
                             return;
                         }
@@ -160,12 +160,17 @@ namespace MyGreatestBot.Player
                             continue;
                         }
 
-                        ++ErrorCount;
-
                         _ = ErrorSemaphore.TryWaitOne();
 
-                        if (!StandardError.EndOfStream && HasExited)
+                        try
                         {
+                            Thread.Sleep(10);
+                        }
+                        catch { }
+
+                        if (!StandardError.EndOfStream)
+                        {
+                            ++ErrorCount;
                             ErrorQueue.Enqueue(StandardError.ReadToEnd());
                         }
 
@@ -175,9 +180,9 @@ namespace MyGreatestBot.Player
             }
 
             /// <inheritdoc cref="Stream.ReadAsync(byte[], int, int, CancellationToken)"/>
-            internal Task<int>? ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            internal Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                return StandardOutput?.BaseStream?.ReadAsync(buffer, offset, count, cancellationToken);
+                return StandardOutput.BaseStream.ReadAsync(buffer, offset, count, cancellationToken);
             }
 
             /// <inheritdoc cref="Process.WaitForExit(int)"/>
@@ -195,8 +200,8 @@ namespace MyGreatestBot.Player
             /// </returns>
             internal string GetErrorMessage()
             {
-                _ = ErrorSemaphore.TryWaitOne();
-                if (Process == null || !ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result))
+                _ = ErrorSemaphore?.TryWaitOne();
+                if (!ErrorQueue.TryDequeue(out string? result) || string.IsNullOrWhiteSpace(result))
                 {
                     result = string.Empty;
                 }
@@ -214,7 +219,7 @@ namespace MyGreatestBot.Player
             /// <returns></returns>
             internal bool TryLoad(int milliseconds)
             {
-                if (Process == null || StandardOutput == null)
+                if (Process == null)
                 {
                     return false;
                 }
@@ -228,8 +233,7 @@ namespace MyGreatestBot.Player
                     bool exit = WaitForExit(1);
                     if ((HasExited && exit) || stopwatch.ElapsedMilliseconds >= milliseconds)
                     {
-                        stopwatch.Stop();
-                        return false;
+                        break;
                     }
                 }
 
@@ -321,6 +325,7 @@ namespace MyGreatestBot.Player
             public void Dispose()
             {
                 Stop();
+
                 try
                 {
                     ErrorTask?.Dispose();

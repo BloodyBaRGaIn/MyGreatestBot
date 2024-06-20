@@ -137,7 +137,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 cnt = bytes.Length;
             }
 
-            await TransmitSink.WriteAsync(bytes.AsMemory()[..cnt]);
+            if (cnt == bytes.Length)
+            {
+                await TransmitSink.WriteAsync(bytes);
+            }
+            else
+            {
+                await TransmitSink.WriteAsync(bytes.AsMemory()[..cnt]);
+            }
         }
 
         /// <summary>

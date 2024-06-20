@@ -202,11 +202,6 @@ namespace MyGreatestBot.ApiClasses.Music
                 {
                     audioTask.Wait();
                 }
-
-                if (string.IsNullOrWhiteSpace(AudioURL))
-                {
-                    throw new InvalidOperationException("Cannot get audio URL");
-                }
             }
             catch
             {

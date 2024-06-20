@@ -58,6 +58,7 @@ namespace MyGreatestBot.Player
 
         private enum LowPlayerResult : int
         {
+            NotStarted = -2,
             TrackNull = -1,
             Success = 0,
             RestartSeek,
@@ -67,9 +68,9 @@ namespace MyGreatestBot.Player
 
         private enum ReadBytesResult : int
         {
+            NotStarted = -2,
             TaskNull = -1,
             Success = 0,
-            NotStarted,
             ZeroLength,
             Timeout
         }
@@ -208,7 +209,7 @@ namespace MyGreatestBot.Player
             Reset();
         }
 
-        private bool TryObtainAudio()
+        private bool ObtainAudio()
         {
             if (currentTrack is null)
             {
@@ -217,18 +218,9 @@ namespace MyGreatestBot.Player
 
             PlayerTimePosition = currentTrack.TimePosition;
 
-            try
-            {
-                currentTrack.ObtainAudioURL();
-            }
-            catch (Exception ex)
-            {
-                Handler.Message.Send(ex);
-                Handler.LogError.Send(ex.GetExtendedMessage());
-                return false;
-            }
+            currentTrack.ObtainAudioURL(TRACK_LOADING_DELAY_MS);
 
-            return true;
+            return !string.IsNullOrWhiteSpace(currentTrack.AudioURL);
         }
 
         private void PlayBody()
@@ -239,6 +231,7 @@ namespace MyGreatestBot.Player
                 return;
             }
 
+            uint obtain_retries = 0;
             uint load_retries = 0;
             bool obtain_audio = true;
 
@@ -256,9 +249,21 @@ namespace MyGreatestBot.Player
             {
                 Status = PlayerStatus.Loading;
 
+                if (obtain_retries >= TRACK_LOADING_FAULT_RETRIES)
+                {
+                    Handler.Message.Send(new PlayerException("Cannot obtain audio URL"));
+                    break;
+                }
+                else if (obtain_retries > 0)
+                {
+                    Handler.LogError.Send($"Obtain audio URL failed for {obtain_retries} times.",
+                        obtain_retries < TRACK_LOADING_WARN_RETRIES ? LogLevel.Warning : LogLevel.Error);
+                }
+
                 if (load_retries >= TRACK_LOADING_FAULT_RETRIES)
                 {
-                    Handler.LogError.Send("Cannot load track");
+                    Handler.Message.Send(new PlayerException("Cannot load track"));
+                    break;
                 }
                 else if (load_retries > 0)
                 {
@@ -270,19 +275,40 @@ namespace MyGreatestBot.Player
 
                 if (obtain_audio)
                 {
-                    if (TryObtainAudio())
+                    bool obtain_success;
+                    bool obtain_failed = false;
+
+                    try
                     {
-                        if (!IAccessible.IsUrlSuccess(currentTrack.AudioURL, false))
+                        obtain_success = ObtainAudio();
+                    }
+                    catch (Exception ex)
+                    {
+                        obtain_retries = TRACK_LOADING_FAULT_RETRIES;
+                        Handler.LogError.Send(ex.GetExtendedMessage());
+                        continue;
+                    }
+
+                    if (obtain_success)
+                    {
+                        bool isUrlAccessible = IAccessible.IsUrlSuccess(currentTrack.AudioURL, false);
+
+                        if (!isUrlAccessible)
                         {
+                            obtain_failed = true;
                             Handler.LogError.Send("Audio URL is not available");
                             currentTrack.Reload();
-                            continue;
                         }
                     }
                     else
                     {
-                        Handler.LogError.Send("Cannot obtain audio URL");
-                        break;
+                        obtain_failed = true;
+                        Handler.LogError.Send("Obtain audio URL timeout or it is empty");
+                    }
+                    if (obtain_failed)
+                    {
+                        obtain_retries++;
+                        continue;
                     }
                 }
 
@@ -292,14 +318,20 @@ namespace MyGreatestBot.Player
 
                 Handler.Log.Send($"Load {nameof(FFMPEG)}", LogLevel.Debug);
 
+                LowPlayerResult lowPlayerResult = LowPlayerResult.NotStarted;
+                ReadBytesResult readBytesResult = ReadBytesResult.NotStarted;
+
                 if (!FfmpegInstance.TryLoad(TRACK_LOADING_DELAY_MS))
                 {
-                    Wait(1);
+                    Wait(10);
+
+                    PrintErrorMessage(lowPlayerResult, readBytesResult);
 
                     if ((!currentTrack.IsLiveStream && TimeRemaining < MinTrackDuration) || !IsPlaying)
                     {
                         break;
                     }
+
                     load_retries++;
                     obtain_audio = true;
                     continue;
@@ -309,37 +341,11 @@ namespace MyGreatestBot.Player
 
                 Handler.Voice.SendSpeaking(true);
 
-                LowPlayerResult lowPlayerResult = LowPlayer(out ReadBytesResult readBytesResult);
+                lowPlayerResult = LowPlayer(out readBytesResult);
 
                 if (lowPlayerResult != LowPlayerResult.Success && !StopRequested)
                 {
-                    Handler.Log.Send(
-                        Environment.NewLine +
-                        string.Join(Environment.NewLine,
-                            $"{nameof(FFMPEG.ExitCode)} {FfmpegInstance.ExitCode}",
-                            $"{nameof(LowPlayerResult)} {lowPlayerResult}",
-                            $"{nameof(ReadBytesResult)} {readBytesResult}",
-                            $"{nameof(PlayerTimePosition)} {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}",
-                            $"{nameof(TimeRemaining)} {ITrackInfo.GetCustomTime(TimeRemaining, true)}") +
-                        Environment.NewLine,
-                        LogLevel.Debug);
-
-                    string errorMessage = FfmpegInstance.GetErrorMessage();
-
-                    if (string.IsNullOrWhiteSpace(errorMessage))
-                    {
-                        Handler.Log.Send("Unexpected process exit", LogLevel.Debug);
-                    }
-                    else
-                    {
-                        Handler.Log.Send(
-                            Environment.NewLine +
-                            string.Join(Environment.NewLine,
-                                $"Error message begin{Environment.NewLine}",
-                                errorMessage,
-                                "Error message end") +
-                            Environment.NewLine, LogLevel.Debug);
-                    }
+                    PrintErrorMessage(lowPlayerResult, readBytesResult);
 
                     obtain_audio = false;
                     continue;
@@ -360,6 +366,38 @@ namespace MyGreatestBot.Player
             currentTrack = null;
         }
 
+        private void PrintErrorMessage(LowPlayerResult lowPlayerResult, ReadBytesResult readBytesResult)
+        {
+            Handler.Log.Send(
+                Environment.NewLine +
+                string.Join(Environment.NewLine,
+                    $"{nameof(FFMPEG.HasExited)} {FfmpegInstance.HasExited}",
+                    $"{nameof(FFMPEG.ExitCode)} {FfmpegInstance.ExitCode}",
+                    $"{nameof(LowPlayerResult)} {lowPlayerResult}",
+                    $"{nameof(ReadBytesResult)} {readBytesResult}",
+                    $"{nameof(PlayerTimePosition)} {ITrackInfo.GetCustomTime(PlayerTimePosition, true)}",
+                    $"{nameof(TimeRemaining)} {ITrackInfo.GetCustomTime(TimeRemaining, true)}") +
+                Environment.NewLine,
+                LogLevel.Debug);
+
+            string errorMessage = FfmpegInstance.GetErrorMessage();
+
+            if (string.IsNullOrWhiteSpace(errorMessage))
+            {
+                Handler.Log.Send("Unexpected process exit", LogLevel.Debug);
+            }
+            else
+            {
+                Handler.Log.Send(
+                    Environment.NewLine +
+                    string.Join(Environment.NewLine,
+                        $"Error message begin{Environment.NewLine}",
+                        errorMessage,
+                        "Error message end") +
+                    Environment.NewLine, LogLevel.Debug);
+            }
+        }
+
         private LowPlayerResult LowPlayer(out ReadBytesResult readBytesResult)
         {
             readBytesResult = ReadBytesResult.NotStarted;
@@ -371,10 +409,11 @@ namespace MyGreatestBot.Player
 
             while (true)
             {
-                while (IsPaused && IsPlaying && !SeekRequested)
+                if (IsPaused && IsPlaying && !SeekRequested)
                 {
                     Status = PlayerStatus.Paused;
                     Wait();
+                    continue;
                 }
 
                 if (!IsPlaying || StopRequested)
@@ -431,12 +470,12 @@ namespace MyGreatestBot.Player
         {
             bytesReadCount = 0;
             CancellationTokenSource cts = new();
-            Task<int>? read_task = FfmpegInstance.ReadAsync(buff, 0, buff.Length, cts.Token);
+            Task<int> read_task = FfmpegInstance.ReadAsync(buff, 0, buff.Length, cts.Token);
             if (read_task == null)
             {
                 return ReadBytesResult.TaskNull;
             }
-            if (!read_task.Wait(TRANSMIT_SINK_MS))
+            if (!read_task.Wait(TRANSMIT_SINK_MS * 100))
             {
                 cts.Cancel();
                 bytesReadCount = 0;
