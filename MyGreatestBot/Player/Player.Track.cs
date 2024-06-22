@@ -14,24 +14,20 @@ namespace MyGreatestBot.Player
             {
                 if (currentTrack != null)
                 {
-                    try
-                    {
-                        builder = GetPlayingMessage<TrackInfoException>(currentTrack, "Current");
-                    }
-                    catch
-                    {
-                        builder = new TrackInfoException("Cannot make track message").GetDiscordEmbed();
-                    }
+                    builder = new TrackInfoException(currentTrack.GetMessage("Current"))
+                        .WithSuccess().GetDiscordEmbed();
+                    builder.Thumbnail = currentTrack.GetThumbnail();
                 }
                 else
                 {
-                    builder = !IsPlaying
-                        ? new TrackInfoException("No tracks playing").GetDiscordEmbed()
-                        : new TrackInfoException("Illegal state detected").GetDiscordEmbed();
+                    builder = (!IsPlaying
+                        ? new TrackInfoException("No tracks playing")
+                        : new TrackInfoException("Illegal state detected"))
+                        .GetDiscordEmbed();
                 }
-
-                Handler.Message.Send(builder);
             }
+
+            Handler.Message.Send(builder);
         }
 
         internal void GetNextTrackInfo()
@@ -50,14 +46,9 @@ namespace MyGreatestBot.Player
                             continue;
                         }
 
-                        try
-                        {
-                            builder = GetPlayingMessage<TrackInfoException>(track, "Next");
-                        }
-                        catch
-                        {
-                            builder = new TrackInfoException("Cannot make next track message").GetDiscordEmbed();
-                        }
+                        builder = new TrackInfoException(track.GetMessage("Next"))
+                            .WithSuccess().GetDiscordEmbed();
+                        builder.Thumbnail = track.GetThumbnail();
                     }
                     else
                     {

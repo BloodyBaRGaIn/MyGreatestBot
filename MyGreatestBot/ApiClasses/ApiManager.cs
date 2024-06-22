@@ -37,11 +37,6 @@ namespace MyGreatestBot.ApiClasses
             ApiCollection.Add(api.ApiType, api);
         }
 
-        public static T? Get<T>(ApiIntents intents) where T : IAPI
-        {
-            return (T?)ApiCollection[intents];
-        }
-
         public static void InitApis()
         {
             InitApis(RegisteredIntents);
@@ -261,7 +256,12 @@ namespace MyGreatestBot.ApiClasses
 
         private static string GetApiStatusString(ApiIntents intents, ApiStatus status)
         {
-            return $"{intents} {status}";
+            return $"{intents} {status}.";
+        }
+
+        private static T? GetApi<T>(ApiIntents intents) where T : class, IAPI
+        {
+            return ApiCollection[intents] as T;
         }
 
         public static string GetRegisteredApiStatus()
@@ -289,7 +289,14 @@ namespace MyGreatestBot.ApiClasses
         public static ITrackDatabaseAPI? GetDbApiInstance()
         {
             return IsApiRegisterdAndAllowed(ApiIntents.NoSql)
-                ? LiteDbWrapper.Instance
+                ? GetApi<ITrackDatabaseAPI>(ApiIntents.NoSql)
+                : null;
+        }
+
+        public static IMusicAPI? GetMusicApiInstance(ApiIntents apiIntents)
+        {
+            return IsApiRegisterdAndAllowed(apiIntents)
+                ? GetApi<IMusicAPI>(apiIntents)
                 : null;
         }
     }

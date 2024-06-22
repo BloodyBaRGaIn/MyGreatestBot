@@ -7,8 +7,6 @@ namespace MyGreatestBot.Commands.Exceptions
     {
         public override string Title { get; } = "Resume";
         protected override DiscordColor ExecutedColor { get; } = DiscordColor.Green;
-
-        public ResumeException() : base() { }
         public ResumeException(string message) : base(message) { }
         public ResumeException(string message, Exception innerException) : base(message, innerException) { }
     }

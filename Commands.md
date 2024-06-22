@@ -49,12 +49,12 @@ Commands are organized into categories for better readability
 - ```count (cnt, cn) - Get the number of tracks in the queue```  
 - ```clear (clr, cl, c) - Clear track queue```  
 - ```shuffle (sh) - Shuffle queue```  
-- ```seek (sk) - Seek audio stream```  
+- ```rewind (seek, rw, sk) - Rewind audio stream```  
     Arguments:
     - ```timespan (String) - Timespan in format HH:MM:SS or MM:SS```  
 - ```return (rt) - Return the track to the queue```  
 - ```currenttrack (track, tr) - Get information about the current track```  
-- ```nexttrack (next, ntr, nex) - Get information about the next track```  
+- ```nexttrack (next, ntr) - Get information about the next track```  
 
 ## Database commands
 

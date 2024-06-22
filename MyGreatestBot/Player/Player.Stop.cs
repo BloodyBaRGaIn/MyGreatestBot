@@ -1,7 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -9,24 +8,21 @@ namespace MyGreatestBot.Player
     {
         internal void Stop(CommandActionSource source)
         {
-            DiscordEmbedBuilder builder;
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
-            if (IsPlaying || tracksQueue.Count != 0)
+            if (!IsPlaying && tracksQueue.Count == 0)
             {
-                builder = new StopException("Stopped").WithSuccess().GetDiscordEmbed();
-                StopRequested = true;
-                IsPlaying = false;
-                WaitForStatus(PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
-            }
-            else
-            {
-                builder = new StopException("Nothing to stop").GetDiscordEmbed();
+                messageHandler?.Send(new StopException("Nothing to stop"));
+                return;
             }
 
-            if (!source.HasFlag(CommandActionSource.Mute))
-            {
-                Handler.Message.Send(builder);
-            }
+            StopRequested = true;
+            IsPlaying = false;
+            WaitForStatus(PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
+
+            messageHandler?.Send(new StopException("Stopped").WithSuccess());
         }
     }
 }

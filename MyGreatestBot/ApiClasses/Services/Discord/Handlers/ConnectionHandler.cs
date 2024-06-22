@@ -19,7 +19,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     {
         [AllowNull] private readonly Player.Player _player = null;
 
-        private readonly PlayerException playerNotInitializedException = new();
+        private readonly PlayerException playerNotInitializedException = new("Not initialized");
 
         internal Player.Player PlayerInstance => _player ?? throw playerNotInitializedException;
         internal bool IsPlayerInitialized => _player != null;

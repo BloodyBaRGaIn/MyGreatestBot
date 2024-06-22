@@ -38,7 +38,7 @@ namespace MyGreatestBot.ApiClasses.Utils
 
         public override string ToString()
         {
-            return this;
+            return GetPrimary();
         }
 
         public static implicit operator string(DomainCollection domainCollection)

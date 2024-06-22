@@ -1,9 +1,8 @@
-﻿using DSharpPlus.Entities;
-using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Services.Db;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 using System;
 
 namespace MyGreatestBot.Player
@@ -12,7 +11,9 @@ namespace MyGreatestBot.Player
     {
         internal void DbIgnoreTrack(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
@@ -20,14 +21,15 @@ namespace MyGreatestBot.Player
             {
                 if (!IsPlaying || currentTrack == null)
                 {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new DbIgnoreException("Nothing to ignore"));
-                    }
+                    messageHandler?.Send(new DbIgnoreException("Nothing to ignore"));
                     return;
                 }
 
-                DiscordEmbedBuilder? builder = null;
+                if (currentTrack.BypassCheck)
+                {
+                    messageHandler?.Send(new DbIgnoreException("Cannot ignore track in bypass mode"));
+                    return;
+                }
 
                 try
                 {
@@ -35,27 +37,24 @@ namespace MyGreatestBot.Player
                 }
                 catch (Exception ex)
                 {
-                    if (nomute)
-                    {
-                        builder = new DbIgnoreException("Failed to ignore track", ex).GetDiscordEmbed();
-                    }
+                    messageHandler?.Send(new DbIgnoreException("Failed to ignore track. Skipping", ex));
+                    return;
                 }
-
-                IsPlaying = false;
-                WaitForFinish();
-
-                builder ??= new DbIgnoreException("Track ignored").WithSuccess().GetDiscordEmbed();
-
-                if (nomute)
+                finally
                 {
-                    Handler.Message.Send(builder);
+                    IsPlaying = false;
+                    WaitForFinish();
                 }
+
+                messageHandler?.Send(new DbIgnoreException("Track ignored").WithSuccess());
             }
         }
 
         internal void DbIgnoreArtist(int index, CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
@@ -63,10 +62,13 @@ namespace MyGreatestBot.Player
             {
                 if (!IsPlaying || currentTrack == null)
                 {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new DbIgnoreException("Nothing to ignore"));
-                    }
+                    messageHandler?.Send(new DbIgnoreException("Nothing to ignore"));
+                    return;
+                }
+
+                if (currentTrack.BypassCheck)
+                {
+                    messageHandler?.Send(new DbIgnoreException("Cannot ignore artist(s) in bypass mode"));
                     return;
                 }
 
@@ -83,6 +85,8 @@ namespace MyGreatestBot.Player
                     max = index;
                 }
 
+                Exception? last_exception = null;
+
                 for (int i = start; i < max; i++)
                 {
                     try
@@ -91,17 +95,16 @@ namespace MyGreatestBot.Player
                     }
                     catch (Exception ex)
                     {
-                        Handler.Message.Send(new DbIgnoreException("Failed to ignore artist", ex));
+                        last_exception = ex;
                     }
                 }
 
                 IsPlaying = false;
                 WaitForFinish();
 
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbIgnoreException("Artist ignored").WithSuccess());
-                }
+                messageHandler?.Send(last_exception != null
+                    ? new DbIgnoreException("Failed to ignore artist", last_exception)
+                    : new DbIgnoreException("Artist(s) ignored").WithSuccess());
             }
         }
     }

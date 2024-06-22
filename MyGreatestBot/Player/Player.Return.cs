@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+﻿using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
@@ -10,12 +10,11 @@ namespace MyGreatestBot.Player
     {
         internal void ReturnCurrentTrackToQueue(CommandActionSource source)
         {
-            DiscordEmbedBuilder builder;
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
-            if (currentTrack == null)
-            {
-                builder = new ReturnException("Nothing to return").GetDiscordEmbed();
-            }
+            bool success = true;
 
             lock (queueLock)
             {
@@ -23,30 +22,25 @@ namespace MyGreatestBot.Player
                 {
                     if (currentTrack == null)
                     {
-                        builder = new ReturnException("Nothing to return").GetDiscordEmbed();
+                        success = false;
+                    }
+                    else if (source.HasFlag(CommandActionSource.PlayerToHead))
+                    {
+                        tracksQueue.EnqueueToHead(currentTrack);
                     }
                     else
                     {
-                        if (source.HasFlag(CommandActionSource.PlayerToHead))
-                        {
-                            tracksQueue.EnqueueToHead(currentTrack);
-                        }
-                        else
-                        {
-                            currentTrack.PerformSeek(TimeSpan.Zero);
-                            tracksQueue.Enqueue(currentTrack);
-                        }
-                        builder = new ReturnException("Returned to queue").WithSuccess().GetDiscordEmbed();
+                        currentTrack.PerformRewind(TimeSpan.Zero);
+                        tracksQueue.Enqueue(currentTrack);
                     }
                 }
 
                 IsPlaying = false;
-
-                if (!source.HasFlag(CommandActionSource.Mute))
-                {
-                    Handler.Message.Send(builder);
-                }
             }
+
+            messageHandler?.Send(success
+                ? new ReturnException("Returned to queue").WithSuccess()
+                : new ReturnException("Nothing to return"));
         }
     }
 }

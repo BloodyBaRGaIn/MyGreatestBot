@@ -7,8 +7,6 @@ namespace MyGreatestBot.Commands.Exceptions
     {
         public override string Title { get; } = "Shuffle";
         protected override DiscordColor ExecutedColor { get; } = DiscordColor.Orange;
-
-        public ShuffleException() : base() { }
         public ShuffleException(string message) : base(message) { }
         public ShuffleException(string message, Exception innerException) : base(message, innerException) { }
     }

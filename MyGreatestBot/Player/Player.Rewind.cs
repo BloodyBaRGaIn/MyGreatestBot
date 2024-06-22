@@ -8,7 +8,7 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        internal void RequestSeek(TimeSpan span, CommandActionSource source)
+        internal void RequestRewind(TimeSpan span, CommandActionSource source)
         {
             lock (trackLock)
             {
@@ -16,28 +16,23 @@ namespace MyGreatestBot.Player
 
                 if (IsPlaying && currentTrack != null)
                 {
-                    if (currentTrack.IsSeekPossible(span))
+                    if (currentTrack.IsRewindPossible(span))
                     {
-                        currentTrack.PerformSeek(span);
-                        SeekRequested = true;
+                        currentTrack.PerformRewind(span);
+                        RewindRequested = true;
 
-                        try
-                        {
-                            builder = GetPlayingMessage<SeekException>(currentTrack, "Playing");
-                        }
-                        catch
-                        {
-                            builder = new SeekException("Cannot make seek message").GetDiscordEmbed();
-                        }
+                        builder = new RewindException(currentTrack.GetMessage("Playing"))
+                            .WithSuccess().GetDiscordEmbed();
+                        builder.Thumbnail = currentTrack.GetThumbnail();
                     }
                     else
                     {
-                        builder = new SeekException("Cannot seek").GetDiscordEmbed();
+                        builder = new RewindException("Cannot seek").GetDiscordEmbed();
                     }
                 }
                 else
                 {
-                    builder = new SeekException("Nothing to seek").GetDiscordEmbed();
+                    builder = new RewindException("Nothing to seek").GetDiscordEmbed();
                 }
 
                 if (!source.HasFlag(CommandActionSource.Mute))

@@ -137,11 +137,11 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.ShuffleQueue(CommandActionSource.Command));
         }
 
-        [Command("seek")]
-        [Aliases("sk")]
-        [Description("Seek audio stream")]
+        [Command("rewind")]
+        [Aliases("seek", "rw", "sk")]
+        [Description("Rewind audio stream")]
         [SuppressMessage("Performance", "CA1822")]
-        public async Task SeekCommand(
+        public async Task RewindCommand(
             CommandContext ctx,
             [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)
         {
@@ -174,10 +174,10 @@ namespace MyGreatestBot.Commands
 
             if (time == TimeSpan.MinValue)
             {
-                throw new SeekException("Wrong format");
+                throw new RewindException("Wrong format");
             }
 
-            await Task.Run(() => handler.PlayerInstance.RequestSeek(time, CommandActionSource.Command));
+            await Task.Run(() => handler.PlayerInstance.RequestRewind(time, CommandActionSource.Command));
         }
 
         [Command("return")]
@@ -216,7 +216,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("nexttrack")]
-        [Aliases("next", "ntr", "nex")]
+        [Aliases("next", "ntr")]
         [Description("Get information about the next track")]
         [SuppressMessage("Performance", "CA1822")]
         public async Task NextTrackInfoCommand(CommandContext ctx)

@@ -1,9 +1,11 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,79 +15,72 @@ namespace MyGreatestBot.Player
     {
         internal void DbSave(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbSaveException("Operation in progress"));
-                }
+                messageHandler?.Send(new DbSaveException("Operation in progress"));
                 return;
             }
 
-            try
+            List<ITrackInfo> tracks = [];
+            lock (trackLock)
             {
-                List<ITrackInfo> tracks = [];
-                lock (trackLock)
+                if (currentTrack != null)
                 {
-                    if (currentTrack != null)
-                    {
-                        tracks.Add(currentTrack);
-                    }
-                }
-
-                lock (queueLock)
-                {
-#pragma warning disable CS8620
-                    tracks.AddRange(tracksQueue.Where(t => t != null));
-#pragma warning restore CS8620
-                }
-
-                if (tracks.Count == 0)
-                {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new DbSaveException("Nothing to save"));
-                    }
-                    return;
-                }
-
-                DbInstance.SaveTracks(tracks, Handler.GuildId);
-
-                int tracksCount = tracks.Count;
-
-                Stop(source | CommandActionSource.Mute);
-
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbSaveException($"Saved {tracksCount} track(s)").WithSuccess());
+                    tracks.Add(currentTrack);
                 }
             }
-            catch
+
+            lock (queueLock)
             {
-                throw;
+#pragma warning disable CS8620
+                tracks.AddRange(tracksQueue.Where(t => t != null));
+#pragma warning restore CS8620
+            }
+
+            if (tracks.Count == 0)
+            {
+                messageHandler?.Send(new DbSaveException("Nothing to save"));
+                return;
+            }
+
+            int tracksCount = tracks.Count;
+
+            try
+            {
+                DbInstance.SaveTracks(tracks, Handler.GuildId);
+            }
+            catch (Exception ex)
+            {
+                messageHandler?.Send(new DbSaveException("Cannot save tracks", ex));
+                return;
             }
             finally
             {
                 _ = DbSemaphore.TryRelease();
             }
+
+            Stop(source | CommandActionSource.Mute);
+
+            messageHandler?.Send(new DbSaveException($"Saved {tracksCount} track(s)").WithSuccess());
         }
 
         internal void DbGetSavedCount(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbSaveException("Operation in progress"));
-                }
+                messageHandler?.Send(new DbSaveException("Operation in progress"));
                 return;
             }
 
@@ -94,26 +89,25 @@ namespace MyGreatestBot.Player
             try
             {
                 tracksCount = DbInstance.GetTracksCount(Handler.GuildId);
-
-                if (nomute)
-                {
-                    if (tracksCount > 0)
-                    {
-                        Handler.Message.Send(new DbGetSavedException($"Saved {tracksCount} track(s)").WithSuccess());
-                    }
-                    else
-                    {
-                        Handler.Message.Send(new DbGetSavedException("No tracks saved"));
-                    }
-                }
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                messageHandler?.Send(new DbSaveException("Cannot get saved tracks count", ex));
+                return;
             }
             finally
             {
                 _ = DbSemaphore.TryRelease();
+            }
+
+            if (tracksCount > 0)
+            {
+                messageHandler?.Send(new DbGetSavedException(
+                    $"{tracksCount} saved track(s) found").WithSuccess());
+            }
+            else
+            {
+                messageHandler?.Send(new DbGetSavedException("No tracks saved"));
             }
         }
     }

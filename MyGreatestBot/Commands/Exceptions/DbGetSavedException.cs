@@ -7,8 +7,6 @@ namespace MyGreatestBot.Commands.Exceptions
     {
         public override string Title { get; } = "Saved count";
         protected override DiscordColor ExecutedColor { get; } = DiscordColor.Blurple;
-
-        public DbGetSavedException() : base() { }
         public DbGetSavedException(string message) : base(message) { }
         public DbGetSavedException(string message, Exception innerException) : base(message, innerException) { }
     }

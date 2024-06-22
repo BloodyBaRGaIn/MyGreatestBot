@@ -15,7 +15,6 @@ namespace MyGreatestBot.Commands.Exceptions
 
         public DiscordColor Color => IsSuccess ? ExecutedColor : ErroredColor;
 
-        protected CommandExecutionException() : base("Exception was thrown") { }
         protected CommandExecutionException(string message) : base(message) { }
         protected CommandExecutionException(string message, Exception exception) : base(message, exception) { }
 

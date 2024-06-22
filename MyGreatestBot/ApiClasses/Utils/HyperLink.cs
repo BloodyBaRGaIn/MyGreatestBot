@@ -1,23 +1,21 @@
-﻿using System;
-
-namespace MyGreatestBot.ApiClasses.Utils
+﻿namespace MyGreatestBot.ApiClasses.Utils
 {
     /// <summary>
     /// Hypertext string
     /// </summary>
     /// <param name="title">Text</param>
     /// <param name="url">URL</param>
-    public sealed class HyperLink(string title, string? url = null) : IComparable<HyperLink>
+    public sealed class HyperLink(string title, string? url = null)
     {
         /// <summary>
         /// Displayed text
         /// </summary>
-        public string Title { get; init; } = title;
+        public string Title { get; } = string.IsNullOrWhiteSpace(title) ? "Blank title" : title;
 
         /// <summary>
         /// URL
         /// </summary>
-        public string Url { get; init; } = url ?? string.Empty;
+        public string Url { get; } = url ?? string.Empty;
 
         public CompositeId InnerId { get; private set; } = new();
 
@@ -37,16 +35,6 @@ namespace MyGreatestBot.ApiClasses.Utils
             string temp_title = Title.Replace("://", " ");
 
             return string.IsNullOrWhiteSpace(Url) ? temp_title : $"[{temp_title}]({Url})";
-        }
-
-        /// <summary>
-        /// Comparsion method
-        /// </summary>
-        /// <param name="other">Other instance</param>
-        /// <returns>Zero if equals</returns>
-        public int CompareTo(HyperLink? other)
-        {
-            return this is null || other is null ? int.MaxValue : other.Title.CompareTo(Title);
         }
     }
 }

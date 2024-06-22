@@ -231,7 +231,7 @@ namespace MyGreatestBot.Player
                 while (StandardOutput.EndOfStream)
                 {
                     bool exit = WaitForExit(1);
-                    if ((HasExited && exit) || stopwatch.ElapsedMilliseconds >= milliseconds)
+                    if ((HasExited && exit) || (stopwatch.ElapsedMilliseconds >= milliseconds))
                     {
                         break;
                     }
@@ -241,7 +241,7 @@ namespace MyGreatestBot.Player
 
                 string errorMessage = GetErrorMessage();
 
-                return string.IsNullOrWhiteSpace(errorMessage);
+                return string.IsNullOrWhiteSpace(errorMessage) && !StandardOutput.EndOfStream;
             }
 
             /// <summary>
@@ -250,6 +250,7 @@ namespace MyGreatestBot.Player
             internal void Stop()
             {
                 ErrorTaskCts?.Cancel();
+                Wait(10);
                 ErrorTask?.Wait();
 
                 if (Process == null)

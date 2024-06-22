@@ -1,7 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
-using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
@@ -9,21 +8,18 @@ namespace MyGreatestBot.Player
     {
         internal void Resume(CommandActionSource source)
         {
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
+
             IsPaused = false;
             WaitForStatus(PlayerStatus.Playing | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
 
-            if (source.HasFlag(CommandActionSource.Mute))
-            {
-                return;
-            }
-
-            DiscordEmbedBuilder builder = currentTrack == null
-                ? new ResumeException("Nothing to resume").GetDiscordEmbed()
+            messageHandler?.Send(currentTrack == null
+                ? new ResumeException("Nothing to resume")
                 : IsPlaying
-                ? new ResumeException("Resumed").WithSuccess().GetDiscordEmbed()
-                : new PlayerException("Illegal state detected").GetDiscordEmbed();
-
-            Handler.Message.Send(builder);
+                ? new ResumeException("Resumed").WithSuccess()
+                : new PlayerException("Illegal state detected"));
         }
     }
 }

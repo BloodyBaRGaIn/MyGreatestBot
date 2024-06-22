@@ -1,6 +1,7 @@
 ﻿using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db;
+using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
@@ -14,47 +15,46 @@ namespace MyGreatestBot.Player
     {
         internal void DbRestore(CommandActionSource source)
         {
-            bool nomute = !source.HasFlag(CommandActionSource.Mute);
+            MessageHandler? messageHandler = source.HasFlag(CommandActionSource.Mute)
+                ? null
+                : Handler.Message;
 
             ITrackDatabaseAPI? DbInstance = ApiManager.GetDbApiInstance() ?? throw new DbApiException();
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbRestoreException("Operation in progress"));
-                }
+                messageHandler?.Send(new DbRestoreException("Operation in progress"));
                 return;
             }
 
+            List<CompositeId> info;
             try
             {
-                List<CompositeId> info;
-                try
-                {
-                    info = DbInstance.RestoreTracks(Handler.GuildId);
-                }
-                catch (Exception ex)
-                {
-                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new DbRestoreException("Restore failed", ex));
-                    }
-                    return;
-                }
-                if (info.Count == 0)
-                {
-                    if (nomute)
-                    {
-                        Handler.Message.Send(new DbRestoreException("Nothing to restore"));
-                    }
-                    return;
-                }
-                int restoreCount = 0;
+                info = DbInstance.RestoreTracks(Handler.GuildId);
+            }
+            catch (Exception ex)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                messageHandler?.Send(new DbRestoreException("Restore failed", ex));
+                return;
+            }
+
+            if (info.Count == 0)
+            {
+                messageHandler?.Send(new DbRestoreException("Nothing to restore"));
+                return;
+            }
+
+            Exception? last_exception = null;
+            int restoreCount = 0;
+
+            try
+            {
                 foreach (CompositeId composite in info)
                 {
-                    ITrackInfo? track = ApiManager.Get<IMusicAPI>(composite.Api)?.GetTrackFromId(composite.Id);
+                    ITrackInfo? track = ApiManager.GetMusicApiInstance(composite.Api)
+                        ?.GetTrackFromId(composite.Id);
+
                     if (track == null)
                     {
                         continue;
@@ -67,19 +67,19 @@ namespace MyGreatestBot.Player
                     restoreCount++;
                 }
                 DbInstance.RemoveTracks(Handler.GuildId);
-                if (nomute)
-                {
-                    Handler.Message.Send(new DbRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
-                }
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                last_exception = ex;
             }
             finally
             {
                 _ = DbSemaphore.TryRelease();
             }
+
+            messageHandler?.Send(last_exception != null
+                ? new DbRestoreException("Cannot restore tracks", last_exception)
+                : new DbRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
         }
     }
 }

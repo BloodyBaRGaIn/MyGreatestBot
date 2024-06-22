@@ -1,4 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
+using MyGreatestBot.Extensions;
 using System;
 using System.Linq;
 using System.Threading;
@@ -21,7 +22,9 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         [DisallowNull]
         public virtual string Domain =>
-            ApiManager.Get<IMusicAPI>(TrackType)?.Domains?.ToString() ?? string.Empty;
+            ApiManager.GetMusicApiInstance(TrackType)
+            ?.Domains
+            ?.ToString() ?? string.Empty;
 
         /// <summary>
         /// Extended track name
@@ -93,7 +96,7 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         /// <param name="span">Specified position</param>
         /// <returns>True if possible to seek</returns>
-        public bool IsSeekPossible(TimeSpan span)
+        public bool IsRewindPossible(TimeSpan span)
         {
             return !(IsLiveStream || span > Duration);
         }
@@ -102,9 +105,9 @@ namespace MyGreatestBot.ApiClasses.Music
         /// Performs seek operation with check
         /// </summary>
         /// <param name="span">Specified position</param>
-        public void PerformSeek(TimeSpan span)
+        public void PerformRewind(TimeSpan span)
         {
-            if (IsSeekPossible(span))
+            if (IsRewindPossible(span))
             {
                 TimePosition = span;
             }
@@ -123,7 +126,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
             if (!IsLiveStream)
             {
-                result += $"{Environment.NewLine}Duration: {GetCustomTime(Duration)}";
+                result += $"{Environment.NewLine}Duration: {Duration.GetCustomTime()}";
             }
 
             if (AlbumName != null && !string.IsNullOrWhiteSpace(AlbumName.Title))
@@ -138,21 +141,10 @@ namespace MyGreatestBot.ApiClasses.Music
 
             if (TimePosition != TimeSpan.Zero)
             {
-                result += $"{Environment.NewLine}Time: {GetCustomTime(TimePosition)}";
+                result += $"{Environment.NewLine}Time: {TimePosition.GetCustomTime()}";
             }
 
             return result;
-        }
-
-        public static string GetCustomTime(TimeSpan time, bool withMilliseconds = false)
-        {
-            static string GetPaddedValue(double x, int pad = 2)
-            {
-                return $"{(int)x}".PadLeft(pad, '0');
-            }
-
-            return $"{GetPaddedValue(time.TotalHours)}:{GetPaddedValue(time.Minutes)}:{GetPaddedValue(time.Seconds)}" +
-                (withMilliseconds ? $":{GetPaddedValue(time.Milliseconds, 3)}" : string.Empty);
         }
 
         public string GetShortMessage(string prefix)

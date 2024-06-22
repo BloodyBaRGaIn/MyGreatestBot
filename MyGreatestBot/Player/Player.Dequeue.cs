@@ -32,14 +32,8 @@ namespace MyGreatestBot.Player
 
                     DiscordEmbedBuilder builder;
 
-                    try
-                    {
-                        builder = GetPlayingMessage<PlayerException>(track, "Playing");
-                    }
-                    catch
-                    {
-                        builder = new PlayerException("Cannot make playing message").GetDiscordEmbed();
-                    }
+                    builder = new PlayerException(track.GetMessage("Playing")).WithSuccess().GetDiscordEmbed();
+                    builder.Thumbnail = track.GetThumbnail();
 
                     Handler.Message.Send(builder);
 
@@ -106,9 +100,13 @@ namespace MyGreatestBot.Player
                                     continue;
                                 }
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                throw;
+                                Handler.Message.Send(
+                                    new DbIgnoreException("Failed to check track", ex)
+                                    .WithSuccess());
+
+                                continue;
                             }
                             finally
                             {

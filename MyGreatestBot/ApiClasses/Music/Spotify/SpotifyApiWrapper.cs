@@ -195,7 +195,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
             if (time > 0)
             {
-                track.PerformSeek(TimeSpan.FromSeconds(time));
+                track.PerformRewind(TimeSpan.FromSeconds(time));
             }
 
             return track;
