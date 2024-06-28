@@ -30,17 +30,20 @@ namespace MyGreatestBot.Player
                         continue;
                     }
 
-                    DiscordEmbedBuilder builder;
+                    {
+                        DiscordEmbedBuilder builder;
 
-                    builder = new PlayerException(track.GetMessage("Playing")).WithSuccess().GetDiscordEmbed();
-                    builder.Thumbnail = track.GetThumbnail();
+                        builder = new PlayerException(track.GetMessage("Playing"))
+                            .WithSuccess().GetDiscordEmbed();
+                        builder.Thumbnail = track.GetThumbnail();
 
-                    Handler.Message.Send(builder);
+                        Handler.Message.Send(builder);
+                    }
 
                     if (track.Radio)
                     {
                         ITrackInfo? radio_track = null;
-                        string message = string.Empty;
+                        Exception? last_exception = null;
 
                         try
                         {
@@ -48,7 +51,7 @@ namespace MyGreatestBot.Player
                         }
                         catch (Exception ex)
                         {
-                            message = ex.Message;
+                            last_exception = ex;
                         }
 
                         if (radio_track == null)
@@ -58,7 +61,7 @@ namespace MyGreatestBot.Player
                                 new PlayerException(
                                     string.Join(Environment.NewLine,
                                         $"Cannot get the next radio track",
-                                        message)));
+                                        last_exception)));
                         }
                         else
                         {
@@ -71,47 +74,39 @@ namespace MyGreatestBot.Player
 
                     if (DbInstance != null && !track.BypassCheck)
                     {
-                        bool semaphoerReady = true;
+                        DiscordEmbedBuilder? builder = null;
 
-                        if (!DbSemaphore.TryWaitOne())
+                        if (DbSemaphore.TryWaitOne())
                         {
-                            semaphoerReady = false;
-                        }
-
-                        if (semaphoerReady)
-                        {
+                            
                             try
                             {
                                 if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
                                 {
-                                    Handler.Message.Send(
-                                        new DbIgnoreException("Skipping track with ignored artist(s)")
-                                        .WithSuccess());
-
-                                    continue;
+                                    builder = new DbIgnoreException("Skipping track with ignored artist(s)")
+                                        .WithSuccess().GetDiscordEmbed();
                                 }
-
-                                if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
+                                else if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
                                 {
-                                    Handler.Message.Send(
-                                        new DbIgnoreException("Skipping ignored track")
-                                        .WithSuccess());
-
-                                    continue;
+                                    builder = new DbIgnoreException("Skipping ignored track")
+                                        .WithSuccess().GetDiscordEmbed();
                                 }
                             }
                             catch (Exception ex)
                             {
-                                Handler.Message.Send(
-                                    new DbIgnoreException("Failed to check track", ex)
-                                    .WithSuccess());
-
-                                continue;
+                                builder = new DbIgnoreException("Failed to check track", ex)
+                                    .WithSuccess().GetDiscordEmbed();
                             }
                             finally
                             {
                                 _ = DbSemaphore.TryRelease();
                             }
+                        }
+
+                        if (builder != null)
+                        {
+                            Handler.Message.Send(builder);
+                            continue;
                         }
                     }
 
