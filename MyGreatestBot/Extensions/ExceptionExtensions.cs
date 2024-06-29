@@ -13,7 +13,7 @@ namespace MyGreatestBot.Extensions
     {
         public static string GetTypeName(this Exception? exception)
         {
-            return (exception?.GetType() ?? typeof(Exception)).Name ?? string.Empty;
+            return (exception?.GetType() ?? typeof(Exception)).Name;
         }
 
         public static string GetNonEmptyMessage(this Exception? exception)

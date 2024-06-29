@@ -34,12 +34,13 @@ namespace MyGreatestBot.Player
             Idle = 0x0002U,
             InitOrIdle = Init | Idle,
             Start = 0x0004U,
-            Loading = 0x0008U,
-            Playing = 0x0010U,
-            Paused = 0x0020U,
-            Finish = 0x0040U,
-            Deinit = 0x0080U,
-            Error = 0x0100U,
+            Obtaining = 0x0008U,
+            Loading = 0x0010U,
+            Playing = 0x0020U,
+            Paused = 0x0040U,
+            Finish = 0x0080U,
+            Deinit = 0x0100U,
+            Error = 0x0200U,
             DeinitOrError = Deinit | Error
         }
 
