@@ -95,7 +95,7 @@
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3421" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.10.0" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.10.0" />
-    <PackageReference Include="LiteDB" Version="5.0.20" />
+    <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="171.30.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

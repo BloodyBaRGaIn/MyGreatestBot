@@ -325,13 +325,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
                 try
                 {
-                    handler.Leave(handler.TextChannel, handler.VoiceChannel).Wait();
+                    handler.PlayerInstance.Terminate(CommandActionSource.Command);
                 }
                 catch { }
 
                 try
                 {
-                    handler.PlayerInstance.Terminate(CommandActionSource.Command);
+                    handler.Leave(handler.TextChannel, handler.VoiceChannel).Wait();
                 }
                 catch { }
             });

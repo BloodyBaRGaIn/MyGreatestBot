@@ -12,10 +12,7 @@ namespace MyGreatestBot.Player
             while (true)
             {
                 if (MainPlayerTask == null
-                    || MainPlayerTask.IsCompletedSuccessfully
-                    || MainPlayerTask.IsCompleted
-                    || MainPlayerTask.IsCanceled
-                    || MainPlayerTask.IsFaulted)
+                    || MainPlayerTask.IsCompleted)
                 {
                     break;
                 }

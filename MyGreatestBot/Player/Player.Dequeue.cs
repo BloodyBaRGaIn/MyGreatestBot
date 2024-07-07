@@ -78,7 +78,7 @@ namespace MyGreatestBot.Player
 
                         if (DbSemaphore.TryWaitOne())
                         {
-                            
+
                             try
                             {
                                 if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
