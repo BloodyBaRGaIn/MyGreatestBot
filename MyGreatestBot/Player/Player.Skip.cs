@@ -26,13 +26,15 @@ namespace MyGreatestBot.Player
                 }
             }
 
+            CommandExecutionException message = IsPlaying
+                ? new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
+                    .WithSuccess()
+                : new SkipException("Nothing to skip");
+
             IsPlaying = false;
             WaitForFinish();
 
-            messageHandler?.Send(IsPlaying
-                ? new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
-                    .WithSuccess()
-                : new SkipException("Nothing to skip"));
+            messageHandler?.Send(message);
         }
     }
 }

@@ -101,9 +101,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                Task.Delay(500).Wait();
-                _ = Client.CreateAuthSession(yandexCredStruct.Username);
-                Task.Delay(500).Wait();
+                Task.Delay(1000).Wait();
+                _ = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
+                Task.Delay(1000).Wait();
                 _ = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
             }
             catch (Exception ex)
