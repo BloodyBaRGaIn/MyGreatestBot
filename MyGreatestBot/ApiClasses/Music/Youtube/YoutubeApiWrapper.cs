@@ -212,8 +212,26 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return other;
             }
 
+            const string searchSeparator = "-";
+            const char searchComma = ',';
+
+            string searchQuery = $"{other.Title} {searchSeparator} {string.Join($"{searchComma} ", other.ArtistArr.Select(a => a.Title))}";
+
+            static IEnumerable<string> GetWords(string input)
+            {
+                return input
+                    .ToLowerInvariant()
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Where(s => s != searchSeparator)
+                    .Select(s => s.Trim(searchComma))
+                    .Where(s => string.IsNullOrEmpty(s));
+            }
+
+            IEnumerable<string> searchWords = GetWords(searchQuery);
+            int searchWordsCount = searchWords.Count();
+
             IEnumerable<VideoSearchResult>? search = Search
-                ?.GetVideosAsync($"{other.Title} - {string.Join(", ", other.ArtistArr.Select(a => a.Title))}")
+                ?.GetVideosAsync(searchQuery)
                 ?.ToBlockingEnumerable();
 
             if (search == null)
@@ -223,7 +241,14 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             VideoSearchResult? result = search.Where(track => track != null)
                 .FirstOrDefault(track =>
-                    Math.Abs((track.Duration.GetValueOrDefault() - other.Duration).Ticks) <= ISearchMusicAPI.MaximumTimeDifference.Ticks);
+                {
+                    IEnumerable<string> resultWords = GetWords(track.Title);
+
+                    return Math.Abs((track.Duration.GetValueOrDefault() - other.Duration).Ticks)
+                            <= ISearchMusicAPI.MaximumTimeDifference.Ticks
+                        && Math.Abs(resultWords.Count() - searchWordsCount) < 2
+                        && searchWords.Intersect(resultWords).Count() == searchWordsCount;
+                });
 
             return result == null ? null : new YoutubeTrackInfo(result);
         }

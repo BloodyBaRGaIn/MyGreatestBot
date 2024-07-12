@@ -314,6 +314,10 @@ namespace MyGreatestBot.Player
 
             while (true)
             {
+                if (MainPlayerCancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
                 if (obtain_retries >= TRACK_LOADING_FAULT_RETRIES)
                 {
                     Handler.Message.Send(new PlayerException("Cannot obtain audio URL"));
