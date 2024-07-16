@@ -10,6 +10,7 @@ Commands are organized into categories for better readability
 - ```apireload (reload) - Reload failed APIs```  
 - ```playerstatus (plst) - Get player status```  
 - ```logout (exit, quit, bye, bb) - Logout and exit```  
+- ```shutdown - Force shutdown```  
 
 ## Queuing commands
 

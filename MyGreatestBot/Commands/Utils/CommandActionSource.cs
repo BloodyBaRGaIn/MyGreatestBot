@@ -4,7 +4,7 @@
     /// Commands additional arguments
     /// </summary>
     [System.Flags]
-    internal enum CommandActionSource : uint
+    public enum CommandActionSource : uint
     {
         None = 0x00000000U,
         Command = 0x00000001U,
@@ -16,6 +16,10 @@
         PlayerRadio = 0x00000800U,
         PlayerNoBlacklist = 0x00001000U,
 
-        Mute = 0x10000000U
+        Mute = 0x10000000U,
+
+        LogoutBye = 0x20000000U,
+        LogoutExit = 0x40000000U,
+        LogoutShut = 0x80000000U
     }
 }

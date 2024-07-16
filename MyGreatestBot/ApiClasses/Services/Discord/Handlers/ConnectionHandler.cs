@@ -302,30 +302,51 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             await Task.Delay(1);
         }
 
-        public static async Task Logout(bool wave = true)
+        public static async Task Logout(CommandActionSource source = CommandActionSource.LogoutExit)
         {
-            try
-            {
-                DiscordWrapper.Logout();
-            }
-            catch { }
-
             ParallelLoopResult result = Parallel.ForEach(ConnectionDictionary.Values, (handler) =>
             {
-                if (wave)
+                if (source.HasFlag(CommandActionSource.LogoutExit))
                 {
-                    handler.Message.Send(":wave:");
+                    try
+                    {
+                        handler.Message.Send(new DiscordEmbedBuilder()
+                            .WithTitle("Application is closing")
+                            .WithColor(DiscordColor.Red));
+                    }
+                    catch { }
+                }
+                else if (source.HasFlag(CommandActionSource.LogoutShut))
+                {
+                    try
+                    {
+                        handler.Message.Send(new DiscordEmbedBuilder()
+                            .WithTitle("Shutting down")
+                            .WithColor(DiscordColor.Red));
+                    }
+                    catch { }
                 }
                 else
                 {
-                    handler.Message.Send(new DiscordEmbedBuilder()
-                        .WithTitle("Application is closing")
-                        .WithColor(DiscordColor.Red));
+                    source = CommandActionSource.LogoutBye;
+                    try
+                    {
+                        handler.Message.Send(":wave:");
+                    }
+                    catch { }
                 }
 
                 try
                 {
-                    handler.PlayerInstance.Terminate(CommandActionSource.Command);
+                    Task terminateTask = Task.Run(() => handler.PlayerInstance.Terminate(CommandActionSource.Command));
+                    if (source.HasFlag(CommandActionSource.LogoutShut))
+                    {
+                        _ = terminateTask.Wait(1);
+                    }
+                    else
+                    {
+                        terminateTask.Wait();
+                    }
                 }
                 catch { }
 
@@ -340,6 +361,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 await Task.Delay(1);
             }
+
+            try
+            {
+                DiscordWrapper.Logout();
+            }
+            catch { }
 
             DiscordWrapper.Exit();
             await Task.Yield();

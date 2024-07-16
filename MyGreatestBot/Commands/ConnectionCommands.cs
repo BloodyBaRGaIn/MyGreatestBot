@@ -118,11 +118,7 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.GetStatus(CommandActionSource.Command));
         }
 
-        [Command("logout")]
-        [Aliases("exit", "quit", "bye", "bb")]
-        [Description("Logout and exit")]
-        [SuppressMessage("Performance", "CA1822")]
-        public async Task LogoutCommand(CommandContext ctx)
+        private static async Task LogoutGeneric(CommandContext ctx, CommandActionSource source)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -141,7 +137,24 @@ namespace MyGreatestBot.Commands
                 }
             }
 
-            await ConnectionHandler.Logout();
+            await ConnectionHandler.Logout(source);
+        }
+
+        [Command("logout")]
+        [Aliases("exit", "quit", "bye", "bb")]
+        [Description("Logout and exit")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task LogoutCommand(CommandContext ctx)
+        {
+            await LogoutGeneric(ctx, CommandActionSource.LogoutBye);
+        }
+
+        [Command("shutdown")]
+        [Description("Force shutdown")]
+        [SuppressMessage("Performance", "CA1822")]
+        public async Task ShutdownCommand(CommandContext ctx)
+        {
+            await LogoutGeneric(ctx, CommandActionSource.LogoutShut);
         }
     }
 }

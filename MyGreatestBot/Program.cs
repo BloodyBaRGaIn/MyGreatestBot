@@ -107,7 +107,7 @@ namespace MyGreatestBot
 
             try
             {
-                ConnectionHandler.Logout(false).Wait();
+                ConnectionHandler.Logout().Wait();
             }
             catch { }
         }
@@ -126,7 +126,7 @@ namespace MyGreatestBot
 
             try
             {
-                ConnectionHandler.Logout(false).Wait();
+                ConnectionHandler.Logout().Wait();
             }
             catch { }
 
