@@ -306,13 +306,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     age--;
                 }
 
-                if (age >= 0)
-                {
-                    Age = age;
-                }
-
                 if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
                 {
+                    Age = age;
+
                     DiscordWrapper.CurrentDomainLogHandler.Send(
                         $"It's my {Age} year anniversary today!!!");
                 }

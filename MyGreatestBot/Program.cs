@@ -24,6 +24,8 @@ namespace MyGreatestBot
 #endif
                 ;
 
+        private static volatile bool CancellationEventTriggered = false;
+
         /// <summary>
         /// Process initialization
         /// </summary>
@@ -97,13 +99,17 @@ namespace MyGreatestBot
         private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
             _ = sender;
-
-            DiscordWrapper.CurrentDomainLogHandler.Send("CancelKey pressed. Closing...", LogLevel.Warning);
-
-            Console.CancelKeyPress -= Console_CancelKeyPress;
             e.Cancel = true;
 
-            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+            if (CancellationEventTriggered)
+            {
+                DiscordWrapper.CurrentDomainLogHandler.Send("Application is already closing.", LogLevel.Warning);
+                return;
+            }
+
+            CancellationEventTriggered = true;
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("CancelKey pressed. Closing...", LogLevel.Warning);
 
             try
             {
@@ -118,11 +124,15 @@ namespace MyGreatestBot
             _ = sender;
             _ = e;
 
+            if (CancellationEventTriggered)
+            {
+                DiscordWrapper.CurrentDomainLogHandler.Send("Application is already closing.", LogLevel.Warning);
+                return;
+            }
+
+            CancellationEventTriggered = true;
+
             DiscordWrapper.CurrentDomainLogHandler.Send("Close button pressed. Closing...", LogLevel.Warning);
-
-            AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;
-
-            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
 
             try
             {
@@ -147,6 +157,11 @@ namespace MyGreatestBot
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _ = sender;
+
+            if (CancellationEventTriggered)
+            {
+                return;
+            }
 
             string? message = (e.ExceptionObject as Exception)?.GetExtendedMessage();
             if (string.IsNullOrWhiteSpace(message))

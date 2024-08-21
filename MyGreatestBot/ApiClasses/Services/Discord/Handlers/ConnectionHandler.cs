@@ -50,7 +50,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 {
                     Color = DiscordColor.White,
                     Title = "Anniversary",
-                    Description = $":partying_face:It's my {DiscordWrapper.Age} year anniversary today!!!:partying_face:"
+                    Description =
+                        $":partying_face:" +
+                        $"It's my {DiscordWrapper.Age} year anniversary today!!!" +
+                        $":partying_face:"
                 });
             }
         }
@@ -156,6 +159,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             DiscordChannel? new_channel = null;
             DiscordChannel? old_channel = null;
+
             if (VoiceChannel is not null)
             {
                 old_channel = await _guild.GetChannelAsync(VoiceChannel.Id);

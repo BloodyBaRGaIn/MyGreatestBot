@@ -50,13 +50,12 @@ namespace MyGreatestBot.ApiClasses.Music
             {
                 foreach (TracksRadio radio in collection)
                 {
-                    if ((radio.api.ApiType & intents) == ApiIntents.None)
+                    if ((radio.api.ApiType & intents) != ApiIntents.None)
                     {
-                        continue;
+                        return ApiManager.IsApiRegisterdAndAllowed(radio.api.ApiType)
+                            ? radio.get_radio.Invoke(id)
+                            : throw new ApiException(radio.api.ApiType);
                     }
-                    return ApiManager.IsApiRegisterdAndAllowed(radio.api.ApiType)
-                        ? radio.get_radio.Invoke(id)
-                        : throw new ApiException(radio.api.ApiType);
                 }
 
                 throw new InvalidOperationException("Radio mode is not supported");
@@ -87,13 +86,12 @@ namespace MyGreatestBot.ApiClasses.Music
             {
                 foreach (TracksReceiver receiver in collection)
                 {
-                    if (!receiver.patterns.Any(p => p.IsMatch(query)))
+                    if (receiver.patterns.Any(p => p.IsMatch(query)))
                     {
-                        continue;
+                        return ApiManager.IsApiRegisterdAndAllowed(receiver.api.ApiType)
+                            ? receiver.getTracks.Invoke(query)
+                            : throw new ApiException(receiver.api.ApiType);
                     }
-                    return ApiManager.IsApiRegisterdAndAllowed(receiver.api.ApiType)
-                        ? receiver.getTracks.Invoke(query)
-                        : throw new ApiException(receiver.api.ApiType);
                 }
 
                 throw new InvalidOperationException("Unknown music format");
