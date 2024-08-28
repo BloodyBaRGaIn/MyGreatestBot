@@ -9,6 +9,6 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         /// <param name="url">URL</param>
         /// <returns>Track collection</returns>
-        IEnumerable<ITrackInfo>? GetTracksFromUrl(string url);
+        IEnumerable<BaseTrackInfo>? GetTracksFromUrl(string url);
     }
 }

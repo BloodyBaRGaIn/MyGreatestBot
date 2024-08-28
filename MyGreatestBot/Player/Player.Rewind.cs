@@ -27,12 +27,12 @@ namespace MyGreatestBot.Player
                     }
                     else
                     {
-                        builder = new RewindException("Cannot seek").GetDiscordEmbed();
+                        builder = new RewindException("Cannot rewind").GetDiscordEmbed();
                     }
                 }
                 else
                 {
-                    builder = new RewindException("Nothing to seek").GetDiscordEmbed();
+                    builder = new RewindException("Nothing to rewind").GetDiscordEmbed();
                 }
 
                 if (!source.HasFlag(CommandActionSource.Mute))

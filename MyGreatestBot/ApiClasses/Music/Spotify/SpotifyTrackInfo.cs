@@ -9,27 +9,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify track info implementation
     /// </summary>
-    public sealed class SpotifyTrackInfo : ITrackInfo
+    public sealed class SpotifyTrackInfo : BaseTrackInfo
     {
-#pragma warning disable CA1859
-        private ITrackInfo Base => this;
-#pragma warning restore CA1859
-
-        ApiIntents ITrackInfo.TrackType => ApiIntents.Spotify;
-
-        public HyperLink TrackName { get; }
-        public HyperLink[] ArtistArr { get; }
-        [AllowNull] public HyperLink AlbumName { get; }
-        [AllowNull] public HyperLink PlaylistName { get; }
-
-        public TimeSpan Duration { get; private set; }
-        TimeSpan ITrackInfo.TimePosition { get; set; }
-
-        public string AudioURL { get; private set; }
-        [AllowNull] public string CoverURL { get; } = null;
-
-        bool ITrackInfo.Radio { get; set; }
-        bool ITrackInfo.BypassCheck { get; set; }
+        public override ApiIntents TrackType => ApiIntents.Spotify;
 
         private ApiIntents AudioFrom = ApiIntents.None;
 
@@ -40,15 +22,16 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         /// <param name="playlist">Playlist instance from Spotify API</param>
         internal SpotifyTrackInfo(FullTrack track, FullPlaylist? playlist = null)
         {
-            TrackName = new HyperLink(track.Name, $"{Base.Domain}track/{track.Id}")
-                .WithId(Base.GetCompositeId(track.Id));
+            TrackName = new HyperLink(track.Name, $"{Domain}track/{track.Id}")
+                .WithId(GetCompositeId(track.Id));
 
             ArtistArr = track.Artists.Select(a =>
                 new HyperLink(
                     a.Name,
-                    $"{Base.Domain}artist/{a.Id}").WithId(Base.GetCompositeId(a.Id))).ToArray();
+                    $"{Domain}artist/{a.Id}")
+                .WithId(GetCompositeId(a.Id))).ToArray();
 
-            AlbumName = new(track.Album.Name, $"{Base.Domain}album/{track.Album.Id}");
+            AlbumName = new(track.Album.Name, $"{Domain}album/{track.Album.Id}");
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
@@ -56,14 +39,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 ? null
                 : string.IsNullOrWhiteSpace(playlist.Id)
                 ? new(playlist.Name)
-                : new(playlist.Name, $"{Base.Domain}playlist/{playlist.Id}");
+                : new(playlist.Name, $"{Domain}playlist/{playlist.Id}");
 
-            string? cover = track.Album.Images.FirstOrDefault()?.Url;
-
-            if (!string.IsNullOrWhiteSpace(cover) && IAccessible.IsUrlSuccess(cover, false))
-            {
-                CoverURL = cover;
-            }
+            CoverUrlCollection = track.Album.Images?.Select(i => i?.Url);
 
             // default
             AudioURL = track.PreviewUrl;
@@ -73,7 +51,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         {
             try
             {
-                ITrackInfo? result = instance.SearchTrack(this);
+                BaseTrackInfo? result = instance.SearchTrack(this);
                 if (result == null)
                 {
                     return false;
@@ -92,7 +70,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
+        protected override void ObtainAudioURLInternal(CancellationTokenSource cts)
         {
             if (!TrySearchGeneric(YoutubeApiWrapper.SearchMusicInstance, cts))
             {
@@ -101,9 +79,10 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             }
         }
 
-        void ITrackInfo.Reload()
+        /// <inheritdoc cref="BaseTrackInfo.Reload"/>
+        public new void Reload()
         {
-            ApiManager.ReloadApis(Base.TrackType | AudioFrom);
+            ApiManager.ReloadApis(TrackType | AudioFrom);
         }
     }
 }

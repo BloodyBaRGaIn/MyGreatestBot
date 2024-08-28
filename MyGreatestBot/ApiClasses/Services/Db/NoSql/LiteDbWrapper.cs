@@ -38,7 +38,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             LiteDbClient = null;
         }
 
-        bool ITrackDatabaseAPI.IsTrackIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsTrackIgnored(BaseTrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -58,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        bool ITrackDatabaseAPI.IsAnyArtistIgnored(ITrackInfo track, ulong guild)
+        bool ITrackDatabaseAPI.IsAnyArtistIgnored(BaseTrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -85,7 +85,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             return false;
         }
 
-        void ITrackDatabaseAPI.AddIgnoredTrack(ITrackInfo track, ulong guild)
+        void ITrackDatabaseAPI.AddIgnoredTrack(BaseTrackInfo track, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -113,7 +113,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        void ITrackDatabaseAPI.AddIgnoredArtist(ITrackInfo track, ulong guild, int index)
+        void ITrackDatabaseAPI.AddIgnoredArtist(BaseTrackInfo track, ulong guild, int index)
         {
             if (LiteDbClient is null)
             {
@@ -141,7 +141,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
             }
         }
 
-        void ITrackDatabaseAPI.SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild)
+        void ITrackDatabaseAPI.SaveTracks(IEnumerable<BaseTrackInfo> tracks, ulong guild)
         {
             if (LiteDbClient is null)
             {
@@ -155,7 +155,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
 
                 UInt128 position = 0;
 
-                foreach (ITrackInfo track in tracks)
+                foreach (BaseTrackInfo track in tracks)
                 {
                     _ = querryCollection.Insert(new GenericDataValueDescriptor(++position, GetTrackKey(track, guild))
                     {
@@ -233,12 +233,12 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
                 : LiteDbClient.GetCollection<GenericDataValueDescriptor>(name);
         }
 
-        private static GenericDataValueKey GetTrackKey(ITrackInfo track, ulong guild)
+        private static GenericDataValueKey GetTrackKey(BaseTrackInfo track, ulong guild)
         {
             return new(guild, track.TrackType, track.Id);
         }
 
-        private static GenericDataValueKey GetArtistKey(ITrackInfo track, ulong guild, int index)
+        private static GenericDataValueKey GetArtistKey(BaseTrackInfo track, ulong guild, int index)
         {
             return new(guild, track.TrackType, track.ArtistArr[index].InnerId);
         }

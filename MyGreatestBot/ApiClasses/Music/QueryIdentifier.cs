@@ -19,19 +19,19 @@ namespace MyGreatestBot.ApiClasses.Music
         private static readonly Regex GENERIC_RE = new("((\\s)|(\\S))+");
 #pragma warning restore SYSLIB1045
 
-        public static IEnumerable<ITrackInfo>? GetTracks(string query)
+        public static IEnumerable<BaseTrackInfo>? GetTracks(string query)
         {
             return TracksReceiver.Execute(query);
         }
 
-        public static ITrackInfo? GetRadio(ApiIntents intents, string id)
+        public static BaseTrackInfo? GetRadio(ApiIntents intents, string id)
         {
             return TracksRadio.Execute(intents, id);
         }
 
         private sealed class TracksRadio
         {
-            private delegate ITrackInfo? GetRadio(string id);
+            private delegate BaseTrackInfo? GetRadio(string id);
 
             private readonly GetRadio get_radio;
             private readonly IMusicAPI api;
@@ -46,7 +46,7 @@ namespace MyGreatestBot.ApiClasses.Music
                 };
             }
 
-            internal static ITrackInfo? Execute(ApiIntents intents, string id)
+            internal static BaseTrackInfo? Execute(ApiIntents intents, string id)
             {
                 foreach (TracksRadio radio in collection)
                 {
@@ -69,7 +69,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
         private sealed class TracksReceiver
         {
-            private delegate IEnumerable<ITrackInfo>? GetTracks(string query);
+            private delegate IEnumerable<BaseTrackInfo>? GetTracks(string query);
 
             private readonly Regex[] patterns;
             private readonly IMusicAPI api;
@@ -82,7 +82,7 @@ namespace MyGreatestBot.ApiClasses.Music
                 this.getTracks = getTracks;
             }
 
-            internal static IEnumerable<ITrackInfo>? Execute(string query)
+            internal static IEnumerable<BaseTrackInfo>? Execute(string query)
             {
                 foreach (TracksReceiver receiver in collection)
                 {

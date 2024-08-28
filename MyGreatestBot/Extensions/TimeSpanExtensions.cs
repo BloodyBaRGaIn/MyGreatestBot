@@ -2,7 +2,7 @@
 
 namespace MyGreatestBot.Extensions
 {
-    internal static class TimeSpanExtensions
+    public static class TimeSpanExtensions
     {
         public static string GetCustomTime(this TimeSpan time, bool withMilliseconds = false)
         {

@@ -52,7 +52,7 @@ namespace MyGreatestBot.Player
             {
                 foreach (CompositeId composite in info)
                 {
-                    ITrackInfo? track = ApiManager.GetMusicApiInstance(composite.Api)
+                    BaseTrackInfo? track = ApiManager.GetMusicApiInstance(composite.Api)
                         ?.GetTrackFromId(composite.Id);
 
                     if (track == null)

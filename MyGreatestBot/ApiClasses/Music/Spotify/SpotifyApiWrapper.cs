@@ -83,9 +83,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             _api = null;
         }
 
-        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
+        IEnumerable<BaseTrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
-            List<ITrackInfo> tracks = [];
+            List<BaseTrackInfo> tracks = [];
 
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -172,7 +172,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     break;
                 }
 
-                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id);
+                BaseTrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id);
 
                 if (track != null)
                 {
@@ -185,14 +185,10 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
+        BaseTrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             FullTrack? origin = Tracks.Get(id).GetAwaiter().GetResult();
-
-#pragma warning disable CA1859
-            ITrackInfo track = new SpotifyTrackInfo(origin);
-#pragma warning restore CA1859
-
+            BaseTrackInfo track = new SpotifyTrackInfo(origin);
             if (time > 0)
             {
                 track.PerformRewind(TimeSpan.FromSeconds(time));
@@ -203,7 +199,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         #region Private methods
 
-        private void FromAlbumId(string album_id, List<ITrackInfo> tracks)
+        private void FromAlbumId(string album_id, List<BaseTrackInfo> tracks)
         {
             FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();
             if (album == null)

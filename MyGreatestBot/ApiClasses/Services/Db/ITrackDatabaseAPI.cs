@@ -17,7 +17,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db
         /// <param name="guild">Discord giuld ID</param>
         /// <returns>True if the track is in the collection, otherwise returns false</returns>
         [SuppressMessage("CodeQuality", "IDE0052")]
-        private bool IsIgnoredDoxygen(ITrackInfo track, ulong guild)
+        private bool IsIgnoredDoxygen(BaseTrackInfo track, ulong guild)
         {
             throw new NotImplementedException();
         }
@@ -28,7 +28,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db
         /// <param name="track"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='track']"/></param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
         /// <returns>True if the track is in the collection, otherwise returns false</returns>
-        bool IsTrackIgnored(ITrackInfo track, ulong guild);
+        bool IsTrackIgnored(BaseTrackInfo track, ulong guild);
 
         /// <summary>
         /// Checks that at least one of the track's artists is in the collection of ignored artists
@@ -36,21 +36,21 @@ namespace MyGreatestBot.ApiClasses.Services.Db
         /// <param name="track"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='track']"/></param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
         /// <returns><inheritdoc cref="IsTrackIgnored"/></returns>
-        bool IsAnyArtistIgnored(ITrackInfo track, ulong guild);
+        bool IsAnyArtistIgnored(BaseTrackInfo track, ulong guild);
 
         /// <summary>
         /// Adds the track to the ignored tracks collection
         /// </summary>
         /// <param name="track"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='track']"/></param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
-        void AddIgnoredTrack(ITrackInfo track, ulong guild);
+        void AddIgnoredTrack(BaseTrackInfo track, ulong guild);
 
         /// <summary>
         /// Adds all of the track's artists to the ignored arists collection
         /// </summary>
         /// <param name="track"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='track']"/></param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
-        public virtual void AddIgnoredArtist(ITrackInfo track, ulong guild)
+        public virtual void AddIgnoredArtist(BaseTrackInfo track, ulong guild)
         {
             for (int i = 0; i < track.ArtistArr.Length; i++)
             {
@@ -64,14 +64,14 @@ namespace MyGreatestBot.ApiClasses.Services.Db
         /// <param name="track"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='track']"/></param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
         /// <param name="index">Zero-based artist index</param>
-        void AddIgnoredArtist(ITrackInfo track, ulong guild, int index);
+        void AddIgnoredArtist(BaseTrackInfo track, ulong guild, int index);
 
         /// <summary>
         /// Saves the tracks collection to the database
         /// </summary>
         /// <param name="tracks">Tracks collection to be saved</param>
         /// <param name="guild"><inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/></param>
-        void SaveTracks(IEnumerable<ITrackInfo> tracks, ulong guild);
+        void SaveTracks(IEnumerable<BaseTrackInfo> tracks, ulong guild);
 
         /// <summary>
         /// Gets saved tracks count

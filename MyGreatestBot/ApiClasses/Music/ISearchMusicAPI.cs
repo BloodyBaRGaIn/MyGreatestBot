@@ -13,6 +13,6 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         /// <param name="other">Track with desired info</param>
         /// <returns>Track from desired platform</returns>
-        ITrackInfo? SearchTrack(ITrackInfo other);
+        BaseTrackInfo? SearchTrack(BaseTrackInfo other);
     }
 }

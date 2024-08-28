@@ -13,6 +13,6 @@
         /// Track starting time in seconds (should be not negative).<br/>
         /// This parameter is optional.</param>
         /// <returns>Track</returns>
-        ITrackInfo? GetTrackFromId(string id, int time = 0);
+        BaseTrackInfo? GetTrackFromId(string id, int time = 0);
     }
 }

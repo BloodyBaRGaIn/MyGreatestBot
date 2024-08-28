@@ -1,6 +1,9 @@
 ﻿using MyGreatestBot.ApiClasses.Utils;
+using MyGreatestBot.Extensions;
 using System;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses
 {
@@ -9,10 +12,23 @@ namespace MyGreatestBot.ApiClasses
     /// </summary>
     public interface IAccessible : IAPI
     {
+        private const int MaxRequestsPerSecond = 15;
+        private static readonly int MinRequestDelay = 1000 / MaxRequestsPerSecond;
+
+        private static readonly Semaphore semaphore = new(1, 1);
+
         /// <summary>
         /// Collection of API domain URLs
         /// </summary>
         DomainCollection Domains { get; }
+
+        static IAccessible()
+        {
+            if (MinRequestDelay == 0)
+            {
+                MinRequestDelay = 1;
+            }
+        }
 
         /// <summary>
         /// Try HTTP request to domain URLs.<br/>
@@ -63,6 +79,11 @@ namespace MyGreatestBot.ApiClasses
                 // bypass accessing check
                 return true;
             }
+
+            bool result = false;
+
+            _ = semaphore.TryWaitOne();
+
             using HttpClient client = new();
             try
             {
@@ -72,12 +93,16 @@ namespace MyGreatestBot.ApiClasses
 
                 if (message.IsSuccessStatusCode || (int)message.StatusCode == 418)
                 {
-                    return true;
+                    result = true;
                 }
             }
             catch { }
 
-            return false;
+            Task.Delay(MinRequestDelay).Wait();
+
+            _ = semaphore.TryRelease();
+
+            return result;
         }
     }
 }

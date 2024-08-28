@@ -10,7 +10,7 @@ namespace MyGreatestBot.Player
 {
     internal sealed partial class Player
     {
-        internal void Enqueue(ref IEnumerable<ITrackInfo> tracks, CommandActionSource source)
+        internal void Enqueue(ref IEnumerable<BaseTrackInfo> tracks, CommandActionSource source)
         {
             int totalCount;
 
@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
             {
                 if (source.HasFlag(CommandActionSource.PlayerNoBlacklist))
                 {
-                    foreach (ITrackInfo track in tracks)
+                    foreach (BaseTrackInfo track in tracks)
                     {
                         track.BypassCheck = true;
                     }
@@ -26,7 +26,7 @@ namespace MyGreatestBot.Player
 
                 if (source.HasFlag(CommandActionSource.PlayerRadio))
                 {
-                    foreach (ITrackInfo track in tracks)
+                    foreach (BaseTrackInfo track in tracks)
                     {
                         track.Radio = true;
                     }

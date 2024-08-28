@@ -24,10 +24,10 @@ namespace MyGreatestBot.Player
 
             lock (queueLock)
             {
-                List<ITrackInfo> collection = [];
+                List<BaseTrackInfo> collection = [];
                 while (tracksQueue.Count != 0)
                 {
-                    ITrackInfo? track = tracksQueue.Dequeue();
+                    BaseTrackInfo? track = tracksQueue.Dequeue();
                     if (track != null)
                     {
                         collection.Add(track);

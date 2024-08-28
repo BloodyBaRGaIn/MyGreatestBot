@@ -213,9 +213,9 @@ namespace MyGreatestBot.ApiClasses
         /// <returns>List of tracks</returns>
         /// <exception cref="ArgumentNullException">Throws if query is invalid</exception>
         /// <exception cref="InvalidOperationException">Throws if no results found</exception>
-        public static IEnumerable<ITrackInfo> GetAll(string query)
+        public static IEnumerable<BaseTrackInfo> GetAll(string query)
         {
-            IEnumerable<ITrackInfo>? tracks;
+            IEnumerable<BaseTrackInfo>? tracks;
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -239,7 +239,7 @@ namespace MyGreatestBot.ApiClasses
                 : !tracks.Any() ? throw new InvalidOperationException("No results") : tracks;
         }
 
-        public static ITrackInfo? GetRadio(ApiIntents intents, string id)
+        public static BaseTrackInfo? GetRadio(ApiIntents intents, string id)
         {
             return QueryIdentifier.GetRadio(intents, id);
         }

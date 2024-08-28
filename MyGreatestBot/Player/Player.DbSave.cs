@@ -27,7 +27,7 @@ namespace MyGreatestBot.Player
                 return;
             }
 
-            List<ITrackInfo> tracks = [];
+            List<BaseTrackInfo> tracks = [];
             lock (trackLock)
             {
                 if (currentTrack != null)

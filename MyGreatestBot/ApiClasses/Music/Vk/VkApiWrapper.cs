@@ -129,14 +129,14 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             _api?.LogOut();
         }
 
-        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
+        IEnumerable<BaseTrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
             if (_api == null || !_api.IsAuthorized)
             {
                 throw GenericException;
             }
 
-            List<ITrackInfo> tracks = [];
+            List<BaseTrackInfo> tracks = [];
 
             return string.IsNullOrWhiteSpace(url)
                 ? tracks
@@ -147,7 +147,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 : null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
+        BaseTrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             if (!long.TryParse(id, out long trackId))
             {
@@ -160,10 +160,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 return null;
             }
 
-#pragma warning disable CA1859
-            ITrackInfo track = new VkTrackInfo(origin);
-#pragma warning restore CA1859
-
+            BaseTrackInfo track = new VkTrackInfo(origin);
             if (time > 0)
             {
                 track.PerformRewind(TimeSpan.FromSeconds(time));
@@ -174,7 +171,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         #region Private methods
 
-        private bool TryAddAsCollection(string query, List<ITrackInfo> tracks, bool is_playlist)
+        private bool TryAddAsCollection(string query, List<BaseTrackInfo> tracks, bool is_playlist)
         {
             bool success = false;
 

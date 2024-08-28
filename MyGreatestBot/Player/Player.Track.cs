@@ -38,7 +38,7 @@ namespace MyGreatestBot.Player
 
                 while (true)
                 {
-                    if (tracksQueue.TryPeek(out ITrackInfo? track))
+                    if (tracksQueue.TryPeek(out BaseTrackInfo? track))
                     {
                         if (track == null)
                         {

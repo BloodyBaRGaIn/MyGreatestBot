@@ -16,7 +16,7 @@ namespace MyGreatestBot.Player
             {
                 lock (queueLock)
                 {
-                    if (!tracksQueue.TryDequeue(out ITrackInfo? track))
+                    if (!tracksQueue.TryDequeue(out BaseTrackInfo? track))
                     {
                         lock (trackLock)
                         {
@@ -42,7 +42,7 @@ namespace MyGreatestBot.Player
 
                     if (track.Radio)
                     {
-                        ITrackInfo? radio_track = null;
+                        BaseTrackInfo? radio_track = null;
                         Exception? last_exception = null;
 
                         try

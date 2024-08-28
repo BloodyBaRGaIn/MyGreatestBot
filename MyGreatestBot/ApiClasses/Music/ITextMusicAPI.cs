@@ -9,6 +9,6 @@ namespace MyGreatestBot.ApiClasses.Music
         /// </summary>
         /// <param name="text">Query string</param>
         /// <returns>Track collection</returns>
-        IEnumerable<ITrackInfo>? GetTracksFromPlainText(string text);
+        IEnumerable<BaseTrackInfo>? GetTracksFromPlainText(string text);
     }
 }

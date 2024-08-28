@@ -29,7 +29,7 @@ namespace MyGreatestBot.Player
 
         internal static Semaphore DbSemaphore { get; } = new(1, 1);
 
-        private volatile ITrackInfo? currentTrack;
+        private volatile BaseTrackInfo? currentTrack;
         private volatile PlayerStatus _status = PlayerStatus.Init;
 
         private volatile bool IsPlaying;
@@ -65,7 +65,7 @@ namespace MyGreatestBot.Player
         private readonly CancellationTokenSource MainPlayerCancellationTokenSource = new();
         private readonly CancellationToken MainPlayerCancellationToken;
 
-        private readonly Queue<ITrackInfo?> tracksQueue = new();
+        private readonly Queue<BaseTrackInfo?> tracksQueue = new();
 
         private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE * 2];
 

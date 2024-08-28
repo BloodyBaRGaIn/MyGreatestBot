@@ -38,7 +38,7 @@ namespace MyGreatestBot.Commands
             handler.Log.Send($"Preparation takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
             command_stopwatch.Restart();
 
-            IEnumerable<ITrackInfo> tracks = ApiManager.GetAll(query);
+            IEnumerable<BaseTrackInfo> tracks = ApiManager.GetAll(query);
 
             command_stopwatch.Stop();
             handler.Log.Send($"GetTracks takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);

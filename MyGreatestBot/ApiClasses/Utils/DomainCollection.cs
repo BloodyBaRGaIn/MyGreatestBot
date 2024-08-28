@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyGreatestBot.ApiClasses.Utils
 {
@@ -23,7 +24,7 @@ namespace MyGreatestBot.ApiClasses.Utils
 
         private string GetPrimary()
         {
-            return collection[0];
+            return collection.Where(c => !string.IsNullOrWhiteSpace(c)).FirstOrDefault() ?? string.Empty;
         }
 
         public IEnumerator<string> GetEnumerator()

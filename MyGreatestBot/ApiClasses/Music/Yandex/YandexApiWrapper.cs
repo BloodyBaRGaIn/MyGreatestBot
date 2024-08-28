@@ -135,7 +135,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             _client = null;
         }
 
-        ITrackInfo? IRadioMusicAPI.GetRadio(string id)
+        BaseTrackInfo? IRadioMusicAPI.GetRadio(string id)
         {
             YTrack originTrack = Client.GetTrack(id);
             if (originTrack == null)
@@ -206,7 +206,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return null;
             }
 
-            ITrackInfo track = new YandexTrackInfo(next);
+            BaseTrackInfo track = new YandexTrackInfo(next);
             if (track == null)
             {
                 return null;
@@ -227,9 +227,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return track;
         }
 
-        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
+        IEnumerable<BaseTrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string? url)
         {
-            List<ITrackInfo> tracks_collection = [];
+            List<BaseTrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -243,7 +243,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id_str);
+                BaseTrackInfo? track = UrlMusicInstance.GetTrackFromId(track_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -258,7 +258,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(podcast_id_str);
+                BaseTrackInfo? track = UrlMusicInstance.GetTrackFromId(podcast_id_str);
                 if (track != null)
                 {
                     tracks_collection.Add(track);
@@ -320,7 +320,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrackFromId(string? track_id_str, int time)
+        BaseTrackInfo? IMusicAPI.GetTrackFromId(string? track_id_str, int time)
         {
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
@@ -328,11 +328,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             YTrack origin = Client.GetTrack(track_id_str);
-
-#pragma warning disable CA1859
-            ITrackInfo track = new YandexTrackInfo(origin);
-#pragma warning restore CA1859
-
+            BaseTrackInfo track = new YandexTrackInfo(origin);
             if (time > 0)
             {
                 track.PerformRewind(TimeSpan.FromSeconds(time));

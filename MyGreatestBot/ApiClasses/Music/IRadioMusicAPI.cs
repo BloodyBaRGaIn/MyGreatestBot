@@ -10,6 +10,6 @@
         /// </summary>
         /// <param name="id">Previous track ID</param>
         /// <returns>Track</returns>
-        ITrackInfo? GetRadio(string id);
+        BaseTrackInfo? GetRadio(string id);
     }
 }

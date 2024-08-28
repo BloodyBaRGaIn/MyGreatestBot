@@ -102,14 +102,14 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             api = null;
         }
 
-        IEnumerable<ITrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string url)
+        IEnumerable<BaseTrackInfo>? IUrlMusicAPI.GetTracksFromUrl(string url)
         {
             if (api == null)
             {
                 throw GenericException;
             }
 
-            List<ITrackInfo> tracks = [];
+            List<BaseTrackInfo> tracks = [];
 
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -168,7 +168,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                     time = 0;
                 }
 
-                ITrackInfo? track = UrlMusicInstance.GetTrackFromId(video_id, time);
+                BaseTrackInfo? track = UrlMusicInstance.GetTrackFromId(video_id, time);
 
                 if (track != null)
                 {
@@ -181,7 +181,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return null;
         }
 
-        ITrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
+        BaseTrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
             Video origin = Videos.GetAsync(id)
                     .AsTask()
@@ -193,10 +193,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return null;
             }
 
-#pragma warning disable CA1859
-            ITrackInfo track = new YoutubeTrackInfo(origin);
-#pragma warning restore CA1859
-
+            BaseTrackInfo track = new YoutubeTrackInfo(origin);
             if (time > 0)
             {
                 track.PerformRewind(TimeSpan.FromSeconds(time));
@@ -205,7 +202,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return track;
         }
 
-        ITrackInfo? ISearchMusicAPI.SearchTrack(ITrackInfo other)
+        BaseTrackInfo? ISearchMusicAPI.SearchTrack(BaseTrackInfo other)
         {
             if (other.TrackType == UrlMusicInstance.ApiType)
             {
@@ -224,7 +221,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Where(s => s != searchSeparator)
                     .Select(s => s.Trim(searchComma))
-                    .Where(s => string.IsNullOrEmpty(s));
+                    .Where(string.IsNullOrEmpty);
             }
 
             IEnumerable<string> searchWords = GetWords(searchQuery);
@@ -253,9 +250,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             return result == null ? null : new YoutubeTrackInfo(result);
         }
 
-        IEnumerable<ITrackInfo> ITextMusicAPI.GetTracksFromPlainText(string text)
+        IEnumerable<BaseTrackInfo> ITextMusicAPI.GetTracksFromPlainText(string text)
         {
-            List<ITrackInfo> tracks = [];
+            List<BaseTrackInfo> tracks = [];
             IEnumerable<VideoSearchResult>? search = Search?.GetVideosAsync(text)?.ToBlockingEnumerable();
             if (search == null)
             {

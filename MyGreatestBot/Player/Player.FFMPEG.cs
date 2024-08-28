@@ -121,7 +121,7 @@ namespace MyGreatestBot.Player
             /// </param>
             /// 
             /// <exception cref="InvalidOperationException"></exception>
-            internal void Start(ITrackInfo track)
+            internal void Start(BaseTrackInfo track)
             {
                 Stop();
 
@@ -277,7 +277,7 @@ namespace MyGreatestBot.Player
             /// <summary>
             /// Gets argument string for FFMPEG
             /// </summary>
-            private static string GetTrackArguments(ITrackInfo track)
+            private static string GetTrackArguments(BaseTrackInfo track)
             {
                 string log_level = "-loglevel warning";
 

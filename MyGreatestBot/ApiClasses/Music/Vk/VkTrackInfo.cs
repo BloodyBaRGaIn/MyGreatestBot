@@ -10,27 +10,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk track info implementation
     /// </summary>
-    public sealed class VkTrackInfo : ITrackInfo
+    public sealed class VkTrackInfo : BaseTrackInfo
     {
-#pragma warning disable CA1859
-        private ITrackInfo Base => this;
-#pragma warning restore CA1859
-
-        ApiIntents ITrackInfo.TrackType => ApiIntents.Vk;
-
-        public HyperLink TrackName { get; }
-        public HyperLink[] ArtistArr { get; }
-        [AllowNull] public HyperLink AlbumName { get; }
-        [AllowNull] public HyperLink PlaylistName { get; }
-
-        public TimeSpan Duration { get; }
-        TimeSpan ITrackInfo.TimePosition { get; set; }
-
-        [AllowNull] public string CoverURL { get; } = null;
-        public string AudioURL { get; private set; }
-
-        bool ITrackInfo.Radio { get; set; }
-        bool ITrackInfo.BypassCheck { get; set; }
+        public override ApiIntents TrackType => ApiIntents.Vk;
 
         private readonly Audio origin;
 
@@ -47,8 +29,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
             TrackName = audio.OwnerId == null || string.IsNullOrEmpty(id_str)
                 ? new(audio.Title)
-                : new HyperLink(audio.Title, $"{Base.Domain}audio{audio.OwnerId}_{id_str}")
-                    .WithId(Base.GetCompositeId(id_str));
+                : new HyperLink(audio.Title, $"{Domain}audio{audio.OwnerId}_{id_str}")
+                    .WithId(GetCompositeId(id_str));
 
             IEnumerable<AudioArtist> audioArtists = Enumerable.Empty<AudioArtist>()
                 .Concat(audio.MainArtists)
@@ -63,34 +45,30 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             ArtistArr = audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)
-                : new HyperLink(a.Name, $"{Base.Domain}artist/{a.Id}")
-                    .WithId(Base.GetCompositeId(a.Id)))
+                : new HyperLink(a.Name, $"{Domain}artist/{a.Id}")
+                    .WithId(GetCompositeId(a.Id)))
                 .ToArray();
 
             AudioAlbum album = audio.Album;
 
             AlbumName = album == null
                 ? null
-                : new(album.Title, $"{Base.Domain}music/album/{album.OwnerId}_{album.Id}");
+                : new(album.Title, $"{Domain}music/album/{album.OwnerId}_{album.Id}");
 
             PlaylistName = playlist == null
                 ? null
                 : playlist.OwnerId == null || playlist.Id == null
                     ? new(playlist.Title)
-                    : new(playlist.Title, $"{Base.Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
+                    : new(playlist.Title, $"{Domain}music/playlist/{playlist.OwnerId}_{playlist.Id}");
 
-            string? cover = album?.Thumb?.Photo135;
-            if (!string.IsNullOrWhiteSpace(cover) && IAccessible.IsUrlSuccess(cover))
-            {
-                CoverURL = cover;
-            }
+            CoverUrlCollection = [album?.Thumb?.Photo135];
 
             Duration = TimeSpan.FromSeconds(audio.Duration);
 
             AudioURL = string.Empty;
         }
 
-        void ITrackInfo.ObtainAudioURLInternal(CancellationTokenSource cts)
+        protected override void ObtainAudioURLInternal(CancellationTokenSource cts)
         {
             _ = cts;
             AudioURL = origin.Url?.ToString() ?? string.Empty;
