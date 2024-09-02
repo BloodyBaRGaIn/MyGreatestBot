@@ -36,5 +36,10 @@
 
             return string.IsNullOrWhiteSpace(Url) ? temp_title : $"[{temp_title}]({Url})";
         }
+
+        public static implicit operator string(HyperLink link)
+        {
+            return link.ToString();
+        }
     }
 }

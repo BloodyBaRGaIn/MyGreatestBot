@@ -21,18 +21,18 @@ namespace MyGreatestBot.Player
                         currentTrack.PerformRewind(span);
                         RewindRequested = true;
 
-                        builder = new RewindException(currentTrack.GetMessage("Playing"))
+                        builder = new RewindCommandException(currentTrack.GetMessage("Playing"))
                             .WithSuccess().GetDiscordEmbed();
-                        builder.Thumbnail = currentTrack.GetThumbnail();
+                        builder.Thumbnail = currentTrack.Thumbnail;
                     }
                     else
                     {
-                        builder = new RewindException("Cannot rewind").GetDiscordEmbed();
+                        builder = new RewindCommandException("Cannot rewind").GetDiscordEmbed();
                     }
                 }
                 else
                 {
-                    builder = new RewindException("Nothing to rewind").GetDiscordEmbed();
+                    builder = new RewindCommandException("Nothing to rewind").GetDiscordEmbed();
                 }
 
                 if (!source.HasFlag(CommandActionSource.Mute))

@@ -1,4 +1,4 @@
-﻿using DSharpPlus.Entities;
+﻿global using DiscordColor = DSharpPlus.Entities.DiscordColor;
 using System;
 
 namespace MyGreatestBot.Commands.Exceptions
@@ -9,7 +9,7 @@ namespace MyGreatestBot.Commands.Exceptions
 
         protected static DiscordColor GenericColor { get; } = new(92, 45, 145);
 
-        public virtual string Title { get; } = "Command error";
+        public abstract string Title { get; }
         protected virtual DiscordColor ErroredColor { get; } = DiscordColor.Red;
         protected virtual DiscordColor ExecutedColor { get; } = DiscordColor.White;
 

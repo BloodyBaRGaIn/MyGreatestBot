@@ -21,8 +21,8 @@ namespace MyGreatestBot.Player
             }
 
             messageHandler?.Send(count != 0
-                ? new ClearException("Queue cleared").WithSuccess()
-                : new ClearException("Nothing to clear"));
+                ? new ClearCommandException("Queue cleared").WithSuccess()
+                : new ClearCommandException("Nothing to clear"));
         }
     }
 }

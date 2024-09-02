@@ -14,15 +14,15 @@ namespace MyGreatestBot.Player
             {
                 if (currentTrack != null)
                 {
-                    builder = new TrackInfoException(currentTrack.GetMessage("Current"))
+                    builder = new TrackInfoCommandException(currentTrack.GetMessage("Current"))
                         .WithSuccess().GetDiscordEmbed();
-                    builder.Thumbnail = currentTrack.GetThumbnail();
+                    builder.Thumbnail = currentTrack.Thumbnail;
                 }
                 else
                 {
                     builder = (!IsPlaying
-                        ? new TrackInfoException("No tracks playing")
-                        : new TrackInfoException("Illegal state detected"))
+                        ? new TrackInfoCommandException("No tracks playing")
+                        : new TrackInfoCommandException("Illegal state detected"))
                         .GetDiscordEmbed();
                 }
             }
@@ -46,13 +46,13 @@ namespace MyGreatestBot.Player
                             continue;
                         }
 
-                        builder = new TrackInfoException(track.GetMessage("Next"))
+                        builder = new TrackInfoCommandException(track.GetMessage("Next"))
                             .WithSuccess().GetDiscordEmbed();
-                        builder.Thumbnail = track.GetThumbnail();
+                        builder.Thumbnail = track.Thumbnail;
                     }
                     else
                     {
-                        builder = new TrackInfoException("Tracks queue is empty").GetDiscordEmbed();
+                        builder = new TrackInfoCommandException("Tracks queue is empty").GetDiscordEmbed();
                     }
                     break;
                 }

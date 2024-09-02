@@ -12,7 +12,7 @@ namespace MyGreatestBot.Player
                 ? null
                 : Handler.Message;
 
-            messageHandler?.Send(new PlayerStatusException(
+            messageHandler?.Send(new PlayerStatusCommandException(
                     $"Player current status is \"{Status.ToString().ToUpperInvariant()}\"")
                 .WithSuccess());
         }

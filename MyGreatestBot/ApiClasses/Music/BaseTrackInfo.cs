@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.ApiClasses.Music
 {
     /// <summary>
-    /// Track information abstraction
+    /// Track information abstrac class.
     /// </summary>
     public abstract class BaseTrackInfo
     {
         /// <summary>
         /// Track type
         /// </summary>
-        public virtual ApiIntents TrackType => ApiIntents.None;
+        public abstract ApiIntents TrackType { get; }
 
         /// <summary>
         /// Base URL
@@ -94,9 +94,43 @@ namespace MyGreatestBot.ApiClasses.Music
         public bool IsLiveStream => Duration == TimeSpan.Zero;
 
         /// <summary>
-        /// Track cover image.
+        /// Discord thumbnail with track cover image.
         /// </summary>
-        private DiscordEmbedBuilder.EmbedThumbnail? LastThumbnail { get; set; }
+        private DiscordEmbedBuilder.EmbedThumbnail? LastThumbnail;
+
+        /// <inheritdoc cref="LastThumbnail"/>
+        public DiscordEmbedBuilder.EmbedThumbnail? Thumbnail
+        {
+            get
+            {
+                if (LastThumbnail != null
+                    || CoverUrlCollection == null
+                    || !CoverUrlCollection.Any())
+                {
+                    return LastThumbnail;
+                }
+
+                foreach (string? url in CoverUrlCollection)
+                {
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        continue;
+                    }
+
+                    if (IAccessible.IsUrlSuccess(url, false))
+                    {
+                        LastThumbnail = new()
+                        {
+                            Url = url
+                        };
+
+                        break;
+                    }
+                }
+
+                return LastThumbnail;
+            }
+        }
 
         /// <summary>
         /// Check for seek operation possible.
@@ -121,36 +155,33 @@ namespace MyGreatestBot.ApiClasses.Music
         }
 
         /// <summary>
-        /// Unused method. Needed for doxygen.
-        /// </summary>
-        /// <param name="prefix">For example "Playing".</param>
-        /// <returns>Content string.</returns>
-        [SuppressMessage("CodeQuality", "IDE0052")]
-        private string GetMessageDoxygen(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Get Discord message content.
         /// </summary>
         /// <param name="prefix">
-        /// <inheritdoc cref="GetMessageDoxygen" path="/param[@name='prefix']"/>
+        /// Message prefix string.<br/>
+        /// For example:<br/>
+        /// <code>"Playing"</code>
         /// </param>
-        /// <returns>
-        /// <inheritdoc cref="GetMessageDoxygen"></inheritdoc>
-        /// </returns>
-        public string GetMessage(string prefix)
+        /// <returns>Content string.</returns>
+        public string GetMessage(string prefix, bool shortMessage = false)
         {
             if (string.IsNullOrWhiteSpace(prefix))
             {
-                prefix = "Empty prefix";
+                prefix = "Blank prefix";
             }
 
-            string result = string.Empty;
+            string result = $"{prefix}: ";
 
-            result += $"{prefix}: {TrackName}{Environment.NewLine}";
-            result += $"Author: {string.Join(", ", ArtistArr.Select(a => a.ToString()))}";
+            if (shortMessage)
+            {
+                result += $"{Title} by " +
+                    $"{string.Join(", ", ArtistArr.Select(static a => a.Title))}";
+
+                return result;
+            }
+
+            result += $"{TrackName}{Environment.NewLine}Author: " +
+                $"{string.Join(", ", ArtistArr.Select(static a => a.ToString()))}";
 
             if (!IsLiveStream)
             {
@@ -173,68 +204,6 @@ namespace MyGreatestBot.ApiClasses.Music
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Get console message string.
-        /// </summary>
-        /// <param name="prefix">
-        /// <inheritdoc cref="GetMessageDoxygen" path="/param[@name='prefix']"/>
-        /// </param>
-        /// <returns>
-        /// <inheritdoc cref="GetMessageDoxygen"></inheritdoc>
-        /// </returns>
-        public string GetShortMessage(string prefix)
-        {
-            if (string.IsNullOrWhiteSpace(prefix))
-            {
-                prefix = "Empty prefix";
-            }
-
-            return $"{prefix}: {Title} by {string.Join(", ", ArtistArr.Select(a => a.Title))}";
-        }
-
-        /// <summary>
-        /// Get Discord thumbnail with track cover image.
-        /// </summary>
-        /// <returns>Track cover image as thumbnail.</returns>
-        public DiscordEmbedBuilder.EmbedThumbnail? GetThumbnail()
-        {
-            if (LastThumbnail != null)
-            {
-                return LastThumbnail;
-            }
-
-            if (CoverUrlCollection == null)
-            {
-                return LastThumbnail;
-            }
-
-            List<string> collection = CoverUrlCollection
-                .Where(v => !string.IsNullOrWhiteSpace(v))
-                .Cast<string>()
-                .ToList();
-
-            int i = 0;
-
-            while (i < collection.Count)
-            {
-                string url = collection[i];
-
-                if (IAccessible.IsUrlSuccess(url, false))
-                {
-                    LastThumbnail = new()
-                    {
-                        Url = url
-                    };
-
-                    break;
-                }
-
-                i++;
-            }
-
-            return LastThumbnail;
         }
 
         /// <summary>

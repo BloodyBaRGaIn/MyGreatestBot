@@ -23,7 +23,7 @@ namespace MyGreatestBot.Player
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                messageHandler?.Send(new DbRestoreException("Operation in progress"));
+                messageHandler?.Send(new DbRestoreCommandException("Operation in progress"));
                 return;
             }
 
@@ -35,13 +35,13 @@ namespace MyGreatestBot.Player
             catch (Exception ex)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                messageHandler?.Send(new DbRestoreException("Restore failed", ex));
+                messageHandler?.Send(new DbRestoreCommandException("Restore failed", ex));
                 return;
             }
 
             if (info.Count == 0)
             {
-                messageHandler?.Send(new DbRestoreException("Nothing to restore"));
+                messageHandler?.Send(new DbRestoreCommandException("Nothing to restore"));
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace MyGreatestBot.Player
                     {
                         tracksQueue.Enqueue(track);
                     }
-                    Handler.Log.Send(track.GetShortMessage("Track restored"));
+                    Handler.Log.Send(track.GetMessage("Track restored", shortMessage: true));
                     restoreCount++;
                 }
                 DbInstance.RemoveTracks(Handler.GuildId);
@@ -78,8 +78,8 @@ namespace MyGreatestBot.Player
             }
 
             messageHandler?.Send(last_exception != null
-                ? new DbRestoreException("Cannot restore tracks", last_exception)
-                : new DbRestoreException($"Restored {restoreCount} track(s)").WithSuccess());
+                ? new DbRestoreCommandException("Cannot restore tracks", last_exception)
+                : new DbRestoreCommandException($"Restored {restoreCount} track(s)").WithSuccess());
         }
     }
 }

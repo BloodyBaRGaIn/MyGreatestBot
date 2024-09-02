@@ -23,7 +23,7 @@ namespace MyGreatestBot.Player
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                messageHandler?.Send(new DbSaveException("Operation in progress"));
+                messageHandler?.Send(new DbSaveCommandException("Operation in progress"));
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace MyGreatestBot.Player
 
             if (tracks.Count == 0)
             {
-                messageHandler?.Send(new DbSaveException("Nothing to save"));
+                messageHandler?.Send(new DbSaveCommandException("Nothing to save"));
                 return;
             }
 
@@ -57,7 +57,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
-                messageHandler?.Send(new DbSaveException("Cannot save tracks", ex));
+                messageHandler?.Send(new DbSaveCommandException("Cannot save tracks", ex));
                 return;
             }
             finally
@@ -67,7 +67,7 @@ namespace MyGreatestBot.Player
 
             Stop(source | CommandActionSource.Mute);
 
-            messageHandler?.Send(new DbSaveException($"Saved {tracksCount} track(s)").WithSuccess());
+            messageHandler?.Send(new DbSaveCommandException($"Saved {tracksCount} track(s)").WithSuccess());
         }
 
         internal void DbGetSavedCount(CommandActionSource source)
@@ -80,7 +80,7 @@ namespace MyGreatestBot.Player
 
             if (!DbSemaphore.TryWaitOne(1))
             {
-                messageHandler?.Send(new DbSaveException("Operation in progress"));
+                messageHandler?.Send(new DbSaveCommandException("Operation in progress"));
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace MyGreatestBot.Player
             }
             catch (Exception ex)
             {
-                messageHandler?.Send(new DbSaveException("Cannot get saved tracks count", ex));
+                messageHandler?.Send(new DbSaveCommandException("Cannot get saved tracks count", ex));
                 return;
             }
             finally
@@ -102,12 +102,12 @@ namespace MyGreatestBot.Player
 
             if (tracksCount > 0)
             {
-                messageHandler?.Send(new DbGetSavedException(
+                messageHandler?.Send(new DbGetSavedCommandException(
                     $"{tracksCount} saved track(s) found").WithSuccess());
             }
             else
             {
-                messageHandler?.Send(new DbGetSavedException("No tracks saved"));
+                messageHandler?.Send(new DbGetSavedCommandException("No tracks saved"));
             }
         }
     }

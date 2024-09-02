@@ -62,8 +62,8 @@ namespace MyGreatestBot.Commands
             string result = ApiManager.GetRegisteredApiStatus();
 
             handler.Message.Send(string.IsNullOrEmpty(result)
-                ? new StatusException("No APIs initialized")
-                : new StatusException(result).WithSuccess());
+                ? new ApiStatusCommandException("No APIs initialized")
+                : new ApiStatusCommandException(result).WithSuccess());
 
             await Task.Delay(1);
         }
@@ -84,18 +84,18 @@ namespace MyGreatestBot.Commands
 
             if (!ApiManager.IsAnyApiFailed)
             {
-                throw new ReloadException("No failed APIs to reload");
+                throw new ReloadCommandException("No failed APIs to reload");
             }
 
             ApiManager.ReloadFailedApis();
 
             if (!ApiManager.IsAnyApiFailed)
             {
-                handler.Message.Send(new ReloadException("Reload success").WithSuccess());
+                handler.Message.Send(new ReloadCommandException("Reload success").WithSuccess());
             }
             else
             {
-                throw new ReloadException("Reload failed");
+                throw new ReloadCommandException("Reload failed");
             }
 
             await Task.Delay(1);

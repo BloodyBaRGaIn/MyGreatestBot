@@ -39,8 +39,8 @@ namespace MyGreatestBot.Player
             }
 
             messageHandler?.Send(success
-                ? new ReturnException("Returned to queue").WithSuccess()
-                : new ReturnException("Nothing to return"));
+                ? new ReturnCommandException("Returned to queue").WithSuccess()
+                : new ReturnCommandException("Nothing to return"));
         }
     }
 }

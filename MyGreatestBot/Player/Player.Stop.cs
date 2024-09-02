@@ -14,7 +14,7 @@ namespace MyGreatestBot.Player
 
             if (!IsPlaying && tracksQueue.Count == 0)
             {
-                messageHandler?.Send(new StopException("Nothing to stop"));
+                messageHandler?.Send(new StopCommandException("Nothing to stop"));
                 return;
             }
 
@@ -22,7 +22,7 @@ namespace MyGreatestBot.Player
             IsPlaying = false;
             WaitForStatus(PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
 
-            messageHandler?.Send(new StopException("Stopped").WithSuccess());
+            messageHandler?.Send(new StopCommandException("Stopped").WithSuccess());
         }
     }
 }

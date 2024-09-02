@@ -21,13 +21,13 @@ namespace MyGreatestBot.Player
             {
                 if (!IsPlaying || currentTrack == null)
                 {
-                    messageHandler?.Send(new DbIgnoreException("Nothing to ignore"));
+                    messageHandler?.Send(new DbIgnoreCommandException("Nothing to ignore"));
                     return;
                 }
 
                 if (currentTrack.BypassCheck)
                 {
-                    messageHandler?.Send(new DbIgnoreException("Cannot ignore track in bypass mode"));
+                    messageHandler?.Send(new DbIgnoreCommandException("Cannot ignore track in bypass mode"));
                     return;
                 }
 
@@ -37,7 +37,7 @@ namespace MyGreatestBot.Player
                 }
                 catch (Exception ex)
                 {
-                    messageHandler?.Send(new DbIgnoreException("Failed to ignore track. Skipping", ex));
+                    messageHandler?.Send(new DbIgnoreCommandException("Failed to ignore track. Skipping", ex));
                     return;
                 }
                 finally
@@ -46,7 +46,7 @@ namespace MyGreatestBot.Player
                     WaitForFinish();
                 }
 
-                messageHandler?.Send(new DbIgnoreException("Track ignored").WithSuccess());
+                messageHandler?.Send(new DbIgnoreCommandException("Track ignored").WithSuccess());
             }
         }
 
@@ -62,13 +62,13 @@ namespace MyGreatestBot.Player
             {
                 if (!IsPlaying || currentTrack == null)
                 {
-                    messageHandler?.Send(new DbIgnoreException("Nothing to ignore"));
+                    messageHandler?.Send(new DbIgnoreCommandException("Nothing to ignore"));
                     return;
                 }
 
                 if (currentTrack.BypassCheck)
                 {
-                    messageHandler?.Send(new DbIgnoreException("Cannot ignore artist(s) in bypass mode"));
+                    messageHandler?.Send(new DbIgnoreCommandException("Cannot ignore artist(s) in bypass mode"));
                     return;
                 }
 
@@ -103,8 +103,8 @@ namespace MyGreatestBot.Player
                 WaitForFinish();
 
                 messageHandler?.Send(last_exception != null
-                    ? new DbIgnoreException("Failed to ignore artist", last_exception)
-                    : new DbIgnoreException("Artist(s) ignored").WithSuccess());
+                    ? new DbIgnoreCommandException("Failed to ignore artist", last_exception)
+                    : new DbIgnoreCommandException("Artist(s) ignored").WithSuccess());
             }
         }
     }

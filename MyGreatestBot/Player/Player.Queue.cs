@@ -10,7 +10,7 @@ namespace MyGreatestBot.Player
         {
             if (tracksQueue.Count == 0)
             {
-                Handler.Message.Send(new QueueLengthException("Tracks queue is empty"));
+                Handler.Message.Send(new QueueLengthCommandException("Tracks queue is empty"));
                 return;
             }
 
@@ -39,7 +39,7 @@ namespace MyGreatestBot.Player
 
             description += $"Total duration: {total_duration:dd\\.hh\\:mm\\:ss}";
 
-            Handler.Message.Send(new QueueLengthException(description).WithSuccess());
+            Handler.Message.Send(new QueueLengthCommandException(description).WithSuccess());
         }
     }
 }

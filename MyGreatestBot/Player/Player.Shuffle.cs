@@ -18,7 +18,7 @@ namespace MyGreatestBot.Player
 
             if (tracksQueue.Count == 0)
             {
-                messageHandler?.Send(new ShuffleException("Nothing to shuffle"));
+                messageHandler?.Send(new ShuffleCommandException("Nothing to shuffle"));
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace MyGreatestBot.Player
                 tracksQueue.EnqueueRange(collection);
             }
 
-            messageHandler?.Send(new ShuffleException("Queue shuffled").WithSuccess());
+            messageHandler?.Send(new ShuffleCommandException("Queue shuffled").WithSuccess());
         }
     }
 }

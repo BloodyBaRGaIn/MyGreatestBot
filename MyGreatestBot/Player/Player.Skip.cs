@@ -14,7 +14,7 @@ namespace MyGreatestBot.Player
 
             if (tracksQueue.Count < add_count)
             {
-                messageHandler?.Send(new SkipException("Requested number exceeds the queue length"));
+                messageHandler?.Send(new SkipCommandException("Requested number exceeds the queue length"));
                 return;
             }
 
@@ -27,9 +27,9 @@ namespace MyGreatestBot.Player
             }
 
             CommandExecutionException message = IsPlaying
-                ? new SkipException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
+                ? new SkipCommandException($"Skipped{(add_count == 0 ? "" : $" {add_count + 1} tracks")}")
                     .WithSuccess()
-                : new SkipException("Nothing to skip");
+                : new SkipCommandException("Nothing to skip");
 
             IsPlaying = false;
             WaitForFinish();

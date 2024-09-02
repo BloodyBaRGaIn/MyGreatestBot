@@ -35,7 +35,7 @@ namespace MyGreatestBot.Player
 
                         builder = new PlayerException(track.GetMessage("Playing"))
                             .WithSuccess().GetDiscordEmbed();
-                        builder.Thumbnail = track.GetThumbnail();
+                        builder.Thumbnail = track.Thumbnail;
 
                         Handler.Message.Send(builder);
                     }
@@ -66,7 +66,7 @@ namespace MyGreatestBot.Player
                         else
                         {
                             tracksQueue.EnqueueToHead(radio_track);
-                            Handler.Log.Send(radio_track.GetShortMessage("Added radio"));
+                            Handler.Log.Send(radio_track.GetMessage("Added radio", shortMessage: true));
                         }
                     }
 
@@ -83,18 +83,18 @@ namespace MyGreatestBot.Player
                             {
                                 if (DbInstance.IsAnyArtistIgnored(track, Handler.GuildId))
                                 {
-                                    builder = new DbIgnoreException("Skipping track with ignored artist(s)")
+                                    builder = new DbIgnoreCommandException("Skipping track with ignored artist(s)")
                                         .WithSuccess().GetDiscordEmbed();
                                 }
                                 else if (DbInstance.IsTrackIgnored(track, Handler.GuildId))
                                 {
-                                    builder = new DbIgnoreException("Skipping ignored track")
+                                    builder = new DbIgnoreCommandException("Skipping ignored track")
                                         .WithSuccess().GetDiscordEmbed();
                                 }
                             }
                             catch (Exception ex)
                             {
-                                builder = new DbIgnoreException("Failed to check track", ex)
+                                builder = new DbIgnoreCommandException("Failed to check track", ex)
                                     .WithSuccess().GetDiscordEmbed();
                             }
                             finally
@@ -112,13 +112,13 @@ namespace MyGreatestBot.Player
 
                     if (track.Duration >= MaxTrackDuration)
                     {
-                        Handler.Message.Send(new DbIgnoreException("Track is too long"));
+                        Handler.Message.Send(new DbIgnoreCommandException("Track is too long"));
                         continue;
                     }
 
                     if (!track.IsLiveStream && track.Duration <= MinTrackDuration)
                     {
-                        Handler.Message.Send(new DbIgnoreException("Track is too short"));
+                        Handler.Message.Send(new DbIgnoreCommandException("Track is too short"));
                         continue;
                     }
 

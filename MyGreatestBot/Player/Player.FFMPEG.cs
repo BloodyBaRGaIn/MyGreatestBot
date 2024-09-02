@@ -213,11 +213,13 @@ namespace MyGreatestBot.Player
             /// Tries to get at least one byte from decoding process.
             /// </summary>
             /// 
-            /// <param name="milliseconds">
-            /// 
+            /// <param name="timeoutMs">
+            /// Time to await in milliseconds.
             /// </param>
-            /// <returns></returns>
-            internal bool TryLoad(int milliseconds)
+            /// <returns>
+            /// True if succeeded, otherwise false.
+            /// </returns>
+            internal bool TryLoad(int timeoutMs)
             {
                 if (Process == null)
                 {
@@ -231,7 +233,7 @@ namespace MyGreatestBot.Player
                 while (StandardOutput.EndOfStream)
                 {
                     bool exit = WaitForExit(1);
-                    if ((HasExited && exit) || (stopwatch.ElapsedMilliseconds >= milliseconds))
+                    if ((HasExited && exit) || (stopwatch.ElapsedMilliseconds >= timeoutMs))
                     {
                         break;
                     }

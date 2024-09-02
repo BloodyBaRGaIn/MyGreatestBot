@@ -78,7 +78,7 @@ namespace MyGreatestBot.Commands
 
             if (number < 1)
             {
-                throw new SkipException("Number must be positive");
+                throw new SkipCommandException("Number must be positive");
             }
 
             handler.TextChannel = ctx.Channel;
@@ -174,7 +174,7 @@ namespace MyGreatestBot.Commands
 
             if (time == TimeSpan.MinValue)
             {
-                throw new RewindException("Wrong format");
+                throw new RewindCommandException("Wrong format");
             }
 
             await Task.Run(() => handler.PlayerInstance.RequestRewind(time, CommandActionSource.Command));

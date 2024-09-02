@@ -13,7 +13,7 @@ namespace MyGreatestBot.ApiClasses
     public interface IAccessible : IAPI
     {
         private const int MaxRequestsPerSecond = 15;
-        private static readonly int MinRequestDelay = 1000 / MaxRequestsPerSecond;
+        private static readonly int MinRequestDelay = (1000 / MaxRequestsPerSecond) + 1;
 
         private static readonly Semaphore semaphore = new(1, 1);
 
@@ -21,14 +21,6 @@ namespace MyGreatestBot.ApiClasses
         /// Collection of API domain URLs
         /// </summary>
         DomainCollection Domains { get; }
-
-        static IAccessible()
-        {
-            if (MinRequestDelay == 0)
-            {
-                MinRequestDelay = 1;
-            }
-        }
 
         /// <summary>
         /// Try HTTP request to domain URLs.<br/>
@@ -98,9 +90,11 @@ namespace MyGreatestBot.ApiClasses
             }
             catch { }
 
-            Task.Delay(MinRequestDelay).Wait();
-
-            _ = semaphore.TryRelease();
+            _ = Task.Run(static () =>
+            {
+                Task.Delay(MinRequestDelay).Wait();
+                _ = semaphore.TryRelease();
+            });
 
             return result;
         }

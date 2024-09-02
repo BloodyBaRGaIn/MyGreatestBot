@@ -16,9 +16,9 @@ namespace MyGreatestBot.Player
             WaitForStatus(PlayerStatus.Paused | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
 
             messageHandler?.Send(currentTrack != null
-                ? new PauseException("Paused").WithSuccess()
+                ? new PauseCommandException("Paused").WithSuccess()
                 : !IsPlaying
-                ? new PauseException("Nothing to pause")
+                ? new PauseCommandException("Nothing to pause")
                 : new PlayerException("Illegal state detected"));
         }
     }
