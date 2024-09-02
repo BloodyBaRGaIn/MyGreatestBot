@@ -1,4 +1,6 @@
-﻿namespace MyGreatestBot.Extensions
+﻿using System;
+
+namespace MyGreatestBot.Extensions
 {
     /// <summary>
     /// <see cref="string"/> extensions
@@ -22,6 +24,21 @@
             return string.IsNullOrEmpty(input)
                 ? string.Empty
                 : $"{char.ToUpperInvariant(input[0])}{input[1..]}";
+        }
+
+        public static string EnsureIdentifier(this string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+            string result = input.Replace("\r", "").Replace("\n", " ");
+            string[] lines = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length > 0)
+            {
+                result = lines[0];
+            }
+            return result;
         }
     }
 }

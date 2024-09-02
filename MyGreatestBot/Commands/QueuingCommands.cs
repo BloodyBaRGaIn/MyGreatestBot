@@ -3,10 +3,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Commands.Utils;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands

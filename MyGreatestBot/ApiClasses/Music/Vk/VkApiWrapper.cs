@@ -149,6 +149,8 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
 
         BaseTrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
+            id = id.EnsureIdentifier();
+
             if (!long.TryParse(id, out long trackId))
             {
                 return null;
@@ -178,6 +180,9 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             (string? user, string? id) = is_playlist
                 ? VkQueryDecomposer.TryGetPlaylistId(query)
                 : VkQueryDecomposer.TryGetAlbumId(query);
+
+            user = user.EnsureIdentifier();
+            id = id.EnsureIdentifier();
 
             if (string.IsNullOrWhiteSpace(user)
                 || string.IsNullOrWhiteSpace(id)

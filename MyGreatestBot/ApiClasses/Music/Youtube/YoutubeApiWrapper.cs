@@ -39,7 +39,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 #pragma warning disable SYSLIB1045
             private static readonly Regex VIDEO_RE = new("/watch\\?v=([^&]+)");
             private static readonly Regex PLAYLIST_RE = new("[&?]list=([^&]+)");
-            private static readonly Regex REDUCED_RE = new("youtu\\.be/([^\\?]+)");
+            private static readonly Regex REDUCED_RE = new("youtu\\.be/([^?]+)");
             private static readonly Regex TIMING_RE = new("[&?]t=([\\d]+)");
 #pragma warning restore SYSLIB1045
 
@@ -118,8 +118,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             while (true)
             {
-                string? playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(url);
-
+                string playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(url).EnsureIdentifier(); ;
                 if (string.IsNullOrWhiteSpace(playlist_id))
                 {
                     break;
@@ -151,11 +150,10 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             while (true)
             {
-                string? video_id = YoutubeQueryDecomposer.TryGetVideoId(url);
-
+                string video_id = YoutubeQueryDecomposer.TryGetVideoId(url).EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(video_id))
                 {
-                    video_id = YoutubeQueryDecomposer.TryGetReducedId(url);
+                    video_id = YoutubeQueryDecomposer.TryGetReducedId(url).EnsureIdentifier();
                 }
                 if (string.IsNullOrWhiteSpace(video_id))
                 {
@@ -183,6 +181,8 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
         BaseTrackInfo? IMusicAPI.GetTrackFromId(string id, int time)
         {
+            id = id.EnsureIdentifier();
+
             Video origin = Videos.GetAsync(id)
                     .AsTask()
                     .GetAwaiter()

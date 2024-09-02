@@ -34,18 +34,12 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         private static class YandexQueryDecomposer
         {
 #pragma warning disable SYSLIB1045
-            private static readonly Regex TRACK_RE = new("/track/(\\d+)$");
-            private static readonly Regex ALBUM_RE = new("/album/(\\d+)$");
-            private static readonly Regex ARTIST_RE = new("/artist/(\\d+)(/\\w*)?$");
-            private static readonly Regex PLAYLIST_RE = new("/users/([^/]+)/playlists/([^?]+)");
-            private static readonly Regex PODCAST_RE = new("/track/([^?]+)");
+            private static readonly Regex TRACK_RE = new("/track/([^/?]+)");
+            private static readonly Regex ALBUM_RE = new("/album/([^/?]+)");
+            private static readonly Regex ARTIST_RE = new("/artist/([^/?]+)");
+            private static readonly Regex PLAYLIST_RE = new("/users/([^/?]+)/playlists/([^/?]+)");
             private static readonly Regex CHART_RE = new("/chart");
 #pragma warning restore SYSLIB1045
-
-            internal static string? TryGetPodcastId(string query)
-            {
-                return PODCAST_RE.GetMatchValue(query);
-            }
 
             internal static string? TryGetTrackId(string query)
             {
@@ -137,6 +131,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         BaseTrackInfo? IRadioMusicAPI.GetRadio(string id)
         {
+            id = id.EnsureIdentifier();
+
             YTrack originTrack = Client.GetTrack(id);
             if (originTrack == null)
             {
@@ -238,7 +234,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                string? track_id_str = YandexQueryDecomposer.TryGetTrackId(url);
+                string track_id_str = YandexQueryDecomposer.TryGetTrackId(url).EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(track_id_str))
                 {
                     break;
@@ -253,55 +249,36 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             while (true)
             {
-                string? podcast_id_str = YandexQueryDecomposer.TryGetPodcastId(url);
-                if (string.IsNullOrWhiteSpace(podcast_id_str))
-                {
-                    break;
-                }
-                BaseTrackInfo? track = UrlMusicInstance.GetTrackFromId(podcast_id_str);
-                if (track != null)
-                {
-                    tracks_collection.Add(track);
-                }
-                return tracks_collection;
-            }
-
-            while (true)
-            {
-                string? album_id_str = YandexQueryDecomposer.TryGetAlbumId(url);
+                string album_id_str = YandexQueryDecomposer.TryGetAlbumId(url).EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(album_id_str))
                 {
                     break;
                 }
-
                 tracks_collection.AddRange(GetAlbum(album_id_str));
-
                 return tracks_collection;
             }
 
             while (true)
             {
-                string? artist_id_str = YandexQueryDecomposer.TryGetArtistId(url);
+                string artist_id_str = YandexQueryDecomposer.TryGetArtistId(url).EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(artist_id_str))
                 {
                     break;
                 }
-
                 tracks_collection.AddRange(GetArtist(artist_id_str));
-
                 return tracks_collection;
             }
 
             while (true)
             {
                 (string? playlist_user_str, string? playlist_id_str) = YandexQueryDecomposer.TryGetPlaylistId(url);
+                playlist_user_str = playlist_user_str.EnsureIdentifier();
+                playlist_id_str = playlist_id_str.EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(playlist_user_str) || string.IsNullOrWhiteSpace(playlist_id_str))
                 {
                     break;
                 }
-
                 tracks_collection.AddRange(GetPlaylist(playlist_user_str, playlist_id_str));
-
                 return tracks_collection;
             }
 
@@ -322,6 +299,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         BaseTrackInfo? IMusicAPI.GetTrackFromId(string? track_id_str, int time)
         {
+            track_id_str = track_id_str.EnsureIdentifier();
+
             if (string.IsNullOrWhiteSpace(track_id_str))
             {
                 return null;
@@ -341,6 +320,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo> GetAlbum(string? album_id_str)
         {
+            album_id_str = album_id_str.EnsureIdentifier();
+
             List<YandexTrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(album_id_str))
@@ -376,6 +357,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo> GetArtist(string? artist_id_str)
         {
+            artist_id_str = artist_id_str.EnsureIdentifier();
+
             List<YandexTrackInfo> tracks_collection = [];
 
             if (string.IsNullOrWhiteSpace(artist_id_str))
@@ -396,6 +379,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
+            playlist_user_str = playlist_user_str.EnsureIdentifier();
+            playlist_id_str = playlist_id_str.EnsureIdentifier();
+
             List<YandexTrackInfo> tracks_collection = [];
 
             YPlaylist playlist = Client.GetPlaylist(playlist_user_str, playlist_id_str);
