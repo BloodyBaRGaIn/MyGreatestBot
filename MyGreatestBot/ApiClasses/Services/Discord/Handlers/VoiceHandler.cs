@@ -59,7 +59,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private async Task UpdateVoiceConnectionAsync()
         {
             UpdateVoiceConnection();
-            await Task.Yield();
             await Task.Delay(1);
         }
 
@@ -67,19 +66,26 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// Connect to specified channel
         /// </summary>
         /// <param name="channel">Channel to connect to</param>
-        public void Connect(DiscordChannel channel)
+        public void Connect(DiscordChannel? channel)
         {
             try
             {
 #pragma warning disable CS8604
-                bool channel_changed = Connection?.TargetChannel != channel;
+                bool channel_changed = Channel != channel;
 #pragma warning restore CS8604
+
+                if (Connection?.TargetChannel is not null && channel_changed)
+                {
+                    Disconnect();
+                }
 
                 if (VoiceNext != null
                     && channel is not null
                     && channel_changed)
                 {
-                    _ = VoiceNext.ConnectAsync(channel).Wait(1000);
+                    Task<VoiceNextConnection> task = VoiceNext.ConnectAsync(channel);
+                    _ = task.Wait(1000);
+                    Connection = task.IsCompletedSuccessfully ? task.Result : null;
                 }
             }
             catch { }
@@ -97,6 +103,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             try
             {
                 SendSpeaking(false);
+                Connection?.Pause();
+                _ = Connection?.WaitForPlaybackFinishAsync()?.Wait(1000);
                 Connection?.Disconnect();
                 Connection?.Dispose();
                 Connection = null;
@@ -125,12 +133,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// <returns></returns>
         public async Task WriteAsync(byte[] bytes, int cnt = 0)
         {
-            while (TransmitSink == null)
+            UpdateSink();
+            
+            if (TransmitSink == null)
             {
-                UpdateSink();
-                await Task.Delay(1);
-                await Task.Yield();
+                return;
             }
+
+            await Connection.ResumeAsync();
 
             if (cnt == 0)
             {
@@ -143,7 +153,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
             else
             {
-                await TransmitSink.WriteAsync(bytes.AsMemory()[..cnt]);
+                await TransmitSink.WriteAsync(bytes.AsMemory(0, cnt));
             }
         }
 

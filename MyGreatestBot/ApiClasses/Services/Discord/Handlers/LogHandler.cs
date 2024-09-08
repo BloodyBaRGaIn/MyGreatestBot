@@ -1,6 +1,7 @@
 ﻿global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using MyGreatestBot.Extensions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,16 +9,39 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     /// <summary>
-    /// Console logging class
+    /// Message logging class
     /// </summary>
-    public sealed class LogHandler(TextWriter writer,
-                                   string guildName,
-                                   int logDelay,
-                                   LogLevel defaultLogLevel = LogLevel.None) : IDisposable
+    public sealed class LogHandler : IDisposable
     {
         public const string DateTimeFormat = "dd.MM.yyyy HH:mm:ss.fff";
 
-        private static readonly Semaphore writerSemaphore = new(1, 1);
+        private static readonly Semaphore consoleSemaphore = new(1, 1);
+        private static readonly Dictionary<TextWriter, Semaphore> semaphoreDictionary = new()
+        {
+            [Console.Out] = consoleSemaphore,
+            [Console.Error] = consoleSemaphore
+        };
+
+        private readonly TextWriter writer;
+        private readonly string guildName;
+        private readonly int logDelay;
+        private readonly LogLevel defaultLogLevel;
+
+        public LogHandler(TextWriter writer,
+                          string guildName,
+                          int logDelay,
+                          LogLevel defaultLogLevel = LogLevel.None)
+        {
+            this.writer = writer;
+            this.guildName = guildName;
+            this.logDelay = logDelay;
+            this.defaultLogLevel = defaultLogLevel;
+
+            if (!semaphoreDictionary.ContainsKey(writer))
+            {
+                semaphoreDictionary.Add(writer, new(1, 1));
+            }
+        }
 
         private async Task GenericWriteLineAsync(string text, LogLevel logLevel)
         {
@@ -25,23 +49,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 return;
             }
-            if (!writerSemaphore.TryWaitOne(logDelay))
+            Semaphore semaphore = semaphoreDictionary[writer];
+            if (!semaphore.TryWaitOne(logDelay))
             {
                 return;
             }
             lock (writer)
             {
-                writer.WriteLine(
-                    string.Join('\t',
-                        $"[{DateTime.Now.ToString(DateTimeFormat)}]",
-                        logLevel == LogLevel.None
-                            ? string.Empty
-                            : $"[{logLevel}]",
-                        string.Join(Environment.NewLine,
-                            guildName,
-                            text)));
+                string output = $"[{DateTime.Now.ToString(DateTimeFormat)}]\t";
+                if (logLevel != LogLevel.None)
+                {
+                    output += $"[{logLevel}] ";
+                }
+                output += $"{guildName}{Environment.NewLine}{text}";
+                writer.WriteLine(output);
             }
-            _ = writerSemaphore.TryRelease();
+            _ = semaphore.TryRelease();
             await Task.Delay(1);
         }
 
@@ -54,7 +77,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             catch { }
         }
 
-        public async Task SendAsync(string text) => await SendAsync(text, defaultLogLevel);
+        public async Task SendAsync(string text)
+        {
+            await SendAsync(text, defaultLogLevel);
+        }
 
         public void Send(string text, LogLevel logLevel)
         {
@@ -65,11 +91,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             catch { }
         }
 
-        public void Send(string text) => Send(text, defaultLogLevel);
+        public void Send(string text)
+        {
+            Send(text, defaultLogLevel);
+        }
 
         public void Dispose()
         {
-            writerSemaphore.TryDispose();
+            semaphoreDictionary[writer].TryDispose();
         }
     }
 }

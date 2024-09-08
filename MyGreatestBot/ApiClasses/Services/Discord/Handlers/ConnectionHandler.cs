@@ -187,9 +187,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             if (VoiceConnection != null && channel_changed)
             {
                 await Task.Run(() => PlayerInstance.Pause(CommandActionSource.Mute));
-                await Task.Delay(10);
-                Voice.Disconnect();
-                Voice.WaitForDisconnectionAsync().Wait();
+                await Task.Delay(40);
+                //Voice.Disconnect();
+                //Voice.WaitForDisconnectionAsync().Wait();
                 await Task.Delay(200);
             }
 
@@ -198,7 +198,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.Connect(new_channel);
                 Voice.WaitForConnectionAsync().Wait();
                 Voice.SendSpeaking(false);
-                await Task.Delay(10);
+                await Task.Delay(40);
                 await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
             }
             else if (!connection_rollback)

@@ -153,8 +153,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Client.ClientErrored -= Client_ClientErrored;
                 Client.SocketErrored -= Client_SocketErrored;
                 Client.SocketClosed -= Client_SocketClosed;
-                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
-                Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
             }
         }
 
@@ -348,6 +346,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
+            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} {e.After?.Channel?.Name ?? "null"}", LogLevel.Debug);
+
+            if (handler.VoiceUpdating)
+            {
+                await Task.Delay(1);
+                return;
+            }
+
             handler.VoiceUpdating = true;
 
 #pragma warning disable CS8604
@@ -359,15 +365,16 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(1000);
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(5000);
+            //if (semaphoreReady)
+            //{
+            //    Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+            //    Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
+            //}
+
             if (semaphoreReady)
             {
-                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
-            }
-
-            try
-            {
-                if (semaphoreReady)
+                try
                 {
                     if (e.After?.Channel is not null)
                     {
@@ -388,25 +395,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         }
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    handler.Message.Send(new DiscordEmbedBuilder()
-                    {
-                        Color = DiscordColor.Red,
-                        Title = "Failed to update voice state"
-                    });
+                    handler.Log.Send(ex.GetExtendedMessage());
                 }
             }
-            catch (Exception ex)
+            else
             {
-                handler.Message.Send(ex);
+                handler.Log.Send("Failed to update voice state", LogLevel.Warning);
             }
 
             handler.Update(e.Guild);
 
             if (semaphoreReady)
             {
-                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+                //Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+                //Client.VoiceServerUpdated += Client_VoiceServerUpdated;
                 _ = handler.VoiceUpdateSemaphore.TryRelease();
             }
 
@@ -427,30 +431,46 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            while (handler.ServerUpdating)
+            handler.Log.Send(nameof(Client.VoiceServerUpdated), LogLevel.Debug);
+
+            if (handler.ServerUpdating)
             {
                 await Task.Delay(1);
-                await Task.Yield();
-            }
-
-            handler.ServerUpdating = true;
-
-            bool semaphoreReady = handler.ServerUpdateSemaphore.TryWaitOne(1000);
-            if (!semaphoreReady)
-            {
                 return;
             }
 
-            Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+            handler.VoiceUpdating = true;
+            handler.ServerUpdating = true;
 
-            await handler.Reconnect();
+            bool semaphoreReady = handler.ServerUpdateSemaphore.TryWaitOne(5000);
+            if (semaphoreReady)
+            {
+                //Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+
+                try
+                {
+                    await handler.Reconnect();
+                }
+                catch (Exception ex)
+                {
+                    handler.Log.Send(ex.GetExtendedMessage());
+                }
+            }
+            else
+            {
+                handler.Log.Send("Failed to update voice server", LogLevel.Warning);
+            }
+
+            if (semaphoreReady)
+            {
+                //Client.VoiceServerUpdated += Client_VoiceServerUpdated;
+                _ = handler.ServerUpdateSemaphore.TryRelease();
+            }
 
             handler.Update(e.Guild);
 
-            Client.VoiceServerUpdated += Client_VoiceServerUpdated;
-            _ = handler.ServerUpdateSemaphore.TryRelease();
-
             handler.ServerUpdating = false;
+            handler.VoiceUpdating = false;
 
             await Task.Delay(1);
         }
