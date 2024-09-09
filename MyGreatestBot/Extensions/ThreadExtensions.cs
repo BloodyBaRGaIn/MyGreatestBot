@@ -23,8 +23,8 @@ namespace MyGreatestBot.Extensions
                     {
                         break;
                     }
-                    current--;
                 }
+                current--;
             }
         }
     }

@@ -43,11 +43,9 @@ namespace MyGreatestBot
                 ? $"{projectName} | {nameof(Release)}"
                 : projectName;
 
-            try
-            {
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            }
-            catch { }
+            Process.GetCurrentProcess()
+                .SetHighestAvailableProcessPriority(ProcessPriorityClass.High,
+                                                    ProcessPriorityClass.Normal);
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Console.OutputEncoding = Encoding.Unicode;

@@ -136,11 +136,8 @@ namespace MyGreatestBot.Player
                     WorkingDirectory = "ffmpeg_binaries"
                 }) ?? throw new InvalidOperationException($"{nameof(FFMPEG)} not started");
 
-                try
-                {
-                    process.PriorityClass = ProcessPriorityClass.RealTime;
-                }
-                catch { }
+                process.SetHighestAvailableProcessPriority(ProcessPriorityClass.RealTime,
+                                                           ProcessPriorityClass.Normal);
 
                 Process = process;
 
