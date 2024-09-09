@@ -346,7 +346,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} {e.After?.Channel?.Name ?? "null"}", LogLevel.Debug);
+            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} start {e.After?.Channel?.Name ?? "null"}", LogLevel.Debug);
 
             if (handler.VoiceUpdating)
             {
@@ -414,6 +414,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 _ = handler.VoiceUpdateSemaphore.TryRelease();
             }
 
+            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} finish");
+
             handler.VoiceUpdating = false;
         }
 
@@ -431,7 +433,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send(nameof(Client.VoiceServerUpdated), LogLevel.Debug);
+            handler.Log.Send($"{nameof(Client.VoiceServerUpdated)} start", LogLevel.Debug);
 
             if (handler.ServerUpdating)
             {
@@ -468,6 +470,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
 
             handler.Update(e.Guild);
+
+            handler.Log.Send($"{nameof(Client.VoiceServerUpdated)} finish", LogLevel.Debug);
 
             handler.ServerUpdating = false;
             handler.VoiceUpdating = false;
