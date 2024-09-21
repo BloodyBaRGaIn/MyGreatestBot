@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void DbRestore(CommandActionSource source)
         {

@@ -13,7 +13,7 @@ namespace MyGreatestBot.Player
     /// <summary>
     /// Player handler class
     /// </summary>
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         private const int TRANSMIT_SINK_MS = 10;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
@@ -72,6 +72,8 @@ namespace MyGreatestBot.Player
         private readonly object queueLock = new();
         private readonly object trackLock = new();
 
+        private bool disposed;
+
         /// <summary>
         /// Default class constructor.
         /// </summary>
@@ -81,7 +83,7 @@ namespace MyGreatestBot.Player
         /// </param>
         /// 
         /// <exception cref="PlayerException"></exception>
-        internal Player(ConnectionHandler handler)
+        internal PlayerHandler(ConnectionHandler handler)
         {
             Handler = handler;
             MainPlayerCancellationToken = MainPlayerCancellationTokenSource.Token;
@@ -110,7 +112,7 @@ namespace MyGreatestBot.Player
         {
             try
             {
-                Thread.CurrentThread.Name = $"{nameof(PlayerTaskFunction)} {Handler.GuildName}";
+                Thread.CurrentThread.Name = $"{nameof(PlayerTaskFunction)} \"{Handler.GuildName}\"";
             }
             catch { }
 
@@ -418,22 +420,37 @@ namespace MyGreatestBot.Player
                     return LowPlayerResult.RestartRead;
                 }
 
-                PlayerTimePosition += TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS * 2 * ((double)cnt / BUFFER_SIZE));
-
                 if (!currentTrack.IsLiveStream && TimeRemaining < TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS))
                 {
                     // track should be ended
                     return LowPlayerResult.Success;
                 }
 
+                using CancellationTokenSource cts = new();
+                using Task<int> writeTask = Handler.Voice.WriteAsync(PlayerByteBuffer, cnt, cts.Token);
+
                 // when discord voice server changed
                 // needs to be handled more propertly
-                if (!Handler.Voice.WriteAsync(PlayerByteBuffer, cnt).Wait(TRANSMIT_SINK_MS * 100))
+                if (!writeTask.Wait(TRANSMIT_SINK_MS * 100))
                 {
+                    cts.Cancel();
+                    try
+                    {
+                        writeTask.Wait();
+                    }
+                    catch { }
                     Handler.Voice.UpdateVoiceConnection();
                     Handler.Voice.UpdateSink();
                     return LowPlayerResult.RestartWrite;
                 }
+
+                if (writeTask.Result < 0)
+                {
+                    IsPaused = true;
+                    continue;
+                }
+
+                PlayerTimePosition += TimeSpan.FromMilliseconds(TRANSMIT_SINK_MS * 2 * ((double)writeTask.Result / BUFFER_SIZE));
 
                 Status = PlayerStatus.Playing;
             }

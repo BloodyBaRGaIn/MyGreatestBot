@@ -14,6 +14,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
     /// </summary>
     public static class DiscordWrapper
     {
+        public const int DefaultConnectionTimeout = 10000;
+        public const int DefaultDisconnectionTimeout = 500;
+
+        public static int ConnectionTimeout { get; private set; } = DefaultConnectionTimeout;
+        public static int DisconnectionTimeout { get; private set; } = DefaultDisconnectionTimeout;
+
         public static LogHandler CurrentDomainLogHandler { get; } = new(
             writer: Console.Out,
             guildName: AppDomain.CurrentDomain.FriendlyName,
@@ -44,23 +50,39 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         public static int Age => Instance.Age;
 
         /// <summary>
-        /// Try to run bot
+        /// Try to run bot with default timeouts.
+        /// </summary>
+        public static void Run()
+        {
+            Run(DefaultConnectionTimeout, DefaultDisconnectionTimeout);
+        }
+
+        /// <summary>
+        /// Try to run bot.
         /// </summary>
         /// <param name="connectionTimeout">
-        /// <inheritdoc cref="DiscordBot.Run(int, int)" path="/param[@name='connectionTimeout']"/>
+        /// Connection timeout in milliseconds.
         /// </param>
         /// <param name="disconnectionTimeout">
-        /// <inheritdoc cref="DiscordBot.Run(int, int)" path="/param[@name='disconnectionTimeout']"/>
+        /// Disconnection timeout in milliseconds.
         /// </param>
         public static void Run(int connectionTimeout, int disconnectionTimeout)
         {
+            ConnectionTimeout = connectionTimeout > 0 ? connectionTimeout : DefaultConnectionTimeout;
+            DisconnectionTimeout = disconnectionTimeout > 0 ? disconnectionTimeout : DefaultDisconnectionTimeout;
+
             try
             {
-                Instance?.Run(connectionTimeout, disconnectionTimeout);
+                Instance?.Run();
             }
             catch (Exception ex)
             {
                 CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+            }
+            finally
+            {
+                CurrentDomainLogHandler.Dispose();
+                CurrentDomainLogErrorHandler.Dispose();
             }
         }
 

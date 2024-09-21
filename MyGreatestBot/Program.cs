@@ -80,8 +80,7 @@ namespace MyGreatestBot
             }
             else
             {
-                DiscordWrapper.Run(connectionTimeout: 10000,
-                                   disconnectionTimeout: 500);
+                DiscordWrapper.Run();
             }
 
             AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_ProcessExit;

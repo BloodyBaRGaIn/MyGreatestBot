@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void DbSave(CommandActionSource source)
         {

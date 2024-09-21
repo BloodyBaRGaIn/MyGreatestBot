@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void Enqueue(ref IEnumerable<BaseTrackInfo> tracks, CommandActionSource source)
         {

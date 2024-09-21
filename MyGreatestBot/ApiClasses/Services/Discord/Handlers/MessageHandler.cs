@@ -15,6 +15,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         private readonly Semaphore messageSendSemaphore = new(1, 1);
 
+        private bool disposed;
+
         private void Send(DiscordMessageBuilder messageBuilder)
         {
             if (Channel is null)
@@ -26,7 +28,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             if (messageBuilder is null)
             {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Mesage is null");
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message is null");
 
                 return;
             }
@@ -40,7 +42,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     })))
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    "Mesage corrupted");
+                    "Message corrupted");
 
                 return;
             }
@@ -122,7 +124,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+            disposed = true;
+            if (disposing)
+            {
+                ;
+            }
             messageSendSemaphore.TryDispose();
+        }
+
+        ~MessageHandler()
+        {
+            Dispose(false);
         }
     }
 }

@@ -4,7 +4,7 @@ using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void Resume(CommandActionSource source)
         {
@@ -12,8 +12,11 @@ namespace MyGreatestBot.Player
                 ? null
                 : Handler.Message;
 
-            IsPaused = false;
-            WaitForStatus(PlayerStatus.Playing | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
+            WaitForStatus(PlayerStatus.Playing | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError,
+                          () =>
+                          {
+                              IsPaused = false;
+                          });
 
             messageHandler?.Send(currentTrack == null
                 ? new ResumeCommandException("Nothing to resume")

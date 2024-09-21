@@ -40,7 +40,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <summary>
         /// Bot voice actions handling instance.
         /// </summary>
-        [AllowNull] public VoiceNextExtension Voice { get; private set; }
+        [AllowNull] public VoiceNextExtension Voice { get; internal set; }
 
         /// <summary>
         /// Bot's age. Zero if it's not its anniversary today.
@@ -60,6 +60,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private string CommandPrefix = string.Empty;
 
         private volatile bool exitRequest;
+
+        private string OnlineActivityName =>
+            $"{(string.IsNullOrWhiteSpace(CommandPrefix) ? DefaultPrefix : CommandPrefix)}{CommandStrings.HelpCommandName}";
+        private ActivityType OnlineActivityType { get; } = ActivityType.ListeningTo;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
 
@@ -85,7 +89,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             Client = new(discordConfig);
 
-            Client.SessionCreated += Client_SessionCreated;
+            Client.Ready += Client_Ready;
             Client.ClientErrored += Client_ClientErrored;
             Client.SocketErrored += Client_SocketErrored;
             Client.SocketClosed += Client_SocketClosed;
@@ -149,7 +153,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
                 Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
-                Client.SessionCreated -= Client_SessionCreated;
+                Client.Ready -= Client_Ready;
                 Client.ClientErrored -= Client_ClientErrored;
                 Client.SocketErrored -= Client_SocketErrored;
                 Client.SocketClosed -= Client_SocketClosed;
@@ -159,9 +163,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <summary>
         /// Runs bot
         /// </summary>
-        /// <param name="connectionTimeout">Timeout for connection</param>
-        /// <param name="disconnectionTimeout">Timeout for disconnection</param>
-        internal void Run(int connectionTimeout, int disconnectionTimeout)
+        internal void Run()
         {
             // try to start
             try
@@ -171,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     throw new DiscordApiException();
                 }
 
-                if (!Client.ConnectAsync().Wait(connectionTimeout))
+                if (!Client.ConnectAsync().Wait(DiscordWrapper.ConnectionTimeout))
                 {
                     throw new DiscordApiException("Cannot connect to Discord");
                 }
@@ -179,7 +181,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
             catch (Exception ex)
             {
-                Disconnect(disconnectionTimeout);
+                Disconnect(DiscordWrapper.DisconnectionTimeout);
 
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     string.Join(Environment.NewLine,
@@ -213,15 +215,35 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
 
             // try to set offline status
+            SetUserStatus(UserStatus.Offline);
+
+            Disconnect(DiscordWrapper.DisconnectionTimeout);
+        }
+
+        private void SetUserStatus(UserStatus status)
+        {
+            if (Client == null)
+            {
+                return;
+            }
+
+            DiscordActivity activity = status switch
+            {
+                UserStatus.Online => new(OnlineActivityName, OnlineActivityType),
+                _ => new(),
+            };
+
+            int timeout = status switch
+            {
+                UserStatus.Online => DiscordWrapper.ConnectionTimeout,
+                _ => DiscordWrapper.DisconnectionTimeout
+            };
+
             try
             {
-                _ = Client.UpdateStatusAsync(
-                    new(), DiscordUserStatus.Offline)
-                .Wait(disconnectionTimeout);
+                Client.UpdateStatusAsync(activity, status).Wait(timeout);
             }
             catch { }
-
-            Disconnect(disconnectionTimeout);
         }
 
         /// <summary>
@@ -271,6 +293,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             try
             {
                 _ = Client.DisconnectAsync().Wait(disconnectionTimeout);
+            }
+            catch { }
+            try
+            {
                 Client.Dispose();
             }
             catch { }
@@ -278,22 +304,18 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         #region Private event handlers
 
-        private async Task Client_SessionCreated(DiscordClient sender, SessionReadyEventArgs args)
+        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
         {
-            await sender.UpdateStatusAsync(new()
-            {
-                ActivityType = DiscordActivityType.ListeningTo,
-                Name = $"{CommandPrefix}{CommandStrings.HelpCommandName}"
-            }, DiscordUserStatus.Online);
+            SetUserStatus(UserStatus.Online);
+
+            await Task.Delay(1);
 
             DiscordWrapper.CurrentDomainLogHandler.Send("Session created.");
 
             if (Age == -1)
             {
                 DateTime birthdate =
-                    Client.CurrentUser.CreationTimestamp.Date
-                //new(DateTime.Today.Year - 5, DateTime.Today.Month, DateTime.Today.Day);
-                ;
+                    Client.CurrentUser.CreationTimestamp.Date;
 
                 DateTime today = DateTime.Today;
 
@@ -312,6 +334,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                         $"It's my {Age} year anniversary today!!!");
                 }
             }
+
+            await Task.Delay(1);
         }
 
         private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
@@ -334,8 +358,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
-            bool isBotVoiceStateUpdated = e.User.Id == client.CurrentUser.Id && e.User.IsBot;
-            if (!isBotVoiceStateUpdated)
+            bool isBotTriggered = e.User.Id == client.CurrentUser.Id && e.User.IsBot;
+            if (!isBotTriggered)
+            {
+                return;
+            }
+
+            bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
+            if (!channel_changed)
             {
                 return;
             }
@@ -346,44 +376,42 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} start {e.After?.Channel?.Name ?? "null"}", LogLevel.Debug);
-
-            if (handler.VoiceUpdating)
+            if (handler.Voice.IsManualDisconnect)
             {
-                await Task.Delay(1);
+                await Task.Yield();
                 return;
             }
 
-            handler.VoiceUpdating = true;
+            string eventName = $"{nameof(Client.VoiceStateUpdated)} {e.After?.Channel?.Name ?? "null"}";
 
-#pragma warning disable CS8604
-            bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
-#pragma warning restore CS8604
+            handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
 
-            if (!channel_changed)
+            await Task.Yield();
+
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(100);
+
+            await Task.Run(async () =>
             {
-                return;
-            }
-
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(5000);
-            //if (semaphoreReady)
-            //{
-            //    Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
-            //    Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
-            //}
-
-            if (semaphoreReady)
-            {
-                try
+                if (semaphoreReady)
                 {
-                    if (e.After?.Channel is not null)
+                    if (handler.VoiceUpdating)
                     {
-                        await handler.Join(e);
-                        await handler.Voice.WaitForConnectionAsync();
+                        handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
+                        await Task.Delay(1);
+                        return;
                     }
-                    else
+
+                    handler.VoiceUpdating = true;
+
+                    try
                     {
-                        if (!handler.Voice.IsManualDisconnect)
+                        if (e.After?.Channel is not null)
+                        {
+                            handler.Voice.IsManualDisconnect = true;
+                            await handler.Join(e);
+                            await handler.Voice.WaitForConnectionAsync();
+                        }
+                        else
                         {
                             await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute));
                             handler.Message.Send(new DiscordEmbedBuilder()
@@ -394,35 +422,33 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                             handler.Voice.Disconnect(false);
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        handler.Log.Send(ex.GetExtendedMessage());
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    handler.Log.Send(ex.GetExtendedMessage());
+                    handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
                 }
-            }
-            else
-            {
-                handler.Log.Send("Failed to update voice state", LogLevel.Warning);
-            }
 
-            handler.Update(e.Guild);
+                handler.Update(e.Guild);
+            });
 
             if (semaphoreReady)
             {
-                //Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-                //Client.VoiceServerUpdated += Client_VoiceServerUpdated;
+                handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
+
+                handler.VoiceUpdating = false;
+
                 _ = handler.VoiceUpdateSemaphore.TryRelease();
             }
-
-            handler.Log.Send($"{nameof(Client.VoiceStateUpdated)} finish");
-
-            handler.VoiceUpdating = false;
         }
 
         private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
         {
-            bool isBotVoiceServerUpdated = Client.CurrentUser.Id == client.CurrentUser.Id;
-            if (!isBotVoiceServerUpdated)
+            bool isBotTriggered = Client.CurrentUser.Id == client.CurrentUser.Id;
+            if (!isBotTriggered)
             {
                 return;
             }
@@ -433,48 +459,52 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send($"{nameof(Client.VoiceServerUpdated)} start", LogLevel.Debug);
-
-            if (handler.ServerUpdating)
+            if (handler.Voice.IsManualDisconnect)
             {
-                await Task.Delay(1);
+                await Task.Yield();
                 return;
             }
 
-            handler.VoiceUpdating = true;
-            handler.ServerUpdating = true;
+            string eventName = nameof(Client.VoiceServerUpdated);
 
-            bool semaphoreReady = handler.ServerUpdateSemaphore.TryWaitOne(5000);
+            handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
+
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(1000);
             if (semaphoreReady)
             {
-                //Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
+                if (handler.VoiceUpdating)
+                {
+                    handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
+                    await Task.Delay(1);
+                    return;
+                }
+
+                handler.VoiceUpdating = true;
+                handler.ServerUpdating = true;
 
                 try
                 {
+                    handler.Voice.IsManualDisconnect = true;
                     await handler.Reconnect();
                 }
                 catch (Exception ex)
                 {
                     handler.Log.Send(ex.GetExtendedMessage());
                 }
+
+                _ = handler.VoiceUpdateSemaphore.TryRelease();
+
+                handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
+
+                handler.ServerUpdating = false;
+                handler.VoiceUpdating = false;
             }
             else
             {
-                handler.Log.Send("Failed to update voice server", LogLevel.Warning);
-            }
-
-            if (semaphoreReady)
-            {
-                //Client.VoiceServerUpdated += Client_VoiceServerUpdated;
-                _ = handler.ServerUpdateSemaphore.TryRelease();
+                handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
             }
 
             handler.Update(e.Guild);
-
-            handler.Log.Send($"{nameof(Client.VoiceServerUpdated)} finish", LogLevel.Debug);
-
-            handler.ServerUpdating = false;
-            handler.VoiceUpdating = false;
 
             await Task.Delay(1);
         }
@@ -575,6 +605,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 handler.Message.Send(args.Exception);
             }
+        }
+
+        private enum VoiceEventState
+        {
+            Start,
+            InProgress,
+            Busy,
+            Finish
         }
 
         #endregion

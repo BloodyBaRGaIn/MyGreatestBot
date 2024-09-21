@@ -1,10 +1,13 @@
 ﻿global using ConnectionHandler = MyGreatestBot.ApiClasses.Services.Discord.Handlers.ConnectionHandler;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.VoiceNext;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
+using MyGreatestBot.Player;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,13 +18,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// <summary>
     /// Connection handler class
     /// </summary>
-    public sealed class ConnectionHandler
+    public sealed class ConnectionHandler : IDisposable
     {
-        [AllowNull] private readonly Player.Player _player = null;
+        [AllowNull] private readonly PlayerHandler _player = null;
 
         private readonly PlayerException playerNotInitializedException = new("Not initialized");
 
-        internal Player.Player PlayerInstance => _player ?? throw playerNotInitializedException;
+        internal PlayerHandler PlayerInstance => _player ?? throw playerNotInitializedException;
         internal bool IsPlayerInitialized => _player != null;
 
         private readonly DiscordGuild _guild;
@@ -69,10 +72,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         public Semaphore VoiceUpdateSemaphore { get; } = new(1, 1);
         public Semaphore ServerUpdateSemaphore { get; } = new(1, 1);
 
-        public volatile bool VoiceUpdating = false;
-        public volatile bool ServerUpdating = false;
+        public volatile bool VoiceUpdating;
+        public volatile bool ServerUpdating;
 
         private static readonly Dictionary<ulong, ConnectionHandler> ConnectionDictionary = [];
+
+        private bool disposed;
 
         private ConnectionHandler(DiscordGuild guild)
         {
@@ -131,17 +136,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task Join(CommandContext ctx)
         {
-            await Join(ctx.Channel, ctx.Member?.VoiceState?.Channel, true);
+            await Join(ctx.Channel, ctx.Member?.VoiceState?.Channel);
         }
 
         public async Task Join(VoiceStateUpdateEventArgs args)
         {
-            await Join(null, args.After?.Channel, false);
+            await Join(null, args.After?.Channel);
         }
 
         private async Task Join(
             DiscordChannel? text,
-            DiscordChannel? channel, bool throw_exception = false)
+            DiscordChannel? channel)
         {
             if (text is not null)
             {
@@ -153,8 +158,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 throw playerNotInitializedException;
             }
 
-            Voice.UpdateVoiceConnection();
-
             await Task.Yield();
 
             DiscordChannel? new_channel = null;
@@ -162,35 +165,43 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             if (VoiceChannel is not null)
             {
-                old_channel = await _guild.GetChannelAsync(VoiceChannel.Id);
+                old_channel = _guild.GetChannel(VoiceChannel.Id);
             }
             if (channel is not null)
             {
-                new_channel = await _guild.GetChannelAsync(channel.Id);
+                new_channel = _guild.GetChannel(channel.Id);
             }
 
             bool connection_rollback = false;
 
             if (channel is not null && !channel.PermissionsFor(_guild.CurrentMember)
-                .HasFlag(DiscordPermissions.AccessChannels |
-                         DiscordPermissions.UseVoice |
-                         DiscordPermissions.Speak))
+                .HasFlag(Permissions.AccessChannels |
+                         Permissions.UseVoice |
+                         Permissions.Speak))
             {
                 connection_rollback = true;
                 new_channel = old_channel;
             }
 
-#pragma warning disable CS8604
-            bool channel_changed = VoiceChannel != channel || VoiceConnection?.TargetChannel != channel;
-#pragma warning restore CS8604
+            InvalidOperationException? exception = connection_rollback
+                ? new("Cannot join this channel")
+                : new_channel is null
+                ? new("You need to be in the voice channel")
+                : null;
 
+            if (exception != null)
+            {
+                Message.Send(exception);
+                return;
+            }
+
+            bool channel_changed = VoiceChannel != channel || VoiceConnection?.TargetChannel != channel;
             if (VoiceConnection != null && channel_changed)
             {
                 await Task.Run(() => PlayerInstance.Pause(CommandActionSource.Mute));
-                await Task.Delay(40);
+                await Task.Delay(PlayerHandler.TransmitSinkDelay * 2);
                 //Voice.Disconnect();
                 //Voice.WaitForDisconnectionAsync().Wait();
-                await Task.Delay(200);
             }
 
             if (new_channel is not null)
@@ -198,38 +209,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.Connect(new_channel);
                 Voice.WaitForConnectionAsync().Wait();
                 Voice.SendSpeaking(false);
-                await Task.Delay(40);
-                await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
-            }
-            else if (!connection_rollback)
-            {
-                InvalidOperationException exception = new("You need to be in the voice channel");
-                if (throw_exception)
-                {
-                    throw exception;
-                }
-                else
-                {
-                    Message.Send(exception);
-                }
-            }
-
-            if (connection_rollback)
-            {
-                InvalidOperationException exception = new("Cannot join this channel");
-                if (throw_exception)
-                {
-                    throw exception;
-                }
-                else
-                {
-                    Message.Send(exception);
-                }
             }
 
             Voice.UpdateVoiceConnection();
 
             await Task.Delay(1);
+
+            await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
         }
 
         public async Task Leave(CommandContext ctx)
@@ -246,22 +232,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 TextChannel = text;
             }
 
-            if (VoiceChannel is null)
-            {
-                return;
-            }
-
-#pragma warning disable CS8604
-            if ((VoiceChannel != channel && _guild == channel?.Guild)
+            Voice.UpdateVoiceConnection();
+            if (((VoiceChannel != channel && _guild == channel?.Guild)
                 || (channel is null && _guild == TextChannel?.Guild))
-#pragma warning restore CS8604
+                && VoiceConnection?.TargetChannel is not null
+                && VoiceChannel is not null)
             {
                 throw new InvalidOperationException("You need to be in the same voice channel");
             }
 
             await Task.Run(() => PlayerInstance.Stop(CommandActionSource.Mute));
 
-            Voice.UpdateVoiceConnection();
             Voice.Disconnect();
 
             await Voice.WaitForDisconnectionAsync();
@@ -276,7 +257,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
-            DiscordChannel? channel = await _guild.GetChannelAsync(origin.Id);
+            DiscordChannel? channel = _guild.GetChannel(origin.Id);
 
             if (channel is null)
             {
@@ -356,7 +337,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
                 try
                 {
-                    handler.Leave(handler.TextChannel, handler.VoiceChannel).Wait();
+                    handler.PlayerInstance.Dispose();
                 }
                 catch { }
             });
@@ -374,6 +355,44 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             DiscordWrapper.Exit();
             await Task.Yield();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+            disposed = true;
+
+            Thread.BeginCriticalRegion();
+
+            if (disposing)
+            {
+                ;
+            }
+
+            try
+            {
+                VoiceUpdateSemaphore.TryDispose();
+                VoiceUpdateSemaphore.TryDispose();
+                Voice.Dispose();
+                Message.Dispose();
+            }
+            catch { }
+
+            Thread.EndCriticalRegion();
+        }
+
+        ~ConnectionHandler()
+        {
+            Dispose(false);
         }
     }
 }

@@ -8,7 +8,7 @@ using System;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         private void Dequeue()
         {

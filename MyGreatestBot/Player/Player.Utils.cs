@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         private enum LowPlayerResult : int
         {
@@ -79,7 +79,8 @@ namespace MyGreatestBot.Player
         /// between the player status and the passed status is non-zero.
         /// </summary>
         /// <param name="status">Status to await.</param>
-        private void WaitForStatus(PlayerStatus status)
+        /// <param name="waitAction">Additional action to invoke while waiting.</param>
+        private void WaitForStatus(PlayerStatus status, Action? waitAction = null)
         {
             while (true)
             {
@@ -87,6 +88,7 @@ namespace MyGreatestBot.Player
                 {
                     break;
                 }
+                waitAction?.Invoke();
                 Wait();
             }
         }

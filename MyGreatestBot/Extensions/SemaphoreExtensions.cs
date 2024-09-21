@@ -2,13 +2,17 @@
 
 namespace MyGreatestBot.Extensions
 {
+    /// <summary>
+    /// <see cref="Semaphore"/> extensions
+    /// </summary>
     public static class SemaphoreExtensions
     {
         /// <summary>
         /// <inheritdoc cref="WaitHandle.WaitOne()"/>
         /// </summary>
         /// <returns>
-        /// <inheritdoc cref="WaitHandle.WaitOne()"/>
+        /// <inheritdoc cref="WaitHandle.WaitOne()"/><br/>
+        /// Returns <c>false</c> if an exception was thrown during the operation.
         /// </returns>
         public static bool TryWaitOne(this Semaphore semaphore)
         {
@@ -29,7 +33,8 @@ namespace MyGreatestBot.Extensions
         /// <inheritdoc cref="WaitHandle.WaitOne(int)" path="/param[@name='millisecondsTimeout']"/>
         /// </param>
         /// <returns>
-        /// <inheritdoc cref="WaitHandle.WaitOne(int)"/>
+        /// <inheritdoc cref="WaitHandle.WaitOne(int)"/><br/>
+        /// Returns <c>false</c> if an exception was thrown during the operation.
         /// </returns>
         public static bool TryWaitOne(this Semaphore semaphore, int millisecondsTimeout)
         {
@@ -43,6 +48,12 @@ namespace MyGreatestBot.Extensions
             }
         }
 
+        /// <summary>
+        /// Tries to exit the semaphore until any exception is thrown.
+        /// </summary>
+        /// <returns>
+        /// <inheritdoc cref="Semaphore.Release()"/>
+        /// </returns>
         public static int ReleaseAll(this Semaphore semaphore)
         {
             int count = 0;
@@ -69,7 +80,9 @@ namespace MyGreatestBot.Extensions
         /// <param name="releaseCount">
         /// <inheritdoc cref="Semaphore.Release(int)" path="/param[@name='releaseCount']"/>
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// <inheritdoc cref="Semaphore.Release(int)"/>
+        /// </returns>
         public static int TryRelease(this Semaphore semaphore, int releaseCount = 0)
         {
             if (releaseCount <= 0)

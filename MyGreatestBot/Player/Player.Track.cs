@@ -5,7 +5,7 @@ using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void GetCurrentTrackInfo()
         {

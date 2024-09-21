@@ -1,6 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
+using MyGreatestBot.Player;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
@@ -8,14 +10,36 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// <summary>
     /// Voice connection handler class
     /// </summary>
-    public sealed class VoiceHandler(DiscordGuild guild)
+    public sealed class VoiceHandler(DiscordGuild guild) : IDisposable
     {
         [AllowNull] private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
-        [AllowNull] public VoiceNextConnection Connection { get; private set; }
         [AllowNull] public DiscordChannel Channel { get; private set; }
         [AllowNull] private VoiceTransmitSink TransmitSink { get; set; }
+        [AllowNull] private DiscordChannel LastKnownChannel { get; set; } = null;
+
+        [AllowNull]
+        public VoiceNextConnection Connection
+        {
+            get => _connection;
+            private set
+            {
+                if (value is null)
+                {
+                    LastKnownChannel = null;
+                }
+                else if (value.TargetChannel is not null)
+                {
+                    LastKnownChannel = value.TargetChannel;
+                }
+                _connection = value;
+            }
+        }
+
+        [AllowNull] private VoiceNextConnection _connection;
 
         internal volatile bool IsManualDisconnect;
+
+        private bool disposed;
 
         /// <summary>
         /// Update voice connection
@@ -47,10 +71,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// <returns></returns>
         public async Task WaitForDisconnectionAsync()
         {
-            while (Connection != null)
+            do
             {
                 await UpdateVoiceConnectionAsync();
-            }
+            } while (Connection != null);
         }
 
         /// <summary>
@@ -70,22 +94,28 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-#pragma warning disable CS8604
-                bool channel_changed = Channel != channel;
-#pragma warning restore CS8604
-
-                if (Connection?.TargetChannel is not null && channel_changed)
+                bool channel_changed = Channel != channel || Connection?.TargetChannel != channel;
+                while (true)
                 {
-                    Disconnect();
-                }
+                    if (channel_changed)
+                    {
+                        Disconnect();
+                        WaitForDisconnectionAsync().Wait();
+                    }
 
-                if (VoiceNext != null
-                    && channel is not null
-                    && channel_changed)
-                {
-                    Task<VoiceNextConnection> task = VoiceNext.ConnectAsync(channel);
-                    _ = task.Wait(1000);
-                    Connection = task.IsCompletedSuccessfully ? task.Result : null;
+                    if (VoiceNext != null
+                        && channel is not null
+                        && channel_changed)
+                    {
+                        Task<VoiceNextConnection> task = VoiceNext.ConnectAsync(channel);
+                        _ = task.Wait(2000);
+                        Connection = task.IsCompletedSuccessfully ? task.Result : null;
+                    }
+
+                    if (Connection != null)
+                    {
+                        break;
+                    }
                 }
             }
             catch { }
@@ -104,7 +134,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 SendSpeaking(false);
                 Connection?.Pause();
-                _ = Connection?.WaitForPlaybackFinishAsync()?.Wait(1000);
+                _ = Connection?.WaitForPlaybackFinishAsync()?.Wait(PlayerHandler.TransmitSinkDelay * 2);
                 Connection?.Disconnect();
                 Connection?.Dispose();
                 Connection = null;
@@ -121,7 +151,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
-                _ = Connection?.SendSpeakingAsync(speaking).Wait(100);
+                _ = Connection?.SendSpeakingAsync(speaking).Wait(1000);
             }
             catch { }
         }
@@ -130,14 +160,39 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// Write bytes array to the transmission sink
         /// </summary>
         /// <param name="bytes">Data to write</param>
-        /// <returns></returns>
-        public async Task WriteAsync(byte[] bytes, int cnt = 0)
+        /// <param name="cnt">Count of bytes to write</param>
+        /// <returns>Written bytes count</returns>
+        public async Task<int> WriteAsync(byte[] bytes, int cnt, CancellationToken cancellationToken)
         {
-            UpdateSink();
-            
-            if (TransmitSink == null)
+            while (true)
             {
-                return;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return 0;
+                }
+
+                UpdateSink();
+
+                if (TransmitSink != null)
+                {
+                    break;
+                }
+
+                Task delayTask = Task.Delay(1, cancellationToken);
+                await delayTask;
+                if (delayTask.IsCompletedSuccessfully)
+                {
+                    break;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            if (cancellationToken.IsCancellationRequested || TransmitSink == null)
+            {
+                return 0;
             }
 
             await Connection.ResumeAsync();
@@ -147,14 +202,23 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 cnt = bytes.Length;
             }
 
-            if (cnt == bytes.Length)
+            ReadOnlyMemory<byte> buffer = (cnt == bytes.Length) ? bytes : bytes.AsMemory(0, cnt);
+
+            if (Connection.TargetChannel is not null)
             {
-                await TransmitSink.WriteAsync(bytes);
+                if (LastKnownChannel is null)
+                {
+                    LastKnownChannel = Connection.TargetChannel;
+                }
+                else if (LastKnownChannel != Connection.TargetChannel)
+                {
+                    return -1;
+                }
             }
-            else
-            {
-                await TransmitSink.WriteAsync(bytes.AsMemory(0, cnt));
-            }
+
+            Task writeTask = TransmitSink.WriteAsync(buffer, cancellationToken);
+            await writeTask;
+            return writeTask.IsCompletedSuccessfully ? cnt : 0;
         }
 
         /// <summary>
@@ -162,7 +226,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// </summary>
         public void UpdateSink()
         {
-            TransmitSink = Connection?.GetTransmitSink(Player.Player.TransmitSinkDelay);
+            TransmitSink = Connection?.GetTransmitSink(PlayerHandler.TransmitSinkDelay);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+            disposed = true;
+            if (disposing)
+            {
+                ;
+            }
+            Disconnect();
         }
     }
 }

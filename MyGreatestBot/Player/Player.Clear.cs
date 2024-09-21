@@ -4,7 +4,7 @@ using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void Clear(CommandActionSource source)
         {

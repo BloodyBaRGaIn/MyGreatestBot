@@ -6,7 +6,7 @@ using System;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void ReturnCurrentTrackToQueue(CommandActionSource source)
         {

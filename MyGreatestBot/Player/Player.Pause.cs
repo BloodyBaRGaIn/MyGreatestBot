@@ -4,7 +4,7 @@ using MyGreatestBot.Commands.Utils;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         internal void Pause(CommandActionSource source)
         {
@@ -12,8 +12,11 @@ namespace MyGreatestBot.Player
                 ? null
                 : Handler.Message;
 
-            IsPaused = true;
-            WaitForStatus(PlayerStatus.Paused | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError);
+            WaitForStatus(PlayerStatus.Paused | PlayerStatus.Finish | PlayerStatus.InitOrIdle | PlayerStatus.DeinitOrError,
+                          () =>
+                          {
+                              IsPaused = true;
+                          });
 
             messageHandler?.Send(currentTrack != null
                 ? new PauseCommandException("Paused").WithSuccess()

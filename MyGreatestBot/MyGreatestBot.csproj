@@ -87,12 +87,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02262" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02262" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02262" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-nightly-02262" />
+    <PackageReference Include="DSharpPlus" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.5.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3513" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3539" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.10.1" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.10.1" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
@@ -106,7 +106,7 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="VkNet" Version="1.77.0-alpha-91" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.4.0" />
+    <PackageReference Include="YoutubeExplode" Version="6.4.1" />
   </ItemGroup>
 
   <ItemGroup>

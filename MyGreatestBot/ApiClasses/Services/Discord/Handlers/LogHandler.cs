@@ -27,6 +27,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private readonly int logDelay;
         private readonly LogLevel defaultLogLevel;
 
+        private bool disposed;
+
         public LogHandler(TextWriter writer,
                           string guildName,
                           int logDelay,
@@ -50,7 +52,16 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
             Semaphore semaphore = semaphoreDictionary[writer];
-            if (!semaphore.TryWaitOne(logDelay))
+            bool ready;
+            try
+            {
+                ready = semaphore.TryWaitOne(logDelay);
+            }
+            catch
+            {
+                ready = true;
+            }
+            if (!ready)
             {
                 return;
             }
@@ -98,7 +109,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public void Dispose()
         {
-            semaphoreDictionary[writer].TryDispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+            disposed = true;
+            Semaphore semaphore = semaphoreDictionary[writer];
+            if (!(disposing ^ (semaphore == consoleSemaphore)))
+            {
+                _ = semaphore.TryRelease();
+            }
+        }
+
+        ~LogHandler()
+        {
+            Dispose(false);
         }
     }
 }

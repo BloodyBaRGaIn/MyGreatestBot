@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MyGreatestBot.Player
 {
-    internal sealed partial class Player
+    internal sealed partial class PlayerHandler
     {
         /// <summary>
         /// Audio decoder handling class
@@ -145,7 +145,7 @@ namespace MyGreatestBot.Player
                 ErrorTask = Task.Factory.StartNew(() =>
                 {
                     Thread.CurrentThread.SetHighestAvailableTheadPriority();
-                    Thread.CurrentThread.Name = $"{nameof(FFMPEG)}_{nameof(ErrorTask)} {guildName} {ErrorCount}";
+                    Thread.CurrentThread.Name = $"{nameof(FFMPEG)}_{nameof(ErrorTask)} \"{guildName}\" {ErrorCount}";
                     while (true)
                     {
                         if (ErrorTaskCts.IsCancellationRequested)
