@@ -1,11 +1,14 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics;
+using System.IO.Compression;
+using System.Runtime.Versioning;
 
 namespace FfmpegUpdater
 {
+    [SupportedOSPlatform("windows")]
     internal static class Program
     {
         private const string ffmpeg_directory_name = "ffmpeg_binaries";
-        private const string ffmpeg_download_link_file_name = "ffmpeg_download_link.txt";
+        private const string ffmpeg_repo_file_name = "ffmpeg_repository.txt";
         private const string ffmpeg_archive_name = "ffmpeg-master-latest-win64-gpl.zip";
         private const string ffmpeg_executable_name = "ffmpeg.exe";
         private const string ffmpeg_backup_name = "ffmpeg_old.exe";
@@ -50,24 +53,24 @@ namespace FfmpegUpdater
             }
 
             // find download link file
-            FileInfo? download_link_info = ffmpeg_directory
-                .GetFiles(ffmpeg_download_link_file_name)
+            FileInfo? repo_link_info = ffmpeg_directory
+                .GetFiles(ffmpeg_repo_file_name)
                 .FirstOrDefault();
 
-            if (download_link_info == null)
+            if (repo_link_info == null)
             {
-                Console.Error.WriteLine($"Cannot find {ffmpeg_download_link_file_name}");
+                Console.Error.WriteLine($"Cannot find {ffmpeg_repo_file_name}");
                 return 1;
             }
 
-            // get download link
-            string download_link;
+            // get repo link file content
+            string repo_link_file_content;
 
             try
             {
-                download_link = File.ReadAllText(download_link_info.FullName).TrimEnd([.. Environment.NewLine]);
+                repo_link_file_content = File.ReadAllText(repo_link_info.FullName).TrimEnd([.. Environment.NewLine]);
 
-                if (string.IsNullOrWhiteSpace(download_link))
+                if (string.IsNullOrWhiteSpace(repo_link_file_content))
                 {
                     throw new Exception("File is empty");
                 }
@@ -80,13 +83,87 @@ namespace FfmpegUpdater
                 return 1;
             }
 
+            string[] repo_file_split = repo_link_file_content.Split([.. Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+            if (repo_file_split.Length != 2)
+            {
+                Console.Error.WriteLine("Repo file is invalid");
+                return 1;
+            }
+
+            string repo_link = repo_file_split[0];
+
+            // get repo latest tag
+            string repo_tag;
+
+            try
+            {
+                Process? git = Process.Start(new ProcessStartInfo("cmd.exe")
+                {
+                    Arguments = $"/C git ls-remote --refs --heads --tags {repo_link}",
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                });
+                if (git == null)
+                {
+                    throw new ArgumentNullException(nameof(git));
+                }
+                if (!git.WaitForExit(10000))
+                {
+                    git.Kill();
+                    throw new InvalidOperationException(nameof(git));
+                }
+                string output = git.StandardOutput.ReadToEnd();
+                string error = git.StandardError.ReadToEnd();
+                if (!string.IsNullOrWhiteSpace(error))
+                {
+                    Console.Error.WriteLine($"{nameof(git)} has error{Environment.NewLine}{error}");
+                }
+                if (string.IsNullOrWhiteSpace(output))
+                {
+                    throw new InvalidOperationException(nameof(output));
+                }
+                repo_tag = output
+                    .TrimEnd([.. Environment.NewLine])
+                    .Split([.. Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)[^1];
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(
+                    $"Cannot get tag{Environment.NewLine}" +
+                    $"{GetExceptionMessage(ex)}");
+                return 1;
+            }
+
+            string[] split_tag = repo_tag.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
+
+            if (split_tag.Length != 2)
+            {
+                Console.Error.WriteLine("Tag is invalid");
+                return 1;
+            }
+
+            string hash_commit = split_tag[0];
+            string tag_name = split_tag[1];
+            tag_name = tag_name[(tag_name.LastIndexOf('/') + 1)..];
+
+            Console.WriteLine($"Latest commit hash: {hash_commit}");
+            Console.WriteLine($"Latest tag: {tag_name}");
+
+            string target_zip_file_name = repo_file_split[1];
+
+            string zip_link = $"{repo_link.Remove(repo_link.LastIndexOf('.'))}/releases/download/{tag_name}/{target_zip_file_name}";
+
             // download ffmpeg zip file
             string target_zip_path = Path.Combine(ffmpeg_directory.FullName, ffmpeg_archive_name);
+
+            Console.WriteLine($"Downloading file {zip_link}");
 
             try
             {
                 using HttpClient httpClient = new();
-                using Task<Stream> streamTask = httpClient.GetStreamAsync(download_link);
+                using Task<Stream> streamTask = httpClient.GetStreamAsync(zip_link);
                 streamTask.Wait();
                 using FileStream fileStream = new(target_zip_path,
                     FileMode.OpenOrCreate);
@@ -138,6 +215,8 @@ namespace FfmpegUpdater
                     ffmpeg_old_path);
             }
             catch { }
+
+            Console.WriteLine($"Extracting file {ffmpeg_executable_name}");
 
             try
             {
