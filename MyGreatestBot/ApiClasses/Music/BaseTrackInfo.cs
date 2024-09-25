@@ -214,16 +214,23 @@ namespace MyGreatestBot.ApiClasses.Music
             int waitMs = Timeout.Infinite,
             CancellationTokenSource? cts = null)
         {
-            Task? audioTask = null;
+            Exception? internalException = null;
+            cts ??= new();
+
+            Task audioTask = Task.Run(() =>
+            {
+                try
+                {
+                    ObtainAudioURLInternal(cts);
+                }
+                catch (Exception ex)
+                {
+                    internalException = ex;
+                }
+            }, cts.Token);
 
             try
             {
-                cts ??= new();
-                audioTask = Task.Run(() =>
-                {
-                    ObtainAudioURLInternal(cts);
-                }, cts.Token);
-
                 if (waitMs > 0)
                 {
                     cts.CancelAfter(waitMs);
@@ -233,6 +240,11 @@ namespace MyGreatestBot.ApiClasses.Music
                 else
                 {
                     audioTask.Wait();
+                }
+
+                if (internalException != null)
+                {
+                    throw internalException;
                 }
             }
             catch

@@ -101,6 +101,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     {
                         Disconnect();
                         WaitForDisconnectionAsync().Wait();
+                        Task.Delay(20).Wait();
+                        Task.Yield().GetAwaiter().GetResult();
                     }
 
                     if (VoiceNext != null

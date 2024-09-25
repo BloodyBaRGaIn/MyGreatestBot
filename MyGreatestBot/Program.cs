@@ -64,11 +64,17 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            ApiManager.Add(LiteDbWrapper.Instance);
+            #region Music APIs
             ApiManager.Add(YoutubeApiWrapper.Instance);
             ApiManager.Add(YandexApiWrapper.Instance);
             ApiManager.Add(VkApiWrapper.Instance);
             ApiManager.Add(SpotifyApiWrapper.Instance);
+            #endregion Music APIs
+
+            #region Services
+            ApiManager.Add(LiteDbWrapper.Instance);
+            #endregion Services
+
             ApiManager.Add(DiscordWrapper.Instance);
 
             ApiManager.InitApis();
