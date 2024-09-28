@@ -242,7 +242,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             try
             {
-                Client.UpdateStatusAsync(activity, status).Wait(timeout);
+                _ = Client.UpdateStatusAsync(activity, status).Wait(timeout);
             }
             catch { }
         }
@@ -372,7 +372,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send($"{eventName} Entry", LogLevel.Debug);
+            handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
             if (!channel_changed)
@@ -380,7 +380,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            handler.Log.Send($"{eventName} ChannelChanged", LogLevel.Debug);
+            handler.Log.Send($"{eventName} {VoiceEventState.ChannelChanged}", LogLevel.Debug);
 
             if (handler.Voice.IsManualDisconnect)
             {
@@ -464,30 +464,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                             handler.LogError.Send("Voice state is illegal");
                         }
                     }
-
-                    //try
-                    //{
-                    //    if (e.After?.Channel is not null)
-                    //    {
-                    //        handler.Voice.IsManualDisconnect = true;
-                    //        await handler.Join(e);
-                    //        await handler.Voice.WaitForConnectionAsync();
-                    //    }
-                    //    else
-                    //    {
-                    //        await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute));
-                    //        handler.Message.Send(new DiscordEmbedBuilder()
-                    //        {
-                    //            Color = DiscordColor.Red,
-                    //            Title = "Kicked from voice channel"
-                    //        });
-                    //        handler.Voice.Disconnect(false);
-                    //    }
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    handler.Log.Send(ex.GetExtendedMessage());
-                    //}
                 }
                 else
                 {
@@ -511,6 +487,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
         {
+            string eventName = nameof(Client.VoiceServerUpdated);
+
             bool isBotTriggered = Client.CurrentUser.Id == client.CurrentUser.Id;
             if (!isBotTriggered)
             {
@@ -523,13 +501,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
+            handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
+
             if (handler.Voice.IsManualDisconnect)
             {
                 await Task.Yield();
                 return;
             }
-
-            string eventName = nameof(Client.VoiceServerUpdated);
 
             handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
 
@@ -673,6 +651,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private enum VoiceEventState
         {
+            Entry,
+            ChannelChanged,
             Start,
             InProgress,
             Busy,

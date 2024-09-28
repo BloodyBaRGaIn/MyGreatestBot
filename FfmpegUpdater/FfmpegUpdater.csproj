@@ -2,10 +2,24 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>..\build\$(MSBuildProjectName)</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <StartupObject>FfmpegUpdater.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup Label="SharedClasses">
+    <Compile Include="..\SharedClasses\*.cs" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Directory.Build.props" Link="Directory.Build.props" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />

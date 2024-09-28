@@ -6,44 +6,31 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <BaseOutputPath>..\build\</BaseOutputPath>
+    <BaseOutputPath>..\build\$(MSBuildProjectName)</BaseOutputPath>
     <StartupObject>MyGreatestBot.Program</StartupObject>
     <RepositoryUrl>https://github.com/BloodyBaRGaIn/MyGreatestBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Platforms>AnyCPU</Platforms>
     <SignAssembly>False</SignAssembly>
-    <AnalysisLevel>latest</AnalysisLevel>
     <ApplicationIcon>Discord_logo.ico</ApplicationIcon>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <IsPublishable>False</IsPublishable>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <WarningLevel>9999</WarningLevel>
-    <DebugType>embedded</DebugType>
-    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <IsPublishable>False</IsPublishable>
+    <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <IsPublishable>False</IsPublishable>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <WarningLevel>9999</WarningLevel>
-    <DebugType>embedded</DebugType>
-    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <IsPublishable>False</IsPublishable>
+    <IsPublishable>True</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,6 +43,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup Label="SharedClasses">
+    <Compile Include="..\SharedClasses\*.cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -107,17 +98,49 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="VkNet" Version="1.77.0-alpha-91" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.4.1" />
+    <PackageReference Include="YoutubeExplode" Version="6.4.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="ffmpeg_binaries\ffmpeg.exe">
+  <ItemGroup Label="BuildProps">
+    <None Include="..\Directory.Build.props" Link="Directory.Build.props" Visible="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /Y /I /C /E &quot;$(ProjectDir)..\Config\*.json&quot; &quot;$(OutDir)Config\&quot; &gt; NUL&#xD;&#xA;xcopy /Y /I /C /E &quot;$(ProjectDir)..\ffmpeg_binaries\ffmpeg.exe&quot; &quot;$(OutDir)ffmpeg_binaries\&quot; &gt; NUL&#xD;&#xA;" />
-  </Target>
+  <ItemGroup Label="FFMPEG">
+    <None Include="..\$(FfmpegDir)\$(FfmpegFileName).exe" Link="$(FfmpegDir)\$(FfmpegFileName).exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Label="Config">
+    <None Include="..\$(ConfigDir)\$(DiscordConfigName).json" Link="$(ConfigDir)\$(DiscordConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(DbNosqlConfigName).json" Link="$(ConfigDir)\$(DbNosqlConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(DbSqlConfigName).json" Link="$(ConfigDir)\$(DbSqlConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(DbSqlServiceConfigName).json" Link="$(ConfigDir)\$(DbSqlServiceConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(GoogleCredentialsConfigName).json" Link="$(ConfigDir)\$(GoogleCredentialsConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(GoogleAppSecretsConfigName).json" Link="$(ConfigDir)\$(GoogleAppSecretsConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(SpotifyCredentialsConfigName).json" Link="$(ConfigDir)\$(SpotifyCredentialsConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(VkCredentialsConfigName).json" Link="$(ConfigDir)\$(VkCredentialsConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\$(ConfigDir)\$(YandexCredentialsConfigName).json" Link="$(ConfigDir)\$(YandexCredentialsConfigName).json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

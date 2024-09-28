@@ -18,38 +18,46 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk API wrapper class
     /// </summary>
-    public sealed class VkApiWrapper : IUrlMusicAPI
+    public sealed partial class VkApiWrapper : IUrlMusicAPI
     {
         private VkApi? _api;
         private readonly VkApiException GenericException = new();
 
         private IAudioCategory Audio => _api?.Audio ?? throw GenericException;
 
-        private static class VkQueryDecomposer
+        private static partial class VkQueryDecomposer
         {
-
-#pragma warning disable SYSLIB1045
-            private static readonly Regex PLAYLIST_RE = new("/music/playlist/([-]?[\\d]+)_([-]?[\\d]+)");
-            private static readonly Regex ALBUM_RE = new("/music/album/([-]?[\\d]+)_([-]?[\\d]+)");
+            private static readonly Regex PlaylistRegex = GeneratePlaylistRegex();
+            private static readonly Regex AlbumRegex = GenerateAlbumRegex();
 
 #pragma warning disable IDE0052
-            private static readonly Regex ARTIST_RE = new("/artist/([\\w\\d\\-._]+)");
-            private static readonly Regex TRACK_RE = new("/audio([-]?[\\d]+)_([-]?[\\d]+)");
+            private static readonly Regex ArtistRegex = GenerateArtistRegex();
+            private static readonly Regex TrackRegex = GenerateTrackRegex();
 #pragma warning restore IDE0052
-
-#pragma warning restore SYSLIB1045
 
             internal static (string? album, string? id) TryGetAlbumId(string query)
             {
-                string?[] strings = ALBUM_RE.GetMatchValue(query, 1, 2);
+                string?[] strings = AlbumRegex.GetMatchValue(query, 1, 2);
                 return (strings[0], strings[1]);
             }
 
             internal static (string? user, string? id) TryGetPlaylistId(string query)
             {
-                string?[] strings = PLAYLIST_RE.GetMatchValue(query, 1, 2);
+                string?[] strings = PlaylistRegex.GetMatchValue(query, 1, 2);
                 return (strings[0], strings[1]);
             }
+
+            [GeneratedRegex("/music/playlist/([-]?[\\d]+)_([-]?[\\d]+)")]
+            private static partial Regex GeneratePlaylistRegex();
+
+            [GeneratedRegex("/music/album/([-]?[\\d]+)_([-]?[\\d]+)")]
+            private static partial Regex GenerateAlbumRegex();
+
+            [GeneratedRegex("/artist/([\\w\\d\\-._]+)")]
+            private static partial Regex GenerateArtistRegex();
+
+            [GeneratedRegex("/audio([-]?[\\d]+)_([-]?[\\d]+)")]
+            private static partial Regex GenerateTrackRegex();
         }
 
         private VkApiWrapper()

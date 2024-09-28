@@ -43,7 +43,7 @@ namespace MyGreatestBot
                 ? $"{projectName} | {nameof(Release)}"
                 : projectName;
 
-            Process.GetCurrentProcess()
+            _ = Process.GetCurrentProcess()
                 .SetHighestAvailableProcessPriority(ProcessPriorityClass.High,
                                                     ProcessPriorityClass.Normal);
 

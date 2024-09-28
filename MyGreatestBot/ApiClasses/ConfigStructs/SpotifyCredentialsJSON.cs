@@ -5,7 +5,7 @@ namespace MyGreatestBot.ApiClasses.ConfigStructs
     /// <summary>
     /// Spotify client secret content
     /// </summary>
-    internal struct SpotifyClientSecretsJSON
+    internal struct SpotifyCredentialsJSON
     {
         [JsonProperty("clientId")]
         public string ClientId { get; private set; }

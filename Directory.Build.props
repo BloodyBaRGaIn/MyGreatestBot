@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+
+    <FfmpegDir>ffmpeg_binaries</FfmpegDir>
+    <FfmpegFileName>ffmpeg</FfmpegFileName>
+    <FfmpegRepoFileName>ffmpeg_repository.txt</FfmpegRepoFileName>
+
+    <ConfigDir>Config</ConfigDir>
+    <DiscordConfigName>config</DiscordConfigName>
+    <DbNosqlConfigName>db_nosql_config</DbNosqlConfigName>
+    <DbSqlConfigName>db_sql_config</DbSqlConfigName>
+    <DbSqlServiceConfigName>db_sql_service_config</DbSqlServiceConfigName>
+    <GoogleCredentialsConfigName>google_cred</GoogleCredentialsConfigName>
+    <GoogleAppSecretsConfigName>google_secret</GoogleAppSecretsConfigName>
+    <SpotifyCredentialsConfigName>spotify_cred</SpotifyCredentialsConfigName>
+    <VkCredentialsConfigName>vk_cred</VkCredentialsConfigName>
+    <YandexCredentialsConfigName>yandex_cred</YandexCredentialsConfigName>
+
+  </PropertyGroup>
+</Project>

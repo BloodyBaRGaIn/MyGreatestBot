@@ -13,7 +13,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify API wrapper class
     /// </summary>
-    public sealed class SpotifyApiWrapper : IUrlMusicAPI
+    public sealed partial class SpotifyApiWrapper : IUrlMusicAPI
     {
         private SpotifyClient? _api;
         private readonly SpotifyApiException GenericException = new();
@@ -23,35 +23,45 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         private IArtistsClient Artists => _api?.Artists ?? throw GenericException;
         private ITracksClient Tracks => _api?.Tracks ?? throw GenericException;
 
-        private static class SpotifyQueryDecomposer
+        private static partial class SpotifyQueryDecomposer
         {
-#pragma warning disable SYSLIB1045
-            private static readonly Regex PLAYLIST_RE = new("/playlist/([^/?]+)");
-            private static readonly Regex ALBUM_RE = new("/album/([^/?]+)");
-            private static readonly Regex ARTIST_RE = new("/artist/([^/?]+)");
-            private static readonly Regex TRACK_RE = new("/track/([^/?]+)");
-#pragma warning restore SYSLIB1045
+            private static readonly Regex PlaylistRegex = GeneratePlaylistRegex();
+            private static readonly Regex AlbumRegex = GenerateAlbumRegex();
+            private static readonly Regex ArtistRegex = GenerateArtistRegex();
+            private static readonly Regex TrackRegex = GenerateTrackRegex();
 
             internal static string? TryGetPlaylistId(string query)
             {
-                return PLAYLIST_RE.GetMatchValue(query);
+                return PlaylistRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetAlbumId(string query)
             {
-                return ALBUM_RE.GetMatchValue(query);
+                return AlbumRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetArtistId(string query)
             {
-                return ARTIST_RE.GetMatchValue(query);
+                return ArtistRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetTrackId(string query, int time = 0)
             {
                 _ = time;
-                return TRACK_RE.GetMatchValue(query);
+                return TrackRegex.GetMatchValue(query);
             }
+
+            [GeneratedRegex("/playlist/([^/?]+)")]
+            private static partial Regex GeneratePlaylistRegex();
+
+            [GeneratedRegex("/album/([^/?]+)")]
+            private static partial Regex GenerateAlbumRegex();
+
+            [GeneratedRegex("/artist/([^/?]+)")]
+            private static partial Regex GenerateArtistRegex();
+
+            [GeneratedRegex("/track/([^/?]+)")]
+            private static partial Regex GenerateTrackRegex();
         }
 
         private SpotifyApiWrapper()
@@ -68,7 +78,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
 
         void IAPI.PerformAuth()
         {
-            SpotifyClientSecretsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
+            SpotifyCredentialsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
             SpotifyClientConfig config = SpotifyClientConfig.CreateDefault().WithAuthenticator(
                 new ClientCredentialsAuthenticator(

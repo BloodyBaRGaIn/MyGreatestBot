@@ -170,40 +170,43 @@ namespace MyGreatestBot.ApiClasses.Music
                 prefix = "Blank prefix";
             }
 
-            string result = $"{prefix}: ";
+            string caption = $"{prefix}: ";
 
             if (shortMessage)
             {
-                result += $"{Title} by " +
+                caption += $"{Title} by " +
                     $"{string.Join(", ", ArtistArr.Select(static a => a.Title))}";
 
-                return result;
+                return caption;
             }
 
-            result += $"{TrackName}{Environment.NewLine}Author: " +
-                $"{string.Join(", ", ArtistArr.Select(static a => a.ToString()))}";
+            caption += $"{TrackName}";
 
-            if (!IsLiveStream)
-            {
-                result += $"{Environment.NewLine}Duration: {Duration.GetCustomTime()}";
-            }
+            string authors = $"Author: {string.Join(", ", ArtistArr.Select(static a => a.ToString()))}";
 
-            if (!string.IsNullOrWhiteSpace(AlbumName?.Title))
-            {
-                result += $"{Environment.NewLine}Album: {AlbumName}";
-            }
+            string album = string.IsNullOrWhiteSpace(AlbumName?.Title)
+                ? string.Empty
+                : $"Album: {AlbumName}";
 
-            if (!string.IsNullOrWhiteSpace(PlaylistName?.Title))
-            {
-                result += $"{Environment.NewLine}Playlist: {PlaylistName}";
-            }
+            string playlist = string.IsNullOrWhiteSpace(PlaylistName?.Title)
+                ? string.Empty
+                : $"Playlist: {PlaylistName}";
 
-            if (TimePosition != TimeSpan.Zero)
-            {
-                result += $"{Environment.NewLine}Time: {TimePosition.GetCustomTime()}";
-            }
+            string duration = IsLiveStream
+                ? string.Empty
+                : $"Duration: {Duration.GetCustomTime()}";
 
-            return result;
+            string time = TimePosition == TimeSpan.Zero
+                ? string.Empty
+                : $"Time: {TimePosition.GetCustomTime()}";
+
+            return string.Join(Environment.NewLine,
+                caption,
+                authors,
+                album,
+                playlist,
+                duration,
+                time);
         }
 
         /// <summary>

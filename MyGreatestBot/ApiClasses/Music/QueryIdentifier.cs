@@ -5,19 +5,20 @@ using System.Text.RegularExpressions;
 
 namespace MyGreatestBot.ApiClasses.Music
 {
-    public static class QueryIdentifier
+    public static partial class QueryIdentifier
     {
-#pragma warning disable SYSLIB1045
-        // regular Youtube link
-        private static readonly Regex YOUTUBE_RE = new("^((http([s])?://)?((www|m)\\.)?(youtube\\.([\\w])+)/)");
-        // reduced Youtube link
-        private static readonly Regex YOUTUBE_REDUCED_RE = new("^((http([s])?://)?((www|m)\\.)?youtu\\.be/)");
-        private static readonly Regex YANDEX_RE = new("^((http([s])?://)?music\\.yandex\\.([\\w])+/)");
-        private static readonly Regex VK_RE = new("^((http([s])?://)?((www|m)\\.)?vk\\.com/)");
-        private static readonly Regex SPOTIFY_RE = new("^((http([s])?://)?open\\.spotify\\.com/)");
+        // Youtube link regular expression
+        private static readonly Regex YoutubeRegex = GenerateYoutubeRegex();
+        // Youtube reduced link regular expression
+        private static readonly Regex YoutubeReducedRegex = GenerateToutubeReducedRegex();
+        // Yandex link regular expression
+        private static readonly Regex YandexRegex = GenerateYandexRegex();
+        // Vk link regular expression
+        private static readonly Regex VkRegex = GenerateVkRegex();
+        // Spotify link regular expression
+        private static readonly Regex SpotifyRegex = GenerateSpotifyRegex();
         // generic search query
-        private static readonly Regex GENERIC_RE = new("((\\s)|(\\S))+");
-#pragma warning restore SYSLIB1045
+        private static readonly Regex GenericRegex = GenerateCommonRegex();
 
         public static IEnumerable<BaseTrackInfo>? GetTracks(string query)
         {
@@ -102,28 +103,46 @@ namespace MyGreatestBot.ApiClasses.Music
                 new TracksReceiver(
                     YoutubeApiWrapper.UrlMusicInstance,
                     YoutubeApiWrapper.UrlMusicInstance.GetTracksFromUrl,
-                    YOUTUBE_RE, YOUTUBE_REDUCED_RE),
+                    YoutubeRegex, YoutubeReducedRegex),
 
                 new TracksReceiver(
                     YandexApiWrapper.UrlMusicInstance,
                     YandexApiWrapper.UrlMusicInstance.GetTracksFromUrl,
-                    YANDEX_RE),
+                    YandexRegex),
 
                 new TracksReceiver(
                     VkApiWrapper.UrlMusicInstance,
                     VkApiWrapper.UrlMusicInstance.GetTracksFromUrl,
-                    VK_RE),
+                    VkRegex),
 
                 new TracksReceiver(
                     SpotifyApiWrapper.UrlMusicInstance,
                     SpotifyApiWrapper.UrlMusicInstance.GetTracksFromUrl,
-                    SPOTIFY_RE),
+                    SpotifyRegex),
 
                 new TracksReceiver(
                     YoutubeApiWrapper.TextMusicInstance,
                     YoutubeApiWrapper.TextMusicInstance.GetTracksFromPlainText,
-                    GENERIC_RE)
+                    GenericRegex)
             ];
         }
+
+        [GeneratedRegex("^((http([s])?://)?((www|m)\\.)?(youtube\\.([\\w])+)/)")]
+        private static partial Regex GenerateYoutubeRegex();
+
+        [GeneratedRegex("^((http([s])?://)?((www|m)\\.)?youtu\\.be/)")]
+        private static partial Regex GenerateToutubeReducedRegex();
+
+        [GeneratedRegex("^((http([s])?://)?music\\.yandex\\.([\\w])+/)")]
+        private static partial Regex GenerateYandexRegex();
+
+        [GeneratedRegex("^((http([s])?://)?((www|m)\\.)?vk\\.com/)")]
+        private static partial Regex GenerateVkRegex();
+
+        [GeneratedRegex("^((http([s])?://)?open\\.spotify\\.com/)")]
+        private static partial Regex GenerateSpotifyRegex();
+
+        [GeneratedRegex("((\\s)|(\\S))+")]
+        private static partial Regex GenerateCommonRegex();
     }
 }

@@ -14,12 +14,12 @@ namespace MyGreatestBot.ApiClasses
     /// </summary>
     public static class ApiManager
     {
-        private static readonly Dictionary<ApiIntents, IAPI?> ApiCollection = [];
+        private static readonly Dictionary<ApiIntents, IAPI> ApiCollection = [];
 
         private static ApiIntents InitIntents { get; set; } = ApiIntents.None;
         private static ApiIntents FailedIntents { get; set; } = ApiIntents.None;
         private static ApiIntents EssentialFailedIntents { get; set; } = ApiIntents.None;
-        private static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate((a, b) => a | b);
+        private static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate(static (a, b) => a | b);
 
         public static bool IsAnyEssentialApiFailed => EssentialFailedIntents != ApiIntents.None;
         public static bool IsAnyApiFailed => FailedIntents != ApiIntents.None;
@@ -28,12 +28,14 @@ namespace MyGreatestBot.ApiClasses
         {
             Success,
             Failed,
+            Deinit,
             InitSkip,
             DeinitSkip
         }
 
         public static void Add([DisallowNull] IAPI api)
         {
+            ArgumentNullException.ThrowIfNull(api, nameof(api));
             ApiCollection.Add(api.ApiType, api);
         }
 
@@ -59,12 +61,31 @@ namespace MyGreatestBot.ApiClasses
                 YoutubeExplodeBypass.Bypass();
             }
 
-            foreach (IAPI? api in ApiCollection.Values)
+            static void InternalInitAction(IAPI api)
             {
-                if (api != null)
+                Init(api);
+            }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Optional APIs init", LogLevel.Debug);
+            ParallelApiAction(InternalInitAction, static api => !api.IsEssential);
+            DiscordWrapper.CurrentDomainLogHandler.Send("Essential APIs init", LogLevel.Debug);
+            ParallelApiAction(InternalInitAction, static api => api.IsEssential);
+        }
+
+        private static void ParallelApiAction(Action<IAPI> action, Predicate<IAPI>? predicate = null)
+        {
+            ParallelLoopResult result = Parallel.ForEach(
+                ApiCollection.Values, api =>
+            {
+                if (api != null && (predicate?.Invoke(api) ?? true))
                 {
-                    Init(api);
+                    action(api);
                 }
+            });
+
+            while (!result.IsCompleted)
+            {
+                Task.Delay(10).Wait();
             }
         }
 
@@ -136,18 +157,15 @@ namespace MyGreatestBot.ApiClasses
         {
             intents &= InitIntents;
 
-            ParallelLoopResult loopResult = Parallel.ForEach(ApiCollection.Values, api =>
+            void LocalDeinitAction(IAPI api)
             {
-                if (api != null)
-                {
-                    Deinit(intents, api, 1);
-                }
-            });
-
-            while (!loopResult.IsCompleted)
-            {
-                Task.Delay(1).Wait();
+                Deinit(intents, api, 1);
             }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Optional APIs deinit", LogLevel.Debug);
+            ParallelApiAction(LocalDeinitAction, static api => !api.IsEssential);
+            DiscordWrapper.CurrentDomainLogHandler.Send("Essential APIs deinit", LogLevel.Debug);
+            ParallelApiAction(LocalDeinitAction, static api => api.IsEssential);
         }
 
         private static void Deinit(ApiIntents allowed, IAPI desired, int delay = 500)
@@ -169,6 +187,8 @@ namespace MyGreatestBot.ApiClasses
             try
             {
                 desired.Logout();
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                    GetApiStatusString(desired.ApiType, ApiStatus.Deinit));
             }
             catch { }
             finally
@@ -181,13 +201,12 @@ namespace MyGreatestBot.ApiClasses
         {
             intents &= InitIntents;
 
-            foreach (IAPI? api in ApiCollection.Values)
+            void InternalReloadAction(IAPI api)
             {
-                if (api != null)
-                {
-                    Reload(intents, api);
-                }
+                Reload(intents, api);
             }
+
+            ParallelApiAction(InternalReloadAction);
         }
 
         public static void ReloadFailedApis()
@@ -270,14 +289,13 @@ namespace MyGreatestBot.ApiClasses
             {
                 return string.Join(
                 Environment.NewLine,
-                    ApiCollection
-                    .Where(record => record.Value != null && !record.Value.IsEssential)
-                    .Select(record => record.Key)
-                    .Where(IsApiRegisterdAndAllowed)
-                    .Select(intents =>
-                        GetApiStatusString(intents, IsApiFailed(intents)
-                                                    ? ApiStatus.Failed
-                                                    : ApiStatus.Success))
+                    ApiCollection.Where(static record => record.Value != null && !record.Value.IsEssential)
+                                 .Select(static record => record.Key)
+                                 .Where(IsApiRegisterdAndAllowed)
+                                 .Select(static intents =>
+                                    GetApiStatusString(intents, IsApiFailed(intents)
+                                        ? ApiStatus.Failed
+                                        : ApiStatus.Success))
                     );
             }
             catch

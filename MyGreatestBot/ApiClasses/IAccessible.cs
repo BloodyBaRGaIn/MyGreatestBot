@@ -20,7 +20,7 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Collection of API domain URLs
         /// </summary>
-        DomainCollection Domains { get; }
+        public DomainCollection Domains { get; }
 
         /// <summary>
         /// Try HTTP request to domain URLs.<br/>

@@ -26,6 +26,7 @@ namespace MyGreatestBot.Player
         private static readonly TimeSpan MinTrackDuration = TimeSpan.FromSeconds(3);
 
         internal static int TransmitSinkDelay => TRANSMIT_SINK_MS;
+        internal static int BufferSize => BUFFER_SIZE * 2;
 
         internal static Semaphore DbSemaphore { get; } = new(1, 1);
 
@@ -67,7 +68,7 @@ namespace MyGreatestBot.Player
 
         private readonly Queue<BaseTrackInfo?> tracksQueue = new();
 
-        private readonly byte[] PlayerByteBuffer = new byte[BUFFER_SIZE * 2];
+        private readonly byte[] PlayerByteBuffer = new byte[BufferSize];
 
         private readonly object queueLock = new();
         private readonly object trackLock = new();
@@ -92,10 +93,7 @@ namespace MyGreatestBot.Player
                 MainPlayerTask = Task.Factory.StartNew(PlayerTaskFunction, MainPlayerCancellationToken);
                 if (!FFMPEG.CheckForExecutableExists())
                 {
-                    throw new FileNotFoundException(
-                        string.Join(Environment.NewLine,
-                            $"{nameof(FFMPEG)} executable file not found",
-                            "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"));
+                    throw new FileNotFoundException($"{nameof(FFMPEG)} executable file not found");
                 }
             }
             catch (Exception ex)

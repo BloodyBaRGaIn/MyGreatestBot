@@ -24,48 +24,61 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// <summary>
     /// Yandex API wrapper class
     /// </summary>
-    public sealed class YandexApiWrapper : IRadioMusicAPI, IUrlMusicAPI
+    public sealed partial class YandexApiWrapper : IRadioMusicAPI, IUrlMusicAPI
     {
         private YandexMusicClient? _client;
         private readonly YandexApiException GenericException = new();
 
         private YandexMusicClient Client => _client ?? throw GenericException;
 
-        private static class YandexQueryDecomposer
+        private static partial class YandexQueryDecomposer
         {
-#pragma warning disable SYSLIB1045
-            private static readonly Regex TRACK_RE = new("/track/([^/?]+)");
-            private static readonly Regex ALBUM_RE = new("/album/([^/?]+)");
-            private static readonly Regex ARTIST_RE = new("/artist/([^/?]+)");
-            private static readonly Regex PLAYLIST_RE = new("/users/([^/?]+)/playlists/([^/?]+)");
-            private static readonly Regex CHART_RE = new("/chart");
-#pragma warning restore SYSLIB1045
+            private static readonly Regex TrackRegex = GenerateTrackRegex();
+            private static readonly Regex AlbumRegex = GenerateAlbumRegex();
+            private static readonly Regex ArtistRegex = GenerateArtistRegex();
+            private static readonly Regex PlaylistRegex = GeneratePlaylistRegex();
+            private static readonly Regex ChartRegex = GenerateChartRegex();
 
             internal static string? TryGetTrackId(string query)
             {
-                return TRACK_RE.GetMatchValue(query);
+                return TrackRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetAlbumId(string query)
             {
-                return ALBUM_RE.GetMatchValue(query);
+                return AlbumRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetArtistId(string query)
             {
-                return ARTIST_RE.GetMatchValue(query);
+                return ArtistRegex.GetMatchValue(query);
             }
 
             internal static (string? user, string? kind) TryGetPlaylistId(string query)
             {
-                string?[] strings = PLAYLIST_RE.GetMatchValue(query, 1, 2);
+                string?[] strings = PlaylistRegex.GetMatchValue(query, 1, 2);
                 return (strings[0], strings[1]);
             }
 
             internal static bool TryGetAsChart(string query)
             {
-                return CHART_RE.IsMatch(query);
+                return ChartRegex.IsMatch(query);
             }
+
+            [GeneratedRegex("/track/([^/?]+)")]
+            private static partial Regex GenerateTrackRegex();
+
+            [GeneratedRegex("/album/([^/?]+)")]
+            private static partial Regex GenerateAlbumRegex();
+
+            [GeneratedRegex("/artist/([^/?]+)")]
+            private static partial Regex GenerateArtistRegex();
+
+            [GeneratedRegex("/users/([^/?]+)/playlists/([^/?]+)")]
+            private static partial Regex GeneratePlaylistRegex();
+
+            [GeneratedRegex("/chart")]
+            private static partial Regex GenerateChartRegex();
         }
 
         private YandexApiWrapper()
@@ -95,9 +108,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                Task.Delay(1000).Wait();
                 _ = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
-                Task.Delay(1000).Wait();
+                Task.Delay(500).Wait();
                 _ = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
             }
             catch (Exception ex)

@@ -10,17 +10,17 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// API flag
         /// </summary>
-        ApiIntents ApiType { get; }
+        public ApiIntents ApiType { get; }
 
         /// <summary>
         /// Is API essential for bot running
         /// </summary>
-        virtual bool IsEssential => false;
+        public virtual bool IsEssential => false;
 
         /// <summary>
         /// Performs log in
         /// </summary>
-        virtual void PerformAuth()
+        public virtual void PerformAuth()
         {
 
         }
@@ -28,7 +28,7 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Performs log out
         /// </summary>
-        virtual void Logout()
+        public virtual void Logout()
         {
 
         }

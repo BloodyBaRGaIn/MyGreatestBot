@@ -8,34 +8,30 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A9F1ADC5-7B32-4B3E-BCCE-9EEE1BDF5A08}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FfmpegUpdater", "FfmpegUpdater\FfmpegUpdater.csproj", "{2C967D89-AA2B-42F8-A30E-FD624D9617D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FfmpegUpdater", "FfmpegUpdater\FfmpegUpdater.csproj", "{2C967D89-AA2B-42F8-A30E-FD624D9617D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedClasses", "SharedClasses", "{F78EA1CC-9058-4F41-8173-4FE49D2A007F}"
+	ProjectSection(SolutionItems) = preProject
+		SharedClasses\BuildPropsProvider.cs = SharedClasses\BuildPropsProvider.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Debug|x86.ActiveCfg = Debug|x86
-		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Debug|x86.Build.0 = Debug|x86
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|x86.ActiveCfg = Release|x86
-		{74FE634C-4EDA-4310-B2F6-AB1B0CD8978A}.Release|x86.Build.0 = Release|x86
 		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Debug|x86.Build.0 = Debug|Any CPU
 		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Release|x86.ActiveCfg = Release|Any CPU
-		{2C967D89-AA2B-42F8-A30E-FD624D9617D2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

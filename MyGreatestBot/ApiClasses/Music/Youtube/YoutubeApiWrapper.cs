@@ -1,6 +1,7 @@
 ﻿global using YoutubeApiWrapper = MyGreatestBot.ApiClasses.Music.Youtube.YoutubeApiWrapper;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
+using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using MyGreatestBot.ApiClasses.ConfigStructs;
 using MyGreatestBot.ApiClasses.Utils;
@@ -9,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +27,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube API wrapper class
     /// </summary>
-    public sealed class YoutubeApiWrapper : ITextMusicAPI, IUrlMusicAPI, ISearchMusicAPI
+    public sealed partial class YoutubeApiWrapper : ITextMusicAPI, IUrlMusicAPI, ISearchMusicAPI
     {
         private YoutubeClient? api;
         private readonly YoutubeApiException GenericException = new();
@@ -34,34 +37,44 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         private PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
         private SearchClient Search => api?.Search ?? throw GenericException;
 
-        private static class YoutubeQueryDecomposer
+        private static partial class YoutubeQueryDecomposer
         {
-#pragma warning disable SYSLIB1045
-            private static readonly Regex VIDEO_RE = new("/watch\\?v=([^&]+)");
-            private static readonly Regex PLAYLIST_RE = new("[&?]list=([^&]+)");
-            private static readonly Regex REDUCED_RE = new("youtu\\.be/([^?]+)");
-            private static readonly Regex TIMING_RE = new("[&?]t=([\\d]+)");
-#pragma warning restore SYSLIB1045
+            private static readonly Regex VideoRegex = GenerateVideoRegex();
+            private static readonly Regex ReducedVideoRegex = GenerateReducedVideoRegex();
+            private static readonly Regex PlaylistRegex = GeneratePlaylistRegex();
+            private static readonly Regex TimingRegex = GenerateTimingRegex();
 
             internal static string? TryGetPlaylistId(string query)
             {
-                return PLAYLIST_RE.GetMatchValue(query);
+                return PlaylistRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetVideoId(string query)
             {
-                return VIDEO_RE.GetMatchValue(query);
+                return VideoRegex.GetMatchValue(query);
             }
 
             internal static string? TryGetReducedId(string query)
             {
-                return REDUCED_RE.GetMatchValue(query);
+                return ReducedVideoRegex.GetMatchValue(query);
             }
 
             internal static string? GetTiming(string query)
             {
-                return TIMING_RE.GetMatchValue(query);
+                return TimingRegex.GetMatchValue(query);
             }
+
+            [GeneratedRegex("/watch\\?v=([^&]+)")]
+            private static partial Regex GenerateVideoRegex();
+
+            [GeneratedRegex("youtu\\.be/([^?]+)")]
+            private static partial Regex GenerateReducedVideoRegex();
+
+            [GeneratedRegex("[&?]list=([^&]+)")]
+            private static partial Regex GeneratePlaylistRegex();
+
+            [GeneratedRegex("[&?]t=([\\d]+)")]
+            private static partial Regex GenerateTimingRegex();
         }
 
         private YoutubeApiWrapper()
@@ -82,7 +95,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
             FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
-            _ = GoogleWebAuthorizationBroker.AuthorizeAsync(
+            UserCredential credentials = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets: GoogleClientSecrets.FromStream(fileStream).Secrets,
                 scopes: [YouTubeService.Scope.YoutubeReadonly],
                 user: user.Username,
@@ -91,10 +104,16 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             YouTubeService GoogleService = new(new BaseClientService.Initializer()
             {
                 ApiKey = user.Key,
-                ApplicationName = typeof(YoutubeApiWrapper).Name
+                ApplicationName = "API Youtube key"
             });
 
-            api = new(GoogleService.HttpClient);
+            HttpClient httpClient = GoogleService.HttpClient;
+
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                credentials.Token.TokenType,
+                credentials.Token.IdToken);
+
+            api = new(httpClient);
         }
 
         void IAPI.Logout()

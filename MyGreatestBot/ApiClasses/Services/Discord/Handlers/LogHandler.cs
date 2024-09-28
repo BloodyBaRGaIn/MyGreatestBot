@@ -55,7 +55,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             bool ready;
             try
             {
-                ready = semaphore.TryWaitOne(logDelay);
+                ready = semaphore.WaitOne(logDelay);
             }
             catch
             {
@@ -121,9 +121,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
             disposed = true;
             Semaphore semaphore = semaphoreDictionary[writer];
-            if (!(disposing ^ (semaphore == consoleSemaphore)))
+            if (disposing || semaphore != consoleSemaphore)
             {
-                _ = semaphore.TryRelease();
+                semaphore.TryDispose();
             }
         }
 
