@@ -184,29 +184,25 @@ namespace MyGreatestBot.ApiClasses.Music
 
             string authors = $"Author: {string.Join(", ", ArtistArr.Select(static a => a.ToString()))}";
 
-            string album = string.IsNullOrWhiteSpace(AlbumName?.Title)
-                ? string.Empty
+            string? album = string.IsNullOrWhiteSpace(AlbumName?.Title)
+                ? null
                 : $"Album: {AlbumName}";
 
-            string playlist = string.IsNullOrWhiteSpace(PlaylistName?.Title)
-                ? string.Empty
+            string? playlist = string.IsNullOrWhiteSpace(PlaylistName?.Title)
+                ? null
                 : $"Playlist: {PlaylistName}";
 
-            string duration = IsLiveStream
-                ? string.Empty
+            string? duration = IsLiveStream
+                ? null
                 : $"Duration: {Duration.GetCustomTime()}";
 
-            string time = TimePosition == TimeSpan.Zero
-                ? string.Empty
+            string? time = TimePosition == TimeSpan.Zero
+                ? null
                 : $"Time: {TimePosition.GetCustomTime()}";
 
             return string.Join(Environment.NewLine,
-                caption,
-                authors,
-                album,
-                playlist,
-                duration,
-                time);
+                               StringExtensions.EnsureStrings(
+                                   caption, authors, album, playlist, duration, time));
         }
 
         /// <summary>

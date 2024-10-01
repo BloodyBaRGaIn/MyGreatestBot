@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace MyGreatestBot.Extensions
 {
@@ -24,6 +26,21 @@ namespace MyGreatestBot.Extensions
             return string.IsNullOrEmpty(input)
                 ? string.Empty
                 : $"{char.ToUpperInvariant(input[0])}{input[1..]}";
+        }
+
+        public static IEnumerable<string> EnsureStrings(params string?[] strings)
+        {
+            if (strings == null || strings.Length == 0)
+            {
+                yield break;
+            }
+            foreach (string? value in strings)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    yield return value;
+                }
+            }
         }
 
         public static string EnsureIdentifier(this string? input)
