@@ -17,20 +17,21 @@ namespace MyGreatestBot.Commands.Utils
         /// <summary>
         /// Creates a Github markdown file that contains all registered commands
         /// </summary>
-        public static void GenerateFile()
+        public static void GenerateFile(MarkdownType mdType = MarkdownType.Github)
         {
             using FileStream markdown = File.Open(FilePath, FileMode.Create, FileAccess.Write);
             using StreamWriter streamWriter = new(markdown);
 
             streamWriter.Write($"# Commands{Environment.NewLine}{Environment.NewLine}");
             streamWriter.Write($"Commands are organized into categories for better readability{Environment.NewLine}");
+            streamWriter.Write($"Default command prefix is {DiscordWrapper.DefaultPrefix}{Environment.NewLine}");
 
             if (DiscordWrapper.Commands == null)
             {
                 return;
             }
 
-            foreach (string item in GetFullCommandsString(MarkdownType.Github))
+            foreach (string item in GetFullCommandsString(mdType))
             {
                 streamWriter.Write(item);
             }
@@ -72,7 +73,7 @@ namespace MyGreatestBot.Commands.Utils
         {
             string result = string.Empty;
 
-            result += $"- ```{command.Name}";
+            result += $"```{Environment.NewLine}{command.Name}";
             if (command.Aliases.Any())
             {
                 result += $" ({string.Join(", ", command.Aliases)})";
@@ -83,42 +84,51 @@ namespace MyGreatestBot.Commands.Utils
                 result += $" - {command.Description}";
             }
 
-            result += $"```  {Environment.NewLine}";
-
-            CommandOverload overload = command.Overloads[0];
-            if (!overload.Arguments.Any())
-            {
-                return result;
-            }
-
-            result += $"    Arguments:{Environment.NewLine}";
+            result += Environment.NewLine;
 
             string pad = GetListPad(1, mdType);
 
-            foreach (CommandArgument argument in overload.Arguments)
+            IReadOnlyList<CommandArgument> arguments = command.Overloads[0].Arguments;
+
+            if (arguments.Any())
             {
-                result += $"{pad}- ```{argument.Name} ({argument.Type.Name})";
-                if (!string.IsNullOrWhiteSpace(argument.Description))
+                result += $"Arguments:{Environment.NewLine}";
+
+                foreach (CommandArgument argument in arguments)
                 {
-                    string[] split = argument.Description.Split(Environment.NewLine);
-
-                    result += " - ";
-
-                    for (int i = 0; i < split.Length; i++)
+                    result += $"{pad}{argument.Name} ({argument.Type.Name})";
+                    if (!string.IsNullOrWhiteSpace(argument.Description))
                     {
-                        result += split[i].Replace("\t", pad);
-                        if (i < split.Length - 1)
+                        string[] split = argument.Description.Split(Environment.NewLine);
+
+                        result += " - ";
+
+                        for (int i = 0; i < split.Length; i++)
                         {
-                            result += Environment.NewLine;
+                            result += split[i].Replace("\t", pad);
+                            if (i < split.Length - 1)
+                            {
+                                result += Environment.NewLine;
+                            }
                         }
                     }
+                    if (argument.IsOptional)
+                    {
+                        result += " (optional)";
+                    }
+                    result += $"{Environment.NewLine}";
                 }
-                if (argument.IsOptional)
-                {
-                    result += " (optional)";
-                }
-                result += $"```  {Environment.NewLine}";
             }
+
+            if (command.CustomAttributes
+                .FirstOrDefault(static attr => attr.GetType() == typeof(ExampleAttribute)) is ExampleAttribute example
+                && !string.IsNullOrWhiteSpace(example.Example))
+            {
+                result += $"Examples:{Environment.NewLine}";
+                result += $"{pad}{example.Example}{Environment.NewLine}";
+            }
+
+            result += $"```{Environment.NewLine}";
 
             return result;
         }

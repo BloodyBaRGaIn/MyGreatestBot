@@ -14,6 +14,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
     /// </summary>
     public static class DiscordWrapper
     {
+        /// <summary>
+        /// Default bot's command prefix
+        /// </summary>
+        public const string DefaultPrefix = "d!";
+
         public const int DefaultConnectionTimeout = 10000;
         public const int DefaultDisconnectionTimeout = 500;
 

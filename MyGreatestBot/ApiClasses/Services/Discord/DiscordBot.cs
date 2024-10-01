@@ -51,11 +51,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
         /// <summary>
-        /// Default bot's command prefix
-        /// </summary>
-        private const string DefaultPrefix = "d!";
-
-        /// <summary>
         /// Actual bot's command prefix
         /// </summary>
         private string CommandPrefix = string.Empty;
@@ -63,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private volatile bool exitRequest;
 
         private string OnlineActivityName =>
-            $"{(string.IsNullOrWhiteSpace(CommandPrefix) ? DefaultPrefix : CommandPrefix)}{CommandStrings.HelpCommandName}";
+            $"{(string.IsNullOrWhiteSpace(CommandPrefix) ? DiscordWrapper.DefaultPrefix : CommandPrefix)}{CommandStrings.HelpCommandName}";
         private ActivityType OnlineActivityType { get; } = ActivityType.ListeningTo;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
@@ -104,7 +99,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             if (string.IsNullOrWhiteSpace(CommandPrefix))
             {
-                CommandPrefix = DefaultPrefix;
+                CommandPrefix = DiscordWrapper.DefaultPrefix;
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send("Command prefix set to its default value", LogLevel.Warning);
             }
 
