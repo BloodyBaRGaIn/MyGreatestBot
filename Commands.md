@@ -1,7 +1,7 @@
 # Commands
 
-Commands are organized into categories for better readability
-Default command prefix is d!
+Commands are organized into categories for better readability  
+Default command prefix is d!  
 
 ## Connection commands
 

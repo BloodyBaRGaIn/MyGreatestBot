@@ -23,8 +23,8 @@ namespace MyGreatestBot.Commands.Utils
             using StreamWriter streamWriter = new(markdown);
 
             streamWriter.Write($"# Commands{Environment.NewLine}{Environment.NewLine}");
-            streamWriter.Write($"Commands are organized into categories for better readability{Environment.NewLine}");
-            streamWriter.Write($"Default command prefix is {DiscordWrapper.DefaultPrefix}{Environment.NewLine}");
+            streamWriter.Write($"Commands are organized into categories for better readability  {Environment.NewLine}");
+            streamWriter.Write($"Default command prefix is {DiscordWrapper.DefaultPrefix}  {Environment.NewLine}");
 
             if (DiscordWrapper.Commands == null)
             {
