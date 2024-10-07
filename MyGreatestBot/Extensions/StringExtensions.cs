@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyGreatestBot.Extensions
 {
@@ -26,6 +26,11 @@ namespace MyGreatestBot.Extensions
             return string.IsNullOrEmpty(input)
                 ? string.Empty
                 : $"{char.ToUpperInvariant(input[0])}{input[1..]}";
+        }
+
+        public static IEnumerable<string> EnsureStrings(IEnumerable<string?> input)
+        {
+            return EnsureStrings(input.ToArray());
         }
 
         public static IEnumerable<string> EnsureStrings(params string?[] strings)

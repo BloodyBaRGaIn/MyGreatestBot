@@ -1,4 +1,5 @@
-﻿using MyGreatestBot.ApiClasses.Music;
+﻿using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,14 @@ namespace MyGreatestBot.Player
         /// </summary>
         private sealed class FFMPEG : IDisposable
         {
-            internal const string FFMPEG_PATH = "ffmpeg_binaries/ffmpeg.exe";
+            private const string FfmpegFileNameKey = "FfmpegFileName";
+
+            private static readonly FfmpegDescriptor FfmpegDescriptor;
+
+            static FFMPEG()
+            {
+                FfmpegDescriptor = new(FfmpegFileNameKey);
+            }
 
             private static float VolumeRatio { get; } = 0.25f;
             private static uint FrequencyHz { get; } = 48000;
@@ -109,7 +117,7 @@ namespace MyGreatestBot.Player
             /// </returns>
             internal static bool CheckForExecutableExists()
             {
-                return File.Exists(FFMPEG_PATH);
+                return File.Exists(FfmpegDescriptor.FullPath);
             }
 
             /// <summary>
@@ -127,7 +135,7 @@ namespace MyGreatestBot.Player
 
                 Process process = Process.Start(new ProcessStartInfo()
                 {
-                    FileName = FFMPEG_PATH,
+                    FileName = FfmpegDescriptor.FullPath,
                     Arguments = GetTrackArguments(track),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,

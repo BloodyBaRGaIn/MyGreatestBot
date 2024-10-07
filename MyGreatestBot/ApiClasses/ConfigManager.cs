@@ -1,8 +1,6 @@
 ﻿using MyGreatestBot.ApiClasses.ConfigStructs;
 using Newtonsoft.Json;
-using SharedClasses;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace MyGreatestBot.ApiClasses
@@ -12,7 +10,7 @@ namespace MyGreatestBot.ApiClasses
     /// </summary>
     internal static class ConfigManager
     {
-        private const string ConfigDirKey = "ConfigDir";
+        
         private const string DiscordConfigNameKey = "DiscordConfigName";
         private const string DbNosqlConfigNameKey = "DbNosqlConfigName";
         private const string DbSqlConfigNameKey = "DbSqlConfigName";
@@ -23,53 +21,27 @@ namespace MyGreatestBot.ApiClasses
         private const string VkCredentialsConfigNameKey = "VkCredentialsConfigName";
         private const string YandexCredentialsConfigNameKey = "YandexCredentialsConfigName";
 
-        private static readonly Dictionary<string, string> propertiesDictionary;
-
-        private static readonly string ConfigDir;
-
-        private class ConfigDescriptor(string name)
-        {
-            private const string ConfigExtension = "json";
-
-            public string FullName { get; } = $"{name}.{ConfigExtension}";
-
-            public string Path => System.IO.Path.Combine(ConfigDir, FullName);
-
-            public ConfigDescriptor(Dictionary<string, string> props, string key) : this($"{props[key]}")
-            {
-
-            }
-        }
-
-        private static readonly ConfigDescriptor DiscordConfigDescriptor;
-        private static readonly ConfigDescriptor DbNosqlConfigDescriptor;
-        private static readonly ConfigDescriptor DbSqlConfigDescriptor;
-        private static readonly ConfigDescriptor DbSqlServiceConfigDescriptor;
-        private static readonly ConfigDescriptor GoogleCredentialsConfigDescriptor;
-        private static readonly ConfigDescriptor GoogleAppSecretsConfigDescriptor;
-        private static readonly ConfigDescriptor SpotifyCredentialsConfigDescriptor;
-        private static readonly ConfigDescriptor VkCredentialsConfigDescriptor;
-        private static readonly ConfigDescriptor YandexCredentialsConfigDescriptor;
+        private static readonly JsonConfigDescriptor DiscordConfigDescriptor;
+        private static readonly JsonConfigDescriptor DbNosqlConfigDescriptor;
+        private static readonly JsonConfigDescriptor DbSqlConfigDescriptor;
+        private static readonly JsonConfigDescriptor DbSqlServiceConfigDescriptor;
+        private static readonly JsonConfigDescriptor GoogleCredentialsConfigDescriptor;
+        private static readonly JsonConfigDescriptor GoogleAppSecretsConfigDescriptor;
+        private static readonly JsonConfigDescriptor SpotifyCredentialsConfigDescriptor;
+        private static readonly JsonConfigDescriptor VkCredentialsConfigDescriptor;
+        private static readonly JsonConfigDescriptor YandexCredentialsConfigDescriptor;
 
         static ConfigManager()
         {
-            if (!BuildPropsProvider.GetProperties(out propertiesDictionary))
-            {
-                throw BuildPropsProvider.LastError
-                    ?? new InvalidOperationException("Cannor get properties");
-            }
-
-            ConfigDir = $"{propertiesDictionary[ConfigDirKey]}";
-
-            DiscordConfigDescriptor = new(propertiesDictionary, DiscordConfigNameKey);
-            DbNosqlConfigDescriptor = new(propertiesDictionary, DbNosqlConfigNameKey);
-            DbSqlConfigDescriptor = new(propertiesDictionary, DbSqlConfigNameKey);
-            DbSqlServiceConfigDescriptor = new(propertiesDictionary, DbSqlServiceConfigNameKey);
-            GoogleCredentialsConfigDescriptor = new(propertiesDictionary, GoogleCredentialsConfigNameKey);
-            GoogleAppSecretsConfigDescriptor = new(propertiesDictionary, GoogleAppSecretsConfigNameKey);
-            SpotifyCredentialsConfigDescriptor = new(propertiesDictionary, SpotifyCredentialsConfigNameKey);
-            VkCredentialsConfigDescriptor = new(propertiesDictionary, VkCredentialsConfigNameKey);
-            YandexCredentialsConfigDescriptor = new(propertiesDictionary, YandexCredentialsConfigNameKey);
+            DiscordConfigDescriptor = new(DiscordConfigNameKey);
+            DbNosqlConfigDescriptor = new(DbNosqlConfigNameKey);
+            DbSqlConfigDescriptor = new(DbSqlConfigNameKey);
+            DbSqlServiceConfigDescriptor = new(DbSqlServiceConfigNameKey);
+            GoogleCredentialsConfigDescriptor = new(GoogleCredentialsConfigNameKey);
+            GoogleAppSecretsConfigDescriptor = new(GoogleAppSecretsConfigNameKey);
+            SpotifyCredentialsConfigDescriptor = new(SpotifyCredentialsConfigNameKey);
+            VkCredentialsConfigDescriptor = new(VkCredentialsConfigNameKey);
+            YandexCredentialsConfigDescriptor = new(YandexCredentialsConfigNameKey);
         }
 
         /// <summary>
@@ -80,7 +52,7 @@ namespace MyGreatestBot.ApiClasses
         /// Return struct type
         /// </typeparam>
         /// 
-        /// <param name="filepath">
+        /// <param name="descriptor">
         /// JSON file path
         /// </param>
         /// 
@@ -89,19 +61,19 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         /// 
         /// <exception cref="InvalidOperationException"></exception>
-        private static T ReadConfig<T>(string filepath) where T : struct
+        private static T ReadConfig<T>(BaseConfigDescriptor descriptor) where T : struct
         {
             string content = string.Empty;
 
             try
             {
-                using FileStream file = GetFileStream(filepath);
+                using FileStream file = GetFileStream(descriptor);
                 using StreamReader reader = new(file);
                 content = reader.ReadToEnd();
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Cannot read file {filepath}", ex);
+                throw new InvalidOperationException($"Cannot read file {descriptor.FullPath}", ex);
             }
 
             try
@@ -118,7 +90,7 @@ namespace MyGreatestBot.ApiClasses
         /// Reads JSON on path
         /// </summary>
         /// 
-        /// <param name="filepath">
+        /// <param name="descriptor">
         /// JSON file path
         /// </param>
         /// 
@@ -127,13 +99,14 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         /// 
         /// <inheritdoc cref="File.OpenRead(string)" path="/exception"/>
-        private static FileStream GetFileStream(string filepath)
+        private static FileStream GetFileStream(BaseConfigDescriptor descriptor)
         {
-            return !Directory.Exists(ConfigDir)
-                ? throw new DirectoryNotFoundException($"Config directory not found: {ConfigDir}")
-                : !File.Exists(filepath)
-                ? throw new FileNotFoundException("Config file not found", filepath)
-                : File.OpenRead(filepath);
+            return !Directory.Exists(descriptor.Root.Directory)
+                ? throw new DirectoryNotFoundException(
+                    $"Config directory not found: {descriptor.Root.Directory}")
+                : !File.Exists(descriptor.FullPath)
+                ? throw new FileNotFoundException("Config file not found", descriptor.FullPath)
+                : File.OpenRead(descriptor.FullPath);
         }
 
         /// <summary>
@@ -145,7 +118,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static DiscordConfigJSON GetDiscordConfigJSON()
         {
-            return ReadConfig<DiscordConfigJSON>(DiscordConfigDescriptor.Path);
+            return ReadConfig<DiscordConfigJSON>(DiscordConfigDescriptor);
         }
 
         /// <summary>
@@ -157,7 +130,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static NoSqlDatabaseConfigJSON GetNoSqlDatabaseConfigJSON()
         {
-            return ReadConfig<NoSqlDatabaseConfigJSON>(DbNosqlConfigDescriptor.Path);
+            return ReadConfig<NoSqlDatabaseConfigJSON>(DbNosqlConfigDescriptor);
         }
 
         /// <summary>
@@ -169,7 +142,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static SqlDatabaseConfigJSON GetSqlDatabaseConfigJSON()
         {
-            return ReadConfig<SqlDatabaseConfigJSON>(DbSqlConfigDescriptor.Path);
+            return ReadConfig<SqlDatabaseConfigJSON>(DbSqlConfigDescriptor);
         }
 
         /// <summary>
@@ -181,7 +154,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static SqlServiceConfigJSON GetSqlServiceConfigJSON()
         {
-            return ReadConfig<SqlServiceConfigJSON>(DbSqlServiceConfigDescriptor.Path);
+            return ReadConfig<SqlServiceConfigJSON>(DbSqlServiceConfigDescriptor);
         }
 
         /// <summary>
@@ -193,7 +166,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static GoogleCredentialsJSON GetGoogleCredentialsJSON()
         {
-            return ReadConfig<GoogleCredentialsJSON>(GoogleCredentialsConfigDescriptor.Path);
+            return ReadConfig<GoogleCredentialsJSON>(GoogleCredentialsConfigDescriptor);
         }
 
         /// <summary>
@@ -205,7 +178,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static FileStream GetGoogleClientSecretsFileStream()
         {
-            return GetFileStream(GoogleAppSecretsConfigDescriptor.Path);
+            return GetFileStream(GoogleAppSecretsConfigDescriptor);
         }
 
         /// <summary>
@@ -217,7 +190,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static SpotifyCredentialsJSON GetSpotifyClientSecretsJSON()
         {
-            return ReadConfig<SpotifyCredentialsJSON>(SpotifyCredentialsConfigDescriptor.Path);
+            return ReadConfig<SpotifyCredentialsJSON>(SpotifyCredentialsConfigDescriptor);
         }
 
         /// <summary>
@@ -229,7 +202,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static VkCredentialsJSON GetVkCredentialsJSON()
         {
-            return ReadConfig<VkCredentialsJSON>(VkCredentialsConfigDescriptor.Path);
+            return ReadConfig<VkCredentialsJSON>(VkCredentialsConfigDescriptor);
         }
 
         /// <summary>
@@ -241,7 +214,7 @@ namespace MyGreatestBot.ApiClasses
         /// </returns>
         internal static YandexCredentialsJSON GetYandexCredentialsJSON()
         {
-            return ReadConfig<YandexCredentialsJSON>(YandexCredentialsConfigDescriptor.Path);
+            return ReadConfig<YandexCredentialsJSON>(YandexCredentialsConfigDescriptor);
         }
     }
 }

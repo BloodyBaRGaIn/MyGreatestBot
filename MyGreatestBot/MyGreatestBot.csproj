@@ -83,7 +83,7 @@
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0" />
     <PackageReference Include="DSharpPlus.VoiceNext" Version="4.5.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3546" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3556" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="1.10.1" />
     <PackageReference Include="KM.Yandex.Music.Client" Version="1.10.1" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
@@ -98,7 +98,7 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="VkNet" Version="1.77.0-alpha-91" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.6" />
-    <PackageReference Include="YoutubeExplode" Version="6.4.2" />
+    <PackageReference Include="YoutubeExplode" Version="6.4.3" />
   </ItemGroup>
 
   <ItemGroup Label="BuildProps">
@@ -108,37 +108,47 @@
   </ItemGroup>
 
   <ItemGroup Label="FFMPEG">
-    <None Include="..\$(FfmpegDir)\$(FfmpegFileName).exe" Link="$(FfmpegDir)\$(FfmpegFileName).exe">
+    <None Include="..\$(FfmpegDir)\$(FfmpegFileName).exe">
+      <Link>$(FfmpegDir)\$(FfmpegFileName).exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup Label="Config">
-    <None Include="..\$(ConfigDir)\$(DiscordConfigName).json" Link="$(ConfigDir)\$(DiscordConfigName).json">
+    <None Include="..\$(ConfigDir)\$(DiscordConfigName).json">
+      <Link>$(ConfigDir)\$(DiscordConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(DbNosqlConfigName).json" Link="$(ConfigDir)\$(DbNosqlConfigName).json">
+    <None Include="..\$(ConfigDir)\$(DbNosqlConfigName).json">
+      <Link>$(ConfigDir)\$(DbNosqlConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(DbSqlConfigName).json" Link="$(ConfigDir)\$(DbSqlConfigName).json">
+    <None Include="..\$(ConfigDir)\$(DbSqlConfigName).json">
+      <Link>$(ConfigDir)\$(DbSqlConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(DbSqlServiceConfigName).json" Link="$(ConfigDir)\$(DbSqlServiceConfigName).json">
+    <None Include="..\$(ConfigDir)\$(DbSqlServiceConfigName).json">
+      <Link>$(ConfigDir)\$(DbSqlServiceConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(GoogleCredentialsConfigName).json" Link="$(ConfigDir)\$(GoogleCredentialsConfigName).json">
+    <None Include="..\$(ConfigDir)\$(GoogleCredentialsConfigName).json">
+      <Link>$(ConfigDir)\$(GoogleCredentialsConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(GoogleAppSecretsConfigName).json" Link="$(ConfigDir)\$(GoogleAppSecretsConfigName).json">
+    <None Include="..\$(ConfigDir)\$(GoogleAppSecretsConfigName).json">
+      <Link>$(ConfigDir)\$(GoogleAppSecretsConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(SpotifyCredentialsConfigName).json" Link="$(ConfigDir)\$(SpotifyCredentialsConfigName).json">
+    <None Include="..\$(ConfigDir)\$(SpotifyCredentialsConfigName).json">
+      <Link>$(ConfigDir)\$(SpotifyCredentialsConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(VkCredentialsConfigName).json" Link="$(ConfigDir)\$(VkCredentialsConfigName).json">
+    <None Include="..\$(ConfigDir)\$(VkCredentialsConfigName).json">
+      <Link>$(ConfigDir)\$(VkCredentialsConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\$(ConfigDir)\$(YandexCredentialsConfigName).json" Link="$(ConfigDir)\$(YandexCredentialsConfigName).json">
+    <None Include="..\$(ConfigDir)\$(YandexCredentialsConfigName).json">
+      <Link>$(ConfigDir)\$(YandexCredentialsConfigName).json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
