@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyGreatestBot.ApiClasses
+namespace MyGreatestBot.ApiClasses.ConfigClasses
 {
-    internal static class PropertiesManager
+    internal static class PropertiesProvider
     {
         private static readonly Dictionary<string, string> Properties;
 
-        static PropertiesManager()
+        static PropertiesProvider()
         {
             if (!BuildPropsProvider.GetProperties(out Properties))
             {

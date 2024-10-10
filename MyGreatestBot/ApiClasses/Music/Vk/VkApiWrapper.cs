@@ -1,6 +1,7 @@
 ﻿global using VkApiWrapper = MyGreatestBot.ApiClasses.Music.Vk.VkApiWrapper;
 using Microsoft.Extensions.DependencyInjection;
-using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.ConfigClasses;
+using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;

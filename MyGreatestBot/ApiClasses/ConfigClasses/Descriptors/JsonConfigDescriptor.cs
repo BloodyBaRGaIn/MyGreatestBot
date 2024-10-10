@@ -1,4 +1,4 @@
-﻿namespace MyGreatestBot.ApiClasses
+﻿namespace MyGreatestBot.ApiClasses.ConfigClasses.Descriptors
 {
     internal sealed class JsonConfigDescriptor : BaseConfigDescriptor
     {

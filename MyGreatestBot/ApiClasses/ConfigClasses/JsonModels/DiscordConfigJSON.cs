@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace MyGreatestBot.ApiClasses.ConfigStructs
+namespace MyGreatestBot.ApiClasses.ConfigClasses.JsonModels
 {
     /// <summary>
     /// Discord config content

@@ -1,16 +1,17 @@
-﻿using MyGreatestBot.ApiClasses.ConfigStructs;
+﻿using MyGreatestBot.ApiClasses.ConfigClasses.Descriptors;
+using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 
-namespace MyGreatestBot.ApiClasses
+namespace MyGreatestBot.ApiClasses.ConfigClasses
 {
     /// <summary>
     /// JSON reader class
     /// </summary>
     internal static class ConfigManager
     {
-        
+
         private const string DiscordConfigNameKey = "DiscordConfigName";
         private const string DbNosqlConfigNameKey = "DbNosqlConfigName";
         private const string DbSqlConfigNameKey = "DbSqlConfigName";

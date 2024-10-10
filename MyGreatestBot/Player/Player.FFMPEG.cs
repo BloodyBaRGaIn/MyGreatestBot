@@ -1,4 +1,4 @@
-﻿using MyGreatestBot.ApiClasses;
+﻿using MyGreatestBot.ApiClasses.ConfigClasses.Descriptors;
 using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.Extensions;
 using System;

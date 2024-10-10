@@ -1,6 +1,6 @@
 ﻿using MyGreatestBot.Extensions;
 
-namespace MyGreatestBot.ApiClasses
+namespace MyGreatestBot.ApiClasses.ConfigClasses.Descriptors
 {
     internal sealed class RootDescriptor
     {
@@ -9,7 +9,7 @@ namespace MyGreatestBot.ApiClasses
 
         internal RootDescriptor(string key)
         {
-            Directory = PropertiesManager.GetProperty(key);
+            Directory = PropertiesProvider.GetProperty(key);
         }
 
         internal RootDescriptor(string key, string extension) : this(key)
@@ -27,7 +27,7 @@ namespace MyGreatestBot.ApiClasses
         {
             Name = string.Join('.',
                 StringExtensions.EnsureStrings(
-                    PropertiesManager.GetProperty(key), Root.Extension));
+                    PropertiesProvider.GetProperty(key), Root.Extension));
             FullPath = System.IO.Path.Combine(Root.Directory, Name);
         }
     }

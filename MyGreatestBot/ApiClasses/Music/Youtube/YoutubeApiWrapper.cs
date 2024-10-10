@@ -2,7 +2,8 @@
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using MyGreatestBot.ApiClasses.ConfigStructs;
+using MyGreatestBot.ApiClasses.ConfigClasses;
+using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;

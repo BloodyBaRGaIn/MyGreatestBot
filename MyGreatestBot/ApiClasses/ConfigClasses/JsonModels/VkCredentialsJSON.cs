@@ -1,12 +1,14 @@
 ﻿using Newtonsoft.Json;
 
-namespace MyGreatestBot.ApiClasses.ConfigStructs
+namespace MyGreatestBot.ApiClasses.ConfigClasses.JsonModels
 {
     /// <summary>
-    /// Yandex credentials content
+    /// Vk credentials content
     /// </summary>
-    internal struct YandexCredentialsJSON
+    internal struct VkCredentialsJSON
     {
+        [JsonProperty("appid")]
+        public string AppId { get; private set; }
         [JsonProperty("username")]
         public string Username { get; private set; }
         [JsonProperty("password")]
