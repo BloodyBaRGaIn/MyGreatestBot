@@ -108,7 +108,9 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             });
 
             HttpClient httpClient = GoogleService.HttpClient;
-
+            httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
+                credentials.Token.TokenType,
+                credentials.Token.IdToken);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 credentials.Token.TokenType,
                 credentials.Token.IdToken);

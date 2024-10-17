@@ -95,7 +95,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 logDelay: 1000,
                 defaultLogLevel: LogLevel.Error);
 
-            Message = new(messageDelay: 1000);
+            Message = new(guildName: guild.Name, messageDelay: 1000);
 
             Voice = new(guild);
 

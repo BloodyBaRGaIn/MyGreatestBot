@@ -1,68 +1,121 @@
 ﻿using DSharpPlus.Entities;
 using MyGreatestBot.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 {
     /// <summary>
     /// Discord messages handler class
     /// </summary>
-    public sealed class MessageHandler(int messageDelay) : IDisposable
+    public sealed class MessageHandler : IDisposable
     {
+        private const int MaxRequestsPerSecond = 15;
+        private static readonly int MinRequestDelay = (1000 / MaxRequestsPerSecond) + 1;
+
         [AllowNull] public DiscordChannel Channel { get; set; }
 
-        private readonly Semaphore messageSendSemaphore = new(1, 1);
+        private readonly Queue<DiscordMessageBuilder> messageQueue = new();
+        private readonly CancellationTokenSource cts = new();
+        private readonly Task task;
+
+        private readonly string guildName;
+        private readonly int messageDelay;
 
         private bool disposed;
 
-        private void Send(DiscordMessageBuilder messageBuilder)
+        public MessageHandler(string guildName, int messageDelay)
         {
-            if (Channel is null)
+            this.guildName = guildName;
+            this.messageDelay = messageDelay;
+
+            task = Task.Run(MessageTask, cts.Token);
+        }
+
+        private void MessageTask()
+        {
+            Thread.CurrentThread.Name = $"{nameof(MessageTask)} \"{guildName}\"";
+
+            while (true)
             {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message channel is null");
+                if (cts.IsCancellationRequested || disposed)
+                {
+                    break;
+                }
 
-                return;
-            }
+                try
+                {
+                    Task.Delay(1).Wait();
+                }
+                catch
+                {
+                    return;
+                }
 
-            if (messageBuilder is null)
-            {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message is null");
+                if (!messageQueue.TryDequeue(out DiscordMessageBuilder? builder))
+                {
+                    continue;
+                }
 
-                return;
-            }
+                if (Channel is null)
+                {
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message channel is null");
 
-            if (string.IsNullOrWhiteSpace(messageBuilder.Content)
-                && (messageBuilder.Embeds.Count == 0
-                    || messageBuilder.Embeds.All(e =>
+                    continue;
+                }
+
+                if (builder is null)
+                {
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send("Message is null");
+
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(builder.Content)
+                    && (builder.Embeds.Count == 0
+                        || builder.Embeds.All(e =>
+                        {
+                            return string.IsNullOrWhiteSpace(e.Title)
+                                && string.IsNullOrWhiteSpace(e.Description);
+                        })))
+                {
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                        "Message corrupted");
+
+                    continue;
+                }
+
+                bool result;
+
+                try
+                {
+                    result = Channel.SendMessageAsync(builder).Wait(messageDelay);
+                }
+                catch
+                {
+                    result = false;
+                }
+
+                if (result)
+                {
+                    try
                     {
-                        return string.IsNullOrWhiteSpace(e.Title)
-                            && string.IsNullOrWhiteSpace(e.Description);
-                    })))
-            {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    "Message corrupted");
+                        Task.Delay(MinRequestDelay).Wait();
+                    }
+                    catch { }
+                    continue;
+                }
 
-                return;
-            }
-
-            if (!messageSendSemaphore.TryWaitOne(messageDelay))
-            {
-                return;
-            }
-
-            if (!Channel.SendMessageAsync(messageBuilder).Wait(messageDelay))
-            {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send("Cannot send message");
-
-                string? content = messageBuilder.Content;
+                string? content = builder.Content;
 
                 if (string.IsNullOrWhiteSpace(content))
                 {
-                    content = messageBuilder.Embeds.Count == 0
+                    content = builder.Embeds.Count == 0
                         ? string.Empty
-                        : string.Join(Environment.NewLine, messageBuilder.Embeds.Select(e =>
+                        : string.Join(Environment.NewLine, builder.Embeds.Select(e =>
                         {
                             string? title = e.Title;
                             if (string.IsNullOrWhiteSpace(title))
@@ -83,19 +136,26 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     content = "Cannot get message content";
                 }
 
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send(content);
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    string.Join(Environment.NewLine,
+                                "Cannot send message",
+                                content));
             }
-            _ = messageSendSemaphore.TryRelease();
+        }
+
+        private void Send(DiscordMessageBuilder messageBuilder)
+        {
+            messageQueue.Enqueue(messageBuilder.SuppressNotifications());
         }
 
         private static DiscordMessageBuilder GetBuilder(string message)
         {
-            return new DiscordMessageBuilder().WithContent(message).SuppressNotifications();
+            return new DiscordMessageBuilder().WithContent(message);
         }
 
         private static DiscordMessageBuilder GetBuilder(DiscordEmbedBuilder embed)
         {
-            return new DiscordMessageBuilder().AddEmbed(embed).SuppressNotifications();
+            return new DiscordMessageBuilder().AddEmbed(embed);
         }
 
         public void Send(DiscordEmbedBuilder embed)
@@ -139,7 +199,21 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             {
                 ;
             }
-            messageSendSemaphore.TryDispose();
+            cts.Cancel();
+            try
+            {
+                task.Wait();
+            }
+            catch { }
+            finally
+            {
+                cts.Dispose();
+            }
+            try
+            {
+                task.Dispose();
+            }
+            catch { }
         }
 
         ~MessageHandler()
