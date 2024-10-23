@@ -60,7 +60,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private string OnlineActivityName =>
             $"{(string.IsNullOrWhiteSpace(CommandPrefix) ? DiscordWrapper.DefaultPrefix : CommandPrefix)}{CommandStrings.HelpCommandName}";
-        private ActivityType OnlineActivityType { get; } = ActivityType.ListeningTo;
+        private DiscordActivityType OnlineActivityType { get; } = DiscordActivityType.ListeningTo;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
         ApiStatus IAPI.OldStatus { get; set; }
@@ -87,7 +87,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             Client = new(discordConfig);
 
-            Client.Ready += Client_Ready;
+            Client.SessionCreated += Client_Ready;
             Client.ClientErrored += Client_ClientErrored;
             Client.SocketErrored += Client_SocketErrored;
             Client.SocketClosed += Client_SocketClosed;
@@ -151,7 +151,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
                 Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
-                Client.Ready -= Client_Ready;
+                Client.SessionCreated -= Client_Ready;
                 Client.ClientErrored -= Client_ClientErrored;
                 Client.SocketErrored -= Client_SocketErrored;
                 Client.SocketClosed -= Client_SocketClosed;
@@ -213,12 +213,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
 
             // try to set offline status
-            SetUserStatus(UserStatus.Offline);
+            SetUserStatus(DiscordUserStatus.Offline);
 
             Disconnect();
         }
 
-        private void SetUserStatus(UserStatus status)
+        private void SetUserStatus(DiscordUserStatus status)
         {
             if (Client == null)
             {
@@ -227,13 +227,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             DiscordActivity activity = status switch
             {
-                UserStatus.Online => new(OnlineActivityName, OnlineActivityType),
+                DiscordUserStatus.Online => new(OnlineActivityName, OnlineActivityType),
                 _ => new(),
             };
 
             int timeout = status switch
             {
-                UserStatus.Online => DiscordWrapper.ConnectionTimeout,
+                DiscordUserStatus.Online => DiscordWrapper.ConnectionTimeout,
                 _ => DiscordWrapper.DisconnectionTimeout
             };
 
@@ -301,9 +301,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         #region Private event handlers
 
-        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
+        private async Task Client_Ready(DiscordClient sender, SessionReadyEventArgs args)
         {
-            SetUserStatus(UserStatus.Online);
+            SetUserStatus(DiscordUserStatus.Online);
 
             await Task.Delay(1);
 
@@ -371,7 +371,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
+#pragma warning disable CS8604
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
+#pragma warning restore CS8604
             if (!channel_changed)
             {
                 return;

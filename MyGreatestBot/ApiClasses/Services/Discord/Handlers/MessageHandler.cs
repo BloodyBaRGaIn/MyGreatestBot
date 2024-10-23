@@ -93,10 +93,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
                 try
                 {
-                    if (!builder.Flags.HasMessageFlag(MessageFlags.SupressNotifications))
-                    {
-                        _ = builder.SuppressNotifications();
-                    }
                     result = Channel.SendMessageAsync(builder).Wait(messageDelay);
                 }
                 catch

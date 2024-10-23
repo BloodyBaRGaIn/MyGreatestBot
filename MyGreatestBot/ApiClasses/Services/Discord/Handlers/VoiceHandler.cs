@@ -94,7 +94,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             try
             {
+#pragma warning disable CS8604
                 bool channel_changed = Channel != channel || Connection?.TargetChannel != channel;
+#pragma warning restore CS8604
                 while (true)
                 {
                     if (channel_changed)

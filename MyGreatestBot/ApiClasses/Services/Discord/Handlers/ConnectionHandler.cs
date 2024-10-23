@@ -165,19 +165,19 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             if (VoiceChannel is not null)
             {
-                old_channel = _guild.GetChannel(VoiceChannel.Id);
+                old_channel = _guild.GetChannelAsync(VoiceChannel.Id).GetAwaiter().GetResult();
             }
             if (channel is not null)
             {
-                new_channel = _guild.GetChannel(channel.Id);
+                new_channel = _guild.GetChannelAsync(channel.Id).GetAwaiter().GetResult();
             }
 
             bool connection_rollback = false;
 
             if (channel is not null && !channel.PermissionsFor(_guild.CurrentMember)
-                .HasFlag(Permissions.AccessChannels |
-                         Permissions.UseVoice |
-                         Permissions.Speak))
+                .HasFlag(DiscordPermissions.AccessChannels |
+                         DiscordPermissions.UseVoice |
+                         DiscordPermissions.Speak))
             {
                 connection_rollback = true;
                 new_channel = old_channel;
@@ -195,7 +195,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
+#pragma warning disable CS8604
             bool channel_changed = VoiceChannel != channel || VoiceConnection?.TargetChannel != channel;
+#pragma warning restore CS8604
             if (VoiceConnection != null && channel_changed)
             {
                 await Task.Run(() => PlayerInstance.Pause(CommandActionSource.Mute));
@@ -233,10 +235,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
 
             Voice.UpdateVoiceConnection();
+#pragma warning disable CS8604
             if (((VoiceChannel != channel && _guild == channel?.Guild)
                 || (channel is null && _guild == TextChannel?.Guild))
                 && VoiceConnection?.TargetChannel is not null
                 && VoiceChannel is not null)
+#pragma warning restore CS8604
             {
                 throw new InvalidOperationException("You need to be in the same voice channel");
             }
@@ -257,7 +261,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
-            DiscordChannel? channel = _guild.GetChannel(origin.Id);
+            DiscordChannel? channel = _guild.GetChannelAsync(origin.Id).GetAwaiter().GetResult();
 
             if (channel is null)
             {
