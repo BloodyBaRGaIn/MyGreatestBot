@@ -70,10 +70,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         public static IUrlMusicAPI UrlMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Vk;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         DomainCollection IAccessible.Domains { get; } = "https://www.vk.com/";
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             VkCredentialsJSON credentials = ConfigManager.GetVkCredentialsJSON();
 
@@ -133,7 +134,7 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             }
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             _api?.LogOut();
         }

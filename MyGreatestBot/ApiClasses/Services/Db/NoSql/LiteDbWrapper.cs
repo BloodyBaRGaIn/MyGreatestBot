@@ -20,6 +20,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
         private readonly object _queryLock = 0;
 
         ApiIntents IAPI.ApiType => ApiIntents.NoSql;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         private LiteDbWrapper()
         {
@@ -28,12 +29,12 @@ namespace MyGreatestBot.ApiClasses.Services.Db.NoSql
 
         public static LiteDbWrapper Instance { get; private set; } = new();
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             LiteDbClient = new(@$"{config.DatabaseName}.db");
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             LiteDbClient?.Dispose();
             LiteDbClient = null;

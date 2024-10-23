@@ -15,6 +15,16 @@ leave (l) - Leave voice channel
 apistatus (status) - Get APIs status
 ```
 ```
+apiinit (init) - Force API initialization
+Arguments:
+    api (String)
+```
+```
+apideinit (deinit) - Force API deinitialization
+Arguments:
+    api (String)
+```
+```
 apireload (reload) - Reload failed APIs
 ```
 ```

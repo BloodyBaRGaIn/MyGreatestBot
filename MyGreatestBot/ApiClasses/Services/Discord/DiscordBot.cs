@@ -63,12 +63,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         private ActivityType OnlineActivityType { get; } = ActivityType.ListeningTo;
 
         ApiIntents IAPI.ApiType => ApiIntents.Discord;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         bool IAPI.IsEssential => true;
 
         DomainCollection IAccessible.Domains { get; } = "http://www.discord.com/";
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
 
@@ -129,7 +130,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             MarkdownWriter.GenerateFile();
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             if (Commands != null)
             {

@@ -2,6 +2,7 @@
 global using DisallowNullAttribute = System.Diagnostics.CodeAnalysis.DisallowNullAttribute;
 global using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessageAttribute;
 using MyGreatestBot.ApiClasses;
+using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
@@ -64,6 +65,9 @@ namespace MyGreatestBot
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
+            // YoutubeExplode won't work without specific environment variable
+            YoutubeExplodeBypass.Bypass();
+
             #region Music APIs
             ApiManager.Add(YoutubeApiWrapper.Instance);
             ApiManager.Add(YandexApiWrapper.Instance);
@@ -77,7 +81,7 @@ namespace MyGreatestBot
 
             ApiManager.Add(DiscordWrapper.Instance);
 
-            ApiManager.InitApis();
+            ApiManager.InitApis(); // ApiIntents.Discord
 
             if (ApiManager.IsAnyEssentialApiFailed)
             {
@@ -137,13 +141,14 @@ namespace MyGreatestBot
 
             DiscordWrapper.CurrentDomainLogHandler.Send("Close button pressed. Closing...", LogLevel.Warning);
 
+            bool success = false;
             try
             {
-                ConnectionHandler.Logout().Wait();
+                success = ConnectionHandler.Logout().Wait(10000);
             }
             catch { }
 
-            while (true)
+            while (success)
             {
                 try
                 {

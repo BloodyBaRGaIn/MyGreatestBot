@@ -6,7 +6,7 @@ using System.Text;
 namespace MyGreatestBot.ApiClasses.Utils
 {
     /// <summary>
-    /// Source code from YoutubeExplode
+    /// Source code from YoutubeExplode.
     /// </summary>
     internal static class YoutubeExplodeBypass
     {
@@ -32,6 +32,8 @@ namespace MyGreatestBot.ApiClasses.Utils
             ref uint lpcbData
         );
 
+        private static bool bypassed;
+
         private static string? GetCurrentUserRegistryValue(string key, string entry)
         {
             if (RegOpenKeyEx(new nuint(0x80000001u), key, 0, 0x20019, out nuint keyHandle) != 0)
@@ -46,11 +48,16 @@ namespace MyGreatestBot.ApiClasses.Utils
 
         internal static void Bypass()
         {
+            if (bypassed)
+            {
+                return;
+            }
             if (IsRestricted())
             {
                 // otherwise it won't work in restricted countries
                 Environment.SetEnvironmentVariable("SLAVA_UKRAINI", "1");
             }
+            bypassed = true;
         }
 
         private static bool IsRestricted()

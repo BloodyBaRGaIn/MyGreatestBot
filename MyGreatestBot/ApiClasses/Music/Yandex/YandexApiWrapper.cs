@@ -92,10 +92,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         public static IRadioMusicAPI RadioMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Yandex;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         DomainCollection IAccessible.Domains { get; } = "https://music.yandex.ru/";
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             YandexCredentialsJSON yandexCredStruct = ConfigManager.GetYandexCredentialsJSON();
 
@@ -137,7 +138,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             _client = null;
         }

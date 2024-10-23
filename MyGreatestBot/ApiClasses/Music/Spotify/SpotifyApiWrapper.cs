@@ -74,10 +74,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         public static IUrlMusicAPI UrlMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Spotify;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         DomainCollection IAccessible.Domains { get; } = new("https://open.spotify.com/", string.Empty);
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             SpotifyCredentialsJSON spotifyClientSecrets = ConfigManager.GetSpotifyClientSecretsJSON();
 
@@ -89,7 +90,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             _api = new(config);
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             _api = null;
         }

@@ -1,6 +1,5 @@
 ﻿using MyGreatestBot.ApiClasses.Music;
 using MyGreatestBot.ApiClasses.Services.Db;
-using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
@@ -10,28 +9,36 @@ using System.Threading.Tasks;
 namespace MyGreatestBot.ApiClasses
 {
     /// <summary>
-    /// API configuration
+    /// API configuration.
     /// </summary>
     public static class ApiManager
     {
         private static readonly Dictionary<ApiIntents, IAPI> ApiCollection = [];
 
         private static ApiIntents InitIntents { get; set; } = ApiIntents.None;
-        private static ApiIntents FailedIntents { get; set; } = ApiIntents.None;
-        private static ApiIntents EssentialFailedIntents { get; set; } = ApiIntents.None;
+
+        private static ApiIntents GetFailedFailedIntents(bool onlyEssential)
+        {
+            IEnumerable<IAPI> failedapis = ApiCollection.Values
+                .Where(a => (!onlyEssential || a.IsEssential) && a.Status == ApiStatus.Failed);
+
+            if (!failedapis.Any())
+            {
+                return ApiIntents.None;
+            }
+
+            return failedapis
+                .Select(static a => a.ApiType)
+                .Aggregate(static (a, b) => a | b);
+        }
+
+        private static ApiIntents FailedIntents => GetFailedFailedIntents(onlyEssential: false);
+        private static ApiIntents EssentialFailedIntents => GetFailedFailedIntents(onlyEssential: true);
+
         private static ApiIntents RegisteredIntents => ApiCollection.Keys.Aggregate(static (a, b) => a | b);
 
         public static bool IsAnyEssentialApiFailed => EssentialFailedIntents != ApiIntents.None;
         public static bool IsAnyApiFailed => FailedIntents != ApiIntents.None;
-
-        private enum ApiStatus
-        {
-            Success,
-            Failed,
-            Deinit,
-            InitSkip,
-            DeinitSkip
-        }
 
         public static void Add([DisallowNull] IAPI api)
         {
@@ -46,7 +53,7 @@ namespace MyGreatestBot.ApiClasses
 
         public static void InitApis(ApiIntents intents)
         {
-            InitIntents = intents;
+            InitIntents |= intents;
 
             if (InitIntents.HasFlag(ApiIntents.Spotify))
             {
@@ -55,20 +62,14 @@ namespace MyGreatestBot.ApiClasses
                 InitIntents |= ApiIntents.Youtube;
             }
 
-            if (InitIntents.HasFlag(ApiIntents.Youtube))
-            {
-                // YoutubeExplode won't work without specific environment variable
-                YoutubeExplodeBypass.Bypass();
-            }
+            InitIntents &= RegisteredIntents;
 
             static void InternalInitAction(IAPI api)
             {
                 Init(api);
             }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Optional APIs init", LogLevel.Debug);
             ParallelApiAction(InternalInitAction, static api => !api.IsEssential);
-            DiscordWrapper.CurrentDomainLogHandler.Send("Essential APIs init", LogLevel.Debug);
             ParallelApiAction(InternalInitAction, static api => api.IsEssential);
         }
 
@@ -93,11 +94,26 @@ namespace MyGreatestBot.ApiClasses
         {
             if (!InitIntents.HasFlag(desired.ApiType))
             {
-                DiscordWrapper.CurrentDomainLogHandler.Send(
-                   GetApiStatusString(desired.ApiType, ApiStatus.InitSkip),
-                   LogLevel.Debug);
+                switch (desired.Status)
+                {
+                    case ApiStatus.NotInitialized:
+                        desired.SetStatus(ApiStatus.InitSkip);
+                        break;
+                }
+            }
+            else
+            {
+                switch (desired.Status)
+                {
+                    case ApiStatus.InitSkip:
+                        desired.SetStatus(ApiStatus.NotInitialized);
+                        break;
+                }
+            }
 
-                return;
+            if (desired.Status == ApiStatus.Failed)
+            {
+                DeinitBody(desired, delay);
             }
 
             InitBody(desired, delay);
@@ -112,35 +128,28 @@ namespace MyGreatestBot.ApiClasses
 
             try
             {
-                if (desired is IAccessible accessible)
+                switch (desired.Status)
                 {
-                    accessible.TryAccess();
+                    case ApiStatus.NotInitialized:
+                    case ApiStatus.Failed:
+                        if (desired is IAccessible accessible)
+                        {
+                            accessible.TryAccess();
+                        }
+                        break;
                 }
 
                 desired.PerformAuth();
-
-                DiscordWrapper.CurrentDomainLogHandler.Send(
-                    GetApiStatusString(desired.ApiType, ApiStatus.Success));
-
-                FailedIntents &= ~desired.ApiType;
             }
             catch (Exception ex)
             {
-                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    string.Join(Environment.NewLine,
-                        GetApiStatusString(desired.ApiType, ApiStatus.Failed),
-                        ex.GetExtendedMessage()));
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
 
                 try
                 {
                     desired.Logout();
                 }
                 catch { }
-                FailedIntents |= desired.ApiType;
-                if (desired.IsEssential)
-                {
-                    EssentialFailedIntents |= desired.ApiType;
-                }
             }
             finally
             {
@@ -162,21 +171,25 @@ namespace MyGreatestBot.ApiClasses
                 Deinit(intents, api, 1);
             }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Optional APIs deinit", LogLevel.Debug);
             ParallelApiAction(LocalDeinitAction, static api => !api.IsEssential);
-            DiscordWrapper.CurrentDomainLogHandler.Send("Essential APIs deinit", LogLevel.Debug);
             ParallelApiAction(LocalDeinitAction, static api => api.IsEssential);
+
+            InitIntents &= ~intents;
         }
 
         private static void Deinit(ApiIntents allowed, IAPI desired, int delay = 500)
         {
             if (!allowed.HasFlag(desired.ApiType))
             {
-                DiscordWrapper.CurrentDomainLogHandler.Send(
-                    GetApiStatusString(desired.ApiType, ApiStatus.DeinitSkip),
-                    LogLevel.Debug);
-
                 return;
+            }
+
+            switch (desired.Status)
+            {
+                case ApiStatus.NotInitialized:
+                case ApiStatus.InitSkip:
+                    desired.SetStatus(ApiStatus.DeinitSkip);
+                    break;
             }
 
             DeinitBody(desired, delay);
@@ -187,8 +200,6 @@ namespace MyGreatestBot.ApiClasses
             try
             {
                 desired.Logout();
-                DiscordWrapper.CurrentDomainLogHandler.Send(
-                    GetApiStatusString(desired.ApiType, ApiStatus.Deinit));
             }
             catch { }
             finally
@@ -199,7 +210,8 @@ namespace MyGreatestBot.ApiClasses
 
         public static void ReloadApis(ApiIntents intents = ApiIntents.All)
         {
-            intents &= InitIntents;
+            intents &= RegisteredIntents;
+            InitIntents |= intents;
 
             void InternalReloadAction(IAPI api)
             {
@@ -273,11 +285,6 @@ namespace MyGreatestBot.ApiClasses
             return IsApiRegisterdAndAllowed(intents) && FailedIntents.HasFlag(intents);
         }
 
-        private static string GetApiStatusString(ApiIntents intents, ApiStatus status)
-        {
-            return $"{intents} {status}.";
-        }
-
         private static T? GetApi<T>(ApiIntents intents) where T : class, IAPI
         {
             return ApiCollection[intents] as T;
@@ -289,14 +296,12 @@ namespace MyGreatestBot.ApiClasses
             {
                 return string.Join(
                 Environment.NewLine,
-                    ApiCollection.Where(static record => record.Value != null && !record.Value.IsEssential)
-                                 .Select(static record => record.Key)
-                                 .Where(IsApiRegisterdAndAllowed)
-                                 .Select(static intents =>
-                                    GetApiStatusString(intents, IsApiFailed(intents)
-                                        ? ApiStatus.Failed
-                                        : ApiStatus.Success))
-                    );
+                    ApiCollection.Where(static record =>
+                    {
+                        return record.Value != null &&
+                            !record.Value.IsEssential
+                            && IsApiRegisterdAndAllowed(record.Key);
+                    }).Select(static record => record.Value.GetApiStatusString()));
             }
             catch
             {

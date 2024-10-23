@@ -1,6 +1,7 @@
 ﻿global using YoutubeApiWrapper = MyGreatestBot.ApiClasses.Music.Youtube.YoutubeApiWrapper;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
+using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
 using MyGreatestBot.ApiClasses.ConfigClasses;
 using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
@@ -88,37 +89,47 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         public static ITextMusicAPI TextMusicInstance => Instance;
 
         ApiIntents IAPI.ApiType => ApiIntents.Youtube;
+        ApiStatus IAPI.OldStatus { get; set; }
 
         DomainCollection IAccessible.Domains { get; } = "https://www.youtube.com/";
 
-        void IAPI.PerformAuth()
+        void IAPI.PerformAuthInternal()
         {
             GoogleCredentialsJSON user = ConfigManager.GetGoogleCredentialsJSON();
-            FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
+            using FileStream fileStream = ConfigManager.GetGoogleClientSecretsFileStream();
+            IDataStore dataStore = new FileDataStore(Directory.GetCurrentDirectory());
+
             UserCredential credentials = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets: GoogleClientSecrets.FromStream(fileStream).Secrets,
-                scopes: [YouTubeService.Scope.YoutubeReadonly],
+                scopes: [YouTubeService.Scope.Youtube],
                 user: user.Username,
-                taskCancellationToken: CancellationToken.None).GetAwaiter().GetResult();
+                taskCancellationToken: CancellationToken.None,
+                dataStore: dataStore).GetAwaiter().GetResult();
+
+            _ = credentials.RefreshTokenAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             YouTubeService GoogleService = new(new BaseClientService.Initializer()
             {
+                HttpClientInitializer = credentials,
                 ApiKey = user.Key,
-                ApplicationName = "API Youtube key"
+                ApplicationName = "MyGreatestApp",
+                MaxUrlLength = 0,
+
+                //"MyGreatestApp" //"MyGreatestProject" //"MyGreatestClient" //"API Youtube key"
             });
 
             HttpClient httpClient = GoogleService.HttpClient;
             httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
                 credentials.Token.TokenType,
-                credentials.Token.IdToken);
+                credentials.Token.IdToken); // AccessToken // RefreshToken // IdToken
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 credentials.Token.TokenType,
-                credentials.Token.IdToken);
+                credentials.Token.IdToken); // AccessToken // RefreshToken // IdToken
 
             api = new(httpClient);
         }
 
-        void IAPI.Logout()
+        void IAPI.LogoutInternal()
         {
             api = null;
         }
@@ -139,7 +150,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             while (true)
             {
-                string playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(url).EnsureIdentifier(); ;
+                string playlist_id = YoutubeQueryDecomposer.TryGetPlaylistId(url).EnsureIdentifier();
                 if (string.IsNullOrWhiteSpace(playlist_id))
                 {
                     break;

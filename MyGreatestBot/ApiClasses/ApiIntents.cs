@@ -15,12 +15,14 @@
         NoSql = 0x20000000U,
         Sql = 0x40000000U,
 
-        Db = Sql | NoSql,
+        Db = NoSql,
 
         Discord = 0x80000000U,
 
+        Services = Db | Discord,
+
         Music = Youtube | Yandex | Vk | Spotify,
 
-        All = Music | Discord
+        All = Music | Services
     }
 }
