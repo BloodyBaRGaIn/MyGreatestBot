@@ -53,24 +53,15 @@ namespace MyGreatestBot.ApiClasses
 
         public static void InitApis(ApiIntents intents)
         {
-            InitIntents |= intents;
+            intents &= RegisteredIntents;
 
-            if (InitIntents.HasFlag(ApiIntents.Spotify))
+            void InternalInitAction(IAPI api)
             {
-                // init Yandex and Youtube API for searching tracks from Spotify
-                InitIntents |= ApiIntents.Yandex;
-                InitIntents |= ApiIntents.Youtube;
+                Init(intents, api);
             }
 
-            InitIntents &= RegisteredIntents;
-
-            static void InternalInitAction(IAPI api)
-            {
-                Init(api);
-            }
-
-            ParallelApiAction(InternalInitAction, static api => !api.IsEssential);
-            ParallelApiAction(InternalInitAction, static api => api.IsEssential);
+            ParallelApiAction(InternalInitAction, api => !api.IsEssential);
+            ParallelApiAction(InternalInitAction, api => api.IsEssential);
         }
 
         private static void ParallelApiAction(Action<IAPI> action, Predicate<IAPI>? predicate = null)
@@ -90,9 +81,9 @@ namespace MyGreatestBot.ApiClasses
             }
         }
 
-        private static void Init(IAPI desired, int delay = 500)
+        private static void Init(ApiIntents allowed, IAPI desired, int delay = 500)
         {
-            if (!InitIntents.HasFlag(desired.ApiType))
+            if (!allowed.HasFlag(desired.ApiType))
             {
                 switch (desired.Status)
                 {
@@ -139,17 +130,12 @@ namespace MyGreatestBot.ApiClasses
                         break;
                 }
 
+                InitIntents |= desired.ApiType;
                 desired.PerformAuth();
             }
             catch (Exception ex)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-
-                try
-                {
-                    desired.Logout();
-                }
-                catch { }
             }
             finally
             {
@@ -173,8 +159,6 @@ namespace MyGreatestBot.ApiClasses
 
             ParallelApiAction(LocalDeinitAction, static api => !api.IsEssential);
             ParallelApiAction(LocalDeinitAction, static api => api.IsEssential);
-
-            InitIntents &= ~intents;
         }
 
         private static void Deinit(ApiIntents allowed, IAPI desired, int delay = 500)
@@ -197,6 +181,7 @@ namespace MyGreatestBot.ApiClasses
 
         private static void DeinitBody(IAPI desired, int delay)
         {
+            InitIntents &= ~desired.ApiType;
             try
             {
                 desired.Logout();
@@ -211,7 +196,6 @@ namespace MyGreatestBot.ApiClasses
         public static void ReloadApis(ApiIntents intents = ApiIntents.All)
         {
             intents &= RegisteredIntents;
-            InitIntents |= intents;
 
             void InternalReloadAction(IAPI api)
             {
