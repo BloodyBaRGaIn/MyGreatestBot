@@ -15,6 +15,7 @@ namespace MyGreatestBot.Commands
         [Description("Get \"Hello World\" response message")]
         [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task TestCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -39,6 +40,7 @@ namespace MyGreatestBot.Commands
         [Description("Get the display name of the bot")]
         [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task NameCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -85,6 +87,7 @@ namespace MyGreatestBot.Commands
         [Description("Echo the message")]
         [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task EchoCommand(
             CommandContext ctx,
             [RemainingText,
@@ -103,11 +106,11 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command(CommandStrings.HelpCommandName)]
-        [Aliases("h")]
+        [Command(CommandStrings.HelpCommandName), Aliases("h")]
         [Description("Get help")]
         [Category(CommandStrings.DebugCategoryName)]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task HelpCommand(
             CommandContext ctx,
             [AllowNull, RemainingText,

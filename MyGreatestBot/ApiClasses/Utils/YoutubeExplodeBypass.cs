@@ -13,6 +13,7 @@ namespace MyGreatestBot.ApiClasses.Utils
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [SuppressMessage("Globalization", "CA2101")]
         [SuppressMessage("Interoperability", "SYSLIB1054")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         private static extern int RegOpenKeyEx(
             nuint hKey,
             string subKey,
@@ -23,6 +24,7 @@ namespace MyGreatestBot.ApiClasses.Utils
 
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [SuppressMessage("Globalization", "CA2101")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         private static extern int RegQueryValueEx(
             nuint hKey,
             string lpValueName,

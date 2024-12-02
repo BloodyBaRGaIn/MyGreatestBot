@@ -7,7 +7,6 @@ using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,10 +18,10 @@ namespace MyGreatestBot.Commands
     [Category(CommandStrings.ConnectionCategoryName)]
     internal class ConnectionCommands : BaseCommandModule
     {
-        [Command("join")]
-        [Aliases("j")]
+        [Command("join"), Aliases("j")]
         [Description("Join voice channel")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task JoinCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -32,10 +31,10 @@ namespace MyGreatestBot.Commands
             }
         }
 
-        [Command("leave")]
-        [Aliases("l")]
+        [Command("leave"), Aliases("l")]
         [Description("Leave voice channel")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task LeaveCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -45,11 +44,10 @@ namespace MyGreatestBot.Commands
             }
         }
 
-        [Command("apistatus")]
-        [Aliases("status")]
+        [Command("apistatus"), Aliases("status")]
         [Description("Get APIs status")]
         [SuppressMessage("Performance", "CA1822")]
-        [RequiresDynamicCode("Calls System.Enum.GetValues(Type)")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task StatusCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -69,10 +67,10 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("apiinit")]
-        [Aliases("init")]
+        [Command("apiinit"), Aliases("init")]
         [Description("Force API initialization")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task InitCommand(CommandContext ctx,
             string api)
         {
@@ -105,10 +103,10 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("apideinit")]
-        [Aliases("deinit")]
+        [Command("apideinit"), Aliases("deinit")]
         [Description("Force API deinitialization")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task DeinitCommand(CommandContext ctx,
             string api)
         {
@@ -141,10 +139,10 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("apireload")]
-        [Aliases("reload")]
+        [Command("apireload"), Aliases("reload")]
         [Description("Reload failed APIs")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ReloadCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -174,10 +172,10 @@ namespace MyGreatestBot.Commands
             await Task.Delay(1);
         }
 
-        [Command("playerstatus")]
-        [Aliases("plst")]
+        [Command("playerstatus"), Aliases("plst")]
         [Description("Get player status")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayerStatusCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -191,10 +189,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.GetStatus(CommandActionSource.Command));
         }
 
-        [Command("logout")]
-        [Aliases("exit", "quit", "bye", "bb")]
+        [Command("logout"), Aliases("exit", "quit", "bye", "bb")]
         [Description("Logout and exit")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task LogoutCommand(CommandContext ctx)
         {
             await LogoutGeneric(ctx, CommandActionSource.LogoutBye);
@@ -203,6 +201,7 @@ namespace MyGreatestBot.Commands
         [Command("shutdown")]
         [Description("Force shutdown")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ShutdownCommand(CommandContext ctx)
         {
             await LogoutGeneric(ctx, CommandActionSource.LogoutShut);

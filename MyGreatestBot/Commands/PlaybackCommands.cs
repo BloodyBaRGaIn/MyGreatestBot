@@ -11,10 +11,10 @@ namespace MyGreatestBot.Commands
     [Category(CommandStrings.PlaybackCategoryName)]
     internal class PlaybackCommands : BaseCommandModule
     {
-        [Command("pause")]
-        [Aliases("ps")]
+        [Command("pause"), Aliases("ps")]
         [Description("Pause playback")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PauseCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -28,10 +28,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.Pause(CommandActionSource.Command));
         }
 
-        [Command("resume")]
-        [Aliases("rs")]
+        [Command("resume"), Aliases("rs")]
         [Description("Resume playback")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ResumeCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -45,10 +45,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.Resume(CommandActionSource.Command));
         }
 
-        [Command("stop")]
-        [Aliases("st")]
+        [Command("stop"), Aliases("st")]
         [Description("Stop playback")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task StopCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -62,10 +62,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Command));
         }
 
-        [Command("skip")]
-        [Aliases("s")]
+        [Command("skip"), Aliases("s")]
         [Description("Skip current track")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task SkipCommand(
             CommandContext ctx,
             [AllowNull, Description("Number of tracks to skip")] int number = 1)
@@ -86,10 +86,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.Skip(number - 1, CommandActionSource.Command));
         }
 
-        [Command("count")]
-        [Aliases("cnt", "cn")]
+        [Command("count"), Aliases("cnt", "cn")]
         [Description("Get the number of tracks in the queue")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task CountCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -103,10 +103,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(handler.PlayerInstance.GetQueueLength);
         }
 
-        [Command("clear")]
-        [Aliases("clr", "cl", "c")]
+        [Command("clear"), Aliases("clr", "cl", "c")]
         [Description("Clear track queue")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ClearCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -120,10 +120,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.Clear(CommandActionSource.Command));
         }
 
-        [Command("shuffle")]
-        [Aliases("sh")]
+        [Command("shuffle"), Aliases("sh")]
         [Description("Shuffle queue")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ShuffleCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -141,6 +141,7 @@ namespace MyGreatestBot.Commands
         [Aliases("seek", "rw", "sk")]
         [Description("Rewind audio stream")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task RewindCommand(
             CommandContext ctx,
             [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)
@@ -180,10 +181,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.RequestRewind(time, CommandActionSource.Command));
         }
 
-        [Command("return")]
-        [Aliases("rt")]
+        [Command("return"), Aliases("rt")]
         [Description("Return the track to the queue")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task ReturnCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -198,10 +199,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.ReturnCurrentTrackToQueue(CommandActionSource.Command));
         }
 
-        [Command("currenttrack")]
-        [Aliases("track", "tr")]
+        [Command("currenttrack"), Aliases("track", "tr")]
         [Description("Get information about the current track")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task TrackInfoCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -215,10 +216,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(handler.PlayerInstance.GetCurrentTrackInfo);
         }
 
-        [Command("nexttrack")]
-        [Aliases("next", "ntr")]
+        [Command("nexttrack"), Aliases("next", "ntr")]
         [Description("Get information about the next track")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task NextTrackInfoCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);

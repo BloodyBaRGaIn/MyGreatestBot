@@ -8,10 +8,10 @@ namespace MyGreatestBot.Commands
     [Category(CommandStrings.DatabaseCategoryName)]
     internal class DatabaseCommands : BaseCommandModule
     {
-        [Command("ignoretrack")]
-        [Aliases("it")]
+        [Command("ignoretrack"), Aliases("it")]
         [Description("Ignore current track")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task IgnoreCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -25,10 +25,10 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.DbIgnoreTrack(CommandActionSource.Command));
         }
 
-        [Command("ignoreartist")]
-        [Aliases("ia")]
+        [Command("ignoreartist"), Aliases("ia")]
         [Description("Ignore current track artist")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task IgnoreArtistCommand(
             CommandContext ctx,
             [AllowNull,
@@ -49,6 +49,7 @@ namespace MyGreatestBot.Commands
         [Command("save")]
         [Description("Save tracks")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task SaveCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -65,6 +66,7 @@ namespace MyGreatestBot.Commands
         [Command("savedcount")]
         [Description("Get saved tracks count")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task SavedCountCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
@@ -81,6 +83,7 @@ namespace MyGreatestBot.Commands
         [Command("restore")]
         [Description("Restore saved tracks")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task RestoreCommand(CommandContext ctx)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);

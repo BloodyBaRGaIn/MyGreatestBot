@@ -49,11 +49,12 @@ namespace MyGreatestBot.Commands
             handler.Log.Send($"Enqueue takes {command_stopwatch.ElapsedMilliseconds} ms.", LogLevel.Debug);
         }
 
-        [Command("play")]
-        [Aliases("p")]
+        [Command("play"), Aliases("p")]
+        [Description("Add tracks to the queue"),
         [Description("Add tracks to the queue")]
         [Example($"{DiscordWrapper.DefaultPrefix}play URL")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayCommand(
             CommandContext ctx,
             [Description("URL")] string query,
@@ -127,10 +128,10 @@ namespace MyGreatestBot.Commands
             await PlayCommandGeneric(ctx, query, source);
         }
 
-        [Command("playshuffled")]
-        [Aliases("psh")]
+        [Command("playshuffled"), Aliases("psh")]
         [Description("Add shuffled tracks to the queue")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayShuffledCommand(
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
@@ -139,10 +140,10 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerShuffle);
         }
 
-        [Command("playhead")]
-        [Aliases("pf", "ff", "f")]
+        [Command("playhead"), Aliases("pf", "ff", "f")]
         [Description("Add tracks to the head")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task HeadCommand(
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
@@ -151,10 +152,10 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerToHead);
         }
 
-        [Command("playimmediatly")]
-        [Aliases("pi", "t", "r")]
+        [Command("playimmediatly"), Aliases("pi", "t", "r")]
         [Description("Play the track immediatly")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task TmsCommand(
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
@@ -163,10 +164,10 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerToHead | CommandActionSource.PlayerSkipCurrent);
         }
 
-        [Command("playradio")]
-        [Aliases("radio", "pr")]
+        [Command("playradio"), Aliases("radio", "pr")]
         [Description("Play in radio mode")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayRadioCommand(
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
@@ -175,10 +176,10 @@ namespace MyGreatestBot.Commands
                 CommandActionSource.Command | CommandActionSource.PlayerRadio);
         }
 
-        [Command("playbypass")]
-        [Aliases("pb", "b")]
+        [Command("playbypass"), Aliases("pb", "b")]
         [Description("Play the track without check")]
         [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayBypassCommand(
             CommandContext ctx,
             [RemainingText, Description("URL")] string query)
