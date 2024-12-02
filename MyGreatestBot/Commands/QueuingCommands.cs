@@ -51,8 +51,9 @@ namespace MyGreatestBot.Commands
 
         [Command("play"), Aliases("p")]
         [Description("Add tracks to the queue"),
-        [Description("Add tracks to the queue")]
-        [Example($"{DiscordWrapper.DefaultPrefix}play URL")]
+        Example(
+        $"{DiscordWrapper.DefaultPrefix}play <URL>",
+        $"{DiscordWrapper.DefaultPrefix}p <URL>")]
         [SuppressMessage("Performance", "CA1822")]
         [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task PlayCommand(

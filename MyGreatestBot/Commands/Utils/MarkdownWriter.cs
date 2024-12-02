@@ -74,9 +74,13 @@ namespace MyGreatestBot.Commands.Utils
             string result = string.Empty;
 
             result += $"```{Environment.NewLine}{command.Name}";
-            if (command.Aliases.Any())
+
             {
-                result += $" ({string.Join(", ", command.Aliases)})";
+                IEnumerable<string> aliases = StringExtensions.EnsureStrings(command.Aliases);
+                if (aliases.Any())
+                {
+                    result += $" ({string.Join(", ", aliases)})";
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(command.Description))
@@ -122,10 +126,13 @@ namespace MyGreatestBot.Commands.Utils
 
             if (command.CustomAttributes
                 .FirstOrDefault(static attr => attr.GetType() == typeof(ExampleAttribute)) is ExampleAttribute example
-                && !string.IsNullOrWhiteSpace(example.Example))
+                && example.ExamplesCollection.Any())
             {
                 result += $"Examples:{Environment.NewLine}";
-                result += $"{pad}{example.Example}{Environment.NewLine}";
+                foreach (string exampleStaement in example.ExamplesCollection)
+                {
+                    result += $"{pad}{exampleStaement}{Environment.NewLine}";
+                }
             }
 
             result += $"```{Environment.NewLine}";
