@@ -50,7 +50,8 @@ Arguments:
         \R - play in radio mode
         \B - bypass SQL check
 Examples:
-    d!play URL
+    d!play <URL>
+    d!p <URL>
 ```
 ```
 playshuffled (psh) - Add shuffled tracks to the queue
@@ -102,6 +103,9 @@ clear (clr, cl, c) - Clear track queue
 ```
 ```
 shuffle (sh) - Shuffle queue
+```
+```
+unique (uniq, u) - Removes all but unique tracks from the queue
 ```
 ```
 rewind (seek, rw, sk) - Rewind audio stream

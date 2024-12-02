@@ -12,7 +12,7 @@ namespace MyGreatestBot.ApiClasses.Music
     /// <summary>
     /// Track information abstrac class.
     /// </summary>
-    public abstract class BaseTrackInfo
+    public abstract class BaseTrackInfo : IEquatable<BaseTrackInfo>
     {
         /// <summary>
         /// Track type
@@ -278,6 +278,21 @@ namespace MyGreatestBot.ApiClasses.Music
         internal CompositeId GetCompositeId(string id)
         {
             return new(id, TrackType);
+        }
+
+        public bool Equals(BaseTrackInfo? other)
+        {
+            return TrackName.InnerId.Equals(other?.TrackName.InnerId);
+        }
+
+        public override bool Equals([AllowNull] object obj)
+        {
+            return Equals(obj as BaseTrackInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            return TrackName.InnerId.GetHashCode();
         }
     }
 }

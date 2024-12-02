@@ -1,5 +1,4 @@
 ﻿global using ConnectionHandler = MyGreatestBot.ApiClasses.Services.Discord.Handlers.ConnectionHandler;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;

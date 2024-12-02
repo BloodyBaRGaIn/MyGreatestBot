@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MyGreatestBot.Extensions;
+using System;
 using System.Collections.Generic;
-using MyGreatestBot.Extensions;
 
 namespace MyGreatestBot.Commands.Utils
 {

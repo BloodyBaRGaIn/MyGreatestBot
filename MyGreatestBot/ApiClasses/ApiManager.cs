@@ -22,14 +22,8 @@ namespace MyGreatestBot.ApiClasses
             IEnumerable<IAPI> failedapis = ApiCollection.Values
                 .Where(a => (!onlyEssential || a.IsEssential) && a.Status == ApiStatus.Failed);
 
-            if (!failedapis.Any())
-            {
-                return ApiIntents.None;
-            }
-
-            return failedapis
-                .Select(static a => a.ApiType)
-                .Aggregate(static (a, b) => a | b);
+            return !failedapis.Any() ? ApiIntents.None :
+                failedapis.Select(static a => a.ApiType).Aggregate(static (a, b) => a | b);
         }
 
         private static ApiIntents FailedIntents => GetFailedFailedIntents(onlyEssential: false);

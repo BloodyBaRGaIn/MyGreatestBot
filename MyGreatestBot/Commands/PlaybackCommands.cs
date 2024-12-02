@@ -137,6 +137,23 @@ namespace MyGreatestBot.Commands
             await Task.Run(() => handler.PlayerInstance.ShuffleQueue(CommandActionSource.Command));
         }
 
+        [Command("unique"), Aliases("uniq", "u")]
+        [Description("Removes all but unique tracks from the queue")]
+        [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
+        public async Task UniqueCommand(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.TextChannel = ctx.Channel;
+
+            await Task.Run(() => handler.PlayerInstance.GetUniqueTracks(CommandActionSource.Command));
+        }
+
         [Command("rewind")]
         [Aliases("seek", "rw", "sk")]
         [Description("Rewind audio stream")]
