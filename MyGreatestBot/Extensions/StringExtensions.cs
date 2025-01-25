@@ -30,10 +30,10 @@ namespace MyGreatestBot.Extensions
 
         public static IEnumerable<string> EnsureStrings(IEnumerable<string?> input)
         {
-            return EnsureStrings(input.ToArray());
+            return EnsureStrings([.. input]);
         }
 
-        public static IEnumerable<string> EnsureStrings(params string?[] strings)
+        public static IEnumerable<string> EnsureStrings(params string?[]? strings)
         {
             if (strings == null || strings.Length == 0)
             {

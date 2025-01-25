@@ -6,6 +6,7 @@ using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MyGreatestBot.ApiClasses.Services.Discord
 {
@@ -89,6 +90,16 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 CurrentDomainLogHandler.Dispose();
                 CurrentDomainLogErrorHandler.Dispose();
             }
+        }
+
+        public static async Task ExecuteCommandAsync(string command, params string[] arguments)
+        {
+            if (Instance == null)
+            {
+                CurrentDomainLogErrorHandler.Send("Instance is not initialized.", LogLevel.Error);
+                return;
+            }
+            await Instance.ExecuteCommandAsync(command, arguments);
         }
 
         /// <inheritdoc cref="IAPI.Logout"/>

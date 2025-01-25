@@ -121,7 +121,8 @@ namespace MyGreatestBot.Commands
 
             List<CustomHelpFormatter> collection = [];
 
-            if (string.IsNullOrWhiteSpace(command))
+            if (string.IsNullOrWhiteSpace(command)
+                || string.Equals(command, "all", StringComparison.CurrentCultureIgnoreCase))
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands(ctx));
             }

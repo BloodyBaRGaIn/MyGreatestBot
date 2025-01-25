@@ -33,11 +33,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             TrackName = new HyperLink(track.Title, $"{Domain}track/{track.Id}")
                 .WithId(GetCompositeId(track.Id));
 
-            ArtistArr = track.Artists.Select(a =>
+            ArtistArr = [.. track.Artists.Select(a =>
                 new HyperLink(
                     transletters ? a.Name.ToTransletters() : a.Name,
                     $"{Domain}artist/{a.Id}")
-                .WithId(GetCompositeId(a.Id))).ToArray();
+                .WithId(GetCompositeId(a.Id)))];
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 

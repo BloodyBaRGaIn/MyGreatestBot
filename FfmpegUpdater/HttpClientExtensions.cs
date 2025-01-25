@@ -28,11 +28,15 @@ namespace FfmpegUpdater
             }
 
             Progress<long> progressWrapper = new(totalBytes =>
-                progress.Report((long)(totalBytes * 100f / contentLength.Value)));
+                progress.Report((long)(totalBytes * 100 / (float)contentLength.Value)));
 
             byte[] buffer = new byte[0x14000];
+            if (buffer == null || buffer.Length == 0)
+            {
+                throw new InvalidOperationException($"Cannot allocate memory for {buffer}.");
+            }
 
-            await download.CopyToAsync(destination, buffer, progressWrapper, cancellationToken);
+            await download.CopyToAsync(destination, buffer.AsMemory(), progressWrapper, cancellationToken);
         }
 
         public static async Task CopyToAsync(this Stream source,
@@ -41,9 +45,9 @@ namespace FfmpegUpdater
                                              IProgress<long>? progress = null,
                                              CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(buffer);
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(destination);
+
             if (!source.CanRead)
             {
                 throw new InvalidOperationException($"'{nameof(source)}' is not readable.");

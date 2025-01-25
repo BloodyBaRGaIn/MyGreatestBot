@@ -38,7 +38,7 @@ namespace MyGreatestBot.Player
                         collection.Add(track);
                     }
                 }
-                collection = collection.DistinctBy(static track => track.TrackName.InnerId).ToList();
+                collection = [.. collection.DistinctBy(static track => track.TrackName.InnerId)];
                 tracksQueue.EnqueueRange(collection);
 
                 builder = new UniqueCommandException(

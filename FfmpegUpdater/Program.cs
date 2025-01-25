@@ -200,7 +200,8 @@ namespace FfmpegUpdater
 
             string target_zip_file_name = repo_file_split[1];
 
-            string zip_link = $"{repo_link.Remove(repo_link.LastIndexOf('.'))}/releases/download/{tag_name}/{target_zip_file_name}";
+            string zip_link =
+                $"{repo_link[..repo_link.LastIndexOf('.')]}/releases/download/{tag_name}/{target_zip_file_name}";
 
             // download ffmpeg zip file
             string target_zip_path = Path.Combine(ffmpeg_directory.FullName, target_zip_file_name);

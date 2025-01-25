@@ -19,7 +19,7 @@ namespace MyGreatestBot.ApiClasses.Utils
             {
                 throw new ArgumentException("Input collection is empty", nameof(domains));
             }
-            collection = new(domains);
+            collection = [.. domains];
         }
 
         private string GetPrimary()

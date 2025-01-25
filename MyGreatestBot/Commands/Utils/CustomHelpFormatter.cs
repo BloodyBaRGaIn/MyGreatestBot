@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using System.Collections.Generic;
 
@@ -8,7 +7,7 @@ namespace MyGreatestBot.Commands.Utils
     /// <summary>
     /// Help formatter
     /// </summary>
-    public sealed class CustomHelpFormatter(CommandContext ctx) : BaseHelpFormatter(ctx)
+    public sealed class CustomHelpFormatter(CommandContext? ctx = null) : PlainHelpFormatter(ctx)
     {
         private string _content = string.Empty;
 
@@ -29,7 +28,7 @@ namespace MyGreatestBot.Commands.Utils
             return this;
         }
 
-        public static IEnumerable<CustomHelpFormatter> WithAllCommands(CommandContext ctx)
+        public static IEnumerable<CustomHelpFormatter> WithAllCommands(CommandContext? ctx = null)
         {
             foreach (string item in MarkdownWriter.GetFullCommandsString(MarkdownType.Discord))
             {

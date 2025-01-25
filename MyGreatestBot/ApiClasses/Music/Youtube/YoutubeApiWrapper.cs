@@ -112,19 +112,19 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             {
                 HttpClientInitializer = credentials,
                 ApiKey = user.Key,
-                ApplicationName = "MyGreatestApp",
+                ApplicationName = string.Empty,
                 MaxUrlLength = 0,
 
                 //"MyGreatestApp" //"MyGreatestProject" //"MyGreatestClient" //"API Youtube key"
             });
 
             HttpClient httpClient = GoogleService.HttpClient;
-            httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
-                credentials.Token.TokenType,
-                credentials.Token.IdToken); // AccessToken // RefreshToken // IdToken
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                credentials.Token.TokenType,
-                credentials.Token.IdToken); // AccessToken // RefreshToken // IdToken
+            //httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
+            //    credentials.Token.TokenType,
+            //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
+            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            //    credentials.Token.TokenType,
+            //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
 
             api = new(httpClient);
         }

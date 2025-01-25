@@ -33,7 +33,7 @@ namespace MyGreatestBot.Player
                         collection.Add(track);
                     }
                 }
-                collection = collection.Shuffle().ToList();
+                collection = [.. collection.Shuffle()];
                 tracksQueue.EnqueueRange(collection);
             }
 

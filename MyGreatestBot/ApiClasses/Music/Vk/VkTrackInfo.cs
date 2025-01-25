@@ -42,12 +42,11 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 audioArtists = [new AudioArtist() { Name = audio.Artist }];
             }
 
-            ArtistArr = audioArtists.Select(a =>
+            ArtistArr = [.. audioArtists.Select(a =>
                 string.IsNullOrWhiteSpace(a.Id)
                 ? new HyperLink(a.Name)
                 : new HyperLink(a.Name, $"{Domain}artist/{a.Id}")
-                    .WithId(GetCompositeId(a.Id)))
-                .ToArray();
+                    .WithId(GetCompositeId(a.Id)))];
 
             AudioAlbum album = audio.Album;
 

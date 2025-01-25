@@ -25,11 +25,11 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             TrackName = new HyperLink(track.Name, $"{Domain}track/{track.Id}")
                 .WithId(GetCompositeId(track.Id));
 
-            ArtistArr = track.Artists.Select(a =>
+            ArtistArr = [.. track.Artists.Select(a =>
                 new HyperLink(
                     a.Name,
                     $"{Domain}artist/{a.Id}")
-                .WithId(GetCompositeId(a.Id))).ToArray();
+                .WithId(GetCompositeId(a.Id)))];
 
             AlbumName = new(track.Album.Name, $"{Domain}album/{track.Album.Id}");
 

@@ -1,5 +1,7 @@
-﻿using DSharpPlus;
+﻿using AngleSharp.Text;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -17,6 +19,7 @@ using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -138,7 +141,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 {
                     try
                     {
-                        Commands.UnregisterCommands(cmds: Commands.RegisteredCommands.Values.ToArray());
+                        Commands.UnregisterCommands(cmds: [.. Commands.RegisteredCommands.Values]);
                     }
                     catch { }
                 }
@@ -156,6 +159,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Client.SocketErrored -= Client_SocketErrored;
                 Client.SocketClosed -= Client_SocketClosed;
             }
+        }
+
+        public async Task ExecuteCommandAsync(string command, params string[] arguments)
+        {
+            if (Commands == null)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    "Bot is not initialized.", LogLevel.Error);
+                return;
+            }
+
+            _ = new ConsoleCommands().InvokeMethod(command, [.. arguments]);
+
+            await Task.Yield();
+
+            //await Commands.ExecuteCommandAsync(
+            //    Commands.CreateContext(
+            //        null,
+            //        CommandPrefix,
+            //        findCommand,
+            //        string.Join("", StringExtensions.EnsureStrings(arguments))));
         }
 
         /// <summary>
@@ -190,6 +214,100 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
+            using CancellationTokenSource cts = new();
+            using Task consoleCommandTask = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    string in_str = string.Empty;
+
+                    if (cts.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    while (true)
+                    {
+                        try
+                        {
+                            await Task.Delay(1);
+                        }
+                        catch
+                        {
+                            return;
+                        }
+
+                        if (cts.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
+                        if (!Console.KeyAvailable)
+                        {
+                            continue;
+                        }
+
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+
+                        char add = '\0';
+                        if (key.Key == ConsoleKey.Enter)
+                        {
+                            Console.Write(Environment.NewLine);
+                            break;
+                        }
+                        else if (key.Key == ConsoleKey.Backspace)
+                        {
+                            (int Left, int Top) = Console.GetCursorPosition();
+                            if (in_str.Length != 0 && Left > 0)
+                            {
+                                Console.Write('\b');
+                                Console.Write(' ');
+                                in_str = in_str.Remove(Left - 1, 1);
+                                Console.SetCursorPosition(Left - 1, Top);
+                            }
+                        }
+                        else if (key.Key == ConsoleKey.Spacebar)
+                        {
+                            add = ' ';
+                        }
+                        else if (key.KeyChar.IsAlphanumericAscii())
+                        {
+                            add = key.KeyChar;
+                        }
+
+                        if (add != '\0')
+                        {
+                            in_str += add;
+                            Console.Write(add);
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(in_str))
+                    {
+                        continue;
+                    }
+
+                    string[] in_split = in_str.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (in_split == null || in_split.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (in_split.Length > 1)
+                            await DiscordWrapper.ExecuteCommandAsync(in_split[0], in_split[1..]);
+                        else
+                            await DiscordWrapper.ExecuteCommandAsync(in_split[0]);
+                    }
+                    catch (Exception ex)
+                    {
+                        DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                            ex.GetExtendedMessage());
+                    }
+                }
+            }, cts.Token);
+
             // waiting for stop request
             while (true)
             {
@@ -206,6 +324,19 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     break;
                 }
             }
+
+            cts.Cancel();
+            try
+            {
+                Console.In.Close();
+                Console.In.Dispose();
+            }
+            catch { }
+            try
+            {
+                consoleCommandTask.Wait();
+            }
+            catch { }
 
             if (Client == null)
             {

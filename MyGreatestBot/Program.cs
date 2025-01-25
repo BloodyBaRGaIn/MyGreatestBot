@@ -42,7 +42,7 @@ namespace MyGreatestBot
                 ? $"{projectName} | {nameof(Debug)}"
                 : Release
                 ? $"{projectName} | {nameof(Release)}"
-                : projectName;
+                : $"{projectName} | Unknown configuration";
 
             _ = Process.GetCurrentProcess()
                 .SetHighestAvailableProcessPriority(ProcessPriorityClass.High,
