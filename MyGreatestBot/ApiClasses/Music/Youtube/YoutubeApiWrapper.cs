@@ -1,5 +1,6 @@
 ﻿global using YoutubeApiWrapper = MyGreatestBot.ApiClasses.Music.Youtube.YoutubeApiWrapper;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Http;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using Google.Apis.YouTube.v3;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -101,7 +103,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             UserCredential credentials = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets: GoogleClientSecrets.FromStream(fileStream).Secrets,
-                scopes: [YouTubeService.Scope.Youtube],
+                scopes: [YouTubeService.ScopeConstants.Youtube, YouTubeService.ScopeConstants.YoutubeReadonly],
                 user: user.Username,
                 taskCancellationToken: CancellationToken.None,
                 dataStore: dataStore).GetAwaiter().GetResult();
@@ -110,21 +112,21 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
 
             YouTubeService GoogleService = new(new BaseClientService.Initializer()
             {
-                HttpClientInitializer = credentials,
+                //HttpClientInitializer = credentials,
                 ApiKey = user.Key,
-                ApplicationName = string.Empty,
+                ApplicationName = "MyGreatestProject",
                 MaxUrlLength = 0,
-
-                //"MyGreatestApp" //"MyGreatestProject" //"MyGreatestClient" //"API Youtube key"
             });
 
-            HttpClient httpClient = GoogleService.HttpClient;
+            ConfigurableHttpClient httpClient = GoogleService.HttpClient;
             //httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
             //    credentials.Token.TokenType,
             //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
             //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             //    credentials.Token.TokenType,
             //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
+
+            //credentials.Initialize(httpClient);
 
             api = new(httpClient);
         }
