@@ -38,6 +38,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             private static readonly Regex AlbumRegex = GenerateAlbumRegex();
             private static readonly Regex ArtistRegex = GenerateArtistRegex();
             private static readonly Regex PlaylistRegex = GeneratePlaylistRegex();
+            private static readonly Regex NewFormatPlaylistRegex = GenerateNewFormatPlaylistRegex();
             private static readonly Regex ChartRegex = GenerateChartRegex();
 
             internal static string? TryGetTrackId(string query)
@@ -61,6 +62,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return (strings[0], strings[1]);
             }
 
+            internal static string? TryGetNewFormatPlaylistId(string query)
+            {
+                return NewFormatPlaylistRegex.GetMatchValue(query);
+            }
+
             internal static bool TryGetAsChart(string query)
             {
                 return ChartRegex.IsMatch(query);
@@ -77,6 +83,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             [GeneratedRegex("/users/([^/?]+)/playlists/([^/?]+)")]
             private static partial Regex GeneratePlaylistRegex();
+
+            [GeneratedRegex("/playlists/([^/?]+)")]
+            private static partial Regex GenerateNewFormatPlaylistRegex();
 
             [GeneratedRegex("/chart")]
             private static partial Regex GenerateChartRegex();
@@ -294,6 +303,17 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 }
                 tracks_collection.AddRange(GetPlaylist(playlist_user_str, playlist_id_str));
                 return tracks_collection;
+            }
+
+            while (true)
+            {
+                string? playlist_id_str = YandexQueryDecomposer.TryGetNewFormatPlaylistId(url);
+                playlist_id_str = playlist_id_str.EnsureIdentifier();
+                if (string.IsNullOrWhiteSpace(playlist_id_str))
+                {
+                    break;
+                }
+                throw new InvalidOperationException("New-format playlist links not supported");
             }
 
             while (true)
