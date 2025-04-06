@@ -11,7 +11,7 @@ namespace FfmpegUpdater
         public static async Task DownloadDataAsync(this HttpClient client,
                                                    string requestUrl,
                                                    Stream destination,
-                                                   IProgress<long> progress,
+                                                   IProgress<string> progress,
                                                    CancellationToken cancellationToken = default)
         {
             using HttpResponseMessage response = await client.GetAsync(requestUrl,
@@ -28,9 +28,13 @@ namespace FfmpegUpdater
             }
 
             Progress<long> progressWrapper = new(totalBytes =>
-                progress.Report((long)(totalBytes * 100 / (float)contentLength.Value)));
+            {
+                long maxBytes = contentLength.Value;
+                float precent = totalBytes * 100.0f / maxBytes;
+                progress.Report($"{totalBytes} / {maxBytes} ({precent:0.0}%)");
+            });
 
-            byte[] buffer = new byte[0x14000];
+            byte[] buffer = new byte[client.MaxResponseContentBufferSize];
             if (buffer == null || buffer.Length == 0)
             {
                 throw new InvalidOperationException($"Cannot allocate memory for {buffer}.");
@@ -59,11 +63,16 @@ namespace FfmpegUpdater
 
             long totalBytesRead = 0;
             int bytesRead;
+
             while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
             {
                 await destination.WriteAsync(buffer[..bytesRead], cancellationToken).ConfigureAwait(false);
                 totalBytesRead += bytesRead;
                 progress?.Report(totalBytesRead);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
         }
     }

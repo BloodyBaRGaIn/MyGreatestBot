@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -20,50 +21,31 @@ namespace FfmpegUpdater
         private const string FfmpegFileNameKey = "FfmpegFileName";
         private const string FfmpegRepoFileNameKey = "FfmpegRepoFileName";
 
-        private static int Exit(int exitCode)
-        {
-            Console.WriteLine("Press any key to exit...");
-            _ = Console.ReadKey(true);
-            Environment.Exit(exitCode);
-            return exitCode;
-        }
+        private static readonly CancellationTokenSource cts = new();
 
-        private static int Main()
+        private static void Main()
         {
+            Console.CancelKeyPress += Console_CancelKeyPress;
+
             // get properties
             if (!BuildPropsProvider.GetProperties(out Dictionary<string, string> PropertiesDictionary))
             {
                 Console.Error.WriteLine($"Cannot get properties{Environment.NewLine}" +
                     $"{GetExceptionMessage(BuildPropsProvider.LastError)}");
-                return Exit(1);
+                Exit(1);
             }
 
-            if (!PropertiesDictionary.TryGetValue(FfmpegDirKey, out string? ffmpeg_directory_name)
-                || string.IsNullOrWhiteSpace(ffmpeg_directory_name))
-            {
-                Console.Error.WriteLine($"Cannot get {FfmpegDirKey} value");
-                return Exit(1);
-            }
+            GetPropValue(PropertiesDictionary, FfmpegDirKey, out string ffmpeg_directory_name);
 
-            if (!PropertiesDictionary.TryGetValue(FfmpegFileNameKey, out string? ffmpeg_file_name)
-                || string.IsNullOrWhiteSpace(ffmpeg_file_name))
-            {
-                Console.Error.WriteLine($"Cannot get {FfmpegFileNameKey} value");
-                return Exit(1);
-            }
+            GetPropValue(PropertiesDictionary, FfmpegFileNameKey, out string ffmpeg_file_name);
 
-            if (!PropertiesDictionary.TryGetValue(FfmpegRepoFileNameKey, out string? ffmpeg_repo_file_name)
-                || string.IsNullOrWhiteSpace(ffmpeg_repo_file_name))
-            {
-                Console.Error.WriteLine($"Cannot get {FfmpegRepoFileNameKey} value");
-                return Exit(1);
-            }
+            GetPropValue(PropertiesDictionary, FfmpegRepoFileNameKey, out string ffmpeg_repo_file_name);
 
             string ffmpeg_executable_name = $"{ffmpeg_file_name}.{FfmpegExtension}";
             string ffmpeg_backup_name = $"{ffmpeg_file_name}_old.{FfmpegExtension}";
 
             // get solution path
-            DirectoryInfo? current_directory_info;
+            DirectoryInfo? current_directory_info = null;
 
             try
             {
@@ -74,7 +56,7 @@ namespace FfmpegUpdater
                 Console.Error.WriteLine(
                     $"Cannot get current directory info{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                return Exit(1);
+                Exit(1);
             }
 
             while (current_directory_info != null && current_directory_info.GetFiles("*.sln").Length == 0)
@@ -85,7 +67,7 @@ namespace FfmpegUpdater
             if (current_directory_info == null)
             {
                 Console.Error.WriteLine("Cannot find solution directory");
-                return Exit(1);
+                Exit(1);
             }
 
             // find ffmpeg directory
@@ -96,7 +78,7 @@ namespace FfmpegUpdater
             if (ffmpeg_directory == null)
             {
                 Console.Error.WriteLine($"Cannot find {ffmpeg_directory_name} directory");
-                return Exit(1);
+                Exit(1);
             }
 
             // find download link file
@@ -107,11 +89,11 @@ namespace FfmpegUpdater
             if (repo_link_info == null)
             {
                 Console.Error.WriteLine($"Cannot find {ffmpeg_repo_file_name}");
-                return Exit(1);
+                Exit(1);
             }
 
             // get repo link file content
-            string repo_link_file_content;
+            string repo_link_file_content = string.Empty;
 
             try
             {
@@ -127,20 +109,20 @@ namespace FfmpegUpdater
                 Console.Error.WriteLine(
                     $"Cannot read link file{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                return Exit(1);
+                Exit(1);
             }
 
             string[] repo_file_split = repo_link_file_content.Split([.. Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
             if (repo_file_split.Length != 2)
             {
                 Console.Error.WriteLine("Repo file is invalid");
-                return Exit(1);
+                Exit(1);
             }
 
             string repo_link = repo_file_split[0];
 
             // get repo latest tag
-            string repo_tag;
+            string repo_tag = string.Empty;
 
             try
             {
@@ -152,25 +134,28 @@ namespace FfmpegUpdater
                     RedirectStandardError = true,
                     UseShellExecute = false
                 });
-                if (git == null)
-                {
-                    throw new ArgumentNullException(nameof(git));
-                }
+
+                ArgumentNullException.ThrowIfNull(git);
+
                 if (!git.WaitForExit(10000))
                 {
                     git.Kill();
                     throw new InvalidOperationException(nameof(git));
                 }
+
                 string output = git.StandardOutput.ReadToEnd();
                 string error = git.StandardError.ReadToEnd();
+
                 if (!string.IsNullOrWhiteSpace(error))
                 {
                     Console.Error.WriteLine($"{nameof(git)} has error{Environment.NewLine}{error}");
                 }
+
                 if (string.IsNullOrWhiteSpace(output))
                 {
-                    throw new InvalidOperationException(nameof(output));
+                    throw new InvalidOperationException($"{nameof(git)} has no output");
                 }
+
                 repo_tag = output
                     .TrimEnd([.. Environment.NewLine])
                     .Split([.. Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)[^1];
@@ -180,7 +165,7 @@ namespace FfmpegUpdater
                 Console.Error.WriteLine(
                     $"Cannot get tag{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                return Exit(1);
+                Exit(1);
             }
 
             string[] split_tag = repo_tag.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
@@ -188,7 +173,7 @@ namespace FfmpegUpdater
             if (split_tag.Length != 2)
             {
                 Console.Error.WriteLine("Tag is invalid");
-                return Exit(1);
+                Exit(1);
             }
 
             string hash_commit = split_tag[0];
@@ -206,37 +191,49 @@ namespace FfmpegUpdater
             // download ffmpeg zip file
             string target_zip_path = Path.Combine(ffmpeg_directory.FullName, target_zip_file_name);
 
+            if (string.IsNullOrWhiteSpace(target_zip_path))
+            {
+                Console.Error.WriteLine("Zip file path is empty");
+                Exit(1);
+            }
+
             Console.WriteLine($"Downloading file {zip_link} to {target_zip_path}");
 
             {
-                static void PrintProgress(long value, int pad)
-                {
-                    Console.Write($"{value.ToString().PadLeft(pad)}");
-                }
+                using Semaphore progressSemaphore = new(1, 1);
+                string old_progress = string.Empty;
+                Progress<string> downloadProgress = new();
 
-                static void ClearProgress(int pad)
+                void ClearProgress()
                 {
-                    for (int i = 0; i < pad; i++)
+                    for (int i = 0; i < old_progress.Length; i++)
                     {
                         Console.Write('\b');
                     }
                 }
 
-                using Semaphore progressSemaphore = new(1, 1);
-                long old_progress = 0;
-                Progress<long> downloadProgress = new();
+                void PrintProgress()
+                {
+                    Console.Write(old_progress);
+                }
+
                 Console.Write("Progress: ");
-                PrintProgress(old_progress, 3);
+                ClearProgress();
+                PrintProgress();
+
                 downloadProgress.ProgressChanged += (sender, progress) =>
                 {
                     if (progress == old_progress)
                     {
                         return;
                     }
+
                     _ = progressSemaphore.WaitOne();
-                    ClearProgress(3);
-                    PrintProgress(progress, 3);
+
+                    ClearProgress();
                     old_progress = progress;
+                    PrintProgress();
+
                     _ = progressSemaphore.Release();
                 };
 
@@ -244,19 +241,41 @@ namespace FfmpegUpdater
                 {
                     using HttpClient httpClient = new();
                     httpClient.Timeout = TimeSpan.FromMinutes(5);
-                    using FileStream fileStream = new(target_zip_path, FileMode.Create, FileAccess.Write, FileShare.None);
-                    using CancellationTokenSource cts = new();
+                    httpClient.MaxResponseContentBufferSize = 0x10000;
+                    using FileStream fileStream = new(target_zip_path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
                     using Task task = httpClient.DownloadDataAsync(zip_link, fileStream, downloadProgress, cts.Token);
-                    cts.CancelAfter(TimeSpan.FromMinutes(5));
+
                     try
                     {
                         task.Wait();
                     }
                     catch { }
+
+                    if (task.IsCanceled)
+                    {
+                        Console.WriteLine();
+                        Console.Error.WriteLine("Download cancelled");
+
+                        try
+                        {
+                            fileStream.Close();
+                            fileStream.Dispose();
+
+                            if (File.Exists(target_zip_path))
+                            {
+                                File.Delete(target_zip_path);
+                            }
+                        }
+                        catch { }
+
+                        Exit(1);
+                    }
+
                     if (!task.IsCompletedSuccessfully)
                     {
-                        throw new TimeoutException("Cannot download");
+                        throw new TimeoutException("Download failed");
                     }
+
                     Console.WriteLine();
                 }
                 catch (Exception ex)
@@ -265,22 +284,24 @@ namespace FfmpegUpdater
                     Console.Error.WriteLine(
                         $"Cannot download file{Environment.NewLine}" +
                         $"{GetExceptionMessage(ex)}");
-                    return Exit(1);
+                    Exit(1);
                 }
             }
 
-            ZipArchive archive;
+            ZipArchive? archive = null;
 
             try
             {
                 archive = ZipFile.OpenRead(target_zip_path);
+
+                ArgumentNullException.ThrowIfNull(archive);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(
                     $"Cannot open archive{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                return Exit(1);
+                Exit(1);
             }
 
             ZipArchiveEntry? entry = archive.Entries.FirstOrDefault(entry => entry.FullName.EndsWith(ffmpeg_executable_name));
@@ -288,15 +309,30 @@ namespace FfmpegUpdater
             if (entry == null)
             {
                 Console.Error.WriteLine($"Archive not containing {ffmpeg_executable_name}");
-                return Exit(1);
+                Exit(1);
             }
 
             string destination_file_path = Path.Combine(ffmpeg_directory.FullName, ffmpeg_executable_name);
             string ffmpeg_old_path = Path.Combine(ffmpeg_directory.FullName, ffmpeg_backup_name);
 
+            if (string.IsNullOrWhiteSpace(destination_file_path))
+            {
+                Console.Error.WriteLine("Destination file path is empty");
+                Exit(1);
+            }
+
+            if (string.IsNullOrWhiteSpace(ffmpeg_old_path))
+            {
+                Console.Error.WriteLine("Old file path is empty");
+                Exit(1);
+            }
+
             try
             {
-                File.Delete(ffmpeg_old_path);
+                if (File.Exists(ffmpeg_old_path))
+                {
+                    File.Delete(ffmpeg_old_path);
+                }
             }
             catch { }
 
@@ -319,7 +355,7 @@ namespace FfmpegUpdater
                 Console.Error.WriteLine(
                     $"Cannot extract file{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                return Exit(1);
+                Exit(1);
             }
 
             archive.Dispose();
@@ -332,7 +368,55 @@ namespace FfmpegUpdater
 
             Console.WriteLine("FFMPEG updated successfully!");
 
-            return Exit(0);
+            Exit(0);
+        }
+
+        private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        {
+            _ = sender;
+            e.Cancel = true;
+
+            try
+            {
+                cts.Cancel();
+            }
+            catch { }
+        }
+
+
+        [DoesNotReturn]
+        private static void Exit(int exitCode)
+        {
+            try
+            {
+                cts.Dispose();
+            }
+            catch { }
+
+            Console.WriteLine("Press any key to exit...");
+            _ = Console.ReadKey(true);
+            Environment.Exit(exitCode);
+
+            while (true)
+            {
+                try
+                {
+                    Task.Delay(1).Wait();
+                }
+                catch { }
+            }
+        }
+
+        private static void GetPropValue(Dictionary<string, string> dictionary, string name, out string value)
+        {
+            if (!dictionary.TryGetValue(name, out string? tmp_value)
+                || string.IsNullOrWhiteSpace(tmp_value))
+            {
+                Console.Error.WriteLine($"Cannot get {name} value");
+                Exit(1);
+            }
+
+            value = tmp_value;
         }
 
         private static string GetExceptionMessage(Exception? ex)
