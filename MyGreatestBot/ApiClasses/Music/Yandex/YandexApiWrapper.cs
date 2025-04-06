@@ -314,7 +314,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 {
                     break;
                 }
-                throw new InvalidOperationException("New-format playlist links not supported");
+                tracks_collection.AddRange(GetPlaylist(playlist_id_str));
+                return tracks_collection;
             }
 
             while (true)
@@ -412,14 +413,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             return tracks_collection;
         }
 
-        private List<YandexTrackInfo> GetPlaylist(string playlist_user_str, string playlist_id_str)
+        private static List<YandexTrackInfo> MakePlaylist(YPlaylist playlist)
         {
-            playlist_user_str = playlist_user_str.EnsureIdentifier();
-            playlist_id_str = playlist_id_str.EnsureIdentifier();
-
             List<YandexTrackInfo> tracks_collection = [];
-
-            YPlaylist playlist = Client.GetPlaylist(playlist_user_str, playlist_id_str);
 
             if (playlist == null)
             {
@@ -451,6 +447,21 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             return tracks_collection;
+        }
+
+        private List<YandexTrackInfo> GetPlaylist(string playlist_user_str, string playlist_id_str)
+        {
+            return MakePlaylist(
+                Client.GetPlaylist(
+                    playlist_user_str,
+                    playlist_id_str));
+        }
+
+        private List<YandexTrackInfo> GetPlaylist(string playlist_id_str)
+        {
+            return MakePlaylist(
+                Client.GetPlaylist(
+                    playlist_id_str));
         }
 
         private List<YandexTrackInfo> GetChart()

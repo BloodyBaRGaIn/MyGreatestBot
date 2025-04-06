@@ -58,8 +58,8 @@
     <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-nightly-02262" />
     <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.69.0.3707" />
-    <PackageReference Include="KM.Yandex.Music.Api" Version="2.0.1" />
-    <PackageReference Include="KM.Yandex.Music.Client" Version="2.0.1" />
+    <PackageReference Include="KM.Yandex.Music.Api" Version="2.0.2" />
+    <PackageReference Include="KM.Yandex.Music.Client" Version="2.0.2" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
