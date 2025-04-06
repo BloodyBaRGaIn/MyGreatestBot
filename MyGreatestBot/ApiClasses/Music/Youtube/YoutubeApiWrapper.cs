@@ -252,15 +252,15 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             const string searchSeparator = "-";
             const char searchComma = ',';
 
-            string searchQuery = $"{other.Title} {searchSeparator} {string.Join($"{searchComma} ", other.ArtistArr.Select(a => a.Title))}";
+            string searchQuery = $"{other.Title} {searchSeparator} {string.Join($"{searchComma} ", other.ArtistArr.Select(static a => a.Title))}";
 
             static IEnumerable<string> GetWords(string input)
             {
                 return input
                     .ToLowerInvariant()
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Where(s => s != searchSeparator)
-                    .Select(s => s.Trim(searchComma))
+                    .Where(static s => s != searchSeparator)
+                    .Select(static s => s.Trim(searchComma))
                     .Where(string.IsNullOrEmpty);
             }
 
@@ -276,7 +276,7 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                 return null;
             }
 
-            VideoSearchResult? result = search.Where(track => track != null)
+            VideoSearchResult? result = search.Where(static track => track != null)
                 .FirstOrDefault(track =>
                 {
                     IEnumerable<string> resultWords = GetWords(track.Title);

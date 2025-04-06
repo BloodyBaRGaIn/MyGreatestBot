@@ -370,9 +370,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                volumes = album.WithTracks().Volumes.SelectMany(t => t)
-                               .Where(t => t != null && !string.IsNullOrWhiteSpace(t.Id))
-                               .DistinctBy(t => t.Id);
+                volumes = album.WithTracks().Volumes.SelectMany(static t => t)
+                               .Where(static t => t != null && !string.IsNullOrWhiteSpace(t.Id))
+                               .DistinctBy(static t => t.Id);
             }
             catch
             {
@@ -385,8 +385,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
 
             tracks_collection.AddRange(volumes
-                .Select(track => new YandexTrackInfo(track))
-                .Where(track => track != null));
+                .Select(static t => new YandexTrackInfo(t))
+                .Where(static t => t != null));
 
             return tracks_collection;
         }
@@ -404,11 +404,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             IEnumerable<YTrack> yTracks = Client.GetArtist(artist_id_str).Artist
                 .GetAllTracks()
-                .Where(track => track != null);
+                .Where(static t => t != null);
 
             tracks_collection.AddRange(yTracks
-                .Select(track => new YandexTrackInfo(track))
-                .Where(track => track != null));
+                .Select(static t => new YandexTrackInfo(t))
+                .Where(static t => t != null));
 
             return tracks_collection;
         }
@@ -427,8 +427,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             try
             {
                 tracks = playlist.Tracks
-                    .Select(t => t.Track)
-                    .Where(t => t != null);
+                    .Select(static t => t.Track)
+                    .Where(static t => t != null);
             }
             catch
             {
@@ -437,9 +437,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             try
             {
-                tracks_collection.AddRange(tracks.Where(t => t != null)
+                tracks_collection.AddRange(tracks.Where(static t => t != null)
                                                  .Select(t => new YandexTrackInfo(t, playlist))
-                                                 .Where(t => t != null));
+                                                 .Where(static t => t != null));
             }
             catch
             {
@@ -475,7 +475,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
-            IEnumerable<YLandingEntity> entities = blocks.SelectMany(b => b.Entities);
+            IEnumerable<YLandingEntity> entities = blocks.SelectMany(static b => b.Entities);
 
             if (entities == null || !entities.Any())
             {

@@ -128,7 +128,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     return tracks;
                 }
 
-                IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(t => t.Track);
+                IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(static t => t.Track);
 
                 foreach (IPlayableItem? item in tracks_collection)
                 {
