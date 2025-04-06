@@ -4,7 +4,6 @@ using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MyGreatestBot.Player
 {

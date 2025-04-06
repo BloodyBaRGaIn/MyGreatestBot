@@ -10,9 +10,9 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// API flag.
         /// </summary>
-        public abstract ApiIntents ApiType { get; }
+        abstract ApiIntents ApiType { get; }
 
-        public ApiStatus Status
+        ApiStatus Status
         {
             get => OldStatus;
             protected set
@@ -30,12 +30,12 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Is API essential for bot running.
         /// </summary>
-        public virtual bool IsEssential => false;
+        virtual bool IsEssential => false;
 
         /// <summary>
         /// Performs log in.
         /// </summary>
-        public sealed void PerformAuth()
+        sealed void PerformAuth()
         {
             switch (Status)
             {
@@ -64,7 +64,7 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Performs log out.
         /// </summary>
-        public sealed void Logout()
+        sealed void Logout()
         {
             switch (Status)
             {
@@ -95,12 +95,12 @@ namespace MyGreatestBot.ApiClasses
 
         protected abstract void LogoutInternal();
 
-        public sealed void SetStatus(ApiStatus status)
+        sealed void SetStatus(ApiStatus status)
         {
             Status = status;
         }
 
-        public sealed string GetApiStatusString()
+        sealed string GetApiStatusString()
         {
             return $"{ApiType} {Status}.";
         }

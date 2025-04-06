@@ -1,7 +1,6 @@
 ﻿using AngleSharp.Text;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -18,8 +17,6 @@ using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -173,13 +170,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             _ = new ConsoleCommands().InvokeMethod(command, [.. arguments]);
 
             await Task.Yield();
-
-            //await Commands.ExecuteCommandAsync(
-            //    Commands.CreateContext(
-            //        null,
-            //        CommandPrefix,
-            //        findCommand,
-            //        string.Join("", StringExtensions.EnsureStrings(arguments))));
         }
 
         /// <summary>
@@ -296,9 +286,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     try
                     {
                         if (in_split.Length > 1)
+                        {
                             await DiscordWrapper.ExecuteCommandAsync(in_split[0], in_split[1..]);
+                        }
                         else
+                        {
                             await DiscordWrapper.ExecuteCommandAsync(in_split[0]);
+                        }
                     }
                     catch (Exception ex)
                     {

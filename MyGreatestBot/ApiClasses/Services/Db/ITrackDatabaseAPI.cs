@@ -84,7 +84,7 @@ namespace MyGreatestBot.ApiClasses.Services.Db
         /// <param name="guild">
         /// <inheritdoc cref="IsIgnoredDoxygen" path="/param[@name='guild']"/>
         /// </param>
-        public virtual void AddIgnoredArtist(BaseTrackInfo track, ulong guild)
+        virtual void AddIgnoredArtist(BaseTrackInfo track, ulong guild)
         {
             for (int i = 0; i < track.ArtistArr.Length; i++)
             {

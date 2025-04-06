@@ -20,7 +20,7 @@ namespace MyGreatestBot.ApiClasses
         /// <summary>
         /// Collection of API domain URLs
         /// </summary>
-        public DomainCollection Domains { get; }
+        DomainCollection Domains { get; }
 
         /// <summary>
         /// Try HTTP request to domain URLs.<br/>
@@ -28,7 +28,7 @@ namespace MyGreatestBot.ApiClasses
         /// </summary>
         /// 
         /// <exception cref="ApplicationException"></exception>
-        public void TryAccess()
+        void TryAccess()
         {
             if (Domains == null)
             {
@@ -62,7 +62,7 @@ namespace MyGreatestBot.ApiClasses
         /// <returns>
         /// True if the response returned successful status code or given URL is an empty string.
         /// </returns>
-        public static bool IsUrlSuccess(
+        static bool IsUrlSuccess(
             [DisallowNull] string url,
             bool isApi = true)
         {

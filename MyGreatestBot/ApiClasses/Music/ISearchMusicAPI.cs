@@ -7,7 +7,7 @@ namespace MyGreatestBot.ApiClasses.Music
     /// </summary>
     public interface ISearchMusicAPI : IMusicAPI
     {
-        public static readonly TimeSpan MaximumTimeDifference = TimeSpan.FromSeconds(2);
+        static readonly TimeSpan MaximumTimeDifference = TimeSpan.FromSeconds(2);
         /// <summary>
         /// Search track with other
         /// </summary>
