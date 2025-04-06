@@ -350,17 +350,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            DiscordActivity activity = status switch
-            {
-                DiscordUserStatus.Online => new(OnlineActivityName, OnlineActivityType),
-                _ => new(),
-            };
+            DiscordActivity activity;
+            int timeout;
 
-            int timeout = status switch
+            switch (status)
             {
-                DiscordUserStatus.Online => DiscordWrapper.ConnectionTimeout,
-                _ => DiscordWrapper.DisconnectionTimeout
-            };
+                case DiscordUserStatus.Online:
+                    activity = new(OnlineActivityName, OnlineActivityType);
+                    timeout = DiscordWrapper.ConnectionTimeout;
+                    break;
+
+                case DiscordUserStatus.Offline:
+                default:
+                    activity = new();
+                    timeout = DiscordWrapper.DisconnectionTimeout;
+                    break;
+            }
 
             try
             {
