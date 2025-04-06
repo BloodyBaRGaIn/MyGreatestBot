@@ -19,12 +19,13 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
     /// <summary>
     /// Vk API wrapper class
     /// </summary>
-    public sealed partial class VkApiWrapper : IUrlMusicAPI
+    public sealed partial class VkApiWrapper : IUrlMusicAPI, IApiGenericException
     {
         private VkApi? _api;
-        private readonly VkApiException GenericException = new();
+        ApiException IApiGenericException.GenericException { get; } = new VkApiException();
+        private static IApiGenericException GenericExceptionInstance => Instance;
 
-        private IAudioCategory Audio => _api?.Audio ?? throw GenericException;
+        private IAudioCategory Audio => _api?.Audio ?? throw GenericExceptionInstance.GenericException;
 
         private static partial class VkQueryDecomposer
         {
@@ -90,17 +91,6 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 throw new VkApiException("Cannot add audio service", ex);
             }
 
-            ApiAuthParams apiAuthParams = new()
-            {
-                Login = credentials.Username,
-                Password = credentials.Password
-            };
-
-            if (ulong.TryParse(credentials.AppId, out ulong appid))
-            {
-                apiAuthParams.ApplicationId = appid;
-            }
-
             try
             {
                 if (_api == null)
@@ -111,6 +101,17 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             catch (Exception ex)
             {
                 throw new VkApiException("Cannot authorize", ex);
+            }
+
+            ApiAuthParams apiAuthParams = new()
+            {
+                Login = credentials.Username,
+                Password = credentials.Password
+            };
+
+            if (ulong.TryParse(credentials.AppId, out ulong appid))
+            {
+                apiAuthParams.ApplicationId = appid;
             }
 
             try
@@ -143,12 +144,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
         {
             if (_api == null || !_api.IsAuthorized)
             {
-                throw GenericException;
+                throw GenericExceptionInstance.GenericException;
             }
 
             List<BaseTrackInfo> tracks = [];
 
-            return string.IsNullOrWhiteSpace(url)
+            return string.IsNullOrWhiteSpace(url) || !IAccessible.IsUrlSuccess(url, false)
                 ? tracks
                 : TryAddAsCollection(url, tracks, is_playlist: true)
                 ? tracks

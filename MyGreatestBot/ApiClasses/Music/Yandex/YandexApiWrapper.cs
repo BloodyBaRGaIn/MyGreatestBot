@@ -25,12 +25,13 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
     /// <summary>
     /// Yandex API wrapper class
     /// </summary>
-    public sealed partial class YandexApiWrapper : IRadioMusicAPI, IUrlMusicAPI
+    public sealed partial class YandexApiWrapper : IRadioMusicAPI, IUrlMusicAPI, IApiGenericException
     {
         private YandexMusicClient? _client;
-        private readonly YandexApiException GenericException = new();
+        ApiException IApiGenericException.GenericException { get; } = new YandexApiException();
+        private static IApiGenericException GenericExceptionInstance => Instance;
 
-        private YandexMusicClient Client => _client ?? throw GenericException;
+        private YandexMusicClient Client => _client ?? throw GenericExceptionInstance.GenericException;
 
         private static partial class YandexQueryDecomposer
         {
@@ -130,7 +131,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             if (!Client.IsAuthorized)
             {
-                throw GenericException;
+                throw GenericExceptionInstance.GenericException;
             }
 
             try
@@ -250,7 +251,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
         {
             List<BaseTrackInfo> tracks_collection = [];
 
-            if (string.IsNullOrWhiteSpace(url))
+            if (string.IsNullOrWhiteSpace(url) || !IAccessible.IsUrlSuccess(url, false))
             {
                 return tracks_collection;
             }

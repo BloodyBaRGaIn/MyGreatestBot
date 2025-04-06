@@ -12,9 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if false
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+#endif
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,15 +32,16 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
     /// <summary>
     /// Youtube API wrapper class
     /// </summary>
-    public sealed partial class YoutubeApiWrapper : ITextMusicAPI, IUrlMusicAPI, ISearchMusicAPI
+    public sealed partial class YoutubeApiWrapper : ITextMusicAPI, IUrlMusicAPI, ISearchMusicAPI, IApiGenericException
     {
         private YoutubeClient? api;
-        private readonly YoutubeApiException GenericException = new();
+        ApiException IApiGenericException.GenericException { get; } = new YoutubeApiException();
+        private static IApiGenericException GenericExceptionInstance => Instance;
 
-        private VideoClient Videos => api?.Videos ?? throw GenericException;
-        public StreamClient Streams => api?.Videos.Streams ?? throw GenericException;
-        private PlaylistClient Playlists => api?.Playlists ?? throw GenericException;
-        private SearchClient Search => api?.Search ?? throw GenericException;
+        private VideoClient Videos => api?.Videos ?? throw GenericExceptionInstance.GenericException;
+        public StreamClient Streams => api?.Videos.Streams ?? throw GenericExceptionInstance.GenericException;
+        private PlaylistClient Playlists => api?.Playlists ?? throw GenericExceptionInstance.GenericException;
+        private SearchClient Search => api?.Search ?? throw GenericExceptionInstance.GenericException;
 
         private static partial class YoutubeQueryDecomposer
         {
@@ -119,14 +122,17 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
             });
 
             ConfigurableHttpClient httpClient = GoogleService.HttpClient;
-            //httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
-            //    credentials.Token.TokenType,
-            //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
-            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            //    credentials.Token.TokenType,
-            //    credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
 
-            //credentials.Initialize(httpClient);
+#if false
+            httpClient.DefaultRequestHeaders.ProxyAuthorization = new AuthenticationHeaderValue(
+                credentials.Token.TokenType,
+                credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                credentials.Token.TokenType,
+                credentials.Token.AccessToken); // AccessToken // RefreshToken // IdToken
+
+            credentials.Initialize(httpClient);
+#endif
 
             api = new(httpClient);
         }
@@ -140,12 +146,12 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
         {
             if (api == null)
             {
-                throw GenericException;
+                throw GenericExceptionInstance.GenericException;
             }
 
             List<BaseTrackInfo> tracks = [];
 
-            if (string.IsNullOrWhiteSpace(url))
+            if (string.IsNullOrWhiteSpace(url) || !IAccessible.IsUrlSuccess(url, false))
             {
                 return tracks;
             }

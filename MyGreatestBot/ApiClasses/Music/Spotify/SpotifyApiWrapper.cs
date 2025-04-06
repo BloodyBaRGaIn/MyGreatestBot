@@ -14,15 +14,17 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
     /// <summary>
     /// Spotify API wrapper class
     /// </summary>
-    public sealed partial class SpotifyApiWrapper : IUrlMusicAPI
+    public sealed partial class SpotifyApiWrapper : IUrlMusicAPI, IApiGenericException
     {
         private SpotifyClient? _api;
-        private readonly SpotifyApiException GenericException = new();
 
-        private IPlaylistsClient Playlists => _api?.Playlists ?? throw GenericException;
-        private IAlbumsClient Albums => _api?.Albums ?? throw GenericException;
-        private IArtistsClient Artists => _api?.Artists ?? throw GenericException;
-        private ITracksClient Tracks => _api?.Tracks ?? throw GenericException;
+        ApiException IApiGenericException.GenericException { get; } = new SpotifyApiException();
+        private static IApiGenericException GenericExceptionInstance => Instance;
+
+        private IPlaylistsClient Playlists => _api?.Playlists ?? throw GenericExceptionInstance.GenericException;
+        private IAlbumsClient Albums => _api?.Albums ?? throw GenericExceptionInstance.GenericException;
+        private IArtistsClient Artists => _api?.Artists ?? throw GenericExceptionInstance.GenericException;
+        private ITracksClient Tracks => _api?.Tracks ?? throw GenericExceptionInstance.GenericException;
 
         private static partial class SpotifyQueryDecomposer
         {
@@ -99,14 +101,14 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         {
             List<BaseTrackInfo> tracks = [];
 
-            if (string.IsNullOrWhiteSpace(url))
+            if (string.IsNullOrWhiteSpace(url) || !IAccessible.IsUrlSuccess(url, false))
             {
                 return tracks;
             }
 
             if (_api == null)
             {
-                throw GenericException;
+                throw GenericExceptionInstance.GenericException;
             }
 
             while (true)

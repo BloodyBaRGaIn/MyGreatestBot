@@ -112,12 +112,7 @@ namespace MyGreatestBot.ApiClasses.Music
 
                 foreach (string? url in CoverUrlCollection)
                 {
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        continue;
-                    }
-
-                    if (IAccessible.IsUrlSuccess(url, false))
+                    if (!string.IsNullOrWhiteSpace(url) && IAccessible.IsUrlSuccess(url, false))
                     {
                         LastThumbnail = new()
                         {

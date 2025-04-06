@@ -92,7 +92,11 @@ namespace MyGreatestBot.ApiClasses
 
             _ = Task.Run(static () =>
             {
-                Task.Delay(MinRequestDelay).Wait();
+                try
+                {
+                    Task.Delay(MinRequestDelay).Wait();
+                }
+                catch { }
                 _ = semaphore.TryRelease();
             });
 
