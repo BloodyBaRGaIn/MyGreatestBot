@@ -52,10 +52,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             try
             {
                 BaseTrackInfo? result = instance.SearchTrack(this);
-                if (result == null)
-                {
-                    return false;
-                }
+                ArgumentNullException.ThrowIfNull(result);
 
                 result.ObtainAudioURL(Timeout.Infinite, cts);
 

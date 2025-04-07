@@ -173,7 +173,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             bool connection_rollback = false;
 
-            if (channel is not null && !channel.PermissionsFor(_guild.CurrentMember)
+            if (new_channel is not null && !new_channel.PermissionsFor(_guild.CurrentMember)
                 .HasFlag(DiscordPermissions.AccessChannels |
                          DiscordPermissions.UseVoice |
                          DiscordPermissions.Speak))

@@ -41,9 +41,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             Duration = TimeSpan.FromMilliseconds(track.DurationMs);
 
-            if (track.Albums != null && track.Albums.Count != 0)
+            YAlbum? album = track.Albums?.FirstOrDefault();
+            if (album != null)
             {
-                YAlbum album = track.Albums.First();
                 AlbumName = new(album.Title, $"{Domain}album/{album.Id}");
             }
 
@@ -61,15 +61,19 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             if (track.Albums != null && track.Albums.Count != 0)
             {
-                cover_uris.AddRange(track.Albums.Select(a => a.CoverUri));
+                cover_uris.AddRange(track.Albums
+                    .Where(static a => a != null)
+                    .Select(static a => a.CoverUri));
             }
 
             if (track.Artists != null && track.Artists.Count != 0)
             {
-                cover_uris.AddRange(track.Artists.Select(a => a.OgImage));
+                cover_uris.AddRange(track.Artists
+                    .Where(static a => a != null)
+                    .Select(a => a.OgImage));
             }
 
-            CoverUrlCollection = cover_uris.Select(cover => $"https://{cover?.Replace("/%%", "/100x100")}");
+            CoverUrlCollection = cover_uris.Select(static cover => $"https://{cover?.Replace("/%%", "/100x100")}");
         }
 
         protected override void ObtainAudioURLInternal(CancellationTokenSource cts)

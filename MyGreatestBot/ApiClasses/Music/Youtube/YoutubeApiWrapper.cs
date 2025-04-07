@@ -180,6 +180,11 @@ namespace MyGreatestBot.ApiClasses.Music.Youtube
                                                                         .GetAwaiter()
                                                                         .GetResult();
 
+                if (!playlist_videos.Any())
+                {
+                    throw new YoutubeApiException("Playlist is empty");
+                }
+
                 foreach (PlaylistVideo pl_video in playlist_videos)
                 {
                     tracks.Add(new YoutubeTrackInfo(pl_video, pl_instance));

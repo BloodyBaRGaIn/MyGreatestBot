@@ -12,6 +12,7 @@ using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
 using Yandex.Music.Api.Models.Album;
+using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Landing;
 using Yandex.Music.Api.Models.Landing.Entity;
 using Yandex.Music.Api.Models.Landing.Entity.Entities;
@@ -376,12 +377,12 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch
             {
-                return tracks_collection;
+                throw;
             }
 
             if (!volumes.Any())
             {
-                return tracks_collection;
+                throw new YandexApiException("Album is empty");
             }
 
             tracks_collection.AddRange(volumes
@@ -402,9 +403,24 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
-            IEnumerable<YTrack> yTracks = Client.GetArtist(artist_id_str).Artist
-                .GetAllTracks()
-                .Where(static t => t != null);
+            YArtist artist = Client.GetArtist(artist_id_str).Artist;
+            IEnumerable<YTrack> yTracks;
+
+            try
+            {
+                yTracks = Client.GetArtist(artist_id_str).Artist
+                    .GetAllTracks()
+                    .Where(static t => t != null);
+            }
+            catch
+            {
+                throw;
+            }
+
+            if (!yTracks.Any())
+            {
+                throw new YandexApiException("Artist is empty");
+            }
 
             tracks_collection.AddRange(yTracks
                 .Select(static t => new YandexTrackInfo(t))
@@ -422,6 +438,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return tracks_collection;
             }
 
+            if (playlist.TrackCount < 0)
+            {
+                throw new YandexApiException("Playlist is empty");
+            }
+
             IEnumerable<YTrack> tracks;
 
             try
@@ -432,7 +453,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch
             {
-                return tracks_collection;
+                throw;
             }
 
             try
@@ -443,7 +464,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             }
             catch
             {
-                return tracks_collection;
+                throw;
             }
 
             return tracks_collection;
@@ -451,17 +472,34 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private List<YandexTrackInfo> GetPlaylist(string playlist_user_str, string playlist_id_str)
         {
-            return MakePlaylist(
-                Client.GetPlaylist(
-                    playlist_user_str,
-                    playlist_id_str));
+            YPlaylist playlist;
+
+            try
+            {
+                playlist = Client.GetPlaylist(playlist_user_str, playlist_id_str);
+                return MakePlaylist(playlist);
+            }
+            catch (Exception ex)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                throw;
+            }
         }
 
         private List<YandexTrackInfo> GetPlaylist(string playlist_id_str)
         {
-            return MakePlaylist(
-                Client.GetPlaylist(
-                    playlist_id_str));
+            YPlaylist playlist;
+
+            try
+            {
+                playlist = Client.GetPlaylist(playlist_id_str);
+                return MakePlaylist(playlist);
+            }
+            catch (Exception ex)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                throw;
+            }
         }
 
         private List<YandexTrackInfo> GetChart()

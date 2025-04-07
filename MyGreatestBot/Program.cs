@@ -49,7 +49,7 @@ namespace MyGreatestBot
                                                     ProcessPriorityClass.Normal);
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            Console.OutputEncoding = Encoding.Unicode;
+            Console.OutputEncoding = Encoding.UTF8;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace MyGreatestBot
         private static int Main()
         {
             Thread.CurrentThread.SetHighestAvailableTheadPriority(
-                ThreadPriority.Highest,
+                ThreadPriority.AboveNormal,
                 ThreadPriority.Normal);
 
             Console.CancelKeyPress += Console_CancelKeyPress;

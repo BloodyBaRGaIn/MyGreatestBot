@@ -501,11 +501,33 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
+            bool semaphoreReady;
+
 #pragma warning disable CS8604
             bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
 #pragma warning restore CS8604
+            // TODO sometimes event triggering without reason
             if (!channel_changed)
             {
+                if (e.After?.Channel is not null)
+                {
+                    semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
+
+                    if (semaphoreReady)
+                    {
+                        handler.VoiceUpdating = true;
+
+                        handler.Voice.IsManualDisconnect = true;
+                        await handler.Join(e);
+                        await handler.Voice.WaitForConnectionAsync();
+
+                        handler.Log.Send($"{eventName} {VoiceEventState.FastFinish}", LogLevel.Debug);
+
+                        handler.VoiceUpdating = false;
+
+                        _ = handler.VoiceUpdateSemaphore.TryRelease();
+                    }
+                }
                 return;
             }
 
@@ -521,7 +543,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             await Task.Yield();
 
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
+            semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
 
             await Task.Run(async () =>
             {
@@ -536,7 +558,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     handler.VoiceUpdating = true;
 
-                    Task waitConnectionTask = Task.Run(async () =>
+                    using Task waitConnectionTask = Task.Run(async () =>
                     {
                         Thread.CurrentThread.Name = $"{nameof(waitConnectionTask)} {handler.GuildName}";
 
@@ -640,13 +662,19 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
 
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(1000);
+            try
+            {
+                await Task.Delay(5000);
+            }
+            catch { }
+
+            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
             if (semaphoreReady)
             {
-                if (handler.VoiceUpdating)
+                if (handler.VoiceUpdating || handler.ServerUpdating)
                 {
                     handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
-                    await Task.Delay(1);
+                    _ = handler.VoiceUpdateSemaphore.TryRelease();
                     return;
                 }
 
@@ -785,7 +813,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             Start,
             InProgress,
             Busy,
-            Finish
+            Finish,
+            FastFinish
         }
 
         #endregion

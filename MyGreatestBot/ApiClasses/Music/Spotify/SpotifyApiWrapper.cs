@@ -120,12 +120,15 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     break;
                 }
 
-                FullPlaylist? playlist = Playlists.Get(playlist_id).GetAwaiter().GetResult();
-                List<PlaylistTrack<IPlayableItem>>? tracks_list = playlist.Tracks?.Items ?? null;
+                FullPlaylist playlist = Playlists.Get(playlist_id).GetAwaiter().GetResult() ??
+                    throw new SpotifyApiException("Cannot get playlist");
 
-                if (tracks_list == null)
+                List<PlaylistTrack<IPlayableItem>> tracks_list = playlist.Tracks?.Items ??
+                    throw new SpotifyApiException("Cannot get playlist items");
+
+                if (tracks_list.Count == 0)
                 {
-                    return tracks;
+                    throw new SpotifyApiException("Playlist is empty");
                 }
 
                 IEnumerable<IPlayableItem> tracks_collection = tracks_list.Select(static t => t.Track);
@@ -163,13 +166,18 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     break;
                 }
 
-                Paging<SimpleAlbum> albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult();
-                if (albums == null || albums.Items == null || albums.Items.Count == 0)
+                Paging<SimpleAlbum> paged_albums = Artists.GetAlbums(artist_id).GetAwaiter().GetResult() ??
+                    throw new SpotifyApiException("Cannot get artist");
+
+                List<SimpleAlbum> albums = paged_albums.Items ??
+                    throw new SpotifyApiException("Cannot get artist albums");
+
+                if (albums.Count == 0)
                 {
-                    return tracks;
+                    throw new SpotifyApiException("Artist is empty");
                 }
 
-                foreach (SimpleAlbum album in albums.Items)
+                foreach (SimpleAlbum album in paged_albums.Items)
                 {
                     FromAlbumId(album.Id, tracks);
                 }
@@ -217,11 +225,9 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
         private void FromAlbumId(string album_id, List<BaseTrackInfo> tracks)
         {
             album_id = album_id.EnsureIdentifier();
-            FullAlbum? album = Albums.Get(album_id).GetAwaiter().GetResult();
-            if (album == null)
-            {
-                return;
-            }
+            FullAlbum album = Albums.Get(album_id).GetAwaiter().GetResult() ??
+                throw new SpotifyApiException("Cannot get album");
+
             SimpleAlbum simpleAlbum = new()
             {
                 Artists = album.Artists,
@@ -239,11 +245,15 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 Type = album.Type,
                 Uri = album.Uri,
             };
-            List<SimpleTrack>? tracks_list = album.Tracks?.Items ?? null;
-            if (tracks_list == null || tracks_list.Count == 0)
+
+            List<SimpleTrack> tracks_list = album.Tracks?.Items ??
+                throw new SpotifyApiException("Cannot get album items");
+
+            if (tracks_list.Count == 0)
             {
-                return;
+                throw new SpotifyApiException("Album is empty");
             }
+
             foreach (SimpleTrack track in tracks_list)
             {
                 FullTrack full = new()
@@ -263,6 +273,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                     Type = track.Type,
                     Uri = track.Uri
                 };
+
                 tracks.Add(new SpotifyTrackInfo(full));
             }
         }

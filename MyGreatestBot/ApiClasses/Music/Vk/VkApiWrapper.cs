@@ -209,11 +209,12 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
                 ? Audio.GetPlaylistById(user_l, id_l)
                 : null;
 
-            VkCollection<Audio>? vk_tracks = Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, });
+            VkCollection<Audio> vk_tracks = Audio.Get(new AudioGetParams() { OwnerId = user_l, PlaylistId = id_l, }) ??
+                throw new VkApiException("Cannot get collection");
 
-            if (vk_tracks == null || !vk_tracks.Any())
+            if (!vk_tracks.Any())
             {
-                return success;
+                throw new VkApiException("Collection is empty");
             }
 
             foreach (Audio t in vk_tracks)
