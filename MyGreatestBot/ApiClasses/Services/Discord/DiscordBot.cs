@@ -517,7 +517,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                     {
                         handler.VoiceUpdating = true;
 
-                        handler.Voice.IsManualDisconnect = true;
+                        handler.Voice.Disconnect();
                         await handler.Join(e);
                         await handler.Voice.WaitForConnectionAsync();
 
@@ -638,7 +638,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
         {
-            string eventName = nameof(Client.VoiceServerUpdated);
+            string eventName = $"{nameof(Client.VoiceServerUpdated)} {e.Endpoint ?? "null"}";
 
             bool isBotTriggered = Client.CurrentUser.Id == client.CurrentUser.Id;
             if (!isBotTriggered)
@@ -654,7 +654,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
-            if (handler.Voice.IsManualDisconnect)
+            bool not_changed = false;
+
+            if (handler.Voice.Endpoint != e.Endpoint || handler.Voice.Token != e.VoiceToken)
+            {
+                if (string.IsNullOrWhiteSpace(handler.Voice.Endpoint) ||
+                    string.IsNullOrWhiteSpace(e.Endpoint) ||
+                    string.IsNullOrWhiteSpace(handler.Voice.Token) ||
+                    string.IsNullOrWhiteSpace(e.VoiceToken))
+                {
+                    not_changed = true;
+                }
+                handler.Voice.Endpoint = e.Endpoint;
+                handler.Voice.Token = e.VoiceToken;
+            }
+
+            if (not_changed || handler.Voice.IsManualDisconnect)
             {
                 await Task.Yield();
                 return;

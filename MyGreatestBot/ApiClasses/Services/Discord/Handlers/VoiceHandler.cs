@@ -16,6 +16,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         [AllowNull] public DiscordChannel Channel { get; private set; }
         [AllowNull] private VoiceTransmitSink TransmitSink { get; set; }
         [AllowNull] private DiscordChannel LastKnownChannel { get; set; } = null;
+        [AllowNull] public string Endpoint { get; set; } = null;
+        [AllowNull] public string Token { get; set; } = null;
 
         [AllowNull]
         public VoiceNextConnection Connection
@@ -143,6 +145,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Connection?.Dispose();
                 Connection = null;
                 Channel = null;
+                Endpoint = null;
+                Token = null;
             }
             catch { }
         }

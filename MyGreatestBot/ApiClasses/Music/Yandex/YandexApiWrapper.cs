@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Yandex.Music.Api.Common.Debug;
 using Yandex.Music.Api.Common.Debug.Writer;
 using Yandex.Music.Api.Extensions.API;
+using Yandex.Music.Api.Models.Account;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Landing;
@@ -119,16 +120,91 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 SaveResponse = true
             });
 
-            try
+            YAuthTypes types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
+
+            if (bool.TryParse(types.CanAuthorize, out bool canAuthorize))
             {
-                _ = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
-                Task.Delay(500).Wait();
-                _ = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
+                if (!canAuthorize)
+                {
+                    throw GenericExceptionInstance.GenericException;
+                }
             }
-            catch (Exception ex)
+
+            Task.Delay(2000).Wait();
+
+            List<Exception> exceptions = [];
+
+            do
             {
-                throw new YandexApiException("Cannot authorize", ex);
+                if (types.AuthMethods.Contains(YAuthMethod.Password))
+                {
+                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password");
+                    try
+                    {
+                        YAuthBase res = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
+                        if (res.Errors == null || res.Errors.Count == 0)
+                        {
+                            break;
+                        }
+                        exceptions.AddRange(res.Errors.Select(err => new Exception($"Error: {err}")));
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptions.Add(ex);
+                    }
+                }
+
+                types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
+
+                if (types.AuthMethods.Contains(YAuthMethod.MagicTokenWithPictures))
+                {
+                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha");
+                    YAuthCaptcha? captcha = Client.GetCaptcha();
+                    if (captcha != null)
+                    {
+                        Console.WriteLine(captcha.ImageUrl);
+                        string? answer = Console.ReadLine();
+                        if (!string.IsNullOrWhiteSpace(answer))
+                        {
+                            YAuthBase res = Client.AuthorizeByCaptcha(answer);
+                            if (res.Errors == null || res.Errors.Count == 0)
+                            {
+                                break;
+                            }
+                            exceptions.AddRange(res.Errors.Select(err => new Exception($"Error: {err}")));
+                        }
+                    }
+                }
+
+                types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
+
+                if (types.AuthMethods.Contains(YAuthMethod.MagicLink))
+                {
+                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter");
+                    YAuthLetter letter = Client.GetAuthLetter();
+                    bool res = false;
+                    while (!res)
+                    {
+                        try
+                        {
+                            res = Client.AuthorizeByLetter();
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                Task.Delay(1000).Wait();
+                            }
+                            catch
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                    break;
+                }
             }
+            while (false);
 
             if (!Client.IsAuthorized)
             {
