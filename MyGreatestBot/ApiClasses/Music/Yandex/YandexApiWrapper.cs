@@ -132,75 +132,125 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             Task.Delay(2000).Wait();
 
-            List<Exception> exceptions = [];
-
-            do
+            bool TryWithPassword()
             {
-                if (types.AuthMethods.Contains(YAuthMethod.Password))
+                if (!types.AuthMethods.Contains(YAuthMethod.Password))
                 {
-                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password");
+                    return false;
+                }
+
+                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password.");
+
+                List<Exception> exceptions = [];
+
+                try
+                {
+                    YAuthBase res = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
+                    if (res.Errors == null || res.Errors.Count == 0)
+                    {
+                        return true;
+                    }
+
+                    exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+
+                foreach (Exception ex in exceptions)
+                {
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                }
+
+                return false;
+            }
+
+            bool TryWithCaptcha()
+            {
+                if (!types.AuthMethods.Contains(YAuthMethod.MagicTokenWithPictures))
+                {
+                    return false;
+                }
+
+                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha.");
+                YAuthCaptcha? captcha = Client.GetCaptcha();
+
+                if (captcha == null)
+                {
+                    return false;
+                }
+
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                    $"Captcha URL:{Environment.NewLine}{captcha.ImageUrl}");
+
+                string? answer = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(answer))
+                {
+                    return false;
+                }
+
+                YAuthBase res = Client.AuthorizeByCaptcha(answer);
+                if (res.Errors == null || res.Errors.Count == 0)
+                {
+                    return TryWithPassword();
+                }
+
+                List<Exception> exceptions = [];
+
+                exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
+
+                foreach (Exception ex in exceptions)
+                {
+                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+                }
+
+                return false;
+            }
+
+            bool TryWithLetter()
+            {
+                if (!types.AuthMethods.Contains(YAuthMethod.MagicLink))
+                {
+                    return false;
+                }
+
+                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter.");
+                YAuthLetter letter = Client.GetAuthLetter();
+
+                DiscordWrapper.CurrentDomainLogHandler.Send("Press any key after link clicked.");
+
+                bool res = false;
+                while (!res)
+                {
+                    _ = Console.ReadKey(true);
                     try
                     {
-                        YAuthBase res = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
-                        if (res.Errors == null || res.Errors.Count == 0)
-                        {
-                            break;
-                        }
-                        exceptions.AddRange(res.Errors.Select(err => new Exception($"Error: {err}")));
+                        res = Client.AuthorizeByLetter();
                     }
                     catch (Exception ex)
                     {
-                        exceptions.Add(ex);
+                        DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
                     }
                 }
+                return true;
+            }
 
-                types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
-
-                if (types.AuthMethods.Contains(YAuthMethod.MagicTokenWithPictures))
+            do
+            {
+                if (TryWithPassword())
                 {
-                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha");
-                    YAuthCaptcha? captcha = Client.GetCaptcha();
-                    if (captcha != null)
-                    {
-                        Console.WriteLine(captcha.ImageUrl);
-                        string? answer = Console.ReadLine();
-                        if (!string.IsNullOrWhiteSpace(answer))
-                        {
-                            YAuthBase res = Client.AuthorizeByCaptcha(answer);
-                            if (res.Errors == null || res.Errors.Count == 0)
-                            {
-                                break;
-                            }
-                            exceptions.AddRange(res.Errors.Select(err => new Exception($"Error: {err}")));
-                        }
-                    }
+                    break;
                 }
 
-                types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
-
-                if (types.AuthMethods.Contains(YAuthMethod.MagicLink))
+                if (TryWithCaptcha())
                 {
-                    DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter");
-                    YAuthLetter letter = Client.GetAuthLetter();
-                    bool res = false;
-                    while (!res)
-                    {
-                        try
-                        {
-                            res = Client.AuthorizeByLetter();
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                Task.Delay(1000).Wait();
-                            }
-                            catch
-                            {
-                                throw;
-                            }
-                        }
-                    }
+                    break;
+                }
+
+                if (TryWithLetter())
+                {
                     break;
                 }
             }
