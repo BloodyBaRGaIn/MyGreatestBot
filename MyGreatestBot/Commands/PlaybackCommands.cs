@@ -2,8 +2,8 @@
 using DSharpPlus.CommandsNext.Attributes;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
+using MyGreatestBot.Extensions;
 using System;
-using System.Globalization;
 using System.Threading.Tasks;
 
 namespace MyGreatestBot.Commands
@@ -161,7 +161,10 @@ namespace MyGreatestBot.Commands
         [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task RewindCommand(
             CommandContext ctx,
-            [Description("Timespan in format HH:MM:SS or MM:SS")] string timespan)
+            [Description(
+            "Timespan in " +
+            $"{TimeSpanRegexProvider.HoursMinutesSecondsFormat} or " +
+            $"{TimeSpanRegexProvider.MinutesSecondsFormat} formats")] string timespan)
         {
             ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
             if (handler == null)
@@ -172,23 +175,7 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
             handler.Voice.UpdateVoiceConnection();
 
-            string[] formats =
-            [
-                "mm:ss",
-                "HH:mm:ss"
-            ];
-
-            TimeSpan time = TimeSpan.MinValue;
-
-            foreach (string format in formats)
-            {
-                try
-                {
-                    time = DateTime.ParseExact(timespan, format, CultureInfo.InvariantCulture).TimeOfDay;
-                    break;
-                }
-                catch { }
-            }
+            TimeSpan time = TimeSpanRegexProvider.GetTimeSpan(timespan);
 
             if (time == TimeSpan.MinValue)
             {
