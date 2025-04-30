@@ -110,7 +110,7 @@ unique (uniq, u) - Removes all but unique tracks from the queue
 ```
 rewind (seek, rw, sk) - Rewind audio stream
 Arguments:
-    timespan (String) - Timespan in format HH:MM:SS or MM:SS
+    timespan (String) - Timespan in "H+:MM:SS" or "M+:SS" formats
 ```
 ```
 return (rt) - Return the track to the queue
