@@ -8,15 +8,29 @@ namespace FfmpegUpdater
 {
     public static class HttpClientExtensions
     {
-        public static async Task DownloadDataAsync(this HttpClient client,
-                                                   string requestUrl,
-                                                   Stream destination,
-                                                   IProgress<string> progress,
-                                                   CancellationToken cancellationToken = default)
+        public static async Task<long> GetDownloadSize(this HttpClient client,
+                                                       string requestUrl,
+                                                       CancellationToken cancellationToken = default)
         {
             using HttpResponseMessage response = await client.GetAsync(requestUrl,
                                                                        HttpCompletionOption.ResponseHeadersRead,
                                                                        cancellationToken);
+
+            long? contentLength = response.Content.Headers.ContentLength;
+
+            return contentLength ?? 0;
+        }
+
+        public static async Task DownloadDataAsync(this HttpClient client,
+                                                   string requestUrl,
+                                                   Stream destination,
+                                                   IProgress<long> progress,
+                                                   CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response =
+                await client.GetAsync(requestUrl,
+                                      HttpCompletionOption.ResponseHeadersRead,
+                                      cancellationToken);
 
             long? contentLength = response.Content.Headers.ContentLength;
             using Stream download = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -27,20 +41,14 @@ namespace FfmpegUpdater
                 return;
             }
 
-            Progress<long> progressWrapper = new(totalBytes =>
-            {
-                long maxBytes = contentLength.Value;
-                float precent = totalBytes * 100.0f / maxBytes;
-                progress.Report($"{totalBytes} / {maxBytes} ({precent:0.0}%)");
-            });
-
             byte[] buffer = new byte[client.MaxResponseContentBufferSize];
             if (buffer == null || buffer.Length == 0)
             {
-                throw new InvalidOperationException($"Cannot allocate memory for {buffer}.");
+                throw new InvalidOperationException(
+                    $"Cannot allocate memory for {buffer} with size of {client.MaxResponseContentBufferSize} byte(s).");
             }
 
-            await download.CopyToAsync(destination, buffer.AsMemory(), progressWrapper, cancellationToken);
+            await download.CopyToAsync(destination, buffer.AsMemory(), progress, cancellationToken);
         }
 
         public static async Task CopyToAsync(this Stream source,

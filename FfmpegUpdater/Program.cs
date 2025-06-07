@@ -1,4 +1,5 @@
 ﻿using SharedClasses;
+using ShellProgressBar;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +27,7 @@ namespace FfmpegUpdater
 
         private static void Main()
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Console.CancelKeyPress += Console_CancelKeyPress;
 
             // get properties
@@ -197,53 +200,96 @@ namespace FfmpegUpdater
                 Exit(1);
             }
 
-            Console.WriteLine($"Downloading file {zip_link} to {target_zip_path}");
-
             {
-                using Semaphore progressSemaphore = new(1, 1);
-                string old_progress = string.Empty;
-                Progress<string> downloadProgress = new();
-
-                void ClearProgress()
+                HttpClient downloadHttpClient = new()
                 {
-                    for (int i = 0; i < old_progress.Length; i++)
+                    Timeout = TimeSpan.FromMinutes(5),
+                    MaxResponseContentBufferSize = 0x10000
+                };
+
+                long download_total_bytes = 0;
+
+                Console.WriteLine(
+                    $"Download URI:{Environment.NewLine}" +
+                    $"{zip_link}");
+                Console.WriteLine(
+                    $"The file will be saved as:{Environment.NewLine}" +
+                    $"{target_zip_path}");
+
+                Console.WriteLine();
+
+                try
+                {
+                    using Task<long> getSizeTask = downloadHttpClient.GetDownloadSize(zip_link, cts.Token);
+                    getSizeTask.Wait();
+                    download_total_bytes = getSizeTask.Result;
+                    if (download_total_bytes == 0)
                     {
-                        Console.Write('\b');
+                        throw new Exception("Invalid or empty responce");
                     }
                 }
-
-                void PrintProgress()
+                catch (Exception ex)
                 {
-                    Console.Write(old_progress);
+                    Console.Error.WriteLine(
+                        $"Cannot get download size{Environment.NewLine}" +
+                        $"{GetExceptionMessage(ex)}");
+                    Exit(1);
                 }
 
-                Console.Write("Progress: ");
-                ClearProgress();
-                PrintProgress();
+                using ProgressBar progressBar = new(
+                    10000,
+                    "Downloading file",
+                    new ProgressBarOptions()
+                    {
+                        ForegroundColor = ConsoleColor.Yellow,
+                        ForegroundColorDone = ConsoleColor.DarkGreen,
+                        ForegroundColorError = ConsoleColor.Red,
+                        BackgroundColor = ConsoleColor.DarkGray,
+                        BackgroundCharacter = '\u2593',
+                        CollapseWhenFinished = false,
+                        ProgressBarOnBottom = true,
+                        ShowEstimatedDuration = true,
+                        EnableTaskBarProgress = true,
+                    });
 
-                downloadProgress.ProgressChanged += (sender, progress) =>
+                DateTime now = DateTime.Now;
+
+                using Semaphore progressSemaphore = new(1, 1);
+                long old_progress_bytes = new();
+                Progress<long> downloadProgress = new();
+
+                downloadProgress.ProgressChanged += (sender, progress_bytes) =>
                 {
-                    if (progress == old_progress)
+                    if (progress_bytes == old_progress_bytes)
                     {
                         return;
                     }
 
                     _ = progressSemaphore.WaitOne();
 
-                    ClearProgress();
-                    old_progress = progress;
-                    PrintProgress();
+                    if (progress_bytes != 0)
+                    {
+                        TimeSpan timeTaken = DateTime.Now - now;
+                        long bytesLeft = download_total_bytes - progress_bytes;
+                        progressBar.EstimatedDuration = timeTaken * bytesLeft / progress_bytes;
+                    }
+                    IProgress<float> float_progress = progressBar.AsProgress<float>();
+                    float_progress.Report((float)progress_bytes / download_total_bytes);
+
+                    old_progress_bytes = progress_bytes;
 
                     _ = progressSemaphore.Release();
                 };
 
+                FileStream? fileStream = null;
+                Exception? exception = null;
+
                 try
                 {
-                    using HttpClient httpClient = new();
-                    httpClient.Timeout = TimeSpan.FromMinutes(5);
-                    httpClient.MaxResponseContentBufferSize = 0x10000;
-                    using FileStream fileStream = new(target_zip_path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                    using Task task = httpClient.DownloadDataAsync(zip_link, fileStream, downloadProgress, cts.Token);
+                    fileStream = new(
+                        target_zip_path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                    using Task task = downloadHttpClient.DownloadDataAsync(
+                        zip_link, fileStream, downloadProgress, cts.Token);
 
                     try
                     {
@@ -253,37 +299,44 @@ namespace FfmpegUpdater
 
                     if (task.IsCanceled)
                     {
-                        Console.WriteLine();
-                        Console.Error.WriteLine("Download cancelled");
-
-                        try
-                        {
-                            fileStream.Close();
-                            fileStream.Dispose();
-
-                            if (File.Exists(target_zip_path))
-                            {
-                                File.Delete(target_zip_path);
-                            }
-                        }
-                        catch { }
-
-                        Exit(1);
+                        throw new OperationCanceledException("Download cancelled");
                     }
-
                     if (!task.IsCompletedSuccessfully)
                     {
                         throw new TimeoutException("Download failed");
                     }
-
-                    Console.WriteLine();
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine();
-                    Console.Error.WriteLine(
-                        $"Cannot download file{Environment.NewLine}" +
-                        $"{GetExceptionMessage(ex)}");
+                    exception = ex;
+                }
+                finally
+                {
+                    downloadHttpClient.Dispose();
+
+                    try
+                    {
+                        if (exception != null)
+                        {
+                            progressBar.ObservedError = true;
+                        }
+                        progressBar.Dispose();
+                    }
+                    catch { }
+
+                    try
+                    {
+                        fileStream?.Close();
+                        fileStream?.Dispose();
+                    }
+                    catch { }
+                }
+
+                Console.WriteLine();
+
+                if (exception != null)
+                {
+                    Console.Error.WriteLine(GetExceptionMessage(exception));
                     Exit(1);
                 }
             }
@@ -329,18 +382,9 @@ namespace FfmpegUpdater
 
             try
             {
-                if (File.Exists(ffmpeg_old_path))
-                {
-                    File.Delete(ffmpeg_old_path);
-                }
-            }
-            catch { }
-
-            try
-            {
-                File.Move(
+                File.Copy(
                     destination_file_path,
-                    ffmpeg_old_path);
+                    ffmpeg_old_path, true);
             }
             catch { }
 
