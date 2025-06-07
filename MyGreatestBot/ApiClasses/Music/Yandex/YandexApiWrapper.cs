@@ -132,124 +132,19 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             Task.Delay(2000).Wait();
 
-            bool TryWithPassword()
-            {
-                if (!types.AuthMethods.Contains(YAuthMethod.Password))
-                {
-                    return false;
-                }
-
-                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password.", LogLevel.Debug);
-
-                List<Exception> exceptions = [];
-
-                try
-                {
-                    YAuthBase res = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
-                    if (res.Errors == null || res.Errors.Count == 0)
-                    {
-                        return true;
-                    }
-
-                    exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
-                }
-                catch (Exception ex)
-                {
-                    exceptions.Add(ex);
-                }
-
-                foreach (Exception ex in exceptions)
-                {
-                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                }
-
-                return false;
-            }
-
-            bool TryWithCaptcha()
-            {
-                if (!types.AuthMethods.Contains(YAuthMethod.MagicTokenWithPictures))
-                {
-                    return false;
-                }
-
-                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha.", LogLevel.Debug);
-                YAuthCaptcha? captcha = Client.GetCaptcha();
-
-                if (captcha == null)
-                {
-                    return false;
-                }
-
-                DiscordWrapper.CurrentDomainLogHandler.Send(
-                    $"Captcha URL:{Environment.NewLine}{captcha.ImageUrl}");
-
-                string? answer = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(answer))
-                {
-                    return false;
-                }
-
-                YAuthBase res = Client.AuthorizeByCaptcha(answer);
-                if (res.Errors == null || res.Errors.Count == 0)
-                {
-                    return TryWithPassword();
-                }
-
-                List<Exception> exceptions = [];
-
-                exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
-
-                foreach (Exception ex in exceptions)
-                {
-                    DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                }
-
-                return false;
-            }
-
-            bool TryWithLetter()
-            {
-                if (!types.AuthMethods.Contains(YAuthMethod.MagicLink))
-                {
-                    return false;
-                }
-
-                DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter.", LogLevel.Debug);
-                YAuthLetter letter = Client.GetAuthLetter();
-
-                DiscordWrapper.CurrentDomainLogHandler.Send("Press any key after link clicked.");
-
-                bool res = false;
-                while (!res)
-                {
-                    _ = Console.ReadKey(true);
-                    try
-                    {
-                        res = Client.AuthorizeByLetter();
-                    }
-                    catch (Exception ex)
-                    {
-                        DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
-                    }
-                }
-                return true;
-            }
-
             do
             {
-                if (TryWithPassword())
+                if (TryAuthWithPassword(yandexCredStruct, types))
                 {
                     break;
                 }
 
-                if (TryWithCaptcha())
+                if (TryAuthWithCaptcha(yandexCredStruct, types))
                 {
                     break;
                 }
 
-                if (TryWithLetter())
+                if (TryAuthWithLetter(types))
                 {
                     break;
                 }
@@ -273,6 +168,127 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 throw new YandexApiException("Cannot get valid access token", ex);
             }
+        }
+
+        private bool TryAuthWithPassword(YandexCredentialsJSON yandexCredStruct, YAuthTypes types)
+        {
+            if (!types.AuthMethods.Contains(YAuthMethod.Password))
+            {
+                return false;
+            }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password.", LogLevel.Debug);
+
+            List<Exception> exceptions = [];
+
+            try
+            {
+                YAuthBase res = Client.AuthorizeByAppPassword(yandexCredStruct.Password);
+                if (res.Errors == null || res.Errors.Count == 0)
+                {
+                    return true;
+                }
+
+                exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+
+            foreach (Exception ex in exceptions)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+            }
+
+            return false;
+        }
+
+        private bool TryAuthWithCaptcha(YandexCredentialsJSON yandexCredStruct, YAuthTypes types)
+        {
+            if (!types.AuthMethods.Contains(YAuthMethod.MagicTokenWithPictures))
+            {
+                return false;
+            }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha.", LogLevel.Debug);
+            YAuthCaptcha? captcha = Client.GetCaptcha();
+
+            if (captcha == null)
+            {
+                return false;
+            }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send(
+                $"Captcha URL:{Environment.NewLine}" +
+                $"{captcha.ImageUrl}{Environment.NewLine}" +
+                $"{Environment.NewLine}" +
+                $"Enter captcha answer:{Environment.NewLine}");
+
+            string? answer = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(answer))
+            {
+                return false;
+            }
+
+            YAuthBase res = Client.AuthorizeByCaptcha(answer);
+            if (res.Errors == null || res.Errors.Count == 0)
+            {
+                return TryAuthWithPassword(yandexCredStruct, types);
+            }
+
+            List<Exception> exceptions = [];
+
+            exceptions.AddRange(res.Errors.Select(static err => new Exception($"Error: {err}")));
+
+            foreach (Exception ex in exceptions)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+            }
+
+            return false;
+        }
+
+        private bool TryAuthWithLetter(YAuthTypes types)
+        {
+            if (!types.AuthMethods.Contains(YAuthMethod.MagicLink))
+            {
+                return false;
+            }
+
+            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter.", LogLevel.Debug);
+            YAuthLetter letter = Client.GetAuthLetter();
+
+            DiscordWrapper.CurrentDomainLogHandler.Send(
+                $"Letter URI:{Environment.NewLine}" +
+                $"{letter.RedirectUrl}{Environment.NewLine}" +
+                $"{Environment.NewLine}" +
+                $"Press any key after link clicked.");
+
+            _ = Console.ReadKey(true);
+
+            List<Exception> exceptions = [];
+
+            bool res;
+            try
+            {
+                res = Client.AuthorizeByLetter();
+            }
+            catch (Exception ex)
+            {
+                res = false;
+                exceptions.Add(ex);
+            }
+
+            exceptions.AddRange(letter.Errors.Select(static err => new Exception($"Error: {err}")));
+
+            foreach (Exception ex in exceptions)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+            }
+
+            return res && exceptions.Count == 0;
         }
 
         void IAPI.LogoutInternal()
