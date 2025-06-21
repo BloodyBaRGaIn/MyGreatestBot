@@ -25,7 +25,7 @@ namespace MyGreatestBot
 #endif
                 ;
 
-        private static volatile bool CancellationEventTriggered = false;
+        private static readonly Semaphore CancellationEventSemaphore = new(1, 1);
 
         /// <summary>
         /// Process initialization
@@ -108,13 +108,11 @@ namespace MyGreatestBot
             _ = sender;
             e.Cancel = true;
 
-            if (CancellationEventTriggered)
+            if (!CancellationEventSemaphore.TryWaitOne(0))
             {
                 DiscordWrapper.CurrentDomainLogHandler.Send("Application is already closing.", LogLevel.Warning);
                 return;
             }
-
-            CancellationEventTriggered = true;
 
             DiscordWrapper.CurrentDomainLogHandler.Send("CancelKey pressed. Closing...", LogLevel.Warning);
 
@@ -131,13 +129,11 @@ namespace MyGreatestBot
             _ = sender;
             _ = e;
 
-            if (CancellationEventTriggered)
+            if (!CancellationEventSemaphore.TryWaitOne(0))
             {
                 DiscordWrapper.CurrentDomainLogHandler.Send("Application is already closing.", LogLevel.Warning);
                 return;
             }
-
-            CancellationEventTriggered = true;
 
             DiscordWrapper.CurrentDomainLogHandler.Send("Close button pressed. Closing...", LogLevel.Warning);
 
@@ -166,7 +162,7 @@ namespace MyGreatestBot
         {
             _ = sender;
 
-            if (CancellationEventTriggered)
+            if (!CancellationEventSemaphore.TryWaitOne(0))
             {
                 return;
             }

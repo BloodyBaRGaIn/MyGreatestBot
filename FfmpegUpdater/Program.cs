@@ -33,9 +33,8 @@ namespace FfmpegUpdater
             // get properties
             if (!BuildPropsProvider.GetProperties(out Dictionary<string, string> PropertiesDictionary))
             {
-                Console.Error.WriteLine($"Cannot get properties{Environment.NewLine}" +
+                Exit($"Cannot get properties{Environment.NewLine}" +
                     $"{GetExceptionMessage(BuildPropsProvider.LastError)}");
-                Exit(1);
             }
 
             GetPropValue(PropertiesDictionary, FfmpegDirKey, out string ffmpeg_directory_name);
@@ -56,10 +55,8 @@ namespace FfmpegUpdater
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"Cannot get current directory info{Environment.NewLine}" +
+                Exit($"Cannot get current directory info{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                Exit(1);
             }
 
             while (current_directory_info != null && current_directory_info.GetFiles("*.sln").Length == 0)
@@ -69,8 +66,7 @@ namespace FfmpegUpdater
 
             if (current_directory_info == null)
             {
-                Console.Error.WriteLine("Cannot find solution directory");
-                Exit(1);
+                Exit("Cannot find solution directory");
             }
 
             // find ffmpeg directory
@@ -80,8 +76,7 @@ namespace FfmpegUpdater
 
             if (ffmpeg_directory == null)
             {
-                Console.Error.WriteLine($"Cannot find {ffmpeg_directory_name} directory");
-                Exit(1);
+                Exit($"Cannot find {ffmpeg_directory_name} directory");
             }
 
             // find download link file
@@ -91,8 +86,7 @@ namespace FfmpegUpdater
 
             if (repo_link_info == null)
             {
-                Console.Error.WriteLine($"Cannot find {ffmpeg_repo_file_name}");
-                Exit(1);
+                Exit($"Cannot find {ffmpeg_repo_file_name}");
             }
 
             // get repo link file content
@@ -109,17 +103,14 @@ namespace FfmpegUpdater
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"Cannot read link file{Environment.NewLine}" +
+                Exit($"Cannot read link file{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                Exit(1);
             }
 
             string[] repo_file_split = repo_link_file_content.Split([.. Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
             if (repo_file_split.Length != 2)
             {
-                Console.Error.WriteLine("Repo file is invalid");
-                Exit(1);
+                Exit("Repo file is invalid");
             }
 
             string repo_link = repo_file_split[0];
@@ -165,18 +156,15 @@ namespace FfmpegUpdater
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"Cannot get tag{Environment.NewLine}" +
+                Exit($"Cannot get tag{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                Exit(1);
             }
 
             string[] split_tag = repo_tag.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
 
             if (split_tag.Length != 2)
             {
-                Console.Error.WriteLine("Tag is invalid");
-                Exit(1);
+                Exit("Tag is invalid");
             }
 
             string hash_commit = split_tag[0];
@@ -196,8 +184,7 @@ namespace FfmpegUpdater
 
             if (string.IsNullOrWhiteSpace(target_zip_path))
             {
-                Console.Error.WriteLine("Zip file path is empty");
-                Exit(1);
+                Exit("Zip file path is empty");
             }
 
             {
@@ -230,10 +217,8 @@ namespace FfmpegUpdater
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(
-                        $"Cannot get download size{Environment.NewLine}" +
+                    Exit($"Cannot get download size{Environment.NewLine}" +
                         $"{GetExceptionMessage(ex)}");
-                    Exit(1);
                 }
 
                 using ProgressBar progressBar = new(
@@ -336,8 +321,7 @@ namespace FfmpegUpdater
 
                 if (exception != null)
                 {
-                    Console.Error.WriteLine(GetExceptionMessage(exception));
-                    Exit(1);
+                    Exit(GetExceptionMessage(exception));
                 }
             }
 
@@ -351,18 +335,15 @@ namespace FfmpegUpdater
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"Cannot open archive{Environment.NewLine}" +
+                Exit($"Cannot open archive{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                Exit(1);
             }
 
             ZipArchiveEntry? entry = archive.Entries.FirstOrDefault(entry => entry.FullName.EndsWith(ffmpeg_executable_name));
 
             if (entry == null)
             {
-                Console.Error.WriteLine($"Archive not containing {ffmpeg_executable_name}");
-                Exit(1);
+                Exit($"Archive not containing {ffmpeg_executable_name}");
             }
 
             string destination_file_path = Path.Combine(ffmpeg_directory.FullName, ffmpeg_executable_name);
@@ -370,14 +351,12 @@ namespace FfmpegUpdater
 
             if (string.IsNullOrWhiteSpace(destination_file_path))
             {
-                Console.Error.WriteLine("Destination file path is empty");
-                Exit(1);
+                Exit("Destination file path is empty");
             }
 
             if (string.IsNullOrWhiteSpace(ffmpeg_old_path))
             {
-                Console.Error.WriteLine("Old file path is empty");
-                Exit(1);
+                Exit("Old file path is empty");
             }
 
             try
@@ -396,10 +375,8 @@ namespace FfmpegUpdater
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(
-                    $"Cannot extract file{Environment.NewLine}" +
+                Exit($"Cannot extract file{Environment.NewLine}" +
                     $"{GetExceptionMessage(ex)}");
-                Exit(1);
             }
 
             archive.Dispose();
@@ -410,9 +387,7 @@ namespace FfmpegUpdater
             }
             catch { }
 
-            Console.WriteLine("FFMPEG updated successfully!");
-
-            Exit(0);
+            Exit("FFMPEG updated successfully!", 0);
         }
 
         private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
@@ -427,10 +402,16 @@ namespace FfmpegUpdater
             catch { }
         }
 
-
         [DoesNotReturn]
-        private static void Exit(int exitCode)
+        private static void Exit(string error_text = "", int exitCode = 1)
         {
+            TextWriter writer = exitCode switch
+            {
+                0 => Console.Out,
+                _ => Console.Error,
+            };
+            writer.WriteLine(error_text);
+
             try
             {
                 cts.Dispose();
@@ -441,6 +422,7 @@ namespace FfmpegUpdater
             _ = Console.ReadKey(true);
             Environment.Exit(exitCode);
 
+            // Does not return
             while (true)
             {
                 try
@@ -456,8 +438,7 @@ namespace FfmpegUpdater
             if (!dictionary.TryGetValue(name, out string? tmp_value)
                 || string.IsNullOrWhiteSpace(tmp_value))
             {
-                Console.Error.WriteLine($"Cannot get {name} value");
-                Exit(1);
+                Exit($"Cannot get {name} value");
             }
 
             value = tmp_value;

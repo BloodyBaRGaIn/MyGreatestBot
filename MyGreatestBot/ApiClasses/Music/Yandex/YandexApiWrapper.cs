@@ -177,7 +177,9 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return false;
             }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with password.", LogLevel.Debug);
+            DiscordWrapper.CurrentDomainLogHandler.Send(
+                $"Trying auth {(this as IAPI).ApiType} with password.",
+                LogLevel.Debug);
 
             List<Exception> exceptions = [];
 
@@ -211,7 +213,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return false;
             }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with captcha.", LogLevel.Debug);
+            DiscordWrapper.CurrentDomainLogHandler.Send(
+                $"Trying auth {(this as IAPI).ApiType} with captcha.",
+                LogLevel.Debug);
+
             YAuthCaptcha? captcha = Client.GetCaptcha();
 
             if (captcha == null)
@@ -257,7 +262,10 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return false;
             }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Trying with letter.", LogLevel.Debug);
+            DiscordWrapper.CurrentDomainLogHandler.Send(
+                $"Trying auth {(this as IAPI).ApiType} with letter.",
+                LogLevel.Debug);
+
             YAuthLetter letter = Client.GetAuthLetter();
 
             DiscordWrapper.CurrentDomainLogHandler.Send(
