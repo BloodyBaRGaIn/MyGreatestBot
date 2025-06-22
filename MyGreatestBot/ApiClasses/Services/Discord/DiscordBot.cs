@@ -1,5 +1,4 @@
-﻿using AngleSharp.Text;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
@@ -158,16 +157,23 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             }
         }
 
-        public async Task ExecuteCommandAsync(string command, params string[] arguments)
+        private async Task ExecuteCommandAsync(params string[] @params)
         {
             if (Commands == null)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
-                    "Bot is not initialized.", LogLevel.Error);
+                    "Bot is not initialized.");
                 return;
             }
 
-            _ = new ConsoleCommands().InvokeMethod(command, [.. arguments]);
+            if (@params.Length < 1)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(
+                    "Invalid parameters.");
+                return;
+            }
+
+            _ = new ConsoleCommands().InvokeMethod(@params[0], (@params.Length > 1) ? @params[1..] : null);
 
             await Task.Yield();
         }
@@ -204,75 +210,28 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 return;
             }
 
-            using CancellationTokenSource cts = new();
-            using Task consoleCommandTask = Task.Run(async () =>
+            using SharedClasses.NonBlockingConsole console = new();
+            console.Start();
+
+            using Task waitForExitTask = Task.Run(async () =>
             {
+                // waiting for stop request
                 while (true)
                 {
-                    string in_str = string.Empty;
-
-                    if (cts.IsCancellationRequested)
+                    if (exitRequest)
+                    {
+                        break;
+                    }
+                    try
+                    {
+                        Thread.Sleep(1);
+                    }
+                    catch
                     {
                         break;
                     }
 
-                    while (true)
-                    {
-                        try
-                        {
-                            await Task.Delay(1);
-                        }
-                        catch
-                        {
-                            return;
-                        }
-
-                        if (cts.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
-                        if (!Console.KeyAvailable)
-                        {
-                            continue;
-                        }
-
-                        ConsoleKeyInfo key = Console.ReadKey(true);
-
-                        char add = '\0';
-                        if (key.Key == ConsoleKey.Enter)
-                        {
-                            Console.Write(Environment.NewLine);
-                            break;
-                        }
-                        else if (key.Key == ConsoleKey.Backspace)
-                        {
-                            (int Left, int Top) = Console.GetCursorPosition();
-                            if (in_str.Length != 0 && Left > 0)
-                            {
-                                Console.Write('\b');
-                                Console.Write(' ');
-                                in_str = in_str.Remove(Left - 1, 1);
-                                Console.SetCursorPosition(Left - 1, Top);
-                            }
-                        }
-                        else if (key.Key == ConsoleKey.Spacebar)
-                        {
-                            add = ' ';
-                        }
-                        else if (key.KeyChar.IsAlphanumericAscii())
-                        {
-                            add = key.KeyChar;
-                        }
-
-                        if (add != '\0')
-                        {
-                            in_str += add;
-                            Console.Write(add);
-                        }
-                    }
-
-                    if (string.IsNullOrWhiteSpace(in_str))
+                    if (!console.DequeueString(out string? in_str))
                     {
                         continue;
                     }
@@ -285,14 +244,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
                     try
                     {
-                        if (in_split.Length > 1)
-                        {
-                            await DiscordWrapper.ExecuteCommandAsync(in_split[0], in_split[1..]);
-                        }
-                        else
-                        {
-                            await DiscordWrapper.ExecuteCommandAsync(in_split[0]);
-                        }
+                        await ExecuteCommandAsync(in_split);
                     }
                     catch (Exception ex)
                     {
@@ -300,35 +252,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                             ex.GetExtendedMessage());
                     }
                 }
-            }, cts.Token);
+            });
 
-            // waiting for stop request
-            while (true)
-            {
-                if (exitRequest)
-                {
-                    break;
-                }
-                try
-                {
-                    Thread.Sleep(1);
-                }
-                catch
-                {
-                    break;
-                }
-            }
+            waitForExitTask.Wait();
 
-            cts.Cancel();
             try
             {
-                Console.In.Close();
-                Console.In.Dispose();
-            }
-            catch { }
-            try
-            {
-                consoleCommandTask.Wait();
+                console.Dispose();
             }
             catch { }
 

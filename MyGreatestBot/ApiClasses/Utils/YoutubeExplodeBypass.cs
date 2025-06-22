@@ -10,6 +10,9 @@ namespace MyGreatestBot.ApiClasses.Utils
     /// </summary>
     internal static class YoutubeExplodeBypass
     {
+        private const string TargatVariableName = "SLAVA_UKRAINI";
+        private const string TargatVariableValue = "1";
+
         [DllImport("advapi32.dll", CharSet = CharSet.Auto)]
         [SuppressMessage("Globalization", "CA2101")]
         [SuppressMessage("Interoperability", "SYSLIB1054")]
@@ -34,8 +37,6 @@ namespace MyGreatestBot.ApiClasses.Utils
             ref uint lpcbData
         );
 
-        private static bool bypassed;
-
         private static string? GetCurrentUserRegistryValue(string key, string entry)
         {
             if (RegOpenKeyEx(new nuint(0x80000001u), key, 0, 0x20019, out nuint keyHandle) != 0)
@@ -50,16 +51,17 @@ namespace MyGreatestBot.ApiClasses.Utils
 
         internal static void Bypass()
         {
-            if (bypassed)
+            if (!IsRestricted())
             {
                 return;
             }
-            if (IsRestricted())
+            if (Environment.GetEnvironmentVariable(TargatVariableName) == TargatVariableValue)
             {
-                // otherwise it won't work in restricted countries
-                Environment.SetEnvironmentVariable("SLAVA_UKRAINI", "1");
+                return;
             }
-            bypassed = true;
+
+            // otherwise it won't work in restricted countries
+            Environment.SetEnvironmentVariable(TargatVariableName, TargatVariableValue);
         }
 
         private static bool IsRestricted()

@@ -8,7 +8,7 @@ namespace MyGreatestBot.Commands.Utils
 {
     public abstract class ConsoleCommandModule
     {
-        public virtual object? InvokeMethod(string commandName, string?[]? arguments = null)
+        public virtual object? InvokeMethod(string commandName, string[]? arguments = null)
         {
             IEnumerable<MethodInfo> methods = GetType().GetMethods()
                 .Where(m => string.Equals(

@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedClasses", "SharedClasses", "{F78EA1CC-9058-4F41-8173-4FE49D2A007F}"
 	ProjectSection(SolutionItems) = preProject
 		SharedClasses\BuildPropsProvider.cs = SharedClasses\BuildPropsProvider.cs
+		SharedClasses\NonBlockingConsole.cs = SharedClasses\NonBlockingConsole.cs
 	EndProjectSection
 EndProject
 Global
