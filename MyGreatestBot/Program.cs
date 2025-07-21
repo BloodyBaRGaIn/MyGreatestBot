@@ -71,7 +71,7 @@ namespace MyGreatestBot
             #region Music APIs
             ApiManager.Add(YoutubeApiWrapper.Instance);
             ApiManager.Add(YandexApiWrapper.Instance);
-            ApiManager.Add(VkApiWrapper.Instance);
+            //ApiManager.Add(VkApiWrapper.Instance);
             ApiManager.Add(SpotifyApiWrapper.Instance);
             #endregion Music APIs
 
