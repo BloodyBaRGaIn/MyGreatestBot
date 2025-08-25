@@ -5,6 +5,7 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VkNet.Model;
 
 namespace MyGreatestBot.Commands
 {
@@ -102,6 +103,71 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             handler.Message.Send(text);
+
+            await Task.Delay(1);
+        }
+
+        [Command("birthday")]
+        [Description("Checks for the bot's birthday")]
+        [Category(CommandStrings.DebugCategoryName)]
+        [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
+        public async Task BirthdayTask(
+            CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            handler.BypassBirthdayCheck();
+            handler.TextChannel = ctx.Channel;
+
+            (int age, bool bday) = DiscordWrapper.Instance.CalculateAge();
+
+            DiscordEmbedBuilder builder = new()
+            {
+                Color = DiscordColor.White,
+                Title = "Anniversary",
+            };
+
+            if (age > 0)
+            {
+                if (bday)
+                {
+                    builder.Description = 
+                        $":partying_face:" +
+                        $"It's my {age} year anniversary today!!!" +
+                        $":partying_face:";
+                }
+                else
+                {
+                    builder.Description =
+                        $":confused:" +
+                        $"It's not my birthday today... I was created {age} years ago." +
+                        $":confused:";
+                }
+            }
+            else
+            {
+                if (bday)
+                {
+                    builder.Description =
+                        $":partying_face:" +
+                        $"I was created just today!!! Congratulations!" +
+                        $":partying_face:";
+                }
+                else
+                {
+                    builder.Description =
+                        $":pleading_face:" +
+                        $"I was created less than year ago... Too early to celebrate." +
+                        $":pleading_face:";
+                }
+            }
+
+            handler.Message.Send(builder);
 
             await Task.Delay(1);
         }

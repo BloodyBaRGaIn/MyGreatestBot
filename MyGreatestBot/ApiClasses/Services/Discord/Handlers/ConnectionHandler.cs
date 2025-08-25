@@ -31,7 +31,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         public ulong GuildId => _guild.Id;
         public string GuildName => _guild.Name;
 
-        private bool FirstTimeTextChannelAssigned = true;
+        private bool _firstTimeTextChannelAssigned = true;
+
+        public void BypassBirthdayCheck()
+        {
+            _firstTimeTextChannelAssigned = true;
+        }
 
         public DiscordChannel? TextChannel
         {
@@ -39,12 +44,13 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             set
             {
                 Message.Channel = value;
-                if (value is null || !FirstTimeTextChannelAssigned)
+                if (value is null || !_firstTimeTextChannelAssigned)
                 {
                     return;
                 }
-                FirstTimeTextChannelAssigned = false;
-                if (DiscordWrapper.Age <= 0)
+                _firstTimeTextChannelAssigned = false;
+                (int age, bool bday) = DiscordWrapper.Instance.CalculateAge();
+                if (age <= 0 || !bday)
                 {
                     return;
                 }
@@ -54,7 +60,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     Title = "Anniversary",
                     Description =
                         $":partying_face:" +
-                        $"It's my {DiscordWrapper.Age} year anniversary today!!!" +
+                        $"It's my {age} year anniversary today!!!" +
                         $":partying_face:"
                 });
             }

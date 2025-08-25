@@ -46,7 +46,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <summary>
         /// Bot's age. Zero if it's not its anniversary today.
         /// </summary>
-        public int Age { get; private set; } = -1;
+        private int Age { get; set; } = -1;
 
         private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
@@ -273,6 +273,27 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             Disconnect();
         }
 
+        internal (int, bool) CalculateAge()
+        {
+            if (Client == null)
+            {
+                return (-1, false);
+            }
+
+            DateTime birthdate = Client.CurrentUser.CreationTimestamp.Date;
+
+            DateTime today = DateTime.Today;
+
+            int age = today.Year - birthdate.Year;
+
+            while (birthdate.Date > today.AddYears(-age))
+            {
+                age--;
+            }
+
+            return (age, birthdate.Month == today.Month && birthdate.Day == today.Day);
+        }
+
         private void SetUserStatus(DiscordUserStatus status)
         {
             if (Client == null)
@@ -371,24 +392,17 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             if (Age == -1)
             {
-                DateTime birthdate =
-                    Client.CurrentUser.CreationTimestamp.Date;
+                (int age, bool bday) = CalculateAge();
 
-                DateTime today = DateTime.Today;
-
-                int age = today.Year - birthdate.Year;
-
-                if (birthdate.Date > today.AddYears(-age))
-                {
-                    age--;
-                }
-
-                if (age > 0 && birthdate.Month == today.Month && birthdate.Day == today.Day)
+                if (age > 0)
                 {
                     Age = age;
 
-                    DiscordWrapper.CurrentDomainLogHandler.Send(
-                        $"It's my {Age} year anniversary today!!!");
+                    if (bday)
+                    {
+                        DiscordWrapper.CurrentDomainLogHandler.Send(
+                            $"It's my {Age} year anniversary today!!!");
+                    }
                 }
             }
 

@@ -156,6 +156,9 @@ Arguments:
     text (String) - Text
 ```
 ```
+birthday - Checks for the bot's birthday
+```
+```
 help (h) - Get help
 Arguments:
     command (String) - Command name (optional)
