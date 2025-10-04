@@ -24,12 +24,10 @@ namespace MyGreatestBot.Commands
 
             command_stopwatch.Start();
             handler.TextChannel = ctx.Channel;
-            handler.Voice.UpdateVoiceConnection();
 
             if (handler.VoiceConnection == null)
             {
                 await handler.Join(ctx);
-                await handler.Voice.WaitForConnectionAsync();
                 handler.Update(ctx.Guild);
             }
             command_stopwatch.Stop();

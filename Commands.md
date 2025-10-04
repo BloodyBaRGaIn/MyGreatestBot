@@ -31,6 +31,9 @@ apireload (reload) - Reload failed APIs
 playerstatus (plst) - Get player status
 ```
 ```
+beep
+```
+```
 logout (exit, quit, bye, bb) - Logout and exit
 ```
 ```

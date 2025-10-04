@@ -16,6 +16,13 @@ namespace SharedClasses
 
         public void Start()
         {
+            while (true)
+            {
+                if (Console.Read() == -1)
+                {
+                    break;
+                }
+            }
             task ??= Task.Run(InputHandler, cts.Token);
         }
 

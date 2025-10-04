@@ -118,7 +118,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             }
         }
 
-        public static ConnectionHandler? GetConnectionHandler(DiscordGuild guild)
+        public static ConnectionHandler? GetConnectionHandler([AllowNull] DiscordGuild guild)
         {
             if (guild is null)
             {
@@ -141,12 +141,54 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task Join(CommandContext ctx)
         {
-            await Join(ctx.Channel, ctx.Member?.VoiceState?.Channel);
+            var guild = ctx?.Guild;
+            if (guild is null)
+            {
+                return;
+            }
+
+            if (_guild != guild)
+            {
+                return;
+            }
+
+            DiscordVoiceState? state = ctx?.Member?.VoiceState;
+            if (state is null)
+            {
+                return;
+            }
+
+            ulong? id = state.ChannelId;
+            if (!id.HasValue)
+            {
+                return;
+            }
+
+            DiscordChannel? channel = await guild.GetChannelAsync(id.Value);
+            await Join(ctx?.Channel, channel);
         }
 
-        public async Task Join(VoiceStateUpdateEventArgs args)
+        public async Task Join(VoiceStateUpdatedEventArgs args)
         {
-            await Join(null, args.After?.Channel);
+            if (args == null)
+            {
+                return;
+            }
+
+            var guild = await args.GetGuildAsync();
+            if (guild is null)
+            {
+                return;
+            }
+
+            ulong? id = args.After?.ChannelId;
+            if (!id.HasValue)
+            {
+                return;
+            }
+
+            DiscordChannel? channel = await guild.GetChannelAsync(id.Value);
+            await Join(null, channel);
         }
 
         private async Task Join(
@@ -179,10 +221,12 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             bool connection_rollback = false;
 
-            if (new_channel is not null && !new_channel.PermissionsFor(_guild.CurrentMember)
-                .HasFlag(DiscordPermissions.AccessChannels |
-                         DiscordPermissions.UseVoice |
-                         DiscordPermissions.Speak))
+            DiscordPermissions permissions = new_channel?.PermissionsFor(_guild.CurrentMember) ?? DiscordPermissions.None;
+
+            if (new_channel is not null && !(
+                permissions.HasPermission(DiscordPermission.ViewChannel) &&
+                permissions.HasPermission(DiscordPermission.UseVoiceActivity) &&
+                permissions.HasPermission(DiscordPermission.Speak)))
             {
                 connection_rollback = true;
                 new_channel = old_channel;
@@ -218,8 +262,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Voice.SendSpeaking(false);
             }
 
-            Voice.UpdateVoiceConnection();
-
             await Task.Delay(1);
 
             await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Mute));
@@ -227,7 +269,32 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task Leave(CommandContext ctx)
         {
-            await Leave(ctx.Channel, ctx.Member?.VoiceState?.Channel);
+            var guild = ctx?.Guild;
+            if (guild is null)
+            {
+                return;
+            }
+
+            if (_guild != guild)
+            {
+                return;
+            }
+
+            DiscordVoiceState? state = ctx?.Member?.VoiceState;
+            if (state is null)
+            {
+                return;
+            }
+
+            ulong? id = state.ChannelId;
+            if (!id.HasValue)
+            {
+                return;
+            }
+
+            DiscordChannel? channel = await guild.GetChannelAsync(id.Value);
+
+            await Leave(ctx?.Channel, channel);
         }
 
         private async Task Leave(
@@ -239,7 +306,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 TextChannel = text;
             }
 
-            Voice.UpdateVoiceConnection();
 #pragma warning disable CS8604
             if (((VoiceChannel != channel && _guild == channel?.Guild)
                 || (channel is null && _guild == TextChannel?.Guild))
@@ -292,7 +358,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             await Task.Run(() => PlayerInstance.Resume(CommandActionSource.Event | CommandActionSource.Mute));
 
-            Voice.UpdateVoiceConnection();
             await Task.Delay(1);
         }
 
@@ -343,6 +408,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                     }
                 }
                 catch { }
+
+                handler.Voice.Disconnect();
 
                 try
                 {

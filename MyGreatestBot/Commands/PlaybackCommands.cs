@@ -173,7 +173,6 @@ namespace MyGreatestBot.Commands
             }
 
             handler.TextChannel = ctx.Channel;
-            handler.Voice.UpdateVoiceConnection();
 
             TimeSpan time = TimeSpanRegexProvider.GetTimeSpan(timespan);
 
@@ -198,7 +197,6 @@ namespace MyGreatestBot.Commands
             }
 
             handler.TextChannel = ctx.Channel;
-            handler.Voice.UpdateVoiceConnection();
 
             await Task.Run(() => handler.PlayerInstance.ReturnCurrentTrackToQueue(CommandActionSource.Command));
         }

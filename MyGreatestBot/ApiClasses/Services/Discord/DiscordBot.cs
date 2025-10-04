@@ -2,20 +2,17 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses.ConfigClasses;
 using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
-using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.ApiClasses.Utils;
 using MyGreatestBot.Commands;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,26 +26,14 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         [AllowNull] public DiscordClient Client { get; private set; }
 
         /// <summary>
-        /// Bot interactivity instance.
-        /// </summary>
-        [AllowNull] public InteractivityExtension Interactivity { get; private set; }
-
-        /// <summary>
         /// Bot commands handling instance.
         /// </summary>
         [AllowNull] public CommandsNextExtension Commands { get; private set; }
 
         /// <summary>
-        /// Bot voice actions handling instance.
-        /// </summary>
-        [AllowNull] public VoiceNextExtension Voice { get; internal set; }
-
-        /// <summary>
         /// Bot's age. Zero if it's not its anniversary today.
         /// </summary>
         private int Age { get; set; } = -1;
-
-        private ServiceProvider ServiceProvider { get; } = new ServiceCollection().BuildServiceProvider();
 
         /// <summary>
         /// Actual bot's command prefix
@@ -72,61 +57,137 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         {
             DiscordConfigJSON config_js = ConfigManager.GetDiscordConfigJSON();
 
-            DiscordConfiguration discordConfig = new()
-            {
-                MinimumLogLevel = LogLevel.Error,
-                LogTimestampFormat = LogHandler.DateTimeFormat,
-                Intents = DiscordIntents.All,
-                Token = config_js.Token,
-                TokenType = TokenType.Bot,
-                AutoReconnect = true
-            };
-
             CommandPrefix = config_js.Prefix;
 
-            Client = new(discordConfig);
+            var clientBuilder =
+                DiscordClientBuilder.CreateDefault(config_js.Token, DiscordIntents.All)
+                .SetLogLevel(LogLevel.Debug)
+                .UseCommandsNext(commands =>
+                {
+                    Commands = commands;
 
-            Client.SessionCreated += Client_Ready;
-            Client.ClientErrored += Client_ClientErrored;
-            Client.SocketErrored += Client_SocketErrored;
-            Client.SocketClosed += Client_SocketClosed;
-            Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-            Client.VoiceServerUpdated += Client_VoiceServerUpdated;
+                    Commands.SetHelpFormatter<CustomHelpFormatter>();
+                    Commands.RegisterCommands<ConnectionCommands>();
+                    Commands.RegisterCommands<QueuingCommands>();
+                    Commands.RegisterCommands<PlaybackCommands>();
+                    Commands.RegisterCommands<DatabaseCommands>();
+                    Commands.RegisterCommands<DebugCommands>();
 
-            Interactivity = Client.UseInteractivity(new()
-            {
-                Timeout = TimeSpan.FromMinutes(20)
-            });
+                    Commands.CommandErrored += Commands_CommandErrored;
+                    Commands.CommandExecuted += Commands_CommandExecuted;
+
+                    MarkdownWriter.GenerateFile();
+                }, new()
+                {
+                    StringPrefixes = [CommandPrefix],
+                    CaseSensitive = false,
+                    EnableMentionPrefix = true,
+                    EnableDms = true,
+                    EnableDefaultHelp = false,
+                })
+                .ConfigureEventHandlers(new Action<EventHandlingBuilder>(events =>
+                {
+                    _ = events.HandleSessionCreated(async (s, e) =>
+                    {
+                        if (s.CurrentUser != Client.CurrentUser)
+                        {
+                            return;
+                        }
+
+                        SetUserStatus(DiscordUserStatus.Online);
+
+                        await Task.Delay(1);
+
+                        DiscordWrapper.CurrentDomainLogHandler.Send("Session created.");
+
+                        if (Age == -1)
+                        {
+                            (int age, bool bday) = CalculateAge();
+
+                            if (age > 0)
+                            {
+                                Age = age;
+
+                                if (bday)
+                                {
+                                    DiscordWrapper.CurrentDomainLogHandler.Send(
+                                        $"It's my {Age} year anniversary today!!!");
+                                }
+                            }
+                        }
+
+                        await Task.Delay(1);
+                    });
+                    _ = events.HandleSocketOpened(async (s, e) =>
+                    {
+                        await DiscordWrapper.CurrentDomainLogHandler.SendAsync("SocketOpened");
+                    });
+                    _ = events.HandleSocketClosed(async (s, e) =>
+                    {
+                        if (s.CurrentUser != Client.CurrentUser)
+                        {
+                            return;
+                        }
+                        await DiscordWrapper.CurrentDomainLogHandler.SendAsync("SocketClosed");
+                    });
+                    _ = events.HandleVoiceStateUpdated(async (s, e) =>
+                    {
+                        if (s.CurrentUser != Client.CurrentUser)
+                        {
+                            return;
+                        }
+
+                        ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(await e.GetGuildAsync());
+                        if (handler == null)
+                        {
+                            return;
+                        }
+
+                        static async Task<DiscordChannel?> GetFromState(DiscordVoiceState? state)
+                        {
+                            return state is null ? null : await state.GetChannelAsync();
+                        }
+
+                        static string GetName(DiscordChannel? channel)
+                        {
+                            return channel?.Name ?? "null";
+                        }
+
+                        DiscordChannel? beforeChannel = await GetFromState(e.Before);
+                        DiscordChannel? afterChannel = await GetFromState(e.After);
+
+                        await handler.Log.SendAsync(
+                            $"VoiceStateUpdated from {GetName(beforeChannel)} to {GetName(afterChannel)}");
+                    });
+                    _ = events.HandleVoiceServerUpdated(async (s, e) =>
+                    {
+                        if (s.CurrentUser != Client.CurrentUser)
+                        {
+                            return;
+                        }
+
+                        ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+                        if (handler == null)
+                        {
+                            return;
+                        }
+
+                        await handler.Log.SendAsync($"VoiceServerUpdated {e.Endpoint}");
+                    });
+                }))
+                .UseVoiceNext(new VoiceNextConfiguration())
+                .UseInteractivity(new InteractivityConfiguration()
+                {
+                    Timeout = TimeSpan.FromMinutes(10)
+                });
+
+            Client = clientBuilder.Build();
 
             if (string.IsNullOrWhiteSpace(CommandPrefix))
             {
                 CommandPrefix = DiscordWrapper.DefaultPrefix;
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send("Command prefix set to its default value", LogLevel.Warning);
             }
-
-            CommandsNextConfiguration commandsConfig = new()
-            {
-                StringPrefixes = [CommandPrefix],
-                CaseSensitive = false,
-                EnableMentionPrefix = true,
-                EnableDms = true,
-                EnableDefaultHelp = false,
-                Services = ServiceProvider,
-            };
-
-            Commands = Client.UseCommandsNext(commandsConfig);
-
-            Commands.SetHelpFormatter<CustomHelpFormatter>();
-            Commands.RegisterCommands<ConnectionCommands>();
-            Commands.RegisterCommands<QueuingCommands>();
-            Commands.RegisterCommands<PlaybackCommands>();
-            Commands.RegisterCommands<DatabaseCommands>();
-            Commands.RegisterCommands<DebugCommands>();
-
-            Commands.CommandErrored += Commands_CommandErrored;
-            Commands.CommandExecuted += Commands_CommandExecuted;
-
-            MarkdownWriter.GenerateFile();
         }
 
         void IAPI.LogoutInternal()
@@ -145,21 +206,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 Commands.CommandExecuted -= Commands_CommandExecuted;
                 Commands.CommandErrored -= Commands_CommandErrored;
             }
-
-            if (Client != null)
-            {
-                Client.VoiceStateUpdated -= Client_VoiceStateUpdated;
-                Client.VoiceServerUpdated -= Client_VoiceServerUpdated;
-                Client.SessionCreated -= Client_Ready;
-                Client.ClientErrored -= Client_ClientErrored;
-                Client.SocketErrored -= Client_SocketErrored;
-                Client.SocketClosed -= Client_SocketClosed;
-            }
         }
 
         private async Task ExecuteCommandAsync(params string[] @params)
         {
-            if (Commands == null)
+            if (Client == null)
             {
                 DiscordWrapper.CurrentDomainLogErrorHandler.Send(
                     "Bot is not initialized.");
@@ -195,7 +246,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 {
                     throw new DiscordApiException("Cannot connect to Discord");
                 }
-                Voice = Client.UseVoiceNext();
             }
             catch (Exception ex)
             {
@@ -382,290 +432,245 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         #region Private event handlers
 
-        private async Task Client_Ready(DiscordClient sender, SessionReadyEventArgs args)
-        {
-            SetUserStatus(DiscordUserStatus.Online);
+        //        private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
+        //        {
+        //            string eventName = $"{nameof(Client.VoiceStateUpdated)} {e.After?.Channel?.Name ?? "null"}";
 
-            await Task.Delay(1);
+        //            bool isBotTriggered = e.User.Id == client.CurrentUser.Id && e.User.IsBot;
+        //            if (!isBotTriggered)
+        //            {
+        //                return;
+        //            }
 
-            DiscordWrapper.CurrentDomainLogHandler.Send("Session created.");
+        //            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+        //            if (handler == null)
+        //            {
+        //                return;
+        //            }
 
-            if (Age == -1)
-            {
-                (int age, bool bday) = CalculateAge();
+        //            handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
-                if (age > 0)
-                {
-                    Age = age;
+        //            bool semaphoreReady;
 
-                    if (bday)
-                    {
-                        DiscordWrapper.CurrentDomainLogHandler.Send(
-                            $"It's my {Age} year anniversary today!!!");
-                    }
-                }
-            }
+        //#pragma warning disable CS8604
+        //            bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
+        //#pragma warning restore CS8604
+        //            // TODO sometimes event triggering without reason
+        //            if (!channel_changed)
+        //            {
+        //                if (e.After?.Channel is not null)
+        //                {
+        //                    semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
 
-            await Task.Delay(1);
-        }
+        //                    if (semaphoreReady)
+        //                    {
+        //                        handler.VoiceUpdating = true;
 
-        private async Task Client_ClientErrored(DiscordClient sender, ClientErrorEventArgs args)
-        {
-            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                args.Exception.GetExtendedMessage());
-        }
+        //                        handler.Voice.Disconnect();
+        //                        await handler.Join(e);
+        //                        await handler.Voice.WaitForConnectionAsync();
 
-        private async Task Client_SocketErrored(DiscordClient sender, SocketErrorEventArgs args)
-        {
-            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                args.Exception.GetExtendedMessage());
-        }
+        //                        handler.Log.Send($"{eventName} {VoiceEventState.FastFinish}", LogLevel.Debug);
 
-        private async Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)
-        {
-            await DiscordWrapper.CurrentDomainLogErrorHandler.SendAsync(
-                args.CloseMessage);
-        }
+        //                        handler.VoiceUpdating = false;
 
-        private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs e)
-        {
-            string eventName = $"{nameof(Client.VoiceStateUpdated)} {e.After?.Channel?.Name ?? "null"}";
+        //                        _ = handler.VoiceUpdateSemaphore.TryRelease();
+        //                    }
+        //                }
+        //                return;
+        //            }
 
-            bool isBotTriggered = e.User.Id == client.CurrentUser.Id && e.User.IsBot;
-            if (!isBotTriggered)
-            {
-                return;
-            }
+        //            handler.Log.Send($"{eventName} {VoiceEventState.ChannelChanged}", LogLevel.Debug);
 
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
-            if (handler == null)
-            {
-                return;
-            }
+        //            if (handler.Voice.IsManualDisconnect)
+        //            {
+        //                await Task.Yield();
+        //                return;
+        //            }
 
-            handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
+        //            handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
 
-            bool semaphoreReady;
+        //            await Task.Yield();
 
-#pragma warning disable CS8604
-            bool channel_changed = (e.After?.Channel) != (e.Before?.Channel);
-#pragma warning restore CS8604
-            // TODO sometimes event triggering without reason
-            if (!channel_changed)
-            {
-                if (e.After?.Channel is not null)
-                {
-                    semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
+        //            semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
 
-                    if (semaphoreReady)
-                    {
-                        handler.VoiceUpdating = true;
+        //            await Task.Run(async () =>
+        //            {
+        //                if (semaphoreReady)
+        //                {
+        //                    if (handler.VoiceUpdating)
+        //                    {
+        //                        handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
+        //                        await Task.Delay(1);
+        //                        return;
+        //                    }
 
-                        handler.Voice.Disconnect();
-                        await handler.Join(e);
-                        await handler.Voice.WaitForConnectionAsync();
+        //                    handler.VoiceUpdating = true;
 
-                        handler.Log.Send($"{eventName} {VoiceEventState.FastFinish}", LogLevel.Debug);
+        //                    using Task waitConnectionTask = Task.Run(async () =>
+        //                    {
+        //                        Thread.CurrentThread.Name = $"{nameof(waitConnectionTask)} {handler.GuildName}";
 
-                        handler.VoiceUpdating = false;
+        //                        Stopwatch? stopwatch = null;
 
-                        _ = handler.VoiceUpdateSemaphore.TryRelease();
-                    }
-                }
-                return;
-            }
+        //                        while (true)
+        //                        {
+        //                            stopwatch ??= Stopwatch.StartNew();
+        //                            if (stopwatch.ElapsedMilliseconds > 5000)
+        //                            {
+        //                                break;
+        //                            }
+        //                            handler.Voice.UpdateVoiceConnection();
+        //                            if (handler.Voice.Connection != null)
+        //                            {
+        //                                break;
+        //                            }
+        //                            await Task.Delay(20);
+        //                            await Task.Yield();
+        //                        }
 
-            handler.Log.Send($"{eventName} {VoiceEventState.ChannelChanged}", LogLevel.Debug);
+        //                        stopwatch?.Stop();
+        //                    });
 
-            if (handler.Voice.IsManualDisconnect)
-            {
-                await Task.Yield();
-                return;
-            }
+        //                    await waitConnectionTask;
 
-            handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
+        //                    if (handler.VoiceConnection == null)
+        //                    {
+        //                        if (e.After?.Channel is null)
+        //                        {
+        //                            await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute));
+        //                            handler.Message.Send(new DiscordEmbedBuilder()
+        //                            {
+        //                                Color = DiscordColor.Red,
+        //                                Title = "Kicked from voice channel"
+        //                            });
+        //                            handler.Voice.Disconnect(false);
+        //                        }
+        //                        else
+        //                        {
+        //                            handler.LogError.Send("Cannot update voice state");
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        if (e.After?.Channel is not null)
+        //                        {
+        //                            handler.Voice.IsManualDisconnect = true;
+        //                            await handler.Join(e);
+        //                            await handler.Voice.WaitForConnectionAsync();
+        //                        }
+        //                        else
+        //                        {
+        //                            handler.LogError.Send("Voice state is illegal");
+        //                        }
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
+        //                }
 
-            await Task.Yield();
+        //                handler.Update(e.Guild);
+        //            });
 
-            semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
+        //            if (semaphoreReady)
+        //            {
+        //                handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
 
-            await Task.Run(async () =>
-            {
-                if (semaphoreReady)
-                {
-                    if (handler.VoiceUpdating)
-                    {
-                        handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
-                        await Task.Delay(1);
-                        return;
-                    }
+        //                handler.VoiceUpdating = false;
 
-                    handler.VoiceUpdating = true;
+        //                _ = handler.VoiceUpdateSemaphore.TryRelease();
+        //            }
 
-                    using Task waitConnectionTask = Task.Run(async () =>
-                    {
-                        Thread.CurrentThread.Name = $"{nameof(waitConnectionTask)} {handler.GuildName}";
+        //            await Task.Yield();
+        //        }
 
-                        Stopwatch? stopwatch = null;
+        //private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
+        //{
+        //    string eventName = $"{nameof(Client.VoiceServerUpdated)} {e.Endpoint ?? "null"}";
 
-                        while (true)
-                        {
-                            stopwatch ??= Stopwatch.StartNew();
-                            if (stopwatch.ElapsedMilliseconds > 5000)
-                            {
-                                break;
-                            }
-                            handler.Voice.UpdateVoiceConnection();
-                            if (handler.Voice.Connection != null)
-                            {
-                                break;
-                            }
-                            await Task.Delay(20);
-                            await Task.Yield();
-                        }
+        //    bool isBotTriggered = Client.CurrentUser.Id == client.CurrentUser.Id;
+        //    if (!isBotTriggered)
+        //    {
+        //        return;
+        //    }
 
-                        stopwatch?.Stop();
-                    });
+        //    ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
+        //    if (handler == null)
+        //    {
+        //        return;
+        //    }
 
-                    await waitConnectionTask;
+        //    handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
 
-                    if (handler.VoiceConnection == null)
-                    {
-                        if (e.After?.Channel is null)
-                        {
-                            await Task.Run(() => handler.PlayerInstance.Stop(CommandActionSource.Event | CommandActionSource.Mute));
-                            handler.Message.Send(new DiscordEmbedBuilder()
-                            {
-                                Color = DiscordColor.Red,
-                                Title = "Kicked from voice channel"
-                            });
-                            handler.Voice.Disconnect(false);
-                        }
-                        else
-                        {
-                            handler.LogError.Send("Cannot update voice state");
-                        }
-                    }
-                    else
-                    {
-                        if (e.After?.Channel is not null)
-                        {
-                            handler.Voice.IsManualDisconnect = true;
-                            await handler.Join(e);
-                            await handler.Voice.WaitForConnectionAsync();
-                        }
-                        else
-                        {
-                            handler.LogError.Send("Voice state is illegal");
-                        }
-                    }
-                }
-                else
-                {
-                    handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
-                }
+        //    bool not_changed = false;
 
-                handler.Update(e.Guild);
-            });
+        //    if (handler.Voice.Endpoint != e.Endpoint || handler.Voice.Token != e.VoiceToken)
+        //    {
+        //        if (string.IsNullOrWhiteSpace(handler.Voice.Endpoint) ||
+        //            string.IsNullOrWhiteSpace(e.Endpoint) ||
+        //            string.IsNullOrWhiteSpace(handler.Voice.Token) ||
+        //            string.IsNullOrWhiteSpace(e.VoiceToken))
+        //        {
+        //            not_changed = true;
+        //        }
+        //        handler.Voice.Endpoint = e.Endpoint;
+        //        handler.Voice.Token = e.VoiceToken;
+        //    }
 
-            if (semaphoreReady)
-            {
-                handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
+        //    if (not_changed || handler.Voice.IsManualDisconnect)
+        //    {
+        //        await Task.Yield();
+        //        return;
+        //    }
 
-                handler.VoiceUpdating = false;
+        //    handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
 
-                _ = handler.VoiceUpdateSemaphore.TryRelease();
-            }
+        //    try
+        //    {
+        //        await Task.Delay(5000);
+        //    }
+        //    catch { }
 
-            await Task.Yield();
-        }
+        //    bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
+        //    if (semaphoreReady)
+        //    {
+        //        if (handler.VoiceUpdating || handler.ServerUpdating)
+        //        {
+        //            handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
+        //            _ = handler.VoiceUpdateSemaphore.TryRelease();
+        //            return;
+        //        }
 
-        private async Task Client_VoiceServerUpdated(DiscordClient client, VoiceServerUpdateEventArgs e)
-        {
-            string eventName = $"{nameof(Client.VoiceServerUpdated)} {e.Endpoint ?? "null"}";
+        //        handler.VoiceUpdating = true;
+        //        handler.ServerUpdating = true;
 
-            bool isBotTriggered = Client.CurrentUser.Id == client.CurrentUser.Id;
-            if (!isBotTriggered)
-            {
-                return;
-            }
+        //        try
+        //        {
+        //            handler.Voice.IsManualDisconnect = true;
+        //            await handler.Reconnect();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            handler.Log.Send(ex.GetExtendedMessage());
+        //        }
 
-            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(e.Guild);
-            if (handler == null)
-            {
-                return;
-            }
+        //        _ = handler.VoiceUpdateSemaphore.TryRelease();
 
-            handler.Log.Send($"{eventName} {VoiceEventState.Entry}", LogLevel.Debug);
+        //        handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
 
-            bool not_changed = false;
+        //        handler.ServerUpdating = false;
+        //        handler.VoiceUpdating = false;
+        //    }
+        //    else
+        //    {
+        //        handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
+        //    }
 
-            if (handler.Voice.Endpoint != e.Endpoint || handler.Voice.Token != e.VoiceToken)
-            {
-                if (string.IsNullOrWhiteSpace(handler.Voice.Endpoint) ||
-                    string.IsNullOrWhiteSpace(e.Endpoint) ||
-                    string.IsNullOrWhiteSpace(handler.Voice.Token) ||
-                    string.IsNullOrWhiteSpace(e.VoiceToken))
-                {
-                    not_changed = true;
-                }
-                handler.Voice.Endpoint = e.Endpoint;
-                handler.Voice.Token = e.VoiceToken;
-            }
+        //    handler.Update(e.Guild);
 
-            if (not_changed || handler.Voice.IsManualDisconnect)
-            {
-                await Task.Yield();
-                return;
-            }
-
-            handler.Log.Send($"{eventName} {VoiceEventState.Start}", LogLevel.Debug);
-
-            try
-            {
-                await Task.Delay(5000);
-            }
-            catch { }
-
-            bool semaphoreReady = handler.VoiceUpdateSemaphore.TryWaitOne(10000);
-            if (semaphoreReady)
-            {
-                if (handler.VoiceUpdating || handler.ServerUpdating)
-                {
-                    handler.Log.Send($"{eventName} {VoiceEventState.InProgress}", LogLevel.Debug);
-                    _ = handler.VoiceUpdateSemaphore.TryRelease();
-                    return;
-                }
-
-                handler.VoiceUpdating = true;
-                handler.ServerUpdating = true;
-
-                try
-                {
-                    handler.Voice.IsManualDisconnect = true;
-                    await handler.Reconnect();
-                }
-                catch (Exception ex)
-                {
-                    handler.Log.Send(ex.GetExtendedMessage());
-                }
-
-                _ = handler.VoiceUpdateSemaphore.TryRelease();
-
-                handler.Log.Send($"{eventName} {VoiceEventState.Finish}", LogLevel.Debug);
-
-                handler.ServerUpdating = false;
-                handler.VoiceUpdating = false;
-            }
-            else
-            {
-                handler.Log.Send($"{eventName} {VoiceEventState.Busy}", LogLevel.Debug);
-            }
-
-            handler.Update(e.Guild);
-
-            await Task.Delay(1);
-        }
+        //    await Task.Delay(1);
+        //}
 
         private async Task Commands_CommandExecuted(
             CommandsNextExtension sender,

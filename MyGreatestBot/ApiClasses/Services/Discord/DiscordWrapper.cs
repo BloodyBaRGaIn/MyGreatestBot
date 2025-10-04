@@ -42,9 +42,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
         /// <inheritdoc cref="DiscordBot.Client"/>
         [AllowNull] public static DiscordClient Client => Instance.Client;
 
-        /// <inheritdoc cref="DiscordBot.Voice"/>
-        [AllowNull] public static VoiceNextExtension VoiceNext => Instance.Voice;
-
         /// <inheritdoc cref="DiscordBot.Commands"/>
         [AllowNull] public static CommandsNextExtension Commands => Instance.Commands;
 

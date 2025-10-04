@@ -60,8 +60,8 @@ namespace MyGreatestBot.Commands
             {
                 collection.AddRange(CustomHelpFormatter.WithAllCommands());
             }
-            else if (DiscordWrapper.RegisteredCommands.TryGetValue(command.ToLowerInvariant(),
-                                                                   out Command? cmd))
+            else if (DiscordWrapper.RegisteredCommands?.TryGetValue(command.ToLowerInvariant(),
+                                                                   out Command? cmd) ?? false)
             {
                 collection.Add(new CustomHelpFormatter().WithCommand(cmd));
             }

@@ -15,7 +15,7 @@ namespace MyGreatestBot.Player
     /// </summary>
     internal sealed partial class PlayerHandler
     {
-        private const int TRANSMIT_SINK_MS = 10;
+        private const int TRANSMIT_SINK_MS = 20;
         private const int BUFFER_SIZE = 1920 * TRANSMIT_SINK_MS / 5;
 
         private const int TRACK_LOADING_DELAY_MS = 20000;
@@ -429,7 +429,7 @@ namespace MyGreatestBot.Player
 
                 // when discord voice server changed
                 // needs to be handled more propertly
-                if (!writeTask.Wait(TRANSMIT_SINK_MS * 100))
+                if (!writeTask.Wait(TRANSMIT_SINK_MS * 100000))
                 {
                     cts.Cancel();
                     try
@@ -437,7 +437,6 @@ namespace MyGreatestBot.Player
                         writeTask.Wait();
                     }
                     catch { }
-                    Handler.Voice.UpdateVoiceConnection();
                     Handler.Voice.UpdateSink();
                     return LowPlayerResult.RestartWrite;
                 }

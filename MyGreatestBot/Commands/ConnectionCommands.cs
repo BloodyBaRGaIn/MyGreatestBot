@@ -1,12 +1,15 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.VoiceNext;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
 using MyGreatestBot.Extensions;
+using Swan;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -187,6 +190,87 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             await Task.Run(() => handler.PlayerInstance.GetStatus(CommandActionSource.Command));
+        }
+
+        [Command("beep")]
+        [SuppressMessage("Performance", "CA1822")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
+        public async Task BeepTask(CommandContext ctx)
+        {
+            ConnectionHandler? handler = ConnectionHandler.GetConnectionHandler(ctx.Guild);
+            if (handler == null)
+            {
+                return;
+            }
+
+            await handler.Join(ctx);
+
+            const int durationSeconds = 5;
+
+            // Generate proper PCM sine wave
+            const int sampleRate = 48000;
+            const short amplitude = 15000; // Max for 16-bit is 32767
+            const double frequency = 440.0; // A4 note
+
+            // Calculate total samples needed
+            var totalSamples = sampleRate * durationSeconds;
+            var pcmData = new byte[totalSamples * 4]; // 2 channels * 2 bytes per sample
+
+            for (int i = 0; i < totalSamples; i++)
+            {
+                double time = (double)i / sampleRate;
+                short sample = (short)(amplitude * Math.Sin(2 * Math.PI * frequency * time));
+
+                // Little endian PCM for both channels
+                int byteIndex = i * 4;
+
+                // Left channel (little endian)
+                pcmData[byteIndex] = (byte)(sample & 0xFF);
+                pcmData[byteIndex + 1] = (byte)((sample >> 8) & 0xFF);
+
+                // Right channel (little endian)
+                pcmData[byteIndex + 2] = (byte)(sample & 0xFF);
+                pcmData[byteIndex + 3] = (byte)((sample >> 8) & 0xFF);
+            }
+
+            using var memoryStream = new MemoryStream(pcmData);
+            Console.WriteLine($"Generated {pcmData.Length} bytes of PCM data");
+
+            // Write in chunks to simulate real audio streaming
+            memoryStream.Position = 0;
+            byte[] buffer = new byte[3840]; // Standard Opus frame size
+
+            var voiceState = await ctx.Guild.GetCurrentUserVoiceStateAsync();
+            if (voiceState is not null)
+            {
+                await handler.Log.SendAsync(string.Join(Environment.NewLine,
+                    $"Discord Voice State - Channel: {voiceState.ChannelId}",
+                    $"Is Server Muted: {voiceState.IsServerMuted}",
+                    $"Is Server Deafened: {voiceState.IsServerDeafened}",
+                    $"Is Self Muted: {voiceState.IsSelfMuted}",
+                    $"Is Self Deafened: {voiceState.IsSelfDeafened}"));
+            }
+
+            await handler.Log.SendAsync(
+                string.Join(Environment.NewLine,
+                handler.Voice.Connection.AudioFormat.Stringify(),
+                handler.Voice.Connection.GetTransmitSink().Stringify(),
+                "VoiceNextConnection.IsPlaying : " + handler.Voice.Connection.IsPlaying.ToString(),
+                "VoiceNextConnection.UdpPing : " + handler.Voice.Connection.UdpPing.ToString(),
+                "VoiceNextConnection.WebSocketPing : " + handler.Voice.Connection.WebSocketPing.ToString()));
+
+            int bytesRead;
+            while ((bytesRead = await memoryStream.ReadAsync(buffer)) > 0)
+            {
+                if (bytesRead < buffer.Length)
+                {
+                    // Last chunk - pad with silence if needed
+                    Array.Clear(buffer, bytesRead, buffer.Length - bytesRead);
+                }
+
+                await handler.Voice.WriteAsync(buffer, buffer.Length);
+                await Task.Delay(20); // Simulate real-time audio
+            }
         }
 
         [Command("logout"), Aliases("exit", "quit", "bye", "bb")]

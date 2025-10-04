@@ -2,6 +2,7 @@
 using DSharpPlus.VoiceNext;
 using MyGreatestBot.Player;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,12 +13,9 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
     /// </summary>
     public sealed class VoiceHandler(DiscordGuild guild) : IDisposable
     {
-        [AllowNull] private static VoiceNextExtension VoiceNext => DiscordWrapper.VoiceNext;
         [AllowNull] public DiscordChannel Channel { get; private set; }
         [AllowNull] private VoiceTransmitSink TransmitSink { get; set; }
         [AllowNull] private DiscordChannel LastKnownChannel { get; set; } = null;
-        [AllowNull] public string Endpoint { get; set; } = null;
-        [AllowNull] public string Token { get; set; } = null;
 
         [AllowNull]
         public VoiceNextConnection Connection
@@ -44,26 +42,26 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         private bool disposed;
 
         /// <summary>
-        /// Update voice connection
-        /// </summary>
-        public void UpdateVoiceConnection()
-        {
-            try
-            {
-                Connection = VoiceNext?.GetConnection(guild);
-            }
-            catch { }
-        }
-
-        /// <summary>
         /// Awaiting for connection
         /// </summary>
         /// <returns></returns>
         public async Task WaitForConnectionAsync()
         {
-            while (Connection == null)
+            while (Connection?.TargetChannel is null)
             {
-                await UpdateVoiceConnectionAsync();
+                await Task.Delay(1);
+            }
+            while (true)
+            {
+                try
+                {
+                    Connection.SendSpeakingAsync(true).Wait();
+                    break;
+                }
+                catch
+                {
+                    await Task.Delay(1);
+                }
             }
         }
 
@@ -73,19 +71,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// <returns></returns>
         public async Task WaitForDisconnectionAsync()
         {
-            do
+            while (Connection?.TargetChannel is not null)
             {
-                await UpdateVoiceConnectionAsync();
-            } while (Connection != null);
-        }
-
-        /// <summary>
-        /// Update voice connection asynchronous
-        /// </summary>
-        private async Task UpdateVoiceConnectionAsync()
-        {
-            UpdateVoiceConnection();
-            await Task.Delay(1);
+                await Task.Delay(1);
+            }
         }
 
         /// <summary>
@@ -94,6 +83,15 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// <param name="channel">Channel to connect to</param>
         public void Connect(DiscordChannel? channel)
         {
+            if (channel is not null)
+            {
+                var found = guild.GetChannelAsync(channel.Id).GetAwaiter().GetResult();
+                if (found is not null && found != channel)
+                {
+                    return;
+                }
+            }
+
             try
             {
 #pragma warning disable CS8604
@@ -109,11 +107,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                         Task.Yield().GetAwaiter().GetResult();
                     }
 
-                    if (VoiceNext != null
-                        && channel is not null
+                    if (channel is not null
                         && channel_changed)
                     {
-                        Task<VoiceNextConnection> task = VoiceNext.ConnectAsync(channel);
+                        Task<VoiceNextConnection> task = channel.ConnectAsync();
                         _ = task.Wait(2000);
                         Connection = task.IsCompletedSuccessfully ? task.Result : null;
                     }
@@ -145,8 +142,6 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 Connection?.Dispose();
                 Connection = null;
                 Channel = null;
-                Endpoint = null;
-                Token = null;
             }
             catch { }
         }
@@ -170,7 +165,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         /// <param name="bytes">Data to write</param>
         /// <param name="cnt">Count of bytes to write</param>
         /// <returns>Written bytes count</returns>
-        public async Task<int> WriteAsync(byte[] bytes, int cnt, CancellationToken cancellationToken)
+        public async Task<int> WriteAsync(byte[] bytes, int cnt, CancellationToken cancellationToken = default)
         {
             while (true)
             {
