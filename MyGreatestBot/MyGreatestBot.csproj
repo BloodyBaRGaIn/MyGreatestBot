@@ -60,9 +60,9 @@
     <PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-02551" />
     <PackageReference Include="DSharpPlus.VoiceNext" Version="5.0.0-nightly-02551" />
     <PackageReference Include="EmbedIO" Version="3.5.2" />
-    <PackageReference Include="Google.Apis" Version="1.71.0" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.71.0" />
-    <PackageReference Include="Google.Apis.Core" Version="1.71.0" />
+    <PackageReference Include="Google.Apis" Version="1.72.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.72.0" />
+    <PackageReference Include="Google.Apis.Core" Version="1.72.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.70.0.3847" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="KM.Yandex.Music.Api" Version="2.0.3" />
@@ -152,7 +152,7 @@
     <PackageReference Include="Unosquare.Swan.Lite" Version="3.1.0" />
     <PackageReference Include="VkNet" Version="1.79.0-alpha-137" />
     <PackageReference Include="VkNet.AudioBypassService" Version="1.7.7" />
-    <PackageReference Include="YoutubeExplode" Version="6.5.4" />
+    <PackageReference Include="YoutubeExplode" Version="6.5.5" />
   </ItemGroup>
 
   <ItemGroup Label="BuildProps">
