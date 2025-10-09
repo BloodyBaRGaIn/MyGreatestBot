@@ -13,5 +13,9 @@ namespace MyGreatestBot.ApiClasses.ConfigClasses.JsonModels
         public string Username { get; private set; }
         [JsonProperty("password")]
         public string Password { get; private set; }
+        [JsonProperty("sequrekey")]
+        public string SequreKey { get; private set; }
+        [JsonProperty("servicekey")]
+        public string ServiceKey { get; private set; }
     }
 }

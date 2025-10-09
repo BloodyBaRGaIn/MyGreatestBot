@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using VkNet;
 using VkNet.Abstractions;
 using VkNet.AudioBypassService.Extensions;
+using VkNet.Enums.Filters;
 using VkNet.Model;
 using VkNet.Utils;
 
@@ -106,12 +107,23 @@ namespace MyGreatestBot.ApiClasses.Music.Vk
             ApiAuthParams apiAuthParams = new()
             {
                 Login = credentials.Username,
-                Password = credentials.Password
+                Password = credentials.Password,
+                Settings = Settings.All,
+                ClientSecret = credentials.ServiceKey,
+                TwoFactorAuthorization = static () => string.Empty
             };
 
             if (ulong.TryParse(credentials.AppId, out ulong appid))
             {
                 apiAuthParams.ApplicationId = appid;
+            }
+            else
+            {
+                DiscordWrapper.CurrentDomainLogHandler.Send(
+                    string.Join(" ",
+                        $"{(this as IAPI).ApiType} ApplicationId has invalid format.",
+                        "The auth flow might fail."),
+                    LogLevel.Warning);
             }
 
             try

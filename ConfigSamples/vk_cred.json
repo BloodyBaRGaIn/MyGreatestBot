@@ -1,5 +1,7 @@
 {
   "appid": "123456789",
   "username": "user",
-  "password": "password"
+  "password": "password",
+  "sequrekey": "sequrekey_hash",
+  "servicekey": "servicekey_hex"
 }
