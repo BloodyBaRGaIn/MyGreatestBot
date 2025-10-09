@@ -193,6 +193,7 @@ namespace MyGreatestBot.Commands
         }
 
         [Command("beep")]
+        [Description("Sends a test beep sound")]
         [SuppressMessage("Performance", "CA1822")]
         [SuppressMessage("CodeQuality", "IDE0079")]
         public async Task BeepTask(CommandContext ctx)
