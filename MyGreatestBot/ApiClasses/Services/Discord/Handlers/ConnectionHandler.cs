@@ -141,7 +141,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task Join(CommandContext ctx)
         {
-            var guild = ctx?.Guild;
+            DiscordGuild? guild = ctx?.Guild;
             if (guild is null)
             {
                 return;
@@ -175,7 +175,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                 return;
             }
 
-            var guild = await args.GetGuildAsync();
+            DiscordGuild? guild = await args.GetGuildAsync();
             if (guild is null)
             {
                 return;
@@ -269,7 +269,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
         public async Task Leave(CommandContext ctx)
         {
-            var guild = ctx?.Guild;
+            DiscordGuild? guild = ctx?.Guild;
             if (guild is null)
             {
                 return;

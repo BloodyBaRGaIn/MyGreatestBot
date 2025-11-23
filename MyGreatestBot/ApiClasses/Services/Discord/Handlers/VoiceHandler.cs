@@ -2,7 +2,6 @@
 using DSharpPlus.VoiceNext;
 using MyGreatestBot.Player;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -85,7 +84,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
         {
             if (channel is not null)
             {
-                var found = guild.GetChannelAsync(channel.Id).GetAwaiter().GetResult();
+                DiscordChannel? found = guild.GetChannelAsync(channel.Id).GetAwaiter().GetResult();
                 if (found is not null && found != channel)
                 {
                     return;

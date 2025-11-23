@@ -5,7 +5,6 @@ using MyGreatestBot.Commands.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using VkNet.Model;
 
 namespace MyGreatestBot.Commands
 {
@@ -125,47 +124,29 @@ namespace MyGreatestBot.Commands
             handler.TextChannel = ctx.Channel;
 
             (int age, bool bday) = DiscordWrapper.Instance.CalculateAge();
+            bool age_gtr_yaer = age > 0;
+
+            string emogi = bday
+                ? ":partying_face:"
+                : age_gtr_yaer
+                    ? ":confused:"
+                    : ":pleading_face:";
 
             DiscordEmbedBuilder builder = new()
             {
                 Color = DiscordColor.White,
                 Title = "Anniversary",
+                Description = string.Join(string.Empty,
+                    emogi,
+                    age_gtr_yaer
+                        ? bday
+                            ? $"It's my {age} year anniversary today!!!"
+                            : $"It's not my birthday today... I was created {age} years ago."
+                        : bday
+                            ? $"I was created just today!!! Congratulations!"
+                            : $"I was created less than year ago... Too early to celebrate.",
+                    emogi),
             };
-
-            if (age > 0)
-            {
-                if (bday)
-                {
-                    builder.Description = 
-                        $":partying_face:" +
-                        $"It's my {age} year anniversary today!!!" +
-                        $":partying_face:";
-                }
-                else
-                {
-                    builder.Description =
-                        $":confused:" +
-                        $"It's not my birthday today... I was created {age} years ago." +
-                        $":confused:";
-                }
-            }
-            else
-            {
-                if (bday)
-                {
-                    builder.Description =
-                        $":partying_face:" +
-                        $"I was created just today!!! Congratulations!" +
-                        $":partying_face:";
-                }
-                else
-                {
-                    builder.Description =
-                        $":pleading_face:" +
-                        $"I was created less than year ago... Too early to celebrate." +
-                        $":pleading_face:";
-                }
-            }
 
             handler.Message.Send(builder);
 

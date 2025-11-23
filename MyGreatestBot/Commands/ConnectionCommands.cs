@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.VoiceNext;
 using MyGreatestBot.ApiClasses;
 using MyGreatestBot.Commands.Exceptions;
 using MyGreatestBot.Commands.Utils;
@@ -214,8 +213,8 @@ namespace MyGreatestBot.Commands
             const double frequency = 440.0; // A4 note
 
             // Calculate total samples needed
-            var totalSamples = sampleRate * durationSeconds;
-            var pcmData = new byte[totalSamples * 4]; // 2 channels * 2 bytes per sample
+            int totalSamples = sampleRate * durationSeconds;
+            byte[] pcmData = new byte[totalSamples * 4]; // 2 channels * 2 bytes per sample
 
             for (int i = 0; i < totalSamples; i++)
             {
@@ -234,14 +233,14 @@ namespace MyGreatestBot.Commands
                 pcmData[byteIndex + 3] = (byte)((sample >> 8) & 0xFF);
             }
 
-            using var memoryStream = new MemoryStream(pcmData);
+            using MemoryStream memoryStream = new MemoryStream(pcmData);
             Console.WriteLine($"Generated {pcmData.Length} bytes of PCM data");
 
             // Write in chunks to simulate real audio streaming
             memoryStream.Position = 0;
             byte[] buffer = new byte[3840]; // Standard Opus frame size
 
-            var voiceState = await ctx.Guild.GetCurrentUserVoiceStateAsync();
+            DiscordVoiceState? voiceState = await ctx.Guild.GetCurrentUserVoiceStateAsync();
             if (voiceState is not null)
             {
                 await handler.Log.SendAsync(string.Join(Environment.NewLine,
@@ -269,7 +268,7 @@ namespace MyGreatestBot.Commands
                     Array.Clear(buffer, bytesRead, buffer.Length - bytesRead);
                 }
 
-                await handler.Voice.WriteAsync(buffer, buffer.Length);
+                _ = await handler.Voice.WriteAsync(buffer, buffer.Length);
                 await Task.Delay(20); // Simulate real-time audio
             }
         }

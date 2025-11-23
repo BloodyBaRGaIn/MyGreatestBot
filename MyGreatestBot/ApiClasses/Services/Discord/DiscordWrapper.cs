@@ -1,7 +1,6 @@
 ﻿global using DiscordWrapper = MyGreatestBot.ApiClasses.Services.Discord.DiscordWrapper;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.VoiceNext;
 using MyGreatestBot.ApiClasses.Services.Discord.Handlers;
 using MyGreatestBot.Extensions;
 using System;

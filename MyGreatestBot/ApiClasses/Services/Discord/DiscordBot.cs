@@ -5,7 +5,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
-using Microsoft.Extensions.DependencyInjection;
 using MyGreatestBot.ApiClasses.ConfigClasses;
 using MyGreatestBot.ApiClasses.ConfigClasses.JsonModels;
 using MyGreatestBot.ApiClasses.Utils;
@@ -59,7 +58,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             CommandPrefix = config_js.Prefix;
 
-            var clientBuilder =
+            DiscordClientBuilder clientBuilder =
                 DiscordClientBuilder.CreateDefault(config_js.Token, DiscordIntents.All)
                 .SetLogLevel(LogLevel.Debug)
                 .UseCommandsNext(commands =>
