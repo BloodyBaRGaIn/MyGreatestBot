@@ -94,7 +94,7 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
             try
             {
 #pragma warning disable CS8604
-                bool channel_changed = Channel != channel || Connection?.TargetChannel != channel;
+                bool channel_changed = (Channel != channel || Connection?.TargetChannel != channel) && Channel is not null;
 #pragma warning restore CS8604
                 while (true)
                 {
@@ -106,11 +106,11 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
                         Task.Yield().GetAwaiter().GetResult();
                     }
 
-                    if (channel is not null
-                        && channel_changed)
+                    if (channel is not null)
                     {
+                        // broken, 4006 error
                         Task<VoiceNextConnection> task = channel.ConnectAsync();
-                        _ = task.Wait(2000);
+                        _ = task.Wait(10 * 60 * 1000);
                         Connection = task.IsCompletedSuccessfully ? task.Result : null;
                     }
 
