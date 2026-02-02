@@ -233,7 +233,7 @@ namespace MyGreatestBot.Commands
                 pcmData[byteIndex + 3] = (byte)((sample >> 8) & 0xFF);
             }
 
-            using MemoryStream memoryStream = new MemoryStream(pcmData);
+            using MemoryStream memoryStream = new(pcmData);
             Console.WriteLine($"Generated {pcmData.Length} bytes of PCM data");
 
             // Write in chunks to simulate real audio streaming
@@ -260,6 +260,10 @@ namespace MyGreatestBot.Commands
                 "VoiceNextConnection.WebSocketPing : " + handler.Voice.Connection.WebSocketPing.ToString()));
 
             int bytesRead;
+            int bytesWrite = 0;
+
+            handler.Voice.SendSpeaking(true);
+
             while ((bytesRead = await memoryStream.ReadAsync(buffer)) > 0)
             {
                 if (bytesRead < buffer.Length)
@@ -268,9 +272,20 @@ namespace MyGreatestBot.Commands
                     Array.Clear(buffer, bytesRead, buffer.Length - bytesRead);
                 }
 
-                _ = await handler.Voice.WriteAsync(buffer, buffer.Length);
-                await Task.Delay(20); // Simulate real-time audio
+                int bytesPushed = await handler.Voice.WriteAsync(buffer, buffer.Length);
+                if (bytesPushed > 0)
+                {
+                    bytesWrite += bytesPushed;
+                }
+                await Task.Delay(handler.Voice.Connection.GetTransmitSink().SampleDuration); // Simulate real-time audio
             }
+
+            handler.Voice.SendSpeaking(false);
+
+            handler.Message.Send(
+                new BeepCommandException(
+                    $"Successfully sent {bytesWrite} out of {pcmData.Length} bytes of PCM data.")
+                .WithSuccess());
         }
 
         [Command("logout"), Aliases("exit", "quit", "bye", "bb")]

@@ -10,19 +10,11 @@ namespace SharedClasses
     {
         private readonly Queue<string> inputStrings = new();
         private Task? task;
-        private Task<string?>? readTask;
         private readonly CancellationTokenSource cts = new();
         private bool disposed;
 
         public void Start()
         {
-            while (true)
-            {
-                if (Console.Read() == -1)
-                {
-                    break;
-                }
-            }
             task ??= Task.Run(InputHandler, cts.Token);
         }
 
@@ -33,6 +25,8 @@ namespace SharedClasses
 
         private void InputHandler()
         {
+            Thread.CurrentThread.Name = nameof(NonBlockingConsole);
+
             while (true)
             {
                 if (cts.IsCancellationRequested)
@@ -49,10 +43,20 @@ namespace SharedClasses
                     return;
                 }
 
-                string? inputStr;
+                string? inputStr = null;
                 try
                 {
-                    inputStr = ReadLineAsync(cts.Token).Result;
+                    Task<string?> readTask = Console.In.ReadLineAsync(cts.Token).AsTask();
+                    readTask.Wait();
+                    cts.Token.ThrowIfCancellationRequested();
+                    if (readTask.IsCompletedSuccessfully)
+                    {
+                        inputStr = readTask.Result;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch
                 {
@@ -64,20 +68,6 @@ namespace SharedClasses
                     inputStrings.Enqueue(inputStr);
                 }
             }
-        }
-
-        private async Task<string?> ReadLineAsync(CancellationToken cancellationToken = default)
-        {
-            readTask ??= Task.Run(Console.ReadLine);
-
-            _ = await Task.WhenAny(readTask, Task.Delay(-1, cancellationToken));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string? result = await readTask;
-            readTask = null;
-
-            return result;
         }
 
         public void Dispose()
@@ -100,11 +90,6 @@ namespace SharedClasses
             }
 
             cts.Cancel();
-            try
-            {
-                _ = readTask?.Wait(100);
-            }
-            catch { }
 
             try
             {

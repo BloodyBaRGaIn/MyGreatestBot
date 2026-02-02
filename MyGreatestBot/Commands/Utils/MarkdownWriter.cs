@@ -45,6 +45,11 @@ namespace MyGreatestBot.Commands.Utils
         /// <returns></returns>
         public static IEnumerable<string> GetFullCommandsString(MarkdownType mdType)
         {
+            if (DiscordWrapper.RegisteredCommands == null || DiscordWrapper.RegisteredCommands.Count == 0)
+            {
+                yield break;
+            }
+
             foreach (IGrouping<string, Command> category in DiscordWrapper.RegisteredCommands.Values
                 .DistinctBy(c => c.Name)
                 .GroupBy(c => c.Category ?? string.Empty))

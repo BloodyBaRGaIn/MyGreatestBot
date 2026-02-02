@@ -191,20 +191,22 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
         void IAPI.LogoutInternal()
         {
-            if (Commands != null)
+            if (Commands == null)
             {
-                if (Commands.RegisteredCommands.Count != 0)
-                {
-                    try
-                    {
-                        Commands.UnregisterCommands(cmds: [.. Commands.RegisteredCommands.Values]);
-                    }
-                    catch { }
-                }
-
-                Commands.CommandExecuted -= Commands_CommandExecuted;
-                Commands.CommandErrored -= Commands_CommandErrored;
+                return;
             }
+
+            if (Commands.RegisteredCommands.Count != 0)
+            {
+                try
+                {
+                    Commands.UnregisterCommands(cmds: [.. Commands.RegisteredCommands.Values]);
+                }
+                catch { }
+            }
+
+            Commands.CommandExecuted -= Commands_CommandExecuted;
+            Commands.CommandErrored -= Commands_CommandErrored;
         }
 
         private async Task ExecuteCommandAsync(params string[] @params)
@@ -264,6 +266,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
 
             using Task waitForExitTask = Task.Run(async () =>
             {
+                Thread.CurrentThread.Name = nameof(DiscordBot);
+
                 // waiting for stop request
                 while (true)
                 {
@@ -387,14 +391,21 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
                 result += $"{args.Context.Member.DisplayName} : ";
             }
 
+            string parameters;
+
             if (args.Command != null)
             {
-                result += $"{args.Command.Name}";
+                result += $"{args.Command.Name} ";
+                parameters = args.Context.RawArgumentString;
+            }
+            else
+            {
+                parameters = args.Context.Message.Content;
             }
 
-            if (!string.IsNullOrWhiteSpace(args.Context.RawArgumentString))
+            if (!string.IsNullOrWhiteSpace(parameters))
             {
-                result += $" {args.Context.RawArgumentString}";
+                result += parameters;
             }
 
             return result;
@@ -691,6 +702,8 @@ namespace MyGreatestBot.ApiClasses.Services.Discord
             {
                 return;
             }
+
+            handler.TextChannel = args.Context.Channel;
 
             bool handled = false;
 

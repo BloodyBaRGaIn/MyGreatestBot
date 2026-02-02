@@ -8,7 +8,7 @@ namespace MyGreatestBot.Commands.Utils
 {
     public abstract class ConsoleCommandModule
     {
-        public virtual object? InvokeMethod(string commandName, string[]? arguments = null)
+        public virtual object? InvokeMethod(string commandName, string?[]? arguments = null)
         {
             IEnumerable<MethodInfo> methods = GetType().GetMethods()
                 .Where(m => string.Equals(
@@ -30,11 +30,21 @@ namespace MyGreatestBot.Commands.Utils
 
             IEnumerable<string> args = StringExtensions.EnsureStrings(arguments);
 
-            int max = method.GetParameters().Length;
+            ParameterInfo[] parametersInfo = method.GetParameters();
 
-            if (args.Count() > max)
+            if (args.Count() > parametersInfo.Length)
             {
-                arguments = args.ToArray()[..max];
+                arguments = args.ToArray()[..parametersInfo.Length];
+            }
+            if (args.Count() < parametersInfo.Length)
+            {
+                int essential = parametersInfo.Count(m => !m.IsOptional);
+                if (args.Count() < essential)
+                {
+                    throw new InvalidOperationException("Insufficient parameters.");
+                }
+
+                arguments = [.. args, .. Enumerable.Repeat<string?>(null, parametersInfo.Length - essential)];
             }
 
             return method.Invoke(this, arguments);
