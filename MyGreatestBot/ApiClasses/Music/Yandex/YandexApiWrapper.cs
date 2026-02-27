@@ -289,7 +289,11 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 exceptions.Add(ex);
             }
 
-            exceptions.AddRange(letter.Errors.Select(static err => new Exception($"Error: {err}")));
+            if (letter.Errors != null)
+            {
+                exceptions.AddRange(letter.Errors
+                    .Select(static err => new Exception($"Error: {err}")));
+            }
 
             foreach (Exception ex in exceptions)
             {
