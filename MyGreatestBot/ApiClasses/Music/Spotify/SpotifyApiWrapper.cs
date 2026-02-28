@@ -123,7 +123,7 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 FullPlaylist playlist = Playlists.Get(playlist_id).GetAwaiter().GetResult() ??
                     throw new SpotifyApiException("Cannot get playlist");
 
-                List<PlaylistTrack<IPlayableItem>> tracks_list = playlist.Tracks?.Items ??
+                List<PlaylistTrack<IPlayableItem>> tracks_list = playlist.Items?.Items ??
                     throw new SpotifyApiException("Cannot get playlist items");
 
                 if (tracks_list.Count == 0)
@@ -232,7 +232,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
             {
                 Artists = album.Artists,
                 AlbumType = album.AlbumType,
-                AvailableMarkets = album.AvailableMarkets,
                 ExternalUrls = album.ExternalUrls,
                 Href = album.Href,
                 Id = album.Id,
@@ -260,7 +259,6 @@ namespace MyGreatestBot.ApiClasses.Music.Spotify
                 {
                     Album = simpleAlbum,
                     Artists = track.Artists,
-                    AvailableMarkets = track.AvailableMarkets,
                     DiscNumber = track.DiscNumber,
                     DurationMs = track.DurationMs,
                     Explicit = track.Explicit,
