@@ -120,7 +120,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 SaveResponse = true
             });
 
-            YAuthTypes types = Client.CreateAuthSession(yandexCredStruct.Username.ToLowerInvariant());
+            YAuthTypes types = Client.CreateAuthSession(yandexCredStruct.Username);
 
             if (bool.TryParse(types.CanAuthorize, out bool canAuthorize))
             {
@@ -130,7 +130,7 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 }
             }
 
-            Task.Delay(2000).Wait();
+            Task.Delay(100).Wait();
 
             do
             {
@@ -177,6 +177,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 return false;
             }
 
+            Task.Delay(2000).Wait();
+
             DiscordWrapper.CurrentDomainLogHandler.Send(
                 $"Trying auth {(this as IAPI).ApiType} with password.",
                 LogLevel.Debug);
@@ -212,6 +214,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 return false;
             }
+
+            Task.Delay(2000).Wait();
 
             DiscordWrapper.CurrentDomainLogHandler.Send(
                 $"Trying auth {(this as IAPI).ApiType} with captcha.",
@@ -261,6 +265,8 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
             {
                 return false;
             }
+
+            Task.Delay(2000).Wait();
 
             DiscordWrapper.CurrentDomainLogHandler.Send(
                 $"Trying auth {(this as IAPI).ApiType} with letter.",
