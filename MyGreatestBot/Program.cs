@@ -162,11 +162,6 @@ namespace MyGreatestBot
         {
             _ = sender;
 
-            if (!CancellationEventSemaphore.TryWaitOne(0))
-            {
-                return;
-            }
-
             string? message = (e.ExceptionObject as Exception)?.GetExtendedMessage();
             if (string.IsNullOrWhiteSpace(message))
             {
