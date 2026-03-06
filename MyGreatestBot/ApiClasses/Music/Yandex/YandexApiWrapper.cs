@@ -163,10 +163,15 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private bool TryAuthenticate(YandexCredentialsJSON credentials, YAuthTypes authTypes)
         {
+            if (!TryTokenAuth(credentials.Token))
+            {
+                // Token is empty or expired
+                credentials.Token = string.Empty;
+            }
+
             // Define authentication strategies in priority order
             List<Func<bool>> authStrategies =
             [
-                () => TryTokenAuth(credentials.Token),
                 () => TryAuthMethod(authTypes, YAuthMethod.MagicToken,
                     () => TryQrCodeAuth()),
                 () => TryAuthMethod(authTypes, YAuthMethod.Password,
