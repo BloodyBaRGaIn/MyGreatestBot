@@ -138,24 +138,35 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 throw GenericExceptionInstance.GenericException;
             }
 
-            try
+            if (string.IsNullOrWhiteSpace(yandexCredStruct.Token))
             {
-                string token = Client.GetAccessToken().AccessToken;
-                if (string.IsNullOrWhiteSpace(token))
+                string token;
+
+                try
                 {
-                    throw new ArgumentNullException(nameof(token));
+                    token = Client.GetAccessToken().AccessToken;
+                    if (string.IsNullOrWhiteSpace(token))
+                    {
+                        throw new ArgumentNullException(nameof(token));
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new YandexApiException("Cannot get valid access token", ex);
+                catch (Exception ex)
+                {
+                    throw new YandexApiException("Cannot get valid access token", ex);
+                }
+
+                yandexCredStruct.Token = token;
+
+                ConfigManager.SetYandexCredentialsJSON(yandexCredStruct);
             }
         }
+
         private bool TryAuthenticate(YandexCredentialsJSON credentials, YAuthTypes authTypes)
         {
             // Define authentication strategies in priority order
             List<Func<bool>> authStrategies =
             [
+                () => TryTokenAuth(credentials.Token),
                 () => TryAuthMethod(authTypes, YAuthMethod.MagicToken,
                     () => TryQrCodeAuth()),
                 () => TryAuthMethod(authTypes, YAuthMethod.Password,
@@ -190,6 +201,30 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
                 LogLevel.Debug);
 
             return authAction();
+        }
+
+        private bool TryTokenAuth(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return false;
+            }
+
+            try
+            {
+                bool result = Client.Authorize(token);
+
+                if (result && Client.IsAuthorized)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                DiscordWrapper.CurrentDomainLogErrorHandler.Send(ex.GetExtendedMessage());
+            }
+
+            return false;
         }
 
         private bool TryQrCodeAuth()

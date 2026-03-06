@@ -11,5 +11,7 @@ namespace MyGreatestBot.ApiClasses.ConfigClasses.JsonModels
         public string Username { get; private set; }
         [JsonProperty("password")]
         public string Password { get; private set; }
+        [JsonProperty("token")]
+        public string Token { get; set; }
     }
 }

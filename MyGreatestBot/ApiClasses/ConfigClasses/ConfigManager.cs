@@ -87,6 +87,31 @@ namespace MyGreatestBot.ApiClasses.ConfigClasses
             }
         }
 
+        private static void WriteConfig<T>(T config, BaseConfigDescriptor descriptor) where T : struct
+        {
+            string content;
+
+            try
+            {
+                content = JsonConvert.SerializeObject(config, Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Cannot serialize config", ex);
+            }
+
+            try
+            {
+                using FileStream file = GetFileStream(descriptor, true);
+                using StreamWriter writer = new(file);
+                writer.Write(content);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Cannot write file {descriptor.FullPath}", ex);
+            }
+        }
+
         /// <summary>
         /// Reads JSON on path
         /// </summary>
@@ -100,14 +125,16 @@ namespace MyGreatestBot.ApiClasses.ConfigClasses
         /// </returns>
         /// 
         /// <inheritdoc cref="File.OpenRead(string)" path="/exception"/>
-        private static FileStream GetFileStream(BaseConfigDescriptor descriptor)
+        private static FileStream GetFileStream(BaseConfigDescriptor descriptor, bool write = false)
         {
             return !Directory.Exists(descriptor.Root.Directory)
                 ? throw new DirectoryNotFoundException(
                     $"Config directory not found: {descriptor.Root.Directory}")
                 : !File.Exists(descriptor.FullPath)
                 ? throw new FileNotFoundException("Config file not found", descriptor.FullPath)
-                : File.OpenRead(descriptor.FullPath);
+                : File.Open(descriptor.FullPath,
+                    write ? FileMode.Truncate : FileMode.Open,
+                    write ? FileAccess.Write : FileAccess.Read);
         }
 
         /// <summary>
@@ -216,6 +243,11 @@ namespace MyGreatestBot.ApiClasses.ConfigClasses
         internal static YandexCredentialsJSON GetYandexCredentialsJSON()
         {
             return ReadConfig<YandexCredentialsJSON>(YandexCredentialsConfigDescriptor);
+        }
+
+        internal static void SetYandexCredentialsJSON(YandexCredentialsJSON config)
+        {
+            WriteConfig(config, YandexCredentialsConfigDescriptor);
         }
     }
 }
