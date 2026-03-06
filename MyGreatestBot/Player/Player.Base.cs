@@ -70,7 +70,12 @@ namespace MyGreatestBot.Player
 
         private readonly byte[] PlayerByteBuffer = new byte[BufferSize];
 
+        [SuppressMessage("CodeQuality", "IDE0330")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         private readonly object queueLock = new();
+
+        [SuppressMessage("CodeQuality", "IDE0330")]
+        [SuppressMessage("CodeQuality", "IDE0079")]
         private readonly object trackLock = new();
 
         private bool disposed;
