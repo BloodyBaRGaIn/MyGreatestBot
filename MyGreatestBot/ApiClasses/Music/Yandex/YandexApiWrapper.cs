@@ -115,11 +115,22 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
             IDebugWriter writer = new DefaultDebugWriter("responses", "log.txt");
 
-            _client = new(new DebugSettings(writer)
+            DebugSettings settings = new(writer)
             {
                 ClearDirectory = true,
                 SaveResponse = true
-            });
+            };
+
+            _client = new(settings);
+
+            if (TryTokenAuth(yandexCredStruct.Token))
+            {
+                // Cached token is valid, auth complete
+                return;
+            }
+
+            // Token is empty or expired
+            yandexCredStruct.Token = string.Empty;
 
             YAuthTypes types = Client.CreateAuthSession(yandexCredStruct.Username);
 
@@ -163,12 +174,6 @@ namespace MyGreatestBot.ApiClasses.Music.Yandex
 
         private bool TryAuthenticate(YandexCredentialsJSON credentials, YAuthTypes authTypes)
         {
-            if (!TryTokenAuth(credentials.Token))
-            {
-                // Token is empty or expired
-                credentials.Token = string.Empty;
-            }
-
             // Define authentication strategies in priority order
             List<Func<bool>> authStrategies =
             [
