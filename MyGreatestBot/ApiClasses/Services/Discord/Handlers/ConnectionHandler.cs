@@ -456,10 +456,10 @@ namespace MyGreatestBot.ApiClasses.Services.Discord.Handlers
 
             try
             {
-                VoiceUpdateSemaphore.TryDispose();
-                VoiceUpdateSemaphore.TryDispose();
-                Voice.Dispose();
-                Message.Dispose();
+                VoiceUpdateSemaphore?.TryDispose();
+                VoiceUpdateSemaphore?.TryDispose();
+                Voice?.Dispose();
+                Message?.Dispose();
             }
             catch { }
 
